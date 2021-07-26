@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="定义 适配器模式用于将一个接口转化成客户想要的另一个接口，使接口不兼容的那些类可以一起工作，其别名为包装器(Wrapper)。适配器模式既可以作为类结构型模式，也可以作为对象结构型模式。    Target（目标抽象类）：目标抽象类定义客户所需接口，可以是一个抽象类或接口，也可以是具体类。  Adapter（适配器类）：适配器可以调用另一个接口，作为一个转换器，对Adaptee和Target进行适">
+<meta property="og:type" content="article">
+<meta property="og:title" content="设计模式之适配器模式">
+<meta property="og:url" content="http://example.com/2018/04/16/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="定义 适配器模式用于将一个接口转化成客户想要的另一个接口，使接口不兼容的那些类可以一起工作，其别名为包装器(Wrapper)。适配器模式既可以作为类结构型模式，也可以作为对象结构型模式。    Target（目标抽象类）：目标抽象类定义客户所需接口，可以是一个抽象类或接口，也可以是具体类。  Adapter（适配器类）：适配器可以调用另一个接口，作为一个转换器，对Adaptee和Target进行适">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://ono60m7tl.bkt.clouddn.com/adapeter1.png">
+<meta property="og:image" content="http://banner.linktech.cn/MC/huaweivmallwap/20171206/450x220.jpg">
+<meta property="og:image" content="http://banner.linktech.cn/MC/huaweivmallwap/20171206/450x220.jpg">
+<meta property="og:image" content="http://track.linktech.cn/?m=huaweivmall&a=A100234624&l=02300&l_cd1=0&l_cd2=0">
+<meta property="og:image" content="http://banner.linktech.cn/MC/huaweivmall/20171225/640x240.jpg">
+<meta property="og:image" content="http://track.linktech.cn/?m=huaweivmall&a=A100234624&l=02303&l_cd1=0&l_cd2=0">
+<meta property="og:image" content="http://banner.linktech.cn/MC/huaweivmallwap/20171219/450x220.jpg">
+<meta property="og:image" content="http://track.linktech.cn/?m=huaweivmall&a=A100234624&l=02302&l_cd1=0&l_cd2=0">
+<meta property="og:image" content="http://banner.linktech.cn/MC/huaweivmallwap/20171206/450x220.jpg">
+<meta property="og:image" content="http://track.linktech.cn/?m=huaweivmall&a=A100234624&l=02300&l_cd1=0&l_cd2=0">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20200310211704.jpg">
+<meta property="article:published_time" content="2018-04-16T05:56:28.000Z">
+<meta property="article:modified_time" content="2020-10-23T13:58:04.814Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="设计模式">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://ono60m7tl.bkt.clouddn.com/adapeter1.png">
+
+<link rel="canonical" href="http://example.com/2018/04/16/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>设计模式之适配器模式 | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2018/04/16/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          设计模式之适配器模式
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-04-16 13:56:28" itemprop="dateCreated datePublished" datetime="2018-04-16T13:56:28+08:00">2018-04-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 21:58:04" itemprop="dateModified" datetime="2020-10-23T21:58:04+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><ul>
+<li>适配器模式用于将一个接口转化成客户想要的另一个接口，使接口不兼容的那些类可以一起工作，其别名为包装器(Wrapper)。适配器模式既可以作为类结构型模式，也可以作为对象结构型模式。</li>
+</ul>
+<p><img src="http://ono60m7tl.bkt.clouddn.com/adapeter1.png" alt="适配器模式"></p>
+<ul>
+<li><p>Target（目标抽象类）：目标抽象类定义客户所需接口，可以是一个抽象类或接口，也可以是具体类。</p>
+</li>
+<li><p>Adapter（适配器类）：适配器可以调用另一个接口，作为一个转换器，对Adaptee和Target进行适配，适配器类是适配器模式的核心，在对象适配器中，它通过继承Target并关联一个Adaptee对象使二者产生联系。</p>
+</li>
+<li><p>Adaptee（适配者类）：适配者即被适配的角色，它定义了一个已经存在的接口，这个接口需要适配，适配者类一般是一个具体类，包含了客户希望使用的业务方法，在某些情况下可能没有适配者类的源代码。</p>
+</li>
+<li><p>根据对象适配器模式结构图，在对象适配器中，客户端需要调用request()方法，而适配者类Adaptee没有该方法，但是它所提供的specificRequest()方法却是客户端所需要的。为了使客户端能够使用适配者类，需要提供一个包装类Adapter，即适配器类。这个包装类包装了一个适配者的实例，从而将客户端与适配者衔接起来，在适配器的request()方法中调用适配者的specificRequest()方法。因为适配器类与适配者类是关联关系（也可称之为委派关系），所以这种适配器模式称为对象适配器模式</p>
+</li>
+</ul>
+<span id="more"></span>
+
+<h2 id="类适配器"><a href="#类适配器" class="headerlink" title="类适配器"></a>类适配器</h2><ul>
+<li><p>类适配器是继承适配者类实现的，其中对象适配器是使用组合的方式实现的，就是适配者类作为适配器类的成员变量而实现的</p>
+</li>
+<li><p>一般目标抽象类是一个接口，适配者类一般是一个具体的实现类，有时候甚至不知道其中的源代码，因此需要适配器类将适配者类转换成适合用户的目标类</p>
+</li>
+</ul>
+<h3 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h3><ul>
+<li>我们知道笔记本充电的电压是5v，但是我们的高压电是220v，那么我们此时就需要一个适配器将这个220v电压转换成为5v的电压给笔记本充电<ul>
+<li>这里的220v电压就是适配者类，即是需要转换的类</li>
+<li>5v电压是目标抽象类，由适配器将220v转换而来</li>
+<li>这里的适配器类的主要功能就是将220v电压转换成5v电压</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li>目标接口(5v电压)</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * 接口为5v电压的接口  ，  这个目标抽象类</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Power5</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">getPower5</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>220v电压的类（这里是一个具体的类，适配者类）</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Power220</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">getPower220</span><span class="params">()</span></span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;正在输出220v电压.....&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>适配器类（将220v电压转换成5v）</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * 适配器类，主要的目的就是将220v电压转换为5v的电压供笔记本充电</span></span><br><span class="line"><span class="comment"> * 其中Power5是目标抽象接口，是最终需要的接口，Power220是一个适配者类，是已经存在的，只需要适配器转换即可</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AdapterPower5</span> <span class="keyword">extends</span> <span class="title">Power220</span> <span class="keyword">implements</span> <span class="title">Power5</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 重载Power5中的方法，获取需要的5v电压</span></span><br><span class="line"><span class="comment">	 * 过程： 先获取220v电压，然后进行转换即可</span></span><br><span class="line"><span class="comment">	 * 	 */</span></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">getPower5</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">super</span>.getPower220();   <span class="comment">//首先获取220v电压</span></span><br><span class="line">		<span class="keyword">this</span>.transform();   <span class="comment">//将220v电压转换成5v的电压</span></span><br><span class="line">		System.out.println(<span class="string">&quot;获取5v电压.......&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * 将220v电压转换成5v电压的方法</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">transform</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;现在将220v电压转换成5v电压.......&quot;</span>);</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<ul>
+<li>笔记本充电的类</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * 笔记本类</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NoteBook</span> </span>&#123;</span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * 笔记本充电的方法</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@param</span> power5   电压为5v的对象</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">PowerOn</span><span class="params">(Power5 power5)</span></span>&#123;</span><br><span class="line">		power5.getPower5();   <span class="comment">//获取5v电压</span></span><br><span class="line">		System.out.println(<span class="string">&quot;笔记本获取了5v的电压，正在开始充电......&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>测试类</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Client</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		NoteBook noteBook=<span class="keyword">new</span> NoteBook();   <span class="comment">//创建笔记本的类</span></span><br><span class="line">		noteBook.PowerOn(<span class="keyword">new</span> AdapterPower5());   <span class="comment">//调用笔记本充电的类</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="对象适配器"><a href="#对象适配器" class="headerlink" title="对象适配器"></a>对象适配器</h2><ul>
+<li>对象适配器是将适配者类作为适配器类的成员变量并不是继承，这个是一种组合方式</li>
+<li>这种方式使用的更加普遍</li>
+</ul>
+<h3 id="实例-1"><a href="#实例-1" class="headerlink" title="实例"></a>实例</h3><ul>
+<li><p>这里的实例还是前面的例子</p>
+</li>
+<li><p>这里唯一不同的就是适配器类，不是继承适配者类，而是使用组合的方式</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * 适配器类，这个是对象适配器，适配者类是作为成员变量存在，是组合关系</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Adapter</span> <span class="keyword">implements</span> <span class="title">Power5</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> Power220 power;   <span class="comment">//220v电压类的对象，作为成员变量</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * 构造方法，主要是为类初始化Power220v的对象</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">Adapter</span><span class="params">(Power220 power)</span></span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.power=power;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">getPower5</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		power.getPower220();   <span class="comment">//获取220v电压</span></span><br><span class="line">		transform();   <span class="comment">//转换电压</span></span><br><span class="line">		System.out.println(<span class="string">&quot;正在输出5v电压.......&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">transform</span><span class="params">()</span></span>&#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;将220v电压转换成5v的电压......&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li><p>类适配器是使用类继承的方式，适配器类继承适配者类(不提倡使用)</p>
+</li>
+<li><p>对象适配器使用的是一种组合的方式，将适配者类作为其中的成员变量，那么也是可以实现（提倡使用）</p>
+</li>
+</ul>
+<h2 id="麻烦支持下博主的广告事业，点击下即可"><a href="#麻烦支持下博主的广告事业，点击下即可" class="headerlink" title="麻烦支持下博主的广告事业，点击下即可"></a>麻烦支持下博主的广告事业，点击下即可</h2><p><a target="_blank" rel="noopener" href="http://click.linktech.cn/?m=huaweivmall&a=A100234624&l=02300&l_cd1=0&l_cd2=0&u_id=chenjiabing"><img src="http://banner.linktech.cn/MC/huaweivmallwap/20171206/450x220.jpg" alt="alt text" title="title"></a></p>
+<p><a href="http://click.linktech.cn/?m=huaweivmall&a=A100234624&l=02300&l_cd1=0&l_cd2=0&u_id=chenjiabing" target=_blank><img src="http://banner.linktech.cn/MC/huaweivmallwap/20171206/450x220.jpg" width="450" height="220" border="0"></a><img src="http://track.linktech.cn/?m=huaweivmall&a=A100234624&l=02300&l_cd1=0&l_cd2=0" width="1" height="1" border="0" style="display:none"></p>
+<p><a href="http://click.linktech.cn/?m=huaweivmall&a=A100234624&l=02303&l_cd1=0&l_cd2=0&u_id=chenjiabing" target=_blank><img src="http://banner.linktech.cn/MC/huaweivmall/20171225/640x240.jpg" width="450" height="240" border="0"></a><img src="http://track.linktech.cn/?m=huaweivmall&a=A100234624&l=02303&l_cd1=0&l_cd2=0" width="1" height="1" border="0" style="display:none"></p>
+<p><a href="http://click.linktech.cn/?m=huaweivmall&a=A100234624&l=02302&l_cd1=0&l_cd2=0&u_id=chenjiabing" target=_blank><img src="http://banner.linktech.cn/MC/huaweivmallwap/20171219/450x220.jpg" width="450" height="220" border="0"></a><img src="http://track.linktech.cn/?m=huaweivmall&a=A100234624&l=02302&l_cd1=0&l_cd2=0" width="1" height="1" border="0" style="display:none"></p>
+<p><a href="http://click.linktech.cn/?m=huaweivmall&a=A100234624&l=02300&l_cd1=0&l_cd2=0&u_id=chenjiabing" target=_blank><img src="http://banner.linktech.cn/MC/huaweivmallwap/20171206/450x220.jpg" width="450" height="220" border="0"></a><img src="http://track.linktech.cn/?m=huaweivmall&a=A100234624&l=02300&l_cd1=0&l_cd2=0" width="1" height="1" border="0" style="display:none"></p>
+<h2 id="笔者有话说"><a href="#笔者有话说" class="headerlink" title="笔者有话说"></a>笔者有话说</h2><ul>
+<li>最近建了一个微信交流群，提供给大家一个交流的平台，扫描下方笔者的微信二维码，备注【交流】，我会把大家拉进群</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20200310211704.jpg"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" rel="tag"># 设计模式</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/04/16/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E6%A1%A5%E6%8E%A5%E6%A8%A1%E5%BC%8F/" rel="prev" title="设计模式之桥接模式">
+      <i class="fa fa-chevron-left"></i> 设计模式之桥接模式
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/07/17/Spring%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96/" rel="next" title="Spring解决循环依赖">
+      Spring解决循环依赖 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89"><span class="nav-text">定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B1%BB%E9%80%82%E9%85%8D%E5%99%A8"><span class="nav-text">类适配器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B"><span class="nav-text">实例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E9%80%82%E9%85%8D%E5%99%A8"><span class="nav-text">对象适配器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B-1"><span class="nav-text">实例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%BA%BB%E7%83%A6%E6%94%AF%E6%8C%81%E4%B8%8B%E5%8D%9A%E4%B8%BB%E7%9A%84%E5%B9%BF%E5%91%8A%E4%BA%8B%E4%B8%9A%EF%BC%8C%E7%82%B9%E5%87%BB%E4%B8%8B%E5%8D%B3%E5%8F%AF"><span class="nav-text">麻烦支持下博主的广告事业，点击下即可</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%94%E8%80%85%E6%9C%89%E8%AF%9D%E8%AF%B4"><span class="nav-text">笔者有话说</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某</span>
+</div>
+ <!-- <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

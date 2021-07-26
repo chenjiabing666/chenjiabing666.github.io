@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言 相信大家用Mybatis这个框架至少一年以上了吧，有没有思考过这样一个问题：数据库有自己的数据类型，Java有自己的数据类型，那么Mybatis是如何把数据库中的类型和Java的数据类型对应的呢？  本篇文章就来讲讲Mybatis中的黑匣子TypeHandler(类型处理器)，说它是黑匣子一点都不为过，总是在默默的奉献着，但是不为人知。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="面试官问：Mybatis中的TypeHandler你用过吗？">
+<meta property="og:url" content="http://example.com/2020/04/20/%E9%9D%A2%E8%AF%95%E5%AE%98%E9%97%AE%EF%BC%9AMybatis%E4%B8%AD%E7%9A%84TypeHandler%E4%BD%A0%E7%94%A8%E8%BF%87%E5%90%97%EF%BC%9F/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="前言 相信大家用Mybatis这个框架至少一年以上了吧，有没有思考过这样一个问题：数据库有自己的数据类型，Java有自己的数据类型，那么Mybatis是如何把数据库中的类型和Java的数据类型对应的呢？  本篇文章就来讲讲Mybatis中的黑匣子TypeHandler(类型处理器)，说它是黑匣子一点都不为过，总是在默默的奉献着，但是不为人知。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis%E4%B8%AD%E7%9A%84TypeHandler/1.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis%E4%B8%AD%E7%9A%84TypeHandler/2.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E4%B8%83%E7%A7%92%E7%BC%96%E7%A8%8B.jpg">
+<meta property="article:published_time" content="2020-04-20T09:08:42.000Z">
+<meta property="article:modified_time" content="2020-10-23T13:55:51.009Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="Mybatis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis%E4%B8%AD%E7%9A%84TypeHandler/1.png">
+
+<link rel="canonical" href="http://example.com/2020/04/20/%E9%9D%A2%E8%AF%95%E5%AE%98%E9%97%AE%EF%BC%9AMybatis%E4%B8%AD%E7%9A%84TypeHandler%E4%BD%A0%E7%94%A8%E8%BF%87%E5%90%97%EF%BC%9F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>面试官问：Mybatis中的TypeHandler你用过吗？ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/04/20/%E9%9D%A2%E8%AF%95%E5%AE%98%E9%97%AE%EF%BC%9AMybatis%E4%B8%AD%E7%9A%84TypeHandler%E4%BD%A0%E7%94%A8%E8%BF%87%E5%90%97%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          面试官问：Mybatis中的TypeHandler你用过吗？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-04-20 17:08:42" itemprop="dateCreated datePublished" datetime="2020-04-20T17:08:42+08:00">2020-04-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 21:55:51" itemprop="dateModified" datetime="2020-10-23T21:55:51+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Mybatis%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Mybatis进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
+<li><p>相信大家用Mybatis这个框架至少一年以上了吧，有没有思考过这样一个问题：数据库有自己的数据类型，Java有自己的数据类型，那么Mybatis是如何把数据库中的类型和Java的数据类型对应的呢？</p>
+</li>
+<li><p>本篇文章就来讲讲Mybatis中的<code>黑匣子TypeHandler(类型处理器)</code>，说它是黑匣子一点都不为过，总是在默默的奉献着，但是不为人知。</p>
+<span id="more"></span></li>
+</ul>
+<h2 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h2><ul>
+<li>本篇文章讲的一切内容都是基于<code>Mybatis3.5</code>和<code>SpringBoot-2.3.3.RELEASE</code>。</li>
+</ul>
+<h2 id="什么是TypeHandler？"><a href="#什么是TypeHandler？" class="headerlink" title="什么是TypeHandler？"></a>什么是TypeHandler？</h2><ul>
+<li><p>顾名思义，类型处理器，将入参和结果转换为所需要的类型，Mybatis中对于内置了许多类型处理器，实际开发中已经足够使用了，如下图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis%E4%B8%AD%E7%9A%84TypeHandler/1.png"><br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis%E4%B8%AD%E7%9A%84TypeHandler/2.png"></p>
+</li>
+<li><p>类型处理器这个接口其实很简单，总共四个方法，一个方法将入参的Java类型的数据转换为JDBC类型，三个方法将返回结果转换为Java类型。源码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">TypeHandler</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">  <span class="comment">//设置参数，java类型转换为jdbc类型</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">setParameter</span><span class="params">(PreparedStatement ps, <span class="keyword">int</span> i, T parameter, JdbcType jdbcType)</span> <span class="keyword">throws</span> SQLException</span>;</span><br><span class="line">  <span class="comment">//将查询的结果转换为java类型</span></span><br><span class="line">  <span class="function">T <span class="title">getResult</span><span class="params">(ResultSet rs, String columnName)</span> <span class="keyword">throws</span> SQLException</span>;</span><br><span class="line"></span><br><span class="line">  <span class="function">T <span class="title">getResult</span><span class="params">(ResultSet rs, <span class="keyword">int</span> columnIndex)</span> <span class="keyword">throws</span> SQLException</span>;</span><br><span class="line"></span><br><span class="line">  <span class="function">T <span class="title">getResult</span><span class="params">(CallableStatement cs, <span class="keyword">int</span> columnIndex)</span> <span class="keyword">throws</span> SQLException</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="如何自定义并使用TypeHandler？"><a href="#如何自定义并使用TypeHandler？" class="headerlink" title="如何自定义并使用TypeHandler？"></a>如何自定义并使用TypeHandler？</h2><ul>
+<li>实际应用开发中的难免会有一些需求要自定义一个<code>TypeHandler</code>，比如这样一个需求：前端传来的年龄是<code>男</code>,<code>女</code>，但是数据库定义的字段却是<code>int</code>类型（<code>1男2女</code>）。此时可以自定义一个年龄的类型处理器，进行转换。</li>
+</ul>
+<h3 id="如何自定义？"><a href="#如何自定义？" class="headerlink" title="如何自定义？"></a>如何自定义？</h3><ul>
+<li><p>自定义的方式有两种，一种是实现<code>TypeHandler</code>这个接口，另一个就是继承<code>BaseTypeHandler</code>这个便捷的抽象类。</p>
+</li>
+<li><p>下面直接继承<code>BaseTypeHandler</code>这个抽象类，定义一个年龄的类型处理器，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@MappedJdbcTypes(JdbcType.INTEGER)</span></span><br><span class="line"><span class="meta">@MappedTypes(String.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GenderTypeHandler</span> <span class="keyword">extends</span> <span class="title">BaseTypeHandler</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//设置参数，这里将Java的String类型转换为JDBC的Integer类型</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setNonNullParameter</span><span class="params">(PreparedStatement ps, <span class="keyword">int</span> i, Object parameter, JdbcType jdbcType)</span> <span class="keyword">throws</span> SQLException </span>&#123;</span><br><span class="line">        ps.setInt(i, StringUtils.equals(parameter.toString(),<span class="string">&quot;男&quot;</span>)?<span class="number">1</span>:<span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//以下三个参数都是将查询的结果转换</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">getNullableResult</span><span class="params">(ResultSet rs, String columnName)</span> <span class="keyword">throws</span> SQLException </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> rs.getInt(columnName)==<span class="number">1</span>?<span class="string">&quot;男&quot;</span>:<span class="string">&quot;女&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">getNullableResult</span><span class="params">(ResultSet rs, <span class="keyword">int</span> columnIndex)</span> <span class="keyword">throws</span> SQLException </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> rs.getInt(columnIndex)==<span class="number">1</span>?<span class="string">&quot;男&quot;</span>:<span class="string">&quot;女&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">getNullableResult</span><span class="params">(CallableStatement cs, <span class="keyword">int</span> columnIndex)</span> <span class="keyword">throws</span> SQLException </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> cs.getInt(columnIndex)==<span class="number">1</span>?<span class="string">&quot;男&quot;</span>:<span class="string">&quot;女&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>这里涉及到两个注解，如下：</p>
+<ul>
+<li><code>@MappedTypes </code>：指定与其关联的 <code>Java</code> 类型列表。 如果在 <code>javaType</code> 属性中也同时指定，则注解上的配置将被忽略。</li>
+<li><code>@MappedJdbcTypes</code>：指定与其关联的 <code>JDBC</code> 类型列表。 如果在 <code>jdbcType</code> 属性中也同时指定，则注解上的配置将被忽略。</li>
+</ul>
+</li>
+</ul>
+<h3 id="如何将其添加到Mybatis中？"><a href="#如何将其添加到Mybatis中？" class="headerlink" title="如何将其添加到Mybatis中？"></a>如何将其添加到Mybatis中？</h3><ul>
+<li><p>Mybatis在与SpringBoot整合之后一切都变得很简单了，其实这里有两种配置方式，下面将会一一介绍。</p>
+</li>
+<li><p><strong>第一种</strong>：只需要在配置文件<code>application.properties</code>中添加一行配置即可，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">## 设置自定义的Typehandler所在的包，启动的时候会自动扫描配置到Mybatis中</span><br><span class="line">mybatis.type-handlers-<span class="keyword">package</span>=cn.cb.demo.typehandler</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>第二种</strong>：其实任何框架与Springboot整合之后，只要配置文件中能够配置的，在配置类中都可以配置（<strong>除非有特殊定制，否则不要轻易覆盖自动配置</strong>）。如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean(&quot;sqlSessionFactory&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> SqlSessionFactory <span class="title">sqlSessionFactory</span><span class="params">(DataSource dataSource)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        SqlSessionFactoryBean sqlSessionFactoryBean = <span class="keyword">new</span> SqlSessionFactoryBean();</span><br><span class="line">        sqlSessionFactoryBean.setDataSource(dataSource);</span><br><span class="line">        sqlSessionFactoryBean.setMapperLocations(<span class="keyword">new</span> PathMatchingResourcePatternResolver().getResources(MAPPER_LOCATOIN));</span><br><span class="line">        org.apache.ibatis.session.Configuration configuration = <span class="keyword">new</span> org.apache.ibatis.session.Configuration();</span><br><span class="line">        <span class="comment">// 自动将数据库中的下划线转换为驼峰格式</span></span><br><span class="line">        configuration.setMapUnderscoreToCamelCase(<span class="keyword">true</span>);</span><br><span class="line">        configuration.setDefaultFetchSize(<span class="number">100</span>);</span><br><span class="line">        configuration.setDefaultStatementTimeout(<span class="number">30</span>);</span><br><span class="line">        sqlSessionFactoryBean.setConfiguration(configuration);</span><br><span class="line">        <span class="comment">//将typehandler注册到mybatis</span></span><br><span class="line">        GenderTypeHandler genderTypeHandler = <span class="keyword">new</span> GenderTypeHandler();</span><br><span class="line">        TypeHandler[] typeHandlers=<span class="keyword">new</span> TypeHandler[]&#123;genderTypeHandler&#125;;</span><br><span class="line">        sqlSessionFactoryBean.setTypeHandlers(typeHandlers);</span><br><span class="line">        <span class="keyword">return</span> sqlSessionFactoryBean.getObject();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>第二种方式的思想其实就是重写自动配置类<code>MybatisAutoConfiguration</code>中的方法。<strong>注意：除非自己有特殊定制，否则不要轻易重写自动配置类中的方法</strong>。</p>
+</li>
+</ul>
+<h3 id="XML文件中如何指定TypeHandler？"><a href="#XML文件中如何指定TypeHandler？" class="headerlink" title="XML文件中如何指定TypeHandler？"></a>XML文件中如何指定TypeHandler？</h3><ul>
+<li><p>上面的两个步骤分别是自定义和注入到Mybatis中，那么如何在<code>XML</code>文件中使用呢？</p>
+</li>
+<li><p>使用其实很简单，分为两种，一种是<code>更新</code>，一种<code>查询</code>，下面将会一一介绍。</p>
+</li>
+<li><p><strong>更新</strong>：删除自不必说了，这里讲的是<code>update</code>和<code>insert</code>两种，只需要在<code>#&#123;&#125;</code>中指定的属性<code>typeHandler</code>为自定义的<code>全类名</code>即可，代码如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">insert</span> <span class="attr">id</span>=<span class="string">&quot;insertUser&quot;</span>&gt;</span></span><br><span class="line">        insert into user_info(user_id,his_id,name,gender,password,create_time)</span><br><span class="line">        values(#&#123;userId,jdbcType=VARCHAR&#125;,#&#123;hisId,jdbcType=VARCHAR&#125;,#&#123;name,jdbcType=VARCHAR&#125;,</span><br><span class="line">        #&#123;gender,jdbcType=INTEGER,typeHandler=cn.cb.demo.typehandler.GenderTypeHandler&#125;,#&#123;password,jdbcType=VARCHAR&#125;,now())</span><br><span class="line">    <span class="tag">&lt;/<span class="name">insert</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+<li><p><strong>查询</strong>：查询的时候类型处理会将JDBC类型的转化为Java类型，因此也是需要指定<code>typeHandler</code>，需要在<code>resultMap</code>中指定<code>typeHandler</code>这个属性，值为<code>全类名</code>，如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">resultMap</span> <span class="attr">id</span>=<span class="string">&quot;userResultMap&quot;</span> <span class="attr">type</span>=<span class="string">&quot;cn.cb.demo.domain.UserInfo&quot;</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">id</span> <span class="attr">column</span>=<span class="string">&quot;id&quot;</span> <span class="attr">property</span>=<span class="string">&quot;id&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">result</span> <span class="attr">column</span>=<span class="string">&quot;user_id&quot;</span> <span class="attr">property</span>=<span class="string">&quot;userId&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">result</span> <span class="attr">column</span>=<span class="string">&quot;his_id&quot;</span> <span class="attr">property</span>=<span class="string">&quot;hisId&quot;</span>/&gt;</span></span><br><span class="line">            <span class="comment">&lt;!-- 指定typeHandler属性为全类名--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">result</span> <span class="attr">column</span>=<span class="string">&quot;gender&quot;</span> <span class="attr">property</span>=<span class="string">&quot;gender&quot;</span> <span class="attr">typeHandler</span>=<span class="string">&quot;cn.cb.demo.typehandler.GenderTypeHandler&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">result</span> <span class="attr">column</span>=<span class="string">&quot;name&quot;</span> <span class="attr">property</span>=<span class="string">&quot;name&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">result</span> <span class="attr">column</span>=<span class="string">&quot;password&quot;</span> <span class="attr">property</span>=<span class="string">&quot;password&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">resultMap</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">select</span> <span class="attr">id</span>=<span class="string">&quot;selectList&quot;</span> <span class="attr">resultMap</span>=<span class="string">&quot;userResultMap&quot;</span>&gt;</span></span><br><span class="line">        select * from user_info where status=1</span><br><span class="line">        and user_id in</span><br><span class="line">        <span class="tag">&lt;<span class="name">foreach</span> <span class="attr">collection</span>=<span class="string">&quot;userIds&quot;</span> <span class="attr">item</span>=<span class="string">&quot;item&quot;</span> <span class="attr">open</span>=<span class="string">&quot;(&quot;</span> <span class="attr">separator</span>=<span class="string">&quot;,&quot;</span> <span class="attr">close</span>=<span class="string">&quot;)&quot;</span> &gt;</span></span><br><span class="line">            #&#123;item&#125;</span><br><span class="line">        <span class="tag">&lt;/<span class="name">foreach</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">select</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="源码中如何执行TypeHandler？"><a href="#源码中如何执行TypeHandler？" class="headerlink" title="源码中如何执行TypeHandler？"></a>源码中如何执行TypeHandler？</h2><ul>
+<li>既然会使用<code>TypeHandler</code>了，那么肯定要知道其中的执行原理了，在Mybatis中类型处理器是如何在<code>JDBC</code>类型和<code>Java</code>类型进行转换的，下面的将从源码角度详细介绍。</li>
+</ul>
+<h3 id="入参如何转换？"><a href="#入参如何转换？" class="headerlink" title="入参如何转换？"></a>入参如何转换？</h3><ul>
+<li><p>这个肯定是发生在设置参数的过程中，详细的代码在<code>PreparedStatementHandler</code>中的<code>parameterize()</code>方法中，这个方法就是设置参数的方法。源码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">parameterize</span><span class="params">(Statement statement)</span> <span class="keyword">throws</span> SQLException </span>&#123;</span><br><span class="line">   <span class="comment">//实际调用的是DefaultParameterHandler</span></span><br><span class="line">   parameterHandler.setParameters((PreparedStatement) statement);</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>实际执行的是<code>DefaultParameterHandler</code>中的<code>setParameters</code>方法，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setParameters</span><span class="params">(PreparedStatement ps)</span> </span>&#123;</span><br><span class="line">    ErrorContext.instance().activity(<span class="string">&quot;setting parameters&quot;</span>).object(mappedStatement.getParameterMap().getId());</span><br><span class="line">    <span class="comment">//获取参数映射</span></span><br><span class="line">    List&lt;ParameterMapping&gt; parameterMappings = boundSql.getParameterMappings();</span><br><span class="line">    <span class="comment">//遍历参数映射，一一设置</span></span><br><span class="line">    <span class="keyword">if</span> (parameterMappings != <span class="keyword">null</span>) &#123;</span><br><span class="line">      <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; parameterMappings.size(); i++) &#123;</span><br><span class="line">        ParameterMapping parameterMapping = parameterMappings.get(i);</span><br><span class="line">        <span class="keyword">if</span> (parameterMapping.getMode() != ParameterMode.OUT) &#123;</span><br><span class="line">          Object value;</span><br><span class="line">          String propertyName = parameterMapping.getProperty();</span><br><span class="line">          <span class="keyword">if</span> (boundSql.hasAdditionalParameter(propertyName)) &#123; <span class="comment">// issue #448 ask first for additional params</span></span><br><span class="line">            value = boundSql.getAdditionalParameter(propertyName);</span><br><span class="line">          &#125; <span class="keyword">else</span> <span class="keyword">if</span> (parameterObject == <span class="keyword">null</span>) &#123;</span><br><span class="line">            value = <span class="keyword">null</span>;</span><br><span class="line">          &#125; <span class="keyword">else</span> <span class="keyword">if</span> (typeHandlerRegistry.hasTypeHandler(parameterObject.getClass())) &#123;</span><br><span class="line">            value = parameterObject;</span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            MetaObject metaObject = configuration.newMetaObject(parameterObject);</span><br><span class="line">            value = metaObject.getValue(propertyName);</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="comment">//获取类型处理器，如果不存在，使用默认的</span></span><br><span class="line">          TypeHandler typeHandler = parameterMapping.getTypeHandler();    </span><br><span class="line">          <span class="comment">//JdbcType</span></span><br><span class="line">          JdbcType jdbcType = parameterMapping.getJdbcType();</span><br><span class="line">          <span class="keyword">if</span> (value == <span class="keyword">null</span> &amp;&amp; jdbcType == <span class="keyword">null</span>) &#123;</span><br><span class="line">            jdbcType = configuration.getJdbcTypeForNull();</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">//调用类型处理器中的方法设置参数，将Java类型转换为JDBC类型</span></span><br><span class="line">            typeHandler.setParameter(ps, i + <span class="number">1</span>, value, jdbcType);</span><br><span class="line">          &#125; <span class="keyword">catch</span> (TypeException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> TypeException(<span class="string">&quot;Could not set parameters for mapping: &quot;</span> + parameterMapping + <span class="string">&quot;. Cause: &quot;</span> + e, e);</span><br><span class="line">          &#125; <span class="keyword">catch</span> (SQLException e) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> TypeException(<span class="string">&quot;Could not set parameters for mapping: &quot;</span> + parameterMapping + <span class="string">&quot;. Cause: &quot;</span> + e, e);</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>从上面的源码中可以知道这行代码<code>typeHandler.setParameter(ps, i + 1, value, jdbcType);</code>就是调用类型处理器中的设置参数的方法，将<code>Java</code>类型转换为<code>JDBC</code>类型。</p>
+</li>
+</ul>
+<h3 id="结果如何转换？"><a href="#结果如何转换？" class="headerlink" title="结果如何转换？"></a>结果如何转换？</h3><ul>
+<li>这一过程肯定是发生在执行查询语句的过程中，之前也是介绍过Mybatis的六大剑客，其中的<code>ResultSetHandler</code>这个组件就是对查询的结果进行处理的，那么肯定是发生在这一组件中的某个方法。</li>
+<li>在<code>PreparedStatementHandler</code>执行查询结束之后，调用的是<code>ResultSetHandler</code>中的<code>handleResultSets()</code>方法，对结果进行处理，如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> &lt;E&gt; <span class="function">List&lt;E&gt; <span class="title">query</span><span class="params">(Statement statement, ResultHandler resultHandler)</span> <span class="keyword">throws</span> SQLException </span>&#123;</span><br><span class="line">    PreparedStatement ps = (PreparedStatement) statement;</span><br><span class="line">    <span class="comment">//执行SQL</span></span><br><span class="line">    ps.execute();</span><br><span class="line">    <span class="comment">//处理结果</span></span><br><span class="line">    <span class="keyword">return</span> resultSetHandler.handleResultSets(ps);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></li>
+<li>最终的在<code>DefaultResultHandler</code>中的<code>getPropertyMappingValue()</code>方法中调用了<code>TypeHandler</code>中的<code>getResult()</code>方法，如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> Object <span class="title">getPropertyMappingValue</span><span class="params">(ResultSet rs, MetaObject metaResultObject, ResultMapping propertyMapping, ResultLoaderMap lazyLoader, String columnPrefix)</span></span></span><br><span class="line"><span class="function">      <span class="keyword">throws</span> SQLException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (propertyMapping.getNestedQueryId() != <span class="keyword">null</span>) &#123;</span><br><span class="line">      <span class="keyword">return</span> getNestedQueryMappingValue(rs, metaResultObject, propertyMapping, lazyLoader, columnPrefix);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (propertyMapping.getResultSet() != <span class="keyword">null</span>) &#123;</span><br><span class="line">      addPendingChildRelation(rs, metaResultObject, propertyMapping);   <span class="comment">// TODO is that OK?</span></span><br><span class="line">      <span class="keyword">return</span> DEFERRED;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">final</span> TypeHandler&lt;?&gt; typeHandler = propertyMapping.getTypeHandler();</span><br><span class="line">      <span class="keyword">final</span> String column = prependPrefix(propertyMapping.getColumn(), columnPrefix);</span><br><span class="line">      <span class="comment">//执行typeHandler中的方法获取结果并且转换为对应的Java类型</span></span><br><span class="line">      <span class="keyword">return</span> typeHandler.getResult(rs, column);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3></li>
+<li>上述只是简要的介绍了类型处理器如何在Mybatis中执行的，可能其中有些概念东西如果不清楚的，可以看一下作者前面的文章，如下：<ul>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/lnJx0h_4Kk6fKuhptN1cdg">Mybatis源码解析之六剑客</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/B9e-4y_jokLHtDnS0o6-7g">Mybatis源码如何阅读，教你一招！！！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/sqRM4BWNv84qbd2Dh-2y4g">Mybatis如何执行Select语句，你知道吗？</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>本文详细的介绍了TypeHandler在Mybatis中的应用、自定义使用以及从源码角度分析了类型处理器的执行流程，如果觉得作者写的不错，有所收获的话，不妨点点关注，分享一波。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E4%B8%83%E7%A7%92%E7%BC%96%E7%A8%8B.jpg"></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Mybatis/" rel="tag"># Mybatis</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/04/20/Mybatis%E7%9A%84Mapper%E4%B8%AD%E7%9A%84%E6%96%B9%E6%B3%95%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E8%83%BD%E9%87%8D%E8%BD%BD/" rel="prev" title="Mybatis的Mapper中的方法为什么不能重载？">
+      <i class="fa fa-chevron-left"></i> Mybatis的Mapper中的方法为什么不能重载？
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/04/20/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E8%AE%B2%E4%B8%80%E8%AE%B2Mybatis%E6%8F%92%E4%BB%B6%E7%9A%84%E5%8E%9F%E7%90%86%E5%8F%8A%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%EF%BC%9F/" rel="next" title="面试官：讲一讲Mybatis插件的原理及如何实现？">
+      面试官：讲一讲Mybatis插件的原理及如何实现？ <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="nav-text">环境配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFTypeHandler%EF%BC%9F"><span class="nav-text">什么是TypeHandler？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%87%AA%E5%AE%9A%E4%B9%89%E5%B9%B6%E4%BD%BF%E7%94%A8TypeHandler%EF%BC%9F"><span class="nav-text">如何自定义并使用TypeHandler？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%87%AA%E5%AE%9A%E4%B9%89%EF%BC%9F"><span class="nav-text">如何自定义？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%B0%86%E5%85%B6%E6%B7%BB%E5%8A%A0%E5%88%B0Mybatis%E4%B8%AD%EF%BC%9F"><span class="nav-text">如何将其添加到Mybatis中？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#XML%E6%96%87%E4%BB%B6%E4%B8%AD%E5%A6%82%E4%BD%95%E6%8C%87%E5%AE%9ATypeHandler%EF%BC%9F"><span class="nav-text">XML文件中如何指定TypeHandler？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E4%B8%AD%E5%A6%82%E4%BD%95%E6%89%A7%E8%A1%8CTypeHandler%EF%BC%9F"><span class="nav-text">源码中如何执行TypeHandler？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%A5%E5%8F%82%E5%A6%82%E4%BD%95%E8%BD%AC%E6%8D%A2%EF%BC%9F"><span class="nav-text">入参如何转换？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%9C%E5%A6%82%E4%BD%95%E8%BD%AC%E6%8D%A2%EF%BC%9F"><span class="nav-text">结果如何转换？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-1"><span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某</span>
+</div>
+ <!-- <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

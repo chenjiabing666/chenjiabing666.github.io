@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="不才陈某技术博客">
+<meta property="og:url" content="http://example.com/page/4/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:author" content="不才陈某">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://example.com/page/4/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : true,
+    isPost : false,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content index posts-expand">
+            
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/14/Spring%20Boot%E7%AC%AC%E5%9B%9B%E5%BC%B9%EF%BC%8C%E4%B8%80%E6%96%87%E5%B8%A6%E4%BD%A0%E6%90%9E%E6%87%82%E6%97%A5%E5%BF%97%E6%A1%86%E6%9E%B6%E5%A6%82%E4%BD%95%E5%88%87%E6%8D%A2%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/14/Spring%20Boot%E7%AC%AC%E5%9B%9B%E5%BC%B9%EF%BC%8C%E4%B8%80%E6%96%87%E5%B8%A6%E4%BD%A0%E6%90%9E%E6%87%82%E6%97%A5%E5%BF%97%E6%A1%86%E6%9E%B6%E5%A6%82%E4%BD%95%E5%88%87%E6%8D%A2%EF%BC%9F/" class="post-title-link" itemprop="url">一文带你搞懂日志框架如何切换？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-14 10:04:42" itemprop="dateCreated datePublished" datetime="2020-10-14T10:04:42+08:00">2020-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 19:10:22" itemprop="dateModified" datetime="2020-10-23T19:10:22+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>首先要感谢一下读者朋友们的支持，你们每一个的赞都是对陈某最大的肯定，陈某也会一如既往的加油，奥利给！！！</p>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Spring%20Boot%E7%AC%AC%E5%9B%9B%E5%BC%B9%EF%BC%8C%E6%97%A5%E5%BF%97%E6%A1%86%E6%9E%B6%E5%A6%82%E4%BD%95%E5%88%87%E6%8D%A2%EF%BC%9F/1.png"><br>言归正传，上一篇文章写了Spring Boot的默认日志框架Logback的基本配置，有兴趣的可以看看：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/5hyGi6X6BhfCC5kTEvUyFg">Spring Boot第三弹，一文带你搞懂日志如何配置？</a>。</p>
+<p>今天就来介绍一下Spring Boot如何无感的切换日志框架？</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/10/14/Spring%20Boot%E7%AC%AC%E5%9B%9B%E5%BC%B9%EF%BC%8C%E4%B8%80%E6%96%87%E5%B8%A6%E4%BD%A0%E6%90%9E%E6%87%82%E6%97%A5%E5%BF%97%E6%A1%86%E6%9E%B6%E5%A6%82%E4%BD%95%E5%88%87%E6%8D%A2%EF%BC%9F/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/14/Spring%20Boot%E7%AC%AC%E4%B8%89%E5%BC%B9%EF%BC%8C%E4%B8%80%E6%96%87%E5%B8%A6%E4%BD%A0%E6%90%9E%E6%87%82%E6%97%A5%E5%BF%97%E5%A6%82%E4%BD%95%E9%85%8D%E7%BD%AE%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/14/Spring%20Boot%E7%AC%AC%E4%B8%89%E5%BC%B9%EF%BC%8C%E4%B8%80%E6%96%87%E5%B8%A6%E4%BD%A0%E6%90%9E%E6%87%82%E6%97%A5%E5%BF%97%E5%A6%82%E4%BD%95%E9%85%8D%E7%BD%AE%EF%BC%9F/" class="post-title-link" itemprop="url">一文带你搞懂日志如何配置？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-14 10:03:42" itemprop="dateCreated datePublished" datetime="2020-10-14T10:03:42+08:00">2020-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 19:09:45" itemprop="dateModified" datetime="2020-10-23T19:09:45+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>日志通常不会在需求阶段作为一个功能单独提出来，也不会在产品方案中看到它的细节。但是，这丝毫不影响它在任何一个系统中的重要的地位。</p>
+<p>今天就来介绍一下Spring Boot中的日志如何配置。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/10/14/Spring%20Boot%E7%AC%AC%E4%B8%89%E5%BC%B9%EF%BC%8C%E4%B8%80%E6%96%87%E5%B8%A6%E4%BD%A0%E6%90%9E%E6%87%82%E6%97%A5%E5%BF%97%E5%A6%82%E4%BD%95%E9%85%8D%E7%BD%AE%EF%BC%9F/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/14/Spring%20Boot%20%E7%AC%AC%E4%BA%8C%E5%BC%B9%EF%BC%8C%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%80%8E%E4%B9%88%E9%80%A0%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/14/Spring%20Boot%20%E7%AC%AC%E4%BA%8C%E5%BC%B9%EF%BC%8C%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%80%8E%E4%B9%88%E9%80%A0%EF%BC%9F/" class="post-title-link" itemprop="url">Spring Boot 配置文件怎么造？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-14 10:01:42" itemprop="dateCreated datePublished" datetime="2020-10-14T10:01:42+08:00">2020-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 19:09:04" itemprop="dateModified" datetime="2020-10-23T19:09:04+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>自从用了Spring Boot，个人最喜欢的就是Spring Boot的配置文件了，和Spring比起，Spring Boot更加灵活，修改的某些配置也是更加得心应手。</p>
+<p>Spring Boot 官方提供了两种常用的配置文件格式，分别是<code>properties</code>、<code>YML</code>格式。相比于<code>properties</code>来说，<code>YML</code>更加年轻，层级也是更加分明。</p>
+<p>今天这篇文章就来介绍一下Spring Boot的配置文件的语法以及如何从配置文件中取值。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/10/14/Spring%20Boot%20%E7%AC%AC%E4%BA%8C%E5%BC%B9%EF%BC%8C%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%80%8E%E4%B9%88%E9%80%A0%EF%BC%9F/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/14/Spring%20Boot%20%E7%AC%AC%E4%B8%80%E5%BC%B9%EF%BC%8C%E9%97%AE%E5%80%99%E4%B8%80%E4%B8%8B%E4%B8%96%E7%95%8C%EF%BC%81%EF%BC%81%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/14/Spring%20Boot%20%E7%AC%AC%E4%B8%80%E5%BC%B9%EF%BC%8C%E9%97%AE%E5%80%99%E4%B8%80%E4%B8%8B%E4%B8%96%E7%95%8C%EF%BC%81%EF%BC%81%EF%BC%81/" class="post-title-link" itemprop="url">Spring Boot 第一弹，问候一下世界！！！</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-14 10:00:42" itemprop="dateCreated datePublished" datetime="2020-10-14T10:00:42+08:00">2020-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 19:08:23" itemprop="dateModified" datetime="2020-10-23T19:08:23+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>相信从事Java开发的朋友都听说过<code>SSM</code>框架，这还算年轻的，老点的甚至经历过<code>SSH</code>，说起来有点恐怖，哈哈。比如我就是经历过<code>SSH</code>那个时代末流，没办法，很无奈。</p>
+<p>当然无论是SSM还是SSH都不是今天的重点，今天要说的是<code>Spring Boot</code>，一个令人眼前一亮的框架，从大的说，Spring Boot取代了<code>SSM</code> 中的<code>SS</code>的角色。</p>
+<p>今天这篇文章就来谈谈Spring Boot，这个我第一次使用直呼<code>爽</code>的框架。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/10/14/Spring%20Boot%20%E7%AC%AC%E4%B8%80%E5%BC%B9%EF%BC%8C%E9%97%AE%E5%80%99%E4%B8%80%E4%B8%8B%E4%B8%96%E7%95%8C%EF%BC%81%EF%BC%81%EF%BC%81/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/08/27/Navicat%20Premium%2012%E5%85%8D%E8%B4%B9%E7%89%88%E6%9C%AC%E5%AE%89%E8%A3%85/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/08/27/Navicat%20Premium%2012%E5%85%8D%E8%B4%B9%E7%89%88%E6%9C%AC%E5%AE%89%E8%A3%85/" class="post-title-link" itemprop="url">Navicat Premium 12破解版安装</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-08-27 15:51:57" itemprop="dateCreated datePublished" datetime="2020-08-27T15:51:57+08:00">2020-08-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 21:56:33" itemprop="dateModified" datetime="2020-10-23T21:56:33+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">开发工具</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
+<li>这几年的工作过程中使用了很多的数据库工具，比如Sqlyog，DBeaver,sqlplus等工具，但是个人觉得很好用的还是Navicat。</li>
+<li>不如人意的就是目前Navicat都在收费，今天就来分享下如何安装免费的Navicat。</li>
+<li><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-Log-plugin/6.jpg">
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/08/27/Navicat%20Premium%2012%E5%85%8D%E8%B4%B9%E7%89%88%E6%9C%AC%E5%AE%89%E8%A3%85/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/08/26/plugin%E7%A0%B4%E8%A7%A3%EF%BC%8C%E4%BA%B2%E6%B5%8B%E5%8F%AF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/08/26/plugin%E7%A0%B4%E8%A7%A3%EF%BC%8C%E4%BA%B2%E6%B5%8B%E5%8F%AF%E7%94%A8/" class="post-title-link" itemprop="url">Mybatis Log plugin破解，亲测可用！！！</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-08-26 14:50:11" itemprop="dateCreated datePublished" datetime="2020-08-26T14:50:11+08:00">2020-08-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 21:55:33" itemprop="dateModified" datetime="2020-10-23T21:55:33+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">开发工具</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
+<li><p>今天重新装了IDEA2020，顺带重装了一些插件，毕竟这些插件都是习惯一直在用，其中一款就是Mybatis  Log plugin，按照往常的思路，在IDEA插件市场搜索安装，艹，眼睛一瞟，竟然收费了，对于我这种支持盗版的人来说太难了，于是自己开始捣鼓各种尝试破解，下文分享自己的破解方式。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/08/26/plugin%E7%A0%B4%E8%A7%A3%EF%BC%8C%E4%BA%B2%E6%B5%8B%E5%8F%AF%E7%94%A8/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/05/08/select%E8%AF%AD%E5%8F%A5%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/05/08/select%E8%AF%AD%E5%8F%A5%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88%EF%BC%9F/" class="post-title-link" itemprop="url">select语句做了什么？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-05-08 18:51:57" itemprop="dateCreated datePublished" datetime="2020-05-08T18:51:57+08:00">2020-05-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-21 21:35:09" itemprop="dateModified" datetime="2020-10-21T21:35:09+08:00">2020-10-21</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%B9%B2%E8%B4%A7%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">数据库干货篇</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <section id="nice" data-tool="mdnice编辑器" data-website="https://www.mdnice.com" style="padding: 0 10px; word-spacing: 0px; word-wrap: break-word; text-align: left; font-family: Optima-Regular, Optima, PingFangSC-light, PingFangTC-light, 'PingFang SC', Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; line-height: 1.6; letter-spacing: .034em; color: rgb(63, 63, 63); font-size: 16px; word-break: all;"><h2 data-tool="mdnice编辑器" style="padding: 0px; font-weight: bold; color: black; font-size: 22px; display: block; text-align: center; background-image: url(https://my-wechat.mdnice.com/koala-2.png); background-position: center center; background-repeat: no-repeat; background-attachment: initial; background-origin: initial; background-clip: initial; background-size: 50px; margin-top: 1em; margin-bottom: 10px;"><span class="prefix" style="display: none;"></span><span class="content" style="text-align: center; display: inline-block; height: 38px; line-height: 42px; color: #48b378; background-position: left center; background-repeat: no-repeat; background-attachment: initial; background-origin: initial; background-clip: initial; background-size: 63px; margin-top: 38px; font-size: 18px; margin-bottom: 10px;">导读</span><span class="suffix"></span></h2>
+<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
+<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">Mysql在中小型企业中是个香饽饽，目前主流的数据库之一，几乎没有一个后端开发者不会使用的，但是作为一个老司机，仅仅会用真的不够。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">今天陈某透过一个简单的查询语句来讲述在Mysql内部的执行过程。</p>
+</section></li></ul>
+<pre class="custom" data-tool="mdnice编辑器" style="margin-top: 10px; margin-bottom: 10px; border-radius: 5px; box-shadow: rgba(0, 0, 0, 0.55) 0px 2px 10px;"><span style="display: block; background: url(https://my-wechat.mdnice.com/point.png); height: 30px; width: 100%; background-size: 40px; background-repeat: no-repeat; background-color: #f8f8f8; margin-bottom: -7px; border-radius: 5px; background-position: 10px 10px;"></span><code class="hljs" style="overflow-x: auto; padding: 16px; color: #333; display: -webkit-box; font-family: Operator Mono, Consolas, Monaco, Menlo, monospace; font-size: 12px; -webkit-overflow-scrolling: touch; padding-top: 15px; background: #f8f8f8; border-radius: 5px;">select * from table where id=10;
+</code></pre>
+<h2 data-tool="mdnice编辑器" style="padding: 0px; font-weight: bold; color: black; font-size: 22px; display: block; text-align: center; background-image: url(https://my-wechat.mdnice.com/koala-2.png); background-position: center center; background-repeat: no-repeat; background-attachment: initial; background-origin: initial; background-clip: initial; background-size: 50px; margin-top: 1em; margin-bottom: 10px;"><span class="prefix" style="display: none;"></span><span class="content" style="text-align: center; display: inline-block; height: 38px; line-height: 42px; color: #48b378; background-position: left center; background-repeat: no-repeat; background-attachment: initial; background-origin: initial; background-clip: initial; background-size: 63px; margin-top: 38px; font-size: 18px; margin-bottom: 10px;">撸它</span><span class="suffix"></span></h2>
+<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
+<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">首先通过一张图片来了解一下Mysql的基础架构，如下：</p>
+<figure style="margin: 0; margin-top: 10px; margin-bottom: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center;"><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/MYSQL%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/1.png" alt style="display: block; margin: 0 auto; max-width: 100%; border-radius: 4px; margin-bottom: 25px;"></figure>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">从上图可以看出，Mysql大致分为Server层和存储引擎层两部分。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">Server层包括连接器、查询缓存、分析器、优化器等，其中包含了Mysql的大多数核心功能以及所有的内置函数（如日期，时间函数等），所有跨存储引擎的功能都在这一层实现，比如存储过程、触发器、视图等。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">存储引擎层负责数据的存储和提取。它的架构是可插拔式的，支持InnoDB、MyISAM等多个存储引擎。Mysql中主流的存储引擎是InnoDB，由于它对事务的支持让它从Mysql5.5.5版本开始成为了默认的存储引擎。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">大致了解了整体架构，现在说说每一个基础的模块都承担着怎样的责任。</p>
+</section></li></ul>
+<h3 data-tool="mdnice编辑器" style="margin-bottom: 15px; padding: 0px; font-weight: bold; color: black; font-size: 20px; margin-top: 1.2em;"><span style="background-image: url(https://my-wechat.mdnice.com/koala-3.png); background-size: 100% 100%; background-repeat: no-repeat; display: inline-block; width: 16px; height: 15px; line-height: 15px; margin-bottom: -1px;"></span><span class="prefix" style="display: none;"></span><span class="content" style="font-size: 17px; font-weight: bold; display: inline-block; margin-left: 8px; color: #48b378;">1. 连接器</span><span class="suffix" style="display: none;"></span></h3>
+<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
+<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;">顾名思义，是客户端和Mysql之间连接的媒介，负责登录、获取权限、维持连接和管理连接。连接命令一般如下：</section></li></ul>
+<pre class="custom" data-tool="mdnice编辑器" style="margin-top: 10px; margin-bottom: 10px; border-radius: 5px; box-shadow: rgba(0, 0, 0, 0.55) 0px 2px 10px;"><span style="display: block; background: url(https://my-wechat.mdnice.com/point.png); height: 30px; width: 100%; background-size: 40px; background-repeat: no-repeat; background-color: #f8f8f8; margin-bottom: -7px; border-radius: 5px; background-position: 10px 10px;"></span><code class="hljs" style="overflow-x: auto; padding: 16px; color: #333; display: -webkit-box; font-family: Operator Mono, Consolas, Monaco, Menlo, monospace; font-size: 12px; -webkit-overflow-scrolling: touch; padding-top: 15px; background: #f8f8f8; border-radius: 5px;">mysql [-h] ip [- P] port -u [user] -p 
+</code></pre>
+<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
+<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">在完成经典的TCP握手后，连接器会开始认证身份，要求输入密码。</p>
+<ul style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: square;">
+<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;">密码认证通过，连接器会查询出拥有的权限，即使管理员修改了权限，也不会影响你这次的连接，只有重新连接才会生效。</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;">密码认证失败，会收到提示信息Access denied for user。</section></li></ul>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">连接完成后，没有后续动作的连接将会变成空闲连接，你可以输入<code style="font-size: 14px; word-wrap: break-word; padding: 2px 4px; border-radius: 4px; margin: 0 2px; background-color: rgba(27,31,35,.05); font-family: Operator Mono, Consolas, Monaco, Menlo, monospace; word-break: break-all; color: #28ca71;">show processlist</code>命令看到它。如下图，其中的Command这一列显示为sleep的这一行表示在系统里面有一个空闲连接。</p>
+<figure style="margin: 0; margin-top: 10px; margin-bottom: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center;"><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/MYSQL%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/2.png" alt style="display: block; margin: 0 auto; max-width: 100%; border-radius: 4px; margin-bottom: 25px;"></figure>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">客户端如果太长时间没有执行动作，连接器将会自动断开，这个时间由参数<code style="font-size: 14px; word-wrap: break-word; padding: 2px 4px; border-radius: 4px; margin: 0 2px; background-color: rgba(27,31,35,.05); font-family: Operator Mono, Consolas, Monaco, Menlo, monospace; word-break: break-all; color: #28ca71;">wait_timeout</code>控制，默认值是8小时。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">如果在连接被断开之后，客户端再次发送请求的话，就会收到一个错误提醒： Lost connection to MySQL server during query。这时候如果你要继续，就需要重连，然后再执行请求了。</p>
+</section></li></ul>
+<h3 data-tool="mdnice编辑器" style="margin-bottom: 15px; padding: 0px; font-weight: bold; color: black; font-size: 20px; margin-top: 1.2em;"><span style="background-image: url(https://my-wechat.mdnice.com/koala-3.png); background-size: 100% 100%; background-repeat: no-repeat; display: inline-block; width: 16px; height: 15px; line-height: 15px; margin-bottom: -1px;"></span><span class="prefix" style="display: none;"></span><span class="content" style="font-size: 17px; font-weight: bold; display: inline-block; margin-left: 8px; color: #48b378;">2. 查询缓存【废材，8.0 版本完全删除】</span><span class="suffix" style="display: none;"></span></h3>
+<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
+<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">连接建立完成后，你就可以select语句了，执行之前会查询缓存。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">查询缓存在Mysql中的是默认关闭的，因为缓存命中率非常低，只要有对表执行一个更新操作，这个表的所有查询缓存都将被清空。怎么样？一句废材足以形容了！！！</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">废材的东西不必多讲，主流的Redis的缓存你不用，别再搞这废材了。</p>
+</section></li></ul>
+<h3 data-tool="mdnice编辑器" style="margin-bottom: 15px; padding: 0px; font-weight: bold; color: black; font-size: 20px; margin-top: 1.2em;"><span style="background-image: url(https://my-wechat.mdnice.com/koala-3.png); background-size: 100% 100%; background-repeat: no-repeat; display: inline-block; width: 16px; height: 15px; line-height: 15px; margin-bottom: -1px;"></span><span class="prefix" style="display: none;"></span><span class="content" style="font-size: 17px; font-weight: bold; display: inline-block; margin-left: 8px; color: #48b378;">3. 分析器</span><span class="suffix" style="display: none;"></span></h3>
+<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
+<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">如果没有命中查询缓存，就要执行查询了，但是在执行查询之前，需要对SQL语句做解析，判断你这条语句有没有语法错误。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">分析器会做 '词法分析' ，你输入的无非可就是多个字符串和空格组成的SQL语句，MYSQL需要识别出里面的字符串是什么，代表什么，有没有关键词等。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">MYSQL会从你输入的select 这个关键字识别出来是一个查询语句，table是表名，id是列名。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">做完这些会做 '语法分析' ，根据MYSQL定义的规则来判断你的SQL语句有没有语法错误，如果你的语法不对，就会收到类似如下的提醒：</p>
+</section></li></ul>
+<pre class="custom" data-tool="mdnice编辑器" style="margin-top: 10px; margin-bottom: 10px; border-radius: 5px; box-shadow: rgba(0, 0, 0, 0.55) 0px 2px 10px;"><span style="display: block; background: url(https://my-wechat.mdnice.com/point.png); height: 30px; width: 100%; background-size: 40px; background-repeat: no-repeat; background-color: #f8f8f8; margin-bottom: -7px; border-radius: 5px; background-position: 10px 10px;"></span><code class="hljs" style="overflow-x: auto; padding: 16px; color: #333; display: -webkit-box; font-family: Operator Mono, Consolas, Monaco, Menlo, monospace; font-size: 12px; -webkit-overflow-scrolling: touch; padding-top: 15px; background: #f8f8f8; border-radius: 5px;">ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'elect * from t where ID=1' at line 1
+</code></pre>
+<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
+<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;">一般语法错误会提示第一个出现错误的位置，所以你要关注的是紧接“use near”的内容。</section></li></ul>
+<h3 data-tool="mdnice编辑器" style="margin-bottom: 15px; padding: 0px; font-weight: bold; color: black; font-size: 20px; margin-top: 1.2em;"><span style="background-image: url(https://my-wechat.mdnice.com/koala-3.png); background-size: 100% 100%; background-repeat: no-repeat; display: inline-block; width: 16px; height: 15px; line-height: 15px; margin-bottom: -1px;"></span><span class="prefix" style="display: none;"></span><span class="content" style="font-size: 17px; font-weight: bold; display: inline-block; margin-left: 8px; color: #48b378;">4. 优化器</span><span class="suffix" style="display: none;"></span></h3>
+<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
+<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">经过分析器词法和语法的分析，此时就能知道这条SQL语句是干什么的。但是在开始执行之前，MYSQL底层还要使用优化器对这条SQL语句进行优化处理。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">MYSQL内部会对这条SQL进行评估，比如涉及到多个索引会比较使用哪个索引代价更小、多表join的时候会考虑决定各个表的连接顺序。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">优化器的作用一句话总结：根据MYSQL内部的算法决定如何执行这条SQL语句来达到MYSQL认为代价最小目的。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">优化器阶段完成后，这个语句的执行方案就确定了，接下来就交给执行器执行了。</p>
+</section></li></ul>
+<h3 data-tool="mdnice编辑器" style="margin-bottom: 15px; padding: 0px; font-weight: bold; color: black; font-size: 20px; margin-top: 1.2em;"><span style="background-image: url(https://my-wechat.mdnice.com/koala-3.png); background-size: 100% 100%; background-repeat: no-repeat; display: inline-block; width: 16px; height: 15px; line-height: 15px; margin-bottom: -1px;"></span><span class="prefix" style="display: none;"></span><span class="content" style="font-size: 17px; font-weight: bold; display: inline-block; margin-left: 8px; color: #48b378;">5. 执行器</span><span class="suffix" style="display: none;"></span></h3>
+<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
+<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">MYSQL通过分析器知道了要做什么，通过优化器知道了如何做，于是就进入了执行器阶段。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">执行器开始执行之前，需要检查一下用户对表table有没有执行的权限，没有返回权限不足的错误，有的话就执行。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">执行也是分类的，如果Id不是索引则全表扫描，一行一行的查找，如果是索引则在索引组织表中查询，索引的查询很复杂，其中涉及到B+树等算法，这里不再详细介绍。</p>
+</section></li></ul>
+<h2 data-tool="mdnice编辑器" style="padding: 0px; font-weight: bold; color: black; font-size: 22px; display: block; text-align: center; background-image: url(https://my-wechat.mdnice.com/koala-2.png); background-position: center center; background-repeat: no-repeat; background-attachment: initial; background-origin: initial; background-clip: initial; background-size: 50px; margin-top: 1em; margin-bottom: 10px;"><span class="prefix" style="display: none;"></span><span class="content" style="text-align: center; display: inline-block; height: 38px; line-height: 42px; color: #48b378; background-position: left center; background-repeat: no-repeat; background-attachment: initial; background-origin: initial; background-clip: initial; background-size: 63px; margin-top: 38px; font-size: 18px; margin-bottom: 10px;">总结</span><span class="suffix"></span></h2>
+<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
+<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">一条SQL语句在MYSQL内部执行的过程涉及到的内部模块有：连接器、查询缓存、分析器、优化器、执行器、存储引擎。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">至此，MYSQL的基础架构已经讲完了。</p>
+</section></li></ul>
+
+
+
+
+
+
+
+
+
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/05/08/IDEA2020%E6%B0%B8%E4%B9%85%E7%A0%B4%E8%A7%A3%EF%BC%8C%E4%BA%B2%E6%B5%8B%E5%8F%AF%E7%94%A8%EF%BC%81%EF%BC%81%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/05/08/IDEA2020%E6%B0%B8%E4%B9%85%E7%A0%B4%E8%A7%A3%EF%BC%8C%E4%BA%B2%E6%B5%8B%E5%8F%AF%E7%94%A8%EF%BC%81%EF%BC%81%EF%BC%81/" class="post-title-link" itemprop="url">IDEA2020永久破解，亲测可用！！！</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-05-08 18:51:57" itemprop="dateCreated datePublished" datetime="2020-05-08T18:51:57+08:00">2020-05-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 21:55:04" itemprop="dateModified" datetime="2020-10-23T21:55:04+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">开发工具</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
+<li><p>随着 IDEA 的 2020 版本的发布，新增和优化了很多的功能，今天陈某不说新增的功能，来讲一讲如何永久破解。</p>
+</li>
+<li><p>不说别的，先上破解后的效果图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/IDEA%E7%A0%B4%E8%A7%A3/1.png" alt="永久破解效果图"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/05/08/IDEA2020%E6%B0%B8%E4%B9%85%E7%A0%B4%E8%A7%A3%EF%BC%8C%E4%BA%B2%E6%B5%8B%E5%8F%AF%E7%94%A8%EF%BC%81%EF%BC%81%EF%BC%81/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/04/28/%E7%BA%BF%E4%B8%8ABug%E6%97%A0%E6%B3%95%E5%A4%8D%E7%8E%B0%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9F%E8%80%81%E5%8F%B8%E6%9C%BA%E6%95%99%E4%BD%A0%E4%B8%80%E6%8B%9B%EF%BC%8CSpringBoot%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95%E4%B8%8D%E7%94%A8%E6%84%81%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/04/28/%E7%BA%BF%E4%B8%8ABug%E6%97%A0%E6%B3%95%E5%A4%8D%E7%8E%B0%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9F%E8%80%81%E5%8F%B8%E6%9C%BA%E6%95%99%E4%BD%A0%E4%B8%80%E6%8B%9B%EF%BC%8CSpringBoot%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95%E4%B8%8D%E7%94%A8%E6%84%81%EF%BC%81/" class="post-title-link" itemprop="url">线上Bug无法复现怎么办？老司机教你一招，SpringBoot远程调试不用愁！</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-04-28 11:03:37" itemprop="dateCreated datePublished" datetime="2020-04-28T11:03:37+08:00">2020-04-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-08-19 14:58:25" itemprop="dateModified" datetime="2020-08-19T14:58:25+08:00">2020-08-19</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9D%82%E8%B0%88/" itemprop="url" rel="index"><span itemprop="name">杂谈</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
+<li>在部署线上项目时，相信大家都会遇到一个问题，线上的 Bug 但是在本地不会复现，多么无奈。</li>
+<li>此时最常用的就是取到前端传递的数据用接口测试工具测试，比如 POSTMAN，复杂不，难受不？</li>
+<li>今天陈某教你一招，让你轻松调试线上的 Bug。文章目录如下：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/7.png"></li>
+</ul>
+<h2 id="什么是-JPDA？"><a href="#什么是-JPDA？" class="headerlink" title="什么是 JPDA？"></a>什么是 JPDA？</h2><ul>
+<li><p><code>JPDA</code>(Java Platform Debugger Architecture)，即 Java 平台调试体系，具体结构图如下图所示。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/1.png"></p>
+</li>
+<li><p>其中实现调试功能的主要协议是<code>JDWP</code>协议，在 <code>Java SE 5</code> 以前版本，JVM 端的实现接口是 <code>JVMPI</code>(Java Virtual Machine Profiler Interface)，而在 <code>Java SE 5</code> 及以后版本，使用 <code>JVMTI</code>(Java Virtual Machine Tool Interface) 来替代 JVMPI。</p>
+</li>
+<li><p>因此，如果使用 Java SE 5 之前版本，使用调试功能的命令为：</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -Xdebug -Xrunjdwp:...</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>而 <code>Java SE 5</code> 及之后版本，使用调试功能的命令为：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -agentlib:jdwp=...</span><br></pre></td></tr></table></figure>
+
+<h2 id="调试命令"><a href="#调试命令" class="headerlink" title="调试命令"></a>调试命令</h2><ul>
+<li>现在开发中最常见的一条远程调试的的命令如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=<span class="number">9091</span> -jar xxx.jar</span><br></pre></td></tr></table></figure>
+
+<h2 id="参数说明"><a href="#参数说明" class="headerlink" title="参数说明"></a>参数说明</h2><ul>
+<li>基于前面的调试命令，我们来分析一下基本的参数代表什么意思。</li>
+</ul>
+<h3 id="transport"><a href="#transport" class="headerlink" title="transport"></a>transport</h3><ul>
+<li>指定运行的被调试应用和调试者之间的通信协议，它由几个可选值：<ol>
+<li><code>dt_socket</code>：主要的方式，采用<code>socket</code>方式连接。</li>
+<li><code>dt_shmem</code>：采用共享内存方式连接，仅支持 Windows 平台。</li>
+</ol>
+</li>
+</ul>
+<h3 id="server"><a href="#server" class="headerlink" title="server"></a>server</h3><ul>
+<li>指定当前应用作为调试服务端还是客户端，默认为<code>n</code>。</li>
+<li>如果你想将当前应用作为被调试应用，设置该值为 <code>y</code>,如果你想将当前应用作为客户端，作为调试的发起者，设置该值为<code>n</code>。</li>
+</ul>
+<h3 id="suspend"><a href="#suspend" class="headerlink" title="suspend"></a>suspend</h3><ul>
+<li>当前应用启动后，是否阻塞应用直到被连接，默认值为 <code>y</code>。</li>
+<li>在大部分的应用场景，这个值为 <code>n</code>，即不需要应用阻塞等待连接。一个可能为 <code>y</code>的应用场景是，你的程序在启动时出现了一个故障，为了调试，必须等到调试方连接上来后程序再启动。</li>
+</ul>
+<h3 id="address"><a href="#address" class="headerlink" title="address"></a>address</h3><ul>
+<li>暴露的调试连接端口，默认值为 <code>8000</code>。</li>
+<li><strong>此端口一定不能与项目端口重复，且必须是服务器开放的端口。</strong></li>
+</ul>
+<h3 id="onthrow"><a href="#onthrow" class="headerlink" title="onthrow"></a>onthrow</h3><ul>
+<li>当程序抛出设定异常时，中断调试。</li>
+</ul>
+<h3 id="onuncaught"><a href="#onuncaught" class="headerlink" title="onuncaught"></a>onuncaught</h3><ul>
+<li>当程序抛出未捕获异常时，是否中断调试，默认值为 n。</li>
+</ul>
+<h3 id="launch"><a href="#launch" class="headerlink" title="launch"></a>launch</h3><ul>
+<li>当调试中断时，执行的程序。</li>
+</ul>
+<h3 id="timeout"><a href="#timeout" class="headerlink" title="timeout"></a>timeout</h3><ul>
+<li>该参数限定为<code>java -agentlib:jdwp=…</code>可用，单位为毫秒<code>ms</code>。</li>
+<li>当 <code>suspend = y</code> 时，该值表示等待连接的超时；当 <code>suspend = n</code> 时，该值表示连接后的使用超时。</li>
+</ul>
+<h2 id="参考命令"><a href="#参考命令" class="headerlink" title="参考命令"></a>参考命令</h2><ol>
+<li><p><code>-agentlib:jdwp=transport=dt_socket,server=y,address=8000</code>：以 Socket 方式监听 8000 端口，程序启动阻塞（suspend 的默认值为 y）直到被连接。</p>
+</li>
+<li><p><code>-agentlib:jdwp=transport=dt_socket,server=y,address=localhost:8000,timeout=5000</code>：以 Socket 方式监听 8000 端口，当程序启动后 5 秒无调试者连接的话终止，程序启动阻塞（suspend 的默认值为 y）直到被连接。</p>
+</li>
+<li><p><code>-agentlib:jdwp=transport=dt_shmem,server=y,suspend=n</code>：选择可用的共享内存连接地址并使用 stdout 打印，程序启动不阻塞。</p>
+</li>
+<li><p><code>-agentlib:jdwp=transport=dt_socket,address=myhost:8000</code>：以 socket 方式连接到 <code>myhost:8000</code>上的调试程序，在连接成功前启动阻塞。</p>
+</li>
+<li><p><code>-agentlib:jdwp=transport=dt_socket,server=y,address=8000,onthrow=java.io.IOException,launch=/usr/local/bin/debugstub</code>：以 Socket 方式监听 8000 端口，程序启动阻塞（suspend 的默认值为 y）直到被连接。当抛出 IOException 时中断调试，转而执行 <code>usr/local/bin/debugstub</code>程序。</p>
+</li>
+</ol>
+<h3 id="IDEA-远程调试示例"><a href="#IDEA-远程调试示例" class="headerlink" title="IDEA 远程调试示例"></a>IDEA 远程调试示例</h3><ul>
+<li>首先打包 SpringBoot 项目，在服务器上运行，执行以下命令：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=<span class="number">9190</span> -jar debug-demo.jar</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>出现下图的界面，表示运行成功：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/2.png"></p>
+</li>
+<li><p>然后在 IDEA 中，点击 <code>Edit Configurations</code>，在弹框中点击 <code>+</code> 号，然后选择<code>Remote</code>。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/3.png"></p>
+</li>
+<li><p>填写服务器的地址及端口，点击 OK 即可。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/4.png"></p>
+</li>
+<li><p>配置完毕后，DEBUG 调试运行即可。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/5.png"></p>
+</li>
+<li><p>配置完毕后点击保存即可，因为我配置的 suspend=n，因此服务端程序无需阻塞等待我们的连接。我们点击 IDEA 调试按钮，当我访问某一接口时，能够正常调试。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/6.png"></p>
+</li>
+</ul>
+<h2 id="小福利"><a href="#小福利" class="headerlink" title="小福利"></a>小福利</h2><ul>
+<li>作者为大家准备了接近 10M 的面试题，涵盖后端各个技术维度，老规矩，公众号内回复关键词<code>JAVA面试题</code>即可免费获取。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/8.png"></li>
+<li>关注微信公众号回复关键词：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E4%B8%83%E7%A7%92%E7%BC%96%E7%A8%8B.jpg"></li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/04/26/%E5%A4%A7%E7%99%BD%E8%AF%9D%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8%EF%BC%8C%E5%8F%88%E8%83%BD%E5%92%8C%E9%9D%A2%E8%AF%95%E5%AE%98%E6%89%AF%E7%9A%AE%E4%BA%86%EF%BC%81%EF%BC%81%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/04/26/%E5%A4%A7%E7%99%BD%E8%AF%9D%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8%EF%BC%8C%E5%8F%88%E8%83%BD%E5%92%8C%E9%9D%A2%E8%AF%95%E5%AE%98%E6%89%AF%E7%9A%AE%E4%BA%86%EF%BC%81%EF%BC%81%EF%BC%81/" class="post-title-link" itemprop="url">大白话布隆过滤器，又能和面试官扯皮了！！！</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-04-26 22:06:38 / 修改时间：22:07:08" itemprop="dateCreated datePublished" datetime="2020-04-26T22:06:38+08:00">2020-04-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9D%82%E8%B0%88/" itemprop="url" rel="index"><span itemprop="name">杂谈</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
+<li>文章首发于微信公众号<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/Vo935pCXH0aPgG20f1ppEg">大白话布隆过滤器，又能和面试官扯皮了~</a></li>
+<li>近期在做推荐系统中已读内容去重的相关内容，刚好用到了布隆过滤器，于是写了一篇文章记录分享一下。</li>
+<li>文章的篇幅不是很长，主要讲了布隆过滤器的核心思想，目录如下：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8.png"></li>
+</ul>
+<h2 id="什么是布隆过滤器？"><a href="#什么是布隆过滤器？" class="headerlink" title="什么是布隆过滤器？"></a>什么是布隆过滤器？</h2><ul>
+<li>布隆过滤器是由一个长度为<code>m</code>比特的位<strong>数组</strong>与<code>k</code>个<strong>哈希函数</strong>组成的数据结构。比特数组均初始化为<code>0</code>，所有哈希函数都可以分别把输入数据尽量均匀地散列。</li>
+<li>当<strong>插入</strong>一个元素时，将其数据通过<code>k</code>个哈希函数转换成<code>k</code>个哈希值，这<code>k</code>个哈希值将作为比特数组的<code>下标</code>，并将数组中的对应下标的值置为<code>1</code>。</li>
+<li>当<strong>查询</strong>一个元素时，同样会将其数据通过<code>k</code>个哈希函数转换成<code>k</code>个哈希值（数组下标），查询数组中对应下标的值，如果有一个下标的值为<code>0</code>表明该元素一定不在集合中，如果全部下标的值都为<code>1</code>，表明该元素有<code>可能</code>在集合中。<strong>至于为什么有可能在集合中？</strong> 因为有可能某个或者多个下标的值为 1 是受到其他元素的影响，这就是所谓的<code>假阳性</code>，下文会详细讲述。</li>
+<li><strong>无法删除一个元素</strong>，为什么呢？因为你删除的元素的哈希值可能和集合中的某个元素的哈希值有相同的，一旦删除了这个元素会导致其他的元素也被删除。</li>
+<li>下图示出一个<code>m=18</code>, <code>k=3</code>的布隆过滤器示例。集合中的 x、y、z 三个元素通过 3 个不同的哈希函数散列到位数组中。当查询元素 w 时，因为有一个比特为 0，因此 w 不在该集合中。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/1.png"></li>
+</ul>
+<h2 id="假阳性概率的计算"><a href="#假阳性概率的计算" class="headerlink" title="假阳性概率的计算"></a>假阳性概率的计算</h2><ul>
+<li>假阳性是布隆过滤器的一个痛点，因此需要不择一切手段来使假阳性的概率降低，此时就需要计算一下假阳性的概率了。</li>
+<li>假设我们的哈希函数选择位数组中的比特时，都是等概率的。当然在设计哈希函数时，也应该尽量满足均匀分布。</li>
+<li>在位数组长度<code>m</code>的布隆过滤器中插入一个元素，它的其中一个哈希函数会将某个特定的比特置为<code>1</code>。因此，在插入元素后，该比特仍然为 0 的概率是：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/2.png"></li>
+<li>现有<code>k</code>个哈希函数，并插入<code>n</code>个元素，自然就可以得到该比特仍然为 0 的概率是：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/3.png"></li>
+<li>反过来讲，它已经被置为<code>1</code>的概率就是：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/4.png"></li>
+<li>也就是说，如果在插入<code>n</code>个元素后，我们用一个不在集合中的元素来检测，那么被误报为存在于集合中的概率（也就是所有哈希函数对应的比特都为<code>1</code>的概率）为：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/5.png"></li>
+<li>当<code>n</code>比较大时，根据极限公式，可以近似得出假阳性率：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/6.png"></li>
+<li>所以，在哈希函数个数<code>k</code>一定的情况下有如下结论：<ol>
+<li>位数组长度 m 越大，假阳性率越低。</li>
+<li>已插入元素的个数 n 越大，假阳性率越高。</li>
+</ol>
+</li>
+</ul>
+<h2 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h2><ul>
+<li>用比特数组表示，不用存储数据本身，对空间的节省相比于传统方式占据绝对的优势。</li>
+<li>时间效率很高，无论是插入还是查询，只需要简单的经过哈希函数转换，时间复杂度均为<code>O(k)</code>。</li>
+</ul>
+<h2 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h2><ul>
+<li>存在<code>假阳性</code>的概率，准确率要求高的场景不太适用。</li>
+<li>只能插入和查询，不能删除了元素。</li>
+</ul>
+<h2 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h2><ul>
+<li>布隆过滤器的用途很多，但是主要的作用就是去重，这里列举几个使用场景。</li>
+</ul>
+<h3 id="爬虫重复-URL-检测"><a href="#爬虫重复-URL-检测" class="headerlink" title="爬虫重复 URL 检测"></a>爬虫重复 URL 检测</h3><ul>
+<li>试想一下，百度是一个爬虫，它会定时搜集各大网站的信息，文章，那么它是如何保证爬取到文章信息不重复，它会将 URL 存放到布隆过滤器中，每次爬取之前先从布隆过滤器中判断这个 URL 是否存在，这样就避免了重复爬取。当然这种存在假阳性的可能，但是只要你的比特数组足够大，<code>假阳性</code>的概率会很低，另一方面，你认为百度会在意这种的误差吗，你的一篇文章可能因为假阳性概率没有收录到，对百度有影响吗？</li>
+</ul>
+<h3 id="抖音推荐功能"><a href="#抖音推荐功能" class="headerlink" title="抖音推荐功能"></a>抖音推荐功能</h3><ul>
+<li>读者朋友们应该没人没刷过抖音吧，每次刷的时候抖音给你的视频有重复的吗？他是如何保证推荐的内容不重复的呢？</li>
+<li>最容易想到的就是抖音会记录用户的历史观看记录，然后从历史记录中排除。这是一种解决办法，但是性能呢？不用多说了，有点常识的都知道这不可能。</li>
+<li>解决这种重复的问题，布隆过滤器有着绝对的优势，能够很轻松的解决。</li>
+</ul>
+<h3 id="防止缓存穿透"><a href="#防止缓存穿透" class="headerlink" title="防止缓存穿透"></a>防止缓存穿透</h3><ul>
+<li>缓存穿透是指查询一条数据库和缓存都没有的一条数据，就会一直查询数据库，对数据库的访问压力会一直增大。</li>
+<li>布隆过滤器在解决缓存穿透的问题效果也是很好，这里不再细说，后续文章会写。</li>
+</ul>
+<h2 id="如何实现布隆过滤器？"><a href="#如何实现布隆过滤器？" class="headerlink" title="如何实现布隆过滤器？"></a>如何实现布隆过滤器？</h2><ul>
+<li>了解布隆过滤器的设计思想之后，想要实现一个布隆过滤器其实很简单，陈某这里就不再搬门弄斧了，介绍一下现成的实现方式吧。</li>
+</ul>
+<h3 id="Redis-实现"><a href="#Redis-实现" class="headerlink" title="Redis 实现"></a>Redis 实现</h3><ul>
+<li>Redis4.0 之后推出了插件的功能，下面用 docker 安装：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker pull redislabs/rebloom</span><br><span class="line">docker run -p6379:<span class="number">6379</span> redislabs/rebloom</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>安装完成后连接 redis 即可，运行命令：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-cli</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>至于具体的使用这里不再演示了，直接看官方文档和教程，使用起来还是很简单的。</li>
+</ul>
+<h3 id="Guava-实现"><a href="#Guava-实现" class="headerlink" title="Guava 实现"></a>Guava 实现</h3><ul>
+<li>guava 对应布隆过滤器的实现做出了支持，使用 guava 可以很轻松的实现一个布隆过滤器。</li>
+</ul>
+<p><strong>1. 创建布隆过滤器</strong></p>
+<ul>
+<li>创建布隆过滤器，如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">BloomFilter&lt;Integer&gt; filter = BloomFilter.create(</span><br><span class="line">                    Funnels.integerFunnel(),</span><br><span class="line">                    <span class="number">5000</span>,</span><br><span class="line">                    <span class="number">0.01</span>);</span><br><span class="line"><span class="comment">//插入</span></span><br><span class="line">IntStream.range(<span class="number">0</span>, <span class="number">100_000</span>).forEach(filter::put);</span><br><span class="line"><span class="comment">//判断是否存在</span></span><br><span class="line"><span class="keyword">boolean</span> b = filter.mightContain(<span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>arg1</code>：用于将任意类型 T 的输入数据转化为 Java 基本类型的数据，这里转换为 byte</li>
+<li><code>arg2</code>：byte 字节数组的基数</li>
+<li><code>arg3</code>：期望的假阳性概率</li>
+</ul>
+<p><strong>2.估计最优 m 值和 k 值</strong></p>
+<ul>
+<li>guava 在底层对 byte 数组的基数(m)和哈希函数的个数 k 做了自己的算法，源码如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//m值的计算</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">long</span> <span class="title">optimalNumOfBits</span><span class="params">(<span class="keyword">long</span> n, <span class="keyword">double</span> p)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (p == <span class="number">0</span>) &#123;</span><br><span class="line">    p = Double.MIN_VALUE;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> (<span class="keyword">long</span>) (-n * Math.log(p) / (Math.log(<span class="number">2</span>) * Math.log(<span class="number">2</span>)));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//k值的计算</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">optimalNumOfHashFunctions</span><span class="params">(<span class="keyword">long</span> n, <span class="keyword">long</span> m)</span> </span>&#123;</span><br><span class="line">  <span class="comment">// (m / n) * log(2), but avoid truncation due to division!</span></span><br><span class="line">  <span class="keyword">return</span> Math.max(<span class="number">1</span>, (<span class="keyword">int</span>) Math.round((<span class="keyword">double</span>) m / n * Math.log(<span class="number">2</span>)));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>想要理解 guava 的计算原理，还要从的上面推导的过程继续。</li>
+<li>由假阳性率的近似计算方法可知，如果要使假阳性率尽量小，在 m 和 n 给定的情况下，<code>k</code>值应为：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/7.png"></li>
+<li>将 k 代入上一节的式子并化简，我们可以整理出期望假阳性率 p 与 m、n 的关系：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/8,.png"></li>
+<li>换算而得：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/9.png"></li>
+<li>根据以上分析得出以下的结论：<ol>
+<li>如果指定期望假阳性率 p，那么最优的 m 值与期望元素数 n 呈线性关系。</li>
+<li>最优的 k 值实际上只与 p 有关，与 m 和 n 都无关，即：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E5%B8%83%E9%9A%86%E8%BF%87%E6%BB%A4%E5%99%A8/10.png"></li>
+<li>综上两个结论，在创建布隆过滤器的时候，确定<code>p</code>值和<code>m</code>值很重要。</li>
+</ol>
+</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>至此，布隆过滤器的知识介绍到这里，如果觉得陈某写得不错的，转发在看点一波，读者的一份支持将会是我莫大的鼓励。</li>
+<li><strong>另外想和陈某私聊或者想要加交流群的朋友，公众号回复关键词<code>加群</code>加陈某微信，陈某会第一时间拉你进群。</strong></li>
+</ul>
+<h2 id="巨人的肩膀"><a href="#巨人的肩膀" class="headerlink" title="巨人的肩膀"></a>巨人的肩膀</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/u012422440/article/details/94088166">https://blog.csdn.net/u012422440/article/details/94088166</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/Revivedsun/article/details/94992323">https://blog.csdn.net/Revivedsun/article/details/94992323</a></li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/page/3/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/5/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+  </nav>
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某</span>
+</div>
+ <!-- <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

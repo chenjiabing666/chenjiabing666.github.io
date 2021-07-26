@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言上篇文章讲了Spring Boot的WEB开发基础内容，相信读者朋友们已经有了初步的了解，知道如何写一个接口。 今天这篇文章来介绍一下拦截器在Spring Boot中如何自定义以及配置。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="拦截器如何配置，看这儿~">
+<meta property="og:url" content="http://example.com/2020/10/14/Spring%20Boot%E7%AC%AC%E5%85%AD%E5%BC%B9%EF%BC%8C%E6%8B%A6%E6%88%AA%E5%99%A8%E5%A6%82%E4%BD%95%E9%85%8D%E7%BD%AE%EF%BC%8C%E7%9C%8B%E8%BF%99%E5%84%BF~/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="前言上篇文章讲了Spring Boot的WEB开发基础内容，相信读者朋友们已经有了初步的了解，知道如何写一个接口。 今天这篇文章来介绍一下拦截器在Spring Boot中如何自定义以及配置。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/myjszl_log.png">
+<meta property="article:published_time" content="2020-10-14T02:06:42.000Z">
+<meta property="article:modified_time" content="2020-10-23T11:11:54.019Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="Spring Boot">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/myjszl_log.png">
+
+<link rel="canonical" href="http://example.com/2020/10/14/Spring%20Boot%E7%AC%AC%E5%85%AD%E5%BC%B9%EF%BC%8C%E6%8B%A6%E6%88%AA%E5%99%A8%E5%A6%82%E4%BD%95%E9%85%8D%E7%BD%AE%EF%BC%8C%E7%9C%8B%E8%BF%99%E5%84%BF~/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>拦截器如何配置，看这儿~ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/14/Spring%20Boot%E7%AC%AC%E5%85%AD%E5%BC%B9%EF%BC%8C%E6%8B%A6%E6%88%AA%E5%99%A8%E5%A6%82%E4%BD%95%E9%85%8D%E7%BD%AE%EF%BC%8C%E7%9C%8B%E8%BF%99%E5%84%BF~/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          拦截器如何配置，看这儿~
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-14 10:06:42" itemprop="dateCreated datePublished" datetime="2020-10-14T10:06:42+08:00">2020-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 19:11:54" itemprop="dateModified" datetime="2020-10-23T19:11:54+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>上篇文章讲了Spring Boot的WEB开发基础内容，相信读者朋友们已经有了初步的了解，知道如何写一个接口。</p>
+<p>今天这篇文章来介绍一下拦截器在Spring Boot中如何自定义以及配置。</p>
+<span id="more"></span>
+
+<h2 id="Spring-Boot-版本"><a href="#Spring-Boot-版本" class="headerlink" title="Spring Boot 版本"></a>Spring Boot 版本</h2><p>本文基于的Spring Boot的版本是<code>2.3.4.RELEASE</code>。</p>
+<h2 id="什么是拦截器？"><a href="#什么是拦截器？" class="headerlink" title="什么是拦截器？"></a>什么是拦截器？</h2><p>Spring MVC中的拦截器（<code>Interceptor</code>）类似于Servlet中的过滤器（<code>Filter</code>），它主要用于拦截用户请求并作相应的处理。例如通过拦截器可以进行权限验证、记录请求信息的日志、判断用户是否登录等。</p>
+<h2 id="如何自定义一个拦截器？"><a href="#如何自定义一个拦截器？" class="headerlink" title="如何自定义一个拦截器？"></a>如何自定义一个拦截器？</h2><p>自定义一个拦截器非常简单，只需要实现<code>HandlerInterceptor</code>这个接口即可，该接口有三个可以实现的方法，如下：</p>
+<ol>
+<li><code>preHandle()</code>方法：该方法会在控制器方法前执行，其返回值表示是否知道如何写一个接口。中断后续操作。当其返回值为<code>true</code>时，表示继续向下执行；当其返回值为<code>false</code>时，会中断后续的所有操作（包括调用下一个拦截器和控制器类中的方法执行等）。</li>
+<li><code>postHandle()</code>方法：该方法会在控制器方法调用之后，且解析视图之前执行。可以通过此方法对请求域中的模型和视图做出进一步的修改。</li>
+<li><code>afterCompletion()</code>方法：该方法会在整个请求完成，即视图渲染结束之后执行。可以通过此方法实现一些资源清理、记录日志信息等工作。</li>
+</ol>
+<h2 id="如何使其在Spring-Boot中生效？"><a href="#如何使其在Spring-Boot中生效？" class="headerlink" title="如何使其在Spring Boot中生效？"></a>如何使其在Spring Boot中生效？</h2><p>其实想要在Spring Boot生效其实很简单，只需要定义一个配置类，实现<code>WebMvcConfigurer</code>这个接口，并且实现其中的<code>addInterceptors()</code>方法即可，代码演示如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebConfig</span> <span class="keyword">implements</span> <span class="title">WebMvcConfigurer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> XXX xxx;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addInterceptors</span><span class="params">(InterceptorRegistry registry)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//不拦截的uri</span></span><br><span class="line">        <span class="keyword">final</span> String[] commonExclude = &#123;&#125;&#125;;</span><br><span class="line">        registry.addInterceptor(xxx).excludePathPatterns(commonExclude);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="举个栗子"><a href="#举个栗子" class="headerlink" title="举个栗子"></a>举个栗子</h2><p>开发中可能会经常遇到短时间内由于用户的重复点击导致几秒之内重复的请求，可能就是在这几秒之内由于各种问题，比如<code>网络</code>，<code>事务的隔离性</code>等等问题导致了数据的重复等问题，因此在日常开发中必须规避这类的重复请求操作，今天就用拦截器简单的处理一下这个问题。</p>
+<h3 id="思路"><a href="#思路" class="headerlink" title="思路"></a>思路</h3><p>在接口执行之前先对指定接口（比如标注某个<code>注解</code>的接口）进行判断，如果在指定的时间内（比如<code>5秒</code>）已经请求过一次了，则返回重复提交的信息给调用者。</p>
+<h3 id="根据什么判断这个接口已经请求了？"><a href="#根据什么判断这个接口已经请求了？" class="headerlink" title="根据什么判断这个接口已经请求了？"></a>根据什么判断这个接口已经请求了？</h3><p>根据项目的架构可能判断的条件也是不同的，比如<code>IP地址</code>，<code>用户唯一标识</code>、<code>请求参数</code>、<code>请求URI</code>等等其中的某一个或者多个的组合。</p>
+<h3 id="这个具体的信息存放在哪里？"><a href="#这个具体的信息存放在哪里？" class="headerlink" title="这个具体的信息存放在哪里？"></a>这个具体的信息存放在哪里？</h3><p>由于是<code>短时间</code>内甚至是瞬间并且要保证<code>定时失效</code>，肯定不能存在事务性数据库中了，因此常用的几种数据库中只有<code>Redis</code>比较合适了。</p>
+<h3 id="如何实现？"><a href="#如何实现？" class="headerlink" title="如何实现？"></a>如何实现？</h3><p>第一步，先自定义一个注解，可以标注在类或者方法上，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target(&#123;ElementType.METHOD, ElementType.TYPE&#125;)</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> RepeatSubmit &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 默认失效时间5秒</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">long</span> <span class="title">seconds</span><span class="params">()</span> <span class="keyword">default</span> 5</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>第二步，创建一个拦截器，<strong>注入到IOC容器中</strong>，实现的思路很简单，判断controller的类或者方法上是否标注了<code>@RepeatSubmit</code>这个注解，如果标注了，则拦截判断，否则跳过，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 重复请求的拦截器</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Component</span>：该注解将其注入到IOC容器中</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RepeatSubmitInterceptor</span> <span class="keyword">implements</span> <span class="title">HandlerInterceptor</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Redis的API</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> StringRedisTemplate stringRedisTemplate;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * preHandler方法，在controller方法之前执行</span></span><br><span class="line"><span class="comment">     * </span></span><br><span class="line"><span class="comment">     * 判断条件仅仅是用了uri，实际开发中根据实际情况组合一个唯一识别的条件。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">preHandle</span><span class="params">(HttpServletRequest request, HttpServletResponse response, Object handler)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (handler <span class="keyword">instanceof</span> HandlerMethod)&#123;</span><br><span class="line">            <span class="comment">//只拦截标注了@RepeatSubmit该注解</span></span><br><span class="line">            HandlerMethod method=(HandlerMethod)handler;</span><br><span class="line">            <span class="comment">//标注在方法上的@RepeatSubmit</span></span><br><span class="line">            RepeatSubmit repeatSubmitByMethod = AnnotationUtils.findAnnotation(method.getMethod(),RepeatSubmit.class);</span><br><span class="line">            <span class="comment">//标注在controler类上的@RepeatSubmit</span></span><br><span class="line">            RepeatSubmit repeatSubmitByCls = AnnotationUtils.findAnnotation(method.getMethod().getDeclaringClass(), RepeatSubmit.class);</span><br><span class="line">            <span class="comment">//没有限制重复提交，直接跳过</span></span><br><span class="line">            <span class="keyword">if</span> (Objects.isNull(repeatSubmitByMethod)&amp;&amp;Objects.isNull(repeatSubmitByCls))</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// todo: 组合判断条件，这里仅仅是演示，实际项目中根据架构组合条件</span></span><br><span class="line">            <span class="comment">//请求的URI</span></span><br><span class="line">            String uri = request.getRequestURI();</span><br><span class="line"></span><br><span class="line">            <span class="comment">//存在即返回false，不存在即返回true</span></span><br><span class="line">            Boolean ifAbsent = stringRedisTemplate.opsForValue().setIfAbsent(uri, <span class="string">&quot;&quot;</span>, Objects.nonNull(repeatSubmitByMethod)?repeatSubmitByMethod.seconds():repeatSubmitByCls.seconds(), TimeUnit.SECONDS);</span><br><span class="line"></span><br><span class="line">            <span class="comment">//如果存在，表示已经请求过了，直接抛出异常，由全局异常进行处理返回指定信息</span></span><br><span class="line">            <span class="keyword">if</span> (ifAbsent!=<span class="keyword">null</span>&amp;&amp;!ifAbsent)</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> RepeatSubmitException();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>第三步，在Spring Boot中配置这个拦截器，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WebConfig</span> <span class="keyword">implements</span> <span class="title">WebMvcConfigurer</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> RepeatSubmitInterceptor repeatSubmitInterceptor;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addInterceptors</span><span class="params">(InterceptorRegistry registry)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//不拦截的uri</span></span><br><span class="line">        <span class="keyword">final</span> String[] commonExclude = &#123;<span class="string">&quot;/error&quot;</span>, <span class="string">&quot;/files/**&quot;</span>&#125;;</span><br><span class="line">        registry.addInterceptor(repeatSubmitInterceptor).excludePathPatterns(commonExclude);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>OK，拦截器已经配置完成，只需要在需要拦截的接口上标注<code>@RepeatSubmit</code>这个注解即可，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;/user&quot;)</span></span><br><span class="line"><span class="comment">//标注了@RepeatSubmit注解，全部的接口都需要拦截</span></span><br><span class="line"><span class="meta">@RepeatSubmit</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LoginController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/login&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">login</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;login success&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此时，请求这个URI:<code>http://localhost:8080/springboot-demo/user/login</code>在5秒之内只能请求一次。</p>
+<p><strong>注意</strong>：标注在方法上的超时时间会覆盖掉类上的时间，因为如下一段代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Boolean ifAbsent = stringRedisTemplate.opsForValue().setIfAbsent(uri, <span class="string">&quot;&quot;</span>, Objects.nonNull(repeatSubmitByMethod)?repeatSubmitByMethod.seconds():repeatSubmitByCls.seconds(), TimeUnit.SECONDS);</span><br></pre></td></tr></table></figure>
+
+<p>这段代码的失效时间先取值<code>repeatSubmitByMethod</code>中配置的，如果为null，则取值<code>repeatSubmitByCls</code>配置的。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>至此，拦截器的内容就介绍完了，其实配置起来很简单，没什么重要的内容。</p>
+<p><strong>上述例子中的<code>源代码</code>有需要的朋友公众号<code>码猿技术专栏</code>内回复关键词<code>拦截器</code>即可获取。</strong></p>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/myjszl_log.png"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Spring-Boot/" rel="tag"># Spring Boot</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/10/14/Spring%20Boot%E7%AC%AC%E4%BA%94%E5%BC%B9%EF%BC%8CWEB%E5%BC%80%E5%8F%91%E5%88%9D%E4%BA%86%E8%A7%A3~/" rel="prev" title="Spring Boot WEB开发初了解~">
+      <i class="fa fa-chevron-left"></i> Spring Boot WEB开发初了解~
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/10/14/Spring%20Boot%E7%AC%AC%E4%B8%83%E5%BC%B9%EF%BC%8C%E8%BF%87%E6%BB%A4%E5%99%A8%E5%A6%82%E4%BD%95%E9%85%8D%E7%BD%AE%EF%BC%8C%E4%B8%80%E6%B3%A2%E6%A2%AD%E5%93%88~/" rel="next" title="过滤器如何配置，一波梭哈~">
+      过滤器如何配置，一波梭哈~ <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Boot-%E7%89%88%E6%9C%AC"><span class="nav-text">Spring Boot 版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%8B%A6%E6%88%AA%E5%99%A8%EF%BC%9F"><span class="nav-text">什么是拦截器？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AA%E6%8B%A6%E6%88%AA%E5%99%A8%EF%BC%9F"><span class="nav-text">如何自定义一个拦截器？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E4%BD%BF%E5%85%B6%E5%9C%A8Spring-Boot%E4%B8%AD%E7%94%9F%E6%95%88%EF%BC%9F"><span class="nav-text">如何使其在Spring Boot中生效？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BE%E4%B8%AA%E6%A0%97%E5%AD%90"><span class="nav-text">举个栗子</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%9D%E8%B7%AF"><span class="nav-text">思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B9%E6%8D%AE%E4%BB%80%E4%B9%88%E5%88%A4%E6%96%AD%E8%BF%99%E4%B8%AA%E6%8E%A5%E5%8F%A3%E5%B7%B2%E7%BB%8F%E8%AF%B7%E6%B1%82%E4%BA%86%EF%BC%9F"><span class="nav-text">根据什么判断这个接口已经请求了？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%99%E4%B8%AA%E5%85%B7%E4%BD%93%E7%9A%84%E4%BF%A1%E6%81%AF%E5%AD%98%E6%94%BE%E5%9C%A8%E5%93%AA%E9%87%8C%EF%BC%9F"><span class="nav-text">这个具体的信息存放在哪里？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%EF%BC%9F"><span class="nav-text">如何实现？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某</span>
+</div>
+ <!-- <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

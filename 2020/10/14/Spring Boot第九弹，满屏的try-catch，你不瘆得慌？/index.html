@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言软件开发过程中难免遇到各种的BUG，各种的异常，一直就是在解决异常的路上永不停歇，如果你的代码中再出现try()&amp;#123;...&amp;#125;catch()&amp;#123;...&amp;#125;finally&amp;#123;...&amp;#125;代码块，你还有心情看下去吗？自己不觉得恶心吗？ 冗余的代码往往回丧失写代码的动力，每天搬砖似的写代码，真的很难受。今天这篇文章教你如何去掉满屏的try()&amp;#123;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="满屏的try-catch，你不瘆得慌？">
+<meta property="og:url" content="http://example.com/2020/10/14/Spring%20Boot%E7%AC%AC%E4%B9%9D%E5%BC%B9%EF%BC%8C%E6%BB%A1%E5%B1%8F%E7%9A%84try-catch%EF%BC%8C%E4%BD%A0%E4%B8%8D%E7%98%86%E5%BE%97%E6%85%8C%EF%BC%9F/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="前言软件开发过程中难免遇到各种的BUG，各种的异常，一直就是在解决异常的路上永不停歇，如果你的代码中再出现try()&amp;#123;...&amp;#125;catch()&amp;#123;...&amp;#125;finally&amp;#123;...&amp;#125;代码块，你还有心情看下去吗？自己不觉得恶心吗？ 冗余的代码往往回丧失写代码的动力，每天搬砖似的写代码，真的很难受。今天这篇文章教你如何去掉满屏的try()&amp;#123;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Spring%20Boot%E7%AC%AC%E5%85%AB%E5%BC%B9%EF%BC%8C%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8/1.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Spring%20Boot%E7%AC%AC%E5%85%AB%E5%BC%B9%EF%BC%8C%E5%A6%82%E4%BD%95%E6%89%A9%E5%B1%95%E5%85%A8%E9%9D%A2%E6%8E%A5%E5%8F%A3MVC/1.jpg">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis%E8%BF%9B%E9%98%B6PDF/2.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/myjszl_log.png">
+<meta property="article:published_time" content="2020-10-14T02:09:42.000Z">
+<meta property="article:modified_time" content="2020-10-23T11:13:45.724Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="Spring Boot">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Spring%20Boot%E7%AC%AC%E5%85%AB%E5%BC%B9%EF%BC%8C%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8/1.png">
+
+<link rel="canonical" href="http://example.com/2020/10/14/Spring%20Boot%E7%AC%AC%E4%B9%9D%E5%BC%B9%EF%BC%8C%E6%BB%A1%E5%B1%8F%E7%9A%84try-catch%EF%BC%8C%E4%BD%A0%E4%B8%8D%E7%98%86%E5%BE%97%E6%85%8C%EF%BC%9F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>满屏的try-catch，你不瘆得慌？ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/14/Spring%20Boot%E7%AC%AC%E4%B9%9D%E5%BC%B9%EF%BC%8C%E6%BB%A1%E5%B1%8F%E7%9A%84try-catch%EF%BC%8C%E4%BD%A0%E4%B8%8D%E7%98%86%E5%BE%97%E6%85%8C%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          满屏的try-catch，你不瘆得慌？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-14 10:09:42" itemprop="dateCreated datePublished" datetime="2020-10-14T10:09:42+08:00">2020-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 19:13:45" itemprop="dateModified" datetime="2020-10-23T19:13:45+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>软件开发过程中难免遇到各种的BUG，各种的异常，一直就是在解决异常的路上永不停歇，如果你的代码中再出现<code>try()&#123;...&#125;catch()&#123;...&#125;finally&#123;...&#125;</code>代码块，你还有心情看下去吗？自己不觉得恶心吗？</p>
+<p>冗余的代码往往回丧失写代码的动力，每天搬砖似的写代码，真的很难受。今天这篇文章教你如何去掉满屏的<code>try()&#123;...&#125;catch()&#123;...&#125;finally&#123;...&#125;</code>，解放你的双手。</p>
+<span id="more"></span>
+
+<h2 id="Spring-Boot-版本"><a href="#Spring-Boot-版本" class="headerlink" title="Spring Boot 版本"></a>Spring Boot 版本</h2><p>本文基于的Spring Boot的版本是<code>2.3.4.RELEASE</code>。</p>
+<h2 id="全局统一异常处理的前世今生"><a href="#全局统一异常处理的前世今生" class="headerlink" title="全局统一异常处理的前世今生"></a>全局统一异常处理的前世今生</h2><p>早在<code>Spring 3.x</code>就已经提出了<code>@ControllerAdvice</code>，可以与<code>@ExceptionHandler</code>、<code>@InitBinder</code>、<code>@ModelAttribute</code> 等注解注解配套使用，这几个此处就不再详细解释了。</p>
+<p>这几个注解小眼一瞟只有<code>@ExceptionHandler</code>与异常有关啊，翻译过来就是<code>异常处理器</code>。**其实异常的处理可以分为两类，分别是<code>局部异常处理</code>和<code>全局异常处理</code>**。</p>
+<p>**<code>局部异常处理</code>**：<code>@ExceptionHandler</code>和<code>@Controller</code>注解搭配使用，只有指定的controller层出现了异常才会被<code>@ExceptionHandler</code>捕获到，实际生产中怕是有成百上千个controller了吧，显然这种方式不合适。</p>
+<p>**<code>全局异常处理</code>**：既然局部异常处理不合适了，自然有人站出来解决问题了，于是就有了<code>@ControllerAdvice</code>这个注解的横空出世了，<code>@ControllerAdvice</code>搭配<code>@ExceptionHandler</code>彻底解决了全局统一异常处理。当然后面还出现了<code>@RestControllerAdvice</code>这个注解，其实就是<code>@ControllerAdvice</code>和<code>@ResponseBody</code>结晶。</p>
+<h2 id="Spring-Boot的异常如何分类？"><a href="#Spring-Boot的异常如何分类？" class="headerlink" title="Spring Boot的异常如何分类？"></a>Spring Boot的异常如何分类？</h2><p>Java中的异常就很多，更别说Spring Boot中的异常了，这里不再根据传统意义上Java的异常进行分类了，而是按照<code>controller</code>进行分类，分为<code>进入controller前的异常</code>和<code>业务层的异常</code>，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Spring%20Boot%E7%AC%AC%E5%85%AB%E5%BC%B9%EF%BC%8C%E5%85%A8%E5%B1%80%E5%BC%82%E5%B8%B8/1.png"></p>
+<p>进入controller之前异常一般是<code>javax.servlet.ServletException</code>类型的异常，因此在全局异常处理的时候需要统一处理。几个常见的异常如下：</p>
+<ol>
+<li><code>NoHandlerFoundException</code>：客户端的请求没有找到对应的controller，将会抛出<code>404</code>异常。</li>
+<li><code>HttpRequestMethodNotSupportedException</code>：若匹配到了（匹配结果是一个列表，不同的是http方法不同，如：Get、Post等），则尝试将请求的http方法与列表的控制器做匹配，若没有对应http方法的控制器，则抛该异常</li>
+<li><code>HttpMediaTypeNotSupportedException</code>：然后再对请求头与控制器支持的做比较，比如<code>content-type</code>请求头，若控制器的参数签名包含注解<code>@RequestBody</code>，但是请求的<code>content-type</code>请求头的值没有包含<code>application/json</code>，那么会抛该异常（当然，不止这种情况会抛这个异常）</li>
+<li><code>MissingPathVariableException</code>：未检测到路径参数。比如url为：/user/{userId}，参数签名包含<code>@PathVariable(&quot;userId&quot;)</code>，当请求的url为/user，在没有明确定义url为/user的情况下，会被判定为：缺少路径参数</li>
+</ol>
+<h2 id="如何统一异常处理？"><a href="#如何统一异常处理？" class="headerlink" title="如何统一异常处理？"></a>如何统一异常处理？</h2><p>在统一异常处理之前其实还有许多东西需要优化的，比如统一结果返回的形式。当然这里不再细说了，不属于本文范畴。</p>
+<p><strong>统一异常处理很简单，这里以前后端分离的项目为例，步骤如下</strong>：</p>
+<ol>
+<li>新建一个统一异常处理的一个类</li>
+<li>类上标注<code>@RestControllerAdvice</code>这一个注解，或者同时标注<code>@ControllerAdvice</code>和<code>@ResponseBody</code>这两个注解。</li>
+<li>在方法上标注<code>@ExceptionHandler</code>注解，并且指定需要捕获的异常，可以同时捕获多个。</li>
+</ol>
+<p>下面是作者随便配置一个demo，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 全局统一的异常处理，简单的配置下，根据自己的业务要求详细配置</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@RestControllerAdvice</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GlobalExceptionHandler</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 重复请求的异常</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> ex</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@ExceptionHandler(RepeatSubmitException.class)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ResultResponse <span class="title">onException</span><span class="params">(RepeatSubmitException ex)</span></span>&#123;</span><br><span class="line">        <span class="comment">//打印日志</span></span><br><span class="line">        log.error(ex.getMessage());</span><br><span class="line">        <span class="comment">//todo 日志入库等等操作</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//统一结果返回</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ResultResponse(ResultCodeEnum.CODE_NOT_REPEAT_SUBMIT);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 自定义的业务上的异常</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@ExceptionHandler(ServiceException.class)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ResultResponse <span class="title">onException</span><span class="params">(ServiceException ex)</span></span>&#123;</span><br><span class="line">        <span class="comment">//打印日志</span></span><br><span class="line">        log.error(ex.getMessage());</span><br><span class="line">        <span class="comment">//todo 日志入库等等操作</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//统一结果返回</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ResultResponse(ResultCodeEnum.CODE_SERVICE_FAIL);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 捕获一些进入controller之前的异常，有些4xx的状态码统一设置为200</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> ex</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@ExceptionHandler(&#123;HttpRequestMethodNotSupportedException.class,</span></span><br><span class="line"><span class="meta">            HttpMediaTypeNotSupportedException.class, HttpMediaTypeNotAcceptableException.class,</span></span><br><span class="line"><span class="meta">            MissingPathVariableException.class, MissingServletRequestParameterException.class,</span></span><br><span class="line"><span class="meta">            ServletRequestBindingException.class, ConversionNotSupportedException.class,</span></span><br><span class="line"><span class="meta">            TypeMismatchException.class, HttpMessageNotReadableException.class,</span></span><br><span class="line"><span class="meta">            HttpMessageNotWritableException.class,</span></span><br><span class="line"><span class="meta">            MissingServletRequestPartException.class, BindException.class,</span></span><br><span class="line"><span class="meta">            NoHandlerFoundException.class, AsyncRequestTimeoutException.class&#125;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> ResultResponse <span class="title">onException</span><span class="params">(Exception ex)</span></span>&#123;</span><br><span class="line">        <span class="comment">//打印日志</span></span><br><span class="line">        log.error(ex.getMessage());</span><br><span class="line">        <span class="comment">//todo 日志入库等等操作</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">//统一结果返回</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ResultResponse(ResultCodeEnum.CODE_FAIL);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意</strong>：<strong>上面的只是一个例子，实际开发中还有许多的异常需要捕获，比如<code>TOKEN失效</code>、<code>过期</code>等等异常，如果整合了其他的框架，还要注意这些框架抛出的异常，比如<code>Shiro</code>，<code>Spring Security</code>等等框架。</strong></p>
+<h2 id="异常匹配的顺序是什么？"><a href="#异常匹配的顺序是什么？" class="headerlink" title="异常匹配的顺序是什么？"></a>异常匹配的顺序是什么？</h2><p>有些朋友可能疑惑了，如果我同时捕获了父类和子类，那么到底能够被那个异常处理器捕获呢？比如<code>Exception</code>和<code>ServiceException</code>。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Spring%20Boot%E7%AC%AC%E5%85%AB%E5%BC%B9%EF%BC%8C%E5%A6%82%E4%BD%95%E6%89%A9%E5%B1%95%E5%85%A8%E9%9D%A2%E6%8E%A5%E5%8F%A3MVC/1.jpg"></p>
+<p>此时可能就疑惑了，<strong>这里先揭晓一下答案，当然是<code>ServiceException</code>的异常处理器捕获了，精确匹配，如果没有<code>ServiceException</code>的异常处理器才会轮到它的<code>父亲</code>，<code>父亲</code>没有才会到<code>祖父</code>。总之一句话，精准匹配，找那个关系最近的。</strong></p>
+<p>为什么呢？这可不是凭空瞎说的，源码为证，出处<code>org.springframework.web.method.annotation.ExceptionHandlerMethodResolver#getMappedMethod</code>，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Nullable</span></span><br><span class="line">	<span class="function"><span class="keyword">private</span> Method <span class="title">getMappedMethod</span><span class="params">(Class&lt;? extends Throwable&gt; exceptionType)</span> </span>&#123;</span><br><span class="line">		List&lt;Class&lt;? extends Throwable&gt;&gt; matches = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="comment">//遍历异常处理器中定义的异常类型</span></span><br><span class="line">		<span class="keyword">for</span> (Class&lt;? extends Throwable&gt; mappedException : <span class="keyword">this</span>.mappedMethods.keySet()) &#123;</span><br><span class="line">      <span class="comment">//是否是抛出异常的父类，如果是添加到集合中</span></span><br><span class="line">			<span class="keyword">if</span> (mappedException.isAssignableFrom(exceptionType)) &#123;    </span><br><span class="line">        <span class="comment">//添加到集合中</span></span><br><span class="line">				matches.add(mappedException);  </span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">    <span class="comment">//如果集合不为空，则按照规则进行排序</span></span><br><span class="line">		<span class="keyword">if</span> (!matches.isEmpty()) &#123;</span><br><span class="line">			matches.sort(<span class="keyword">new</span> ExceptionDepthComparator(exceptionType));</span><br><span class="line">      <span class="comment">//取第一个</span></span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">this</span>.mappedMethods.get(matches.get(<span class="number">0</span>));</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>在初次异常处理的时候会执行上述的代码找到最匹配的那个异常处理器方法，后续都是直接从缓存中（一个<code>Map</code>结构，<code>key</code>是异常类型，<code>value</code>是异常处理器方法）。</strong></p>
+<p>别着急，上面代码最精华的地方就是对<code>matches</code>进行排序的代码了，我们来看看<code>ExceptionDepthComparator</code>这个比较器的关键代码，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//递归调用，获取深度，depth值越小越精准匹配</span></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">int</span> <span class="title">getDepth</span><span class="params">(Class&lt;?&gt; declaredException, Class&lt;?&gt; exceptionToMatch, <span class="keyword">int</span> depth)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//如果匹配了，返回</span></span><br><span class="line">		<span class="keyword">if</span> (exceptionToMatch.equals(declaredException)) &#123;</span><br><span class="line">			<span class="comment">// Found it!</span></span><br><span class="line">			<span class="keyword">return</span> depth;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// 递归结束的条件，最大限度了</span></span><br><span class="line">		<span class="keyword">if</span> (exceptionToMatch == Throwable.class) &#123;</span><br><span class="line">			<span class="keyword">return</span> Integer.MAX_VALUE;</span><br><span class="line">		&#125;</span><br><span class="line">    <span class="comment">//继续匹配父类</span></span><br><span class="line">		<span class="keyword">return</span> getDepth(declaredException, exceptionToMatch.getSuperclass(), depth + <span class="number">1</span>);</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>精髓全在这里了，一个递归搞定，计算深度，<code>depth</code>初始值为0。值越小，匹配度越高越精准。</strong></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>全局异常的文章万万千，能够讲清楚的能有几篇呢？<strong>只出最精的文章，做最野的程序员</strong>，如果觉得不错的，关注分享走一波，谢谢支持！！！</p>
+<p><strong>另外作者的第一本PDF书籍已经整理好了，由浅入深的详细介绍了Mybatis基础以及底层源码，有需要的朋友公众号回复关键词<code>Mybatis进阶</code>即可获取，目录如下：</strong></p>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis%E8%BF%9B%E9%98%B6PDF/2.png"></p>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/myjszl_log.png"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Spring-Boot/" rel="tag"># Spring Boot</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/10/14/Spring%20Boot%E7%AC%AC%E5%85%AB%E5%BC%B9%EF%BC%8C%E4%B8%80%E6%B3%A2%E5%B8%A6%E8%B5%B0%EF%BC%8C%E6%95%99%E4%BD%A0Spring%20Boot%E5%A6%82%E4%BD%95%E6%89%A9%E5%B1%95%E3%80%81%E6%8E%A5%E7%AE%A1MVC%EF%BC%9F/" rel="prev" title="一波带走，教你Spring Boot如何扩展、接管MVC？">
+      <i class="fa fa-chevron-left"></i> 一波带走，教你Spring Boot如何扩展、接管MVC？
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/10/14/Spring%20Boot%20%E7%AC%AC%E5%8D%81%E5%BC%B9%EF%BC%8C%E4%BC%98%E8%B4%A8%E8%B5%84%E6%BA%90%E5%88%86%E4%BA%AB%20!%20Spring%20Boot%20%E5%85%A5%E9%97%A8%E5%88%B0%E6%94%BE%E5%BC%83%EF%BC%81%EF%BC%81%EF%BC%81/" rel="next" title="优质资源分享 ! Spring Boot 入门到放弃！！！">
+      优质资源分享 ! Spring Boot 入门到放弃！！！ <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Boot-%E7%89%88%E6%9C%AC"><span class="nav-text">Spring Boot 版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%A8%E5%B1%80%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%E7%9A%84%E5%89%8D%E4%B8%96%E4%BB%8A%E7%94%9F"><span class="nav-text">全局统一异常处理的前世今生</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Boot%E7%9A%84%E5%BC%82%E5%B8%B8%E5%A6%82%E4%BD%95%E5%88%86%E7%B1%BB%EF%BC%9F"><span class="nav-text">Spring Boot的异常如何分类？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E7%BB%9F%E4%B8%80%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86%EF%BC%9F"><span class="nav-text">如何统一异常处理？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%82%E5%B8%B8%E5%8C%B9%E9%85%8D%E7%9A%84%E9%A1%BA%E5%BA%8F%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">异常匹配的顺序是什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某</span>
+</div>
+ <!-- <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

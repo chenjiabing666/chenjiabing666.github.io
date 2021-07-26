@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言注解相信大家都用过，尤其是Spring Boot 这个框架，比如@Controller。 这篇文章就来介绍下Spring Boot 中如何自定义一个注解，顺带介绍一下Spring Boot 与 AOP如何整合。 什么是AOP？AOP即是面向切面，是Spring的核心功能之一，主要的目的即是针对业务处理过程中的横向拓展，以达到低耦合的效果。 举个栗子，项目中有记录操作日志的需求、或者流程变更是记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring Boot 整合 AOP 自定义注解">
+<meta property="og:url" content="http://example.com/2020/11/18/SpringBoot%E6%95%B4%E5%90%88AOP%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="前言注解相信大家都用过，尤其是Spring Boot 这个框架，比如@Controller。 这篇文章就来介绍下Spring Boot 中如何自定义一个注解，顺带介绍一下Spring Boot 与 AOP如何整合。 什么是AOP？AOP即是面向切面，是Spring的核心功能之一，主要的目的即是针对业务处理过程中的横向拓展，以达到低耦合的效果。 举个栗子，项目中有记录操作日志的需求、或者流程变更是记">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis%E8%BF%9B%E9%98%B6PDF/2.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png">
+<meta property="article:published_time" content="2020-11-18T09:47:09.000Z">
+<meta property="article:modified_time" content="2020-11-18T09:49:03.068Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="Spring Boot">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis%E8%BF%9B%E9%98%B6PDF/2.png">
+
+<link rel="canonical" href="http://example.com/2020/11/18/SpringBoot%E6%95%B4%E5%90%88AOP%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Spring Boot 整合 AOP 自定义注解 | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/18/SpringBoot%E6%95%B4%E5%90%88AOP%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Spring Boot 整合 AOP 自定义注解
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-18 17:47:09 / 修改时间：17:49:03" itemprop="dateCreated datePublished" datetime="2020-11-18T17:47:09+08:00">2020-11-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>注解相信大家都用过，尤其是<code>Spring Boot</code> 这个框架，比如<code>@Controller</code>。</p>
+<p>这篇文章就来介绍下<code>Spring Boot</code> 中如何自定义一个注解，顺带介绍一下<code>Spring Boot</code> 与 <code>AOP</code>如何整合。</p>
+<h2 id="什么是AOP？"><a href="#什么是AOP？" class="headerlink" title="什么是AOP？"></a>什么是AOP？</h2><p><code>AOP</code>即是面向切面，是<code>Spring</code>的核心功能之一，主要的目的即是针对业务处理过程中的横向拓展，以达到低耦合的效果。</p>
+<p>举个栗子，项目中有记录操作日志的需求、或者流程变更是记录变更履历，无非就是插表操作，很简单的一个<code>save</code>操作，都是一些记录日志或者其他辅助性的代码。一遍又一遍的重写和调用。不仅浪费了时间，又将项目变得更加的冗余，实在得不偿失。</p>
+<p>此时<code>AOP</code>的就该出场了，能够在不改变原逻辑的基础上实现相关功能。</p>
+<span id="more"></span>
+
+<h2 id="AOP的相关概念（面试常客）"><a href="#AOP的相关概念（面试常客）" class="headerlink" title="AOP的相关概念（面试常客）"></a>AOP的相关概念（面试常客）</h2><p>要理解<code>Spring Boot</code>整合<code>Aop</code>的实现，就必须先对面向切面实现的一些<code>Aop</code>的概念有所了解，不然也是云里雾里。</p>
+<p><strong>切面（Aspect）</strong>：一个关注点的模块化。以注解<code>@Aspect</code>的形式放在类上方，声明一个切面。</p>
+<p><strong>连接点（Joinpoint）</strong>：在程序执行过程中某个特定的点，比如某方法调用的时候或者处理异常的时候都可以是连接点。</p>
+<p><strong>通知（Advice）</strong>：通知增强，需要完成的工作叫做通知，就是你写的业务逻辑中需要比如事务、日志等先定义好，然后需要的地方再去用。增强包括如下五个方面：</p>
+<ol>
+<li><code>@Before</code>：在切点之前执行</li>
+<li><code>@After</code>：在切点方法之后执行</li>
+<li><code>@AfterReturning</code>：切点方法返回后执行</li>
+<li><code>@AfterThrowing</code>：切点方法抛异常执行</li>
+<li><code>@Around</code>：属于环绕增强，能控制切点执行前，执行后，用这个注解后，程序抛异常，会影响<code>@AfterThrowing</code>这个注解。</li>
+</ol>
+<p><strong>切点（Pointcut）</strong>：其实就是筛选出的连接点，匹配连接点的断言，一个类中的所有方法都是连接点，但又不全需要，会筛选出某些作为连接点做为切点。</p>
+<p><strong>引入（Introduction）</strong>：在不改变一个现有类代码的情况下，为该类添加属性和方法,可以在无需修改现有类的前提下，让它们具有新的行为和状态。其实就是把切面（也就是新方法属性：通知定义的）用到目标类中去。</p>
+<p><strong>目标对象（Target Object）</strong>：被一个或者多个切面所通知的对象。也被称做被通知（<code>adviced</code>）对象。既然<code>Spring AOP</code>是通过运行时代理实现的，这个对象永远是一个被代理（<code>proxied</code>）对象。</p>
+<p><strong>AOP代理（AOP Proxy）</strong>：<code>AOP</code>框架创建的对象，用来实现切面契约（例如通知方法执行等等）。在<code>Spring</code>中，<code>AOP</code>代理可以是<code>JDK</code>动态代理或者<code>CGLIB</code>代理。</p>
+<p><strong>织入（Weaving）</strong>：把切面连接到其它的应用程序类型或者对象上，并创建一个被通知的对象。这些可以在编译时（例如使用<code>AspectJ</code>编译器），类加载时和运行时完成。<code>Spring</code>和其他纯<code>Java AOP</code>框架一样，在运行时完成织入。</p>
+<h2 id="Spring-Boot-如何整合AOP自定义一个注解？"><a href="#Spring-Boot-如何整合AOP自定义一个注解？" class="headerlink" title="Spring Boot 如何整合AOP自定义一个注解？"></a>Spring Boot 如何整合AOP自定义一个注解？</h2><p>在实际开发中对于横向公共的逻辑需要抽取出来，这时候就需要使用<code>AOP</code>，比如日志的记录、权限的验证等等，这些功能都可以用注解轻松的完成。</p>
+<p>下面介绍如何在<code>Spring Boot</code>使用<code>AOP</code>定义一个注解。</p>
+<h3 id="添加依赖starter"><a href="#添加依赖starter" class="headerlink" title="添加依赖starter"></a>添加依赖starter</h3><p><code>AOP</code>整合<code>Spring Boot</code>有一个<code>starter</code>，只需要添加依赖即可，如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--springboot集成Aop--&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-aop<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="开启AOP"><a href="#开启AOP" class="headerlink" title="开启AOP"></a>开启AOP</h3><p>在配置类上标注<code>@EnableAspectJAutoProxy</code>注解即可开启<code>AOP</code>，这个注解有什么用呢，源码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target(ElementType.TYPE)</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span></span><br><span class="line"><span class="meta">@Documented</span></span><br><span class="line"><span class="meta">@Import(AspectJAutoProxyRegistrar.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> EnableAspectJAutoProxy &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最重要的是如下一行代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Import(AspectJAutoProxyRegistrar.class)</span></span><br></pre></td></tr></table></figure>
+
+<p><code>@Import</code>这个注解很熟悉了吧，快速注入一个类，这里是注入一个<code>AnnotationAwareAspectJAutoProxyCreator</code>。</p>
+<h3 id="自定义一个注解"><a href="#自定义一个注解" class="headerlink" title="自定义一个注解"></a>自定义一个注解</h3><p>就以日志处理为例子，定义一个日志处理的注解，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target(ElementType.METHOD)</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span></span><br><span class="line"><span class="meta">@Documented</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> SysLog &#123;</span><br><span class="line">    <span class="function">String <span class="title">value</span><span class="params">()</span> <span class="keyword">default</span> &quot;&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="定义一个切面"><a href="#定义一个切面" class="headerlink" title="定义一个切面"></a>定义一个切面</h3><p>一个切面的满足条件如下：</p>
+<ol>
+<li>类上标注了<code>@Aspect</code>注解</li>
+<li>注入到IOC容器中，比如<code>@Component</code>注解</li>
+</ol>
+<p>定义的日志切面如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Aspect</span></span><br><span class="line"><span class="meta">@Order(Ordered.HIGHEST_PRECEDENCE)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SysLogAspect</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>@Order</code>指定了切面执行的优先级，假如有多个切面，肯定是要有先后的执行顺序，这样才能保证逻辑性。</p>
+<h3 id="定义切点表达式"><a href="#定义切点表达式" class="headerlink" title="定义切点表达式"></a>定义切点表达式</h3><p>这里需要拦截的肯定是<code>@SysLog</code>这个注解，只要方法上标注了该注解都将会被拦截，表达式如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Pointcut(&quot;@annotation(com.example.annotation_demo.annotation.SysLog)&quot;)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">pointCut</span><span class="params">()</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="添加通知方法"><a href="#添加通知方法" class="headerlink" title="添加通知方法"></a>添加通知方法</h3><p>既然是日志记录，肯定是在方法执行前，执行后都需要记录，因此需要定义一个环绕通知，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Around(&quot;pointCut()&quot;)</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> Object <span class="title">around</span><span class="params">(ProceedingJoinPoint point)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">      <span class="comment">//逻辑开始时间</span></span><br><span class="line">      <span class="keyword">long</span> beginTime = System.currentTimeMillis();</span><br><span class="line"></span><br><span class="line">      <span class="comment">//执行方法</span></span><br><span class="line">      Object result = point.proceed();</span><br><span class="line"></span><br><span class="line">      <span class="comment">//todo，保存日志，自己完善</span></span><br><span class="line">      saveLog(point,beginTime);</span><br><span class="line"></span><br><span class="line">      <span class="keyword">return</span> result;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><p>以上配置完成后即可使用，只需要在需要的方法上标注<code>@SysLog</code>注解即可，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SysLog</span></span><br><span class="line"><span class="meta">@PostMapping(&quot;/add&quot;)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">add</span><span class="params">()</span></span>&#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用拦截器如何自定义注解？"><a href="#使用拦截器如何自定义注解？" class="headerlink" title="使用拦截器如何自定义注解？"></a>使用拦截器如何自定义注解？</h2><p>使用<code>AOP</code>自定义的注解在每个方法上都会被拦截验证，首先效率上就不高。</p>
+<p>然而拦截器是在每个<code>Controller</code>方法执行之前进行拦截，其他的方法都不会生效，比如<code>service</code>方法。</p>
+<p>比如权限的验证、防止瞬间重复点击等等需求就适合使用拦截器自定义的注解。</p>
+<h3 id="自定义一个注解-1"><a href="#自定义一个注解-1" class="headerlink" title="自定义一个注解"></a>自定义一个注解</h3><p>就以防止瞬间重复点击的例子来创建一个注解，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Target(&#123;ElementType.METHOD, ElementType.TYPE&#125;)</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> RepeatSubmit &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 默认失效时间5秒</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">long</span> <span class="title">seconds</span><span class="params">()</span> <span class="keyword">default</span> 5</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="自定义拦截器"><a href="#自定义拦截器" class="headerlink" title="自定义拦截器"></a>自定义拦截器</h3><p>需要在请求执行之前完成验证，逻辑很简单，就是判断方法上有没有标注<code>@RepeatSubmit</code>注解，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * description:重复提交注解的拦截器</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RepeatSubmitInterceptor</span> <span class="keyword">implements</span> <span class="title">HandlerInterceptor</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> StringRedisTemplate stringRedisTemplate;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">preHandle</span><span class="params">(HttpServletRequest request, HttpServletResponse response, Object handler)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (handler <span class="keyword">instanceof</span> HandlerMethod)&#123;</span><br><span class="line">            <span class="comment">//只拦截标注了@RepeatSubmit该注解</span></span><br><span class="line">            HandlerMethod handlerMethod=(HandlerMethod)handler;</span><br><span class="line">            <span class="comment">//获取controller方法上标注的注解</span></span><br><span class="line">            RepeatSubmit repeatSubmit = AnnotationUtils.findAnnotation(handlerMethod.getMethod(),RepeatSubmit.class);</span><br><span class="line">            <span class="comment">//没有限制重复提交，直接跳过</span></span><br><span class="line">            <span class="keyword">if</span> (Objects.isNull(repeatSubmit))</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">            <span class="comment">//todo 一个值，标志这个请求的唯一性，比如IP+userId+uri+请求参数</span></span><br><span class="line">            String flag=<span class="string">&quot;&quot;</span>;</span><br><span class="line">            <span class="comment">//存在即返回false，不存在即返回true</span></span><br><span class="line">            Boolean ifAbsent = stringRedisTemplate.opsForValue().setIfAbsent(flag, <span class="string">&quot;&quot;</span>, repeatSubmit.seconds(), TimeUnit.SECONDS);</span><br><span class="line">            <span class="keyword">if</span> (ifAbsent!=<span class="keyword">null</span>&amp;&amp;!ifAbsent)</span><br><span class="line">                <span class="comment">//todo: 此处抛出异常，需要在全局异常解析器中捕获</span></span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> RepeatSubmitException();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="注入的拦截器"><a href="#注入的拦截器" class="headerlink" title="注入的拦截器"></a>注入的拦截器</h3><p>将上述自定义的拦截器注入到<code>Sprign Boot</code>中，这里不再演示了，前面教程有介绍过，请看：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/PDg-0sZ_FUcS8ERenBWPYg">Spring Boot 第六弹，拦截器如何配置，看这儿~</a>。</p>
+<h3 id="测试-1"><a href="#测试-1" class="headerlink" title="测试"></a>测试</h3><p>在需要拦截方法上添加<code>@RepeatSubmit</code>注解即可，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RepeatSubmit</span></span><br><span class="line"><span class="meta">@GetMapping(&quot;/add&quot;)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">add</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="内部调用导致AOP注解失效"><a href="#内部调用导致AOP注解失效" class="headerlink" title="内部调用导致AOP注解失效"></a>内部调用导致AOP注解失效</h2><p>这个问题在事务中也是经常被忽略的问题，网上很多人说是<code>AOP</code>的<code>Bug</code>，其实在我看来这真不是一个<code>BUG</code>，并且也是有办法解决的。</p>
+<p>先来看一下失效的案例，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ArticleServiceImpl</span></span>&#123;</span><br><span class="line">  <span class="meta">@SysLog</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">A</span><span class="params">()</span></span>&#123;</span><br><span class="line">    ......</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">B</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.A();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在上述的代码中，如果执行方法<code>B</code>，则<code>@SysLog</code>注解将会失效。</p>
+<h3 id="失效的原因"><a href="#失效的原因" class="headerlink" title="失效的原因"></a>失效的原因</h3><p><code>AOP</code>使用的是动态代理的机制，它会给类生成一个代理类，事务的相关操作都在代理类上完成。内部方式使用<code>this</code>调用方式时，使用的是实例调用，并没有通过代理类调用方法，所以会导致事务失效。</p>
+<h3 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h3><p>其实解决方法有很多，下面将会一一介绍。</p>
+<h4 id="1-引入自身的Bean"><a href="#1-引入自身的Bean" class="headerlink" title="1. 引入自身的Bean"></a>1. 引入自身的Bean</h4><p>在类内部通过<code>@Autowired</code>将本身<code>bean</code>引入，然后通过调用自身<code>bean</code>，从而实现使用<code>AOP</code>代理操作。代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ArticleServiceImpl</span></span>&#123;</span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">  * 注入自身的Bean</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line">  <span class="meta">@Autowired</span></span><br><span class="line">  <span class="keyword">private</span> ArticleService articleService;</span><br><span class="line">  </span><br><span class="line">  <span class="meta">@SysLog</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">A</span><span class="params">()</span></span>&#123;</span><br><span class="line">    ......</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">B</span><span class="params">()</span></span>&#123;</span><br><span class="line">    articleService.A();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-通过ApplicationContext引入bean"><a href="#2-通过ApplicationContext引入bean" class="headerlink" title="2. 通过ApplicationContext引入bean"></a>2. 通过ApplicationContext引入bean</h4><p>通过<code>ApplicationContext</code>获取<code>bean</code>，通过<code>bean</code>调用内部方法，就使用了<code>bean</code>的代理类。</p>
+<p>需要先创建一个<code>ApplicationContext</code>的工具类获取<code>ApplicationContext</code>，然后才能调用<code>getBean()</code>方法，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ArticleServiceImpl</span></span>&#123;</span><br><span class="line">  </span><br><span class="line">  <span class="meta">@SysLog</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">A</span><span class="params">()</span></span>&#123;</span><br><span class="line">    ......</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">B</span><span class="params">()</span></span>&#123;</span><br><span class="line">    ApplicationContextUtils.getApplicationContext().getBean(ArticleService.class).A();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-通过AopContext获取当前类的代理类"><a href="#3-通过AopContext获取当前类的代理类" class="headerlink" title="3. 通过AopContext获取当前类的代理类"></a>3. 通过AopContext获取当前类的代理类</h4><p>此种方法需要设置<code>@EnableAspectJAutoProxy</code>中的<code>exposeProxy</code>为<code>true</code>。</p>
+<p>使用<code>AopContext</code>获取当前的代理对象，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ArticleServiceImpl</span></span>&#123;</span><br><span class="line">  </span><br><span class="line">  <span class="meta">@SysLog</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">A</span><span class="params">()</span></span>&#123;</span><br><span class="line">    ......</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">B</span><span class="params">()</span></span>&#123;</span><br><span class="line">    ((ArticleService)AopContext.currentProxy()).A();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这篇文章介绍了<code>AOP</code>的相关概念、<code>AOP</code>实现自定义注解以及拦截器实现自定义注解，都是日常开发中必备的知识点，希望这篇文章对各位有所帮助。</p>
+<blockquote>
+<p>源码已经上传，回复关键词<code>AOP注解</code>获取。</p>
+</blockquote>
+<p>最后，别忘了点赞哦！！！</p>
+<p>另外作者的第一本<code>PDF</code>书籍已经整理好了，由浅入深的详细介绍了Mybatis基础以及底层源码，有需要的朋友公众号回复关键词<strong>Mybatis进阶</strong>即可获取，目录如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis%E8%BF%9B%E9%98%B6PDF/2.png"></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Spring-Boot/" rel="tag"># Spring Boot</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/11/13/SpringBoot%E5%A4%9A%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE%EF%BC%8C%E4%BD%A0%E5%96%9C%E6%AC%A2%E5%93%AA%E7%A7%8D%EF%BC%9F/" rel="prev" title="Spring Boot多环境配置，你喜欢哪种？">
+      <i class="fa fa-chevron-left"></i> Spring Boot多环境配置，你喜欢哪种？
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/11/20/SpringBoot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" rel="next" title="SpringBoot启动流程源码分析~">
+      SpringBoot启动流程源码分析~ <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFAOP%EF%BC%9F"><span class="nav-text">什么是AOP？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AOP%E7%9A%84%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5%EF%BC%88%E9%9D%A2%E8%AF%95%E5%B8%B8%E5%AE%A2%EF%BC%89"><span class="nav-text">AOP的相关概念（面试常客）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Boot-%E5%A6%82%E4%BD%95%E6%95%B4%E5%90%88AOP%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AA%E6%B3%A8%E8%A7%A3%EF%BC%9F"><span class="nav-text">Spring Boot 如何整合AOP自定义一个注解？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E4%BE%9D%E8%B5%96starter"><span class="nav-text">添加依赖starter</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%80%E5%90%AFAOP"><span class="nav-text">开启AOP</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AA%E6%B3%A8%E8%A7%A3"><span class="nav-text">自定义一个注解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AA%E5%88%87%E9%9D%A2"><span class="nav-text">定义一个切面</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E5%88%87%E7%82%B9%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-text">定义切点表达式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E9%80%9A%E7%9F%A5%E6%96%B9%E6%B3%95"><span class="nav-text">添加通知方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-text">测试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%8B%A6%E6%88%AA%E5%99%A8%E5%A6%82%E4%BD%95%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3%EF%BC%9F"><span class="nav-text">使用拦截器如何自定义注解？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AA%E6%B3%A8%E8%A7%A3-1"><span class="nav-text">自定义一个注解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8B%A6%E6%88%AA%E5%99%A8"><span class="nav-text">自定义拦截器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B3%A8%E5%85%A5%E7%9A%84%E6%8B%A6%E6%88%AA%E5%99%A8"><span class="nav-text">注入的拦截器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95-1"><span class="nav-text">测试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E9%83%A8%E8%B0%83%E7%94%A8%E5%AF%BC%E8%87%B4AOP%E6%B3%A8%E8%A7%A3%E5%A4%B1%E6%95%88"><span class="nav-text">内部调用导致AOP注解失效</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%B1%E6%95%88%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="nav-text">失效的原因</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95"><span class="nav-text">解决方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%BC%95%E5%85%A5%E8%87%AA%E8%BA%AB%E7%9A%84Bean"><span class="nav-text">1. 引入自身的Bean</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E9%80%9A%E8%BF%87ApplicationContext%E5%BC%95%E5%85%A5bean"><span class="nav-text">2. 通过ApplicationContext引入bean</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E9%80%9A%E8%BF%87AopContext%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8D%E7%B1%BB%E7%9A%84%E4%BB%A3%E7%90%86%E7%B1%BB"><span class="nav-text">3. 通过AopContext获取当前类的代理类</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某</span>
+</div>
+ <!-- <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

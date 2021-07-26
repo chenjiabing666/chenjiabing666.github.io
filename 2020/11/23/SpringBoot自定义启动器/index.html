@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言日常工作中对于Spring Boot 提供的一些启动器可能已经足够使用了，但是不可避免的需要自定义启动器，比如整合一个陌生的组件，也想要达到开箱即用的效果。 在上一章节从底层源码介绍了Spring Boot 的自动配置的原理，未读过的朋友建议看一下：Spring Boot 自动配置源码解析 这篇文章将会介绍如何自定义一个启动器，同时对于自动配置类的执行顺序做一个详细的分析。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring Boot自定义启动器">
+<meta property="og:url" content="http://example.com/2020/11/23/SpringBoot%E8%87%AA%E5%AE%9A%E4%B9%89%E5%90%AF%E5%8A%A8%E5%99%A8/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="前言日常工作中对于Spring Boot 提供的一些启动器可能已经足够使用了，但是不可避免的需要自定义启动器，比如整合一个陌生的组件，也想要达到开箱即用的效果。 在上一章节从底层源码介绍了Spring Boot 的自动配置的原理，未读过的朋友建议看一下：Spring Boot 自动配置源码解析 这篇文章将会介绍如何自定义一个启动器，同时对于自动配置类的执行顺序做一个详细的分析。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E8%87%AA%E5%AE%9A%E4%B9%89%E5%90%AF%E5%8A%A8%E5%99%A8/1.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis%E8%BF%9B%E9%98%B6PDF/2.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png">
+<meta property="article:published_time" content="2020-11-23T01:26:44.000Z">
+<meta property="article:modified_time" content="2020-11-23T01:29:32.683Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="Spring Boot">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E8%87%AA%E5%AE%9A%E4%B9%89%E5%90%AF%E5%8A%A8%E5%99%A8/1.png">
+
+<link rel="canonical" href="http://example.com/2020/11/23/SpringBoot%E8%87%AA%E5%AE%9A%E4%B9%89%E5%90%AF%E5%8A%A8%E5%99%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Spring Boot自定义启动器 | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/23/SpringBoot%E8%87%AA%E5%AE%9A%E4%B9%89%E5%90%AF%E5%8A%A8%E5%99%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Spring Boot自定义启动器
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-23 09:26:44 / 修改时间：09:29:32" itemprop="dateCreated datePublished" datetime="2020-11-23T09:26:44+08:00">2020-11-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>日常工作中对于<code>Spring Boot</code> 提供的一些启动器可能已经足够使用了，但是不可避免的需要自定义启动器，比如整合一个陌生的组件，也想要达到开箱即用的效果。</p>
+<p>在上一章节从底层源码介绍了<code>Spring Boot</code> 的自动配置的原理，未读过的朋友建议看一下：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/cEBvxQ4iDo3QOMYWvwE6nw">Spring Boot 自动配置源码解析</a></p>
+<p>这篇文章将会介绍如何自定义一个启动器，同时对于自动配置类的执行顺序做一个详细的分析。</p>
+<span id="more"></span>
+
+<h2 id="如何自定义一个starter？"><a href="#如何自定义一个starter？" class="headerlink" title="如何自定义一个starter？"></a>如何自定义一个starter？</h2><p>启动器的核心其实就是自动配置类，在自动配置源码分析的章节已经介绍过，<code>AutoConfigurationImportSelector</code>是从<code>spring.factories</code>中加载自动配置类，因此只需要将自定义的自动配置类设置在该文件中即可。</p>
+<p>读过源码的朋友都知道自动配置类常用的一些注解，总结如下：</p>
+<ol>
+<li><code>@Configuration</code>： 该注解标志这是一个配置类，<strong>自动配置类可以不加该注解</strong>。</li>
+<li><code>@EnableConfigurationProperties</code>：这个配置也是经常使用了，使得指定的属性配置生效。一般自动配置类都需要从全局属性配置中读取自定义的配置，这就是一个开关。</li>
+<li><code>@ConditionalOnXxxx</code>：该注解是自动配置类的核心了，自动配置类既要启动时自动配置，又要保证用户用户自定义的配置覆盖掉自动配置，该注解就是一个条件语句，只有当指定条件成立才会执行某操作。不理解的，请看作者前面的一篇文章：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/BoujdCIHPK79jT9RKAmyug">这类注解都不知道，还说用过Spring Boot~</a></li>
+<li><code>@AutoConfigureAfter</code>：指定自动配置类的执行先后顺序，下文详细介绍。</li>
+<li><code>@AutoConfigureBefore</code>：指定自动配置列的执行先后顺序，下文详细介绍。</li>
+<li><code>@AutoConfigureOrder</code>：指定自动配置类的优先级，下文详细介绍。</li>
+</ol>
+<p>有了以上准备，自定义一个<code>starter</code>非常简单，分为两个步骤。</p>
+<h3 id="1-准备自己的自动配置类"><a href="#1-准备自己的自动配置类" class="headerlink" title="1. 准备自己的自动配置类"></a>1. 准备自己的自动配置类</h3><p>启动器的灵魂核心就是自动配置类，因此需要首先创建一个自动配置类，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@AutoConfigureAfter(DataSourceAutoConfiguration.class)</span></span><br><span class="line"><span class="meta">@AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE+5)</span></span><br><span class="line"><span class="meta">@ConditionalOnProperty(prefix = &quot;my.auto&quot;,name = &quot;enabled&quot;,havingValue = &quot;true&quot;,matchIfMissing = true)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyCustomAutoConfiguration</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上自动配置类只是作者简单的按照格式随手写了一个，真实开发中需要根据启动器的业务做默认配置。</p>
+<h3 id="2-将自动配置类设置在spring-factories"><a href="#2-将自动配置类设置在spring-factories" class="headerlink" title="2. 将自动配置类设置在spring.factories"></a>2. 将自动配置类设置在spring.factories</h3><p>标注了<code>@Configuration</code>注解的自动配置类如果不放在<code>spring.factories</code>文件中，仅仅是一个普通的配置类而已。想要其成为自动配置类，需要在<code>spring.factories</code>文件中设置，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># Auto Configure</span><br><span class="line">org.springframework.boot.autoconfigure.EnableAutoConfiguration=\</span><br><span class="line">com.example.autoconfig.MyCustomAutoConfiguration</span><br></pre></td></tr></table></figure>
+
+<p>经过以上的配置，粗略的启动器完成了，只需要打包，然后<code>Maven</code>引入即可工作。</p>
+<h2 id="如何指定自动配置类的执行顺序？"><a href="#如何指定自动配置类的执行顺序？" class="headerlink" title="如何指定自动配置类的执行顺序？"></a>如何指定自动配置类的执行顺序？</h2><p>自动配置类需要定义执行顺序吗？答案：肯定的。比如<code>Mybatis</code>的自动配置类，肯定要在数据源的自动配置类之后执行，否则如何创建<code>SqlSessionFactory</code>？</p>
+<p>如何自定义自动配置类的执行顺序呢？此时就需要用到上文提到的三个注解，如下：</p>
+<ol>
+<li><code>@AutoConfigureAfter</code>： 当前配置类在指定配置类之后执行</li>
+<li><code>@AutoConfigureBefore</code>： 当前配置类在指定配置类之前执行</li>
+<li><code>@AutoConfigureOrder</code>：指定优先级，数值越小，优先级越高。</li>
+</ol>
+<h3 id="分享一个经典的误区"><a href="#分享一个经典的误区" class="headerlink" title="分享一个经典的误区"></a>分享一个经典的误区</h3><p>对于<code>Spring Boot</code>不是很了解的人写出的代码真是<strong>不堪入目</strong>，曾经看过有人在<strong>普通的配置类</strong>上使用<code>@AutoConfigurexxx</code>注解，如下；</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="meta">@AutoConfigureBefore(Config2.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Config1</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Config2</span></span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>是不是感觉很爽，原来还能这么指定配置类的执行顺序…..（此处省略一万字）</p>
+<blockquote>
+<p>可能有时候走了狗屎运给你一种错觉还真的配置成功了。实际上这种方式是不可行的，以上三个注解只有针对自动配置类才会生效。</p>
+</blockquote>
+<h3 id="源码分析自动配置类如何排序？"><a href="#源码分析自动配置类如何排序？" class="headerlink" title="源码分析自动配置类如何排序？"></a>源码分析自动配置类如何排序？</h3><p>其实关键的代码还是在<code>AutoConfigurationImportSelector</code>中，将自动配置类从<code>spring.factories</code>加载出来之后会根据条件排序，在<code>selectImports()</code>方法中最后一行代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> sortAutoConfigurations(processedConfigurations, getAutoConfigurationMetadata()).stream()</span><br><span class="line">					.map((importClassName) -&gt; <span class="keyword">new</span> Entry(<span class="keyword">this</span>.entries.get(importClassName), importClassName))</span><br><span class="line">					.collect(Collectors.toList());</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码则是将排序好的自动配置类返回，跟进代码，发现最终的实现都在<code>AutoConfigurationSorter.getInPriorityOrder()</code>方法中，逻辑如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E8%87%AA%E5%AE%9A%E4%B9%89%E5%90%AF%E5%8A%A8%E5%99%A8/1.png"></p>
+<p>具体的流程如上图，排序也是按照先后顺序，如下：</p>
+<ol>
+<li>先按照字母排序</li>
+<li>按照<code>@AutoConfigureOrder</code>优先级排序</li>
+<li>最终按照<code>@AutoConfigureAfter</code>、<code>@AutoConfigureBefore</code>排序</li>
+</ol>
+<blockquote>
+<p>从上面配置的顺序可以知道，最终决定权还是在<code>@AutoConfigureAfter</code>、<code>@AutoConfigureBefore</code>这两个注解。</p>
+</blockquote>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文介绍了如何自定义一个启动器以及指定自动配置类的执行顺序，通过作者的介绍，希望读者们能够理解并灵活运用。</p>
+<p>另外作者的第一本<code>PDF</code>书籍已经整理好了，由浅入深的详细介绍了Mybatis基础以及底层源码，有需要的朋友公众号回复关键词<strong>Mybatis进阶</strong>即可获取，目录如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis%E8%BF%9B%E9%98%B6PDF/2.png"></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Spring-Boot/" rel="tag"># Spring Boot</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/11/23/SpringBoot%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" rel="prev" title="Spring Boot自动配置源码解析~">
+      <i class="fa fa-chevron-left"></i> Spring Boot自动配置源码解析~
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/11/24/%E5%8D%95%E7%BA%BF%E7%A8%8B%E7%9A%84Redis%EF%BC%8C%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E5%8A%A8%E4%BD%9C/" rel="next" title="单线程的Redis，有哪些慢动作？">
+      单线程的Redis，有哪些慢动作？ <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAstarter%EF%BC%9F"><span class="nav-text">如何自定义一个starter？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%87%86%E5%A4%87%E8%87%AA%E5%B7%B1%E7%9A%84%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E7%B1%BB"><span class="nav-text">1. 准备自己的自动配置类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%B0%86%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E7%B1%BB%E8%AE%BE%E7%BD%AE%E5%9C%A8spring-factories"><span class="nav-text">2. 将自动配置类设置在spring.factories</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%8C%87%E5%AE%9A%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E7%B1%BB%E7%9A%84%E6%89%A7%E8%A1%8C%E9%A1%BA%E5%BA%8F%EF%BC%9F"><span class="nav-text">如何指定自动配置类的执行顺序？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E4%BA%AB%E4%B8%80%E4%B8%AA%E7%BB%8F%E5%85%B8%E7%9A%84%E8%AF%AF%E5%8C%BA"><span class="nav-text">分享一个经典的误区</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E7%B1%BB%E5%A6%82%E4%BD%95%E6%8E%92%E5%BA%8F%EF%BC%9F"><span class="nav-text">源码分析自动配置类如何排序？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某</span>
+</div>
+ <!-- <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

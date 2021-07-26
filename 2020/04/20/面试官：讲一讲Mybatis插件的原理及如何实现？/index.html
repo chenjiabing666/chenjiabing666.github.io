@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言 Mybatis的分页插件相信大家都使用过，那么可知道其中的实现原理？分页插件就是利用的Mybatis中的插件机制实现的，在Executor的query执行前后进行分页处理。 此篇文章就来介绍以下Mybatis的插件机制以及在底层是如何实现的。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="面试官：讲一讲Mybatis插件的原理及如何实现？">
+<meta property="og:url" content="http://example.com/2020/04/20/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E8%AE%B2%E4%B8%80%E8%AE%B2Mybatis%E6%8F%92%E4%BB%B6%E7%9A%84%E5%8E%9F%E7%90%86%E5%8F%8A%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%EF%BC%9F/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="前言 Mybatis的分页插件相信大家都使用过，那么可知道其中的实现原理？分页插件就是利用的Mybatis中的插件机制实现的，在Executor的query执行前后进行分页处理。 此篇文章就来介绍以下Mybatis的插件机制以及在底层是如何实现的。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Myabtis-%E6%8F%92%E4%BB%B6/1.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Myabtis-%E6%8F%92%E4%BB%B6/2.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Myabtis-%E6%8F%92%E4%BB%B6/3.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Myabtis-%E6%8F%92%E4%BB%B6/4.png">
+<meta property="article:published_time" content="2020-04-20T09:09:42.000Z">
+<meta property="article:modified_time" content="2020-10-23T13:55:46.541Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="Mybatis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Myabtis-%E6%8F%92%E4%BB%B6/1.png">
+
+<link rel="canonical" href="http://example.com/2020/04/20/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E8%AE%B2%E4%B8%80%E8%AE%B2Mybatis%E6%8F%92%E4%BB%B6%E7%9A%84%E5%8E%9F%E7%90%86%E5%8F%8A%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%EF%BC%9F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>面试官：讲一讲Mybatis插件的原理及如何实现？ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/04/20/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E8%AE%B2%E4%B8%80%E8%AE%B2Mybatis%E6%8F%92%E4%BB%B6%E7%9A%84%E5%8E%9F%E7%90%86%E5%8F%8A%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          面试官：讲一讲Mybatis插件的原理及如何实现？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-04-20 17:09:42" itemprop="dateCreated datePublished" datetime="2020-04-20T17:09:42+08:00">2020-04-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 21:55:46" itemprop="dateModified" datetime="2020-10-23T21:55:46+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Mybatis%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Mybatis进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
+<li>Mybatis的分页插件相信大家都使用过，那么可知道其中的实现原理？分页插件就是利用的Mybatis中的插件机制实现的，在<code>Executor</code>的<code>query</code>执行前后进行分页处理。</li>
+<li>此篇文章就来介绍以下Mybatis的插件机制以及在底层是如何实现的。<span id="more"></span>
+<h2 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h2></li>
+<li>本篇文章讲的一切内容都是基于<code>Mybatis3.5</code>和<code>SpringBoot-2.3.3.RELEASE</code>。</li>
+</ul>
+<h2 id="什么是插件？"><a href="#什么是插件？" class="headerlink" title="什么是插件？"></a>什么是插件？</h2><ul>
+<li>插件是Mybatis中的最重要的功能之一，能够对特定组件的特定方法进行增强。</li>
+<li>MyBatis 允许你在映射语句执行过程中的某一点进行拦截调用。默认情况下，MyBatis 允许使用插件来拦截的方法调用包括：<ul>
+<li><strong>Executor</strong>：<code>update</code>, <code>query</code>, <code>flushStatements</code>, <code>commit</code>, <code>rollback</code>, <code>getTransaction</code>, <code>close</code>, <code>isClosed</code></li>
+<li><strong>ParameterHandler</strong>: <code>getParameterObject</code>, <code>setParameters</code></li>
+<li><strong>ResultSetHandler</strong>：<code>handleResultSets</code>, <code>handleOutputParameters</code></li>
+<li><strong>StatementHandler</strong>: <code>prepare</code>, <code>parameterize</code>, <code>batch</code>, <code>update</code>, <code>query</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="如何自定义插件？"><a href="#如何自定义插件？" class="headerlink" title="如何自定义插件？"></a>如何自定义插件？</h2><ul>
+<li>插件的实现其实很简单，只需要实现Mybatis提供的<code>Interceptor</code>这个接口即可，源码如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Interceptor</span> </span>&#123;</span><br><span class="line">  <span class="comment">//拦截的方法</span></span><br><span class="line">  <span class="function">Object <span class="title">intercept</span><span class="params">(Invocation invocation)</span> <span class="keyword">throws</span> Throwable</span>;</span><br><span class="line">  <span class="comment">//返回拦截器的代理对象</span></span><br><span class="line">  <span class="function">Object <span class="title">plugin</span><span class="params">(Object target)</span></span>;</span><br><span class="line">  <span class="comment">//设置一些属性</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">setProperties</span><span class="params">(Properties properties)</span></span>;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="举个栗子"><a href="#举个栗子" class="headerlink" title="举个栗子"></a>举个栗子</h3><ul>
+<li>有这样一个需求：需要在Mybatis执行的时候篡改<code>selectByUserId</code>的参数值。</li>
+<li><strong>分析</strong>：修改SQL的入参，应该在哪个组件的哪个方法上拦截篡改呢？研究过源码的估计都很清楚的知道，<code>ParameterHandler</code>中的<code>setParameters()</code>方法就是对参数进行处理的。因此肯定是拦截这个方法是最合适。</li>
+<li>自定义的插件如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Intercepts</span> 注解标记这是一个拦截器,其中可以指定多个<span class="doctag">@Signature</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Signature</span> 指定该拦截器拦截的是四大对象中的哪个方法</span></span><br><span class="line"><span class="comment"> *      type：拦截器的四大对象的类型</span></span><br><span class="line"><span class="comment"> *      method：拦截器的方法，方法名</span></span><br><span class="line"><span class="comment"> *      args：入参的类型，可以是多个，根据方法的参数指定，以此来区分方法的重载</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Intercepts(</span></span><br><span class="line"><span class="meta">        &#123;</span></span><br><span class="line"><span class="meta">                @Signature(type = ParameterHandler.class,method =&quot;setParameters&quot;,args = &#123;PreparedStatement.class&#125;)</span></span><br><span class="line"><span class="meta">        &#125;</span></span><br><span class="line"><span class="meta">)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ParameterInterceptor</span> <span class="keyword">implements</span> <span class="title">Interceptor</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">intercept</span><span class="params">(Invocation invocation)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;拦截器执行：&quot;</span>+invocation.getTarget());</span><br><span class="line">        <span class="comment">//目标对象</span></span><br><span class="line">        Object target = invocation.getTarget();</span><br><span class="line">        <span class="comment">//获取目标对象中所有属性的值，因为ParameterHandler使用的是DefaultParameterHandler，因此里面的所有的属性都封装在其中</span></span><br><span class="line">        MetaObject metaObject = SystemMetaObject.forObject(target);</span><br><span class="line">        <span class="comment">//使用xxx.xxx.xx的方式可以层层获取属性值，这里获取的是mappedStatement中的id值</span></span><br><span class="line">        String value = (String) metaObject.getValue(<span class="string">&quot;mappedStatement.id&quot;</span>);</span><br><span class="line">        <span class="comment">//如果是指定的查询方法</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="string">&quot;cn.cb.demo.dao.UserMapper.selectByUserId&quot;</span>.equals(value))&#123;</span><br><span class="line">            <span class="comment">//设置参数的值是admin_1，即是设置id=admin_1，因为这里只有一个参数，可以这么设置，如果有多个需要需要循环</span></span><br><span class="line">            metaObject.setValue(<span class="string">&quot;parameterObject&quot;</span>, <span class="string">&quot;admin_1&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//执行目标方法</span></span><br><span class="line">        <span class="keyword">return</span> invocation.proceed();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">plugin</span><span class="params">(Object target)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//如果没有特殊定制，直接使用Plugin这个工具类返回一个代理对象即可</span></span><br><span class="line">        <span class="keyword">return</span> Plugin.wrap(target, <span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setProperties</span><span class="params">(Properties properties)</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><code>intercept</code>方法：最终会拦截的方法，最重要的一个方法。</li>
+<li><code>plugin</code>方法：返回一个代理对象，如果没有特殊要求，直接使用Mybatis的工具类<code>Plugin</code>返回即可。</li>
+<li><code>setProperties</code>：设置一些属性，不重要。</li>
+</ul>
+<h3 id="用到哪些注解？"><a href="#用到哪些注解？" class="headerlink" title="用到哪些注解？"></a>用到哪些注解？</h3><ul>
+<li>自定义插件需要用到两个注解，分别是<code>@Intercepts</code>和<code>@Signature</code>。</li>
+<li><code>@Intercepts</code>：标注在实现类上，表示这个类是一个插件的实现类。</li>
+<li><code>@Signature</code>：作为<code>@Intercepts</code>的属性，表示需要增强Mybatis的<code>某些</code>组件中的<code>某些</code>方法（可以指定多个）。常用的属性如下：<ul>
+<li><code>Class&lt;?&gt; type()</code>：指定哪个组件（<code>Executor</code>、<code>ParameterHandler</code>、<code>ResultSetHandler</code>、<code>StatementHandler</code>）</li>
+<li><code>String method()</code>：指定增强组件中的哪个方法，直接写方法名称。</li>
+<li><code>Class&lt;?&gt;[] args()</code>：方法中的参数，必须一一对应，可以写多个；这个属性非常重用，区分重载方法。</li>
+</ul>
+</li>
+</ul>
+<h3 id="如何注入Mybatis？"><a href="#如何注入Mybatis？" class="headerlink" title="如何注入Mybatis？"></a>如何注入Mybatis？</h3><ul>
+<li><p>上面已经将插件定义好了，那么如何注入到Mybatis中使其生效呢？</p>
+</li>
+<li><p><strong>前提</strong>：由于本篇文章的环境是<code>SpringBoot+Mybatis</code>，因此讲一讲如何在SpringBoot中将插件注入到Mybatis中。</p>
+</li>
+<li><p>在Mybatis的自动配置类<code>MybatisAutoConfiguration</code>中，注入<code>SqlSessionFactory</code>的时候，有如下一段代码：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Myabtis-%E6%8F%92%E4%BB%B6/1.png"></p>
+</li>
+<li><p>上图中的<code>this.interceptors</code>是什么，从何而来，其实就是从容器中的获取的<code>Interceptor[]</code>，如下一段代码：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Myabtis-%E6%8F%92%E4%BB%B6/2.png" alt="2"></p>
+</li>
+<li><p>从上图我们知道，这插件最终还是从IOC容器中获取的<code>Interceptor[]</code>这个<code>Bean </code>，因此我们只需要在配置类中注入这个<code>Bean</code>即可，如下代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Configuration</span>：这个注解标注该类是一个配置类</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MybatisConfig</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@Bean</span> ： 该注解用于向容器中注入一个Bean</span></span><br><span class="line"><span class="comment">     * 注入Interceptor[]这个Bean</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="keyword">public</span> Interceptor[] interceptors()&#123;</span><br><span class="line">        <span class="comment">//创建ParameterInterceptor这个插件</span></span><br><span class="line">        ParameterInterceptor parameterInterceptor = <span class="keyword">new</span> ParameterInterceptor();</span><br><span class="line">        <span class="comment">//放入数组返回</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> Interceptor[]&#123;parameterInterceptor&#125;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><ul>
+<li>此时自定义的插件已经注入了Mybatis中了，现在测试看看能不能成功执行呢？测试代码如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">contextLoads</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="comment">//传入的是1222</span></span><br><span class="line">    UserInfo userInfo = userMapper.selectByUserId(<span class="string">&quot;1222&quot;</span>);</span><br><span class="line">    System.out.println(userInfo);</span><br><span class="line">  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>测试代码传入的是<code>1222</code>，由于插件改变了入参，因此查询出来的应该是<code>admin_1</code>这个人。</li>
+</ul>
+<h2 id="插件原理分析"><a href="#插件原理分析" class="headerlink" title="插件原理分析"></a>插件原理分析</h2><ul>
+<li><p>插件的原理其实很简单，就是在创建组件的时候生成代理对象(<code>Plugin</code>)，执行组件方法的时候拦截即可。下面就来详细介绍一下插件在Mybatis底层是如何工作的？</p>
+</li>
+<li><p>Mybatis的四大组件都是在Mybatis的配置类<code>Configuration</code>中创建的，具体的方法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">//创建Executor</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Executor <span class="title">newExecutor</span><span class="params">(Transaction transaction, ExecutorType executorType)</span> </span>&#123;</span><br><span class="line">    executorType = executorType == <span class="keyword">null</span> ? defaultExecutorType : executorType;</span><br><span class="line">    executorType = executorType == <span class="keyword">null</span> ? ExecutorType.SIMPLE : executorType;</span><br><span class="line">    Executor executor;</span><br><span class="line">    <span class="keyword">if</span> (ExecutorType.BATCH == executorType) &#123;</span><br><span class="line">      executor = <span class="keyword">new</span> BatchExecutor(<span class="keyword">this</span>, transaction);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (ExecutorType.REUSE == executorType) &#123;</span><br><span class="line">      executor = <span class="keyword">new</span> ReuseExecutor(<span class="keyword">this</span>, transaction);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      executor = <span class="keyword">new</span> SimpleExecutor(<span class="keyword">this</span>, transaction);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (cacheEnabled) &#123;</span><br><span class="line">      executor = <span class="keyword">new</span> CachingExecutor(executor);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//调用pluginAll方法，生成代理对象</span></span><br><span class="line">    executor = (Executor) interceptorChain.pluginAll(executor);</span><br><span class="line">    <span class="keyword">return</span> executor;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//创建ParameterHandler</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> ParameterHandler <span class="title">newParameterHandler</span><span class="params">(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql)</span> </span>&#123;</span><br><span class="line">    ParameterHandler parameterHandler = mappedStatement.getLang().createParameterHandler(mappedStatement, parameterObject, boundSql);</span><br><span class="line">    <span class="comment">//调用pluginAll方法，生成代理对象</span></span><br><span class="line">    parameterHandler = (ParameterHandler) interceptorChain.pluginAll(parameterHandler);</span><br><span class="line">    <span class="keyword">return</span> parameterHandler;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//创建ResultSetHandler</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> ResultSetHandler <span class="title">newResultSetHandler</span><span class="params">(Executor executor, MappedStatement mappedStatement, RowBounds rowBounds, ParameterHandler parameterHandler,</span></span></span><br><span class="line"><span class="params"><span class="function">      ResultHandler resultHandler, BoundSql boundSql)</span> </span>&#123;</span><br><span class="line">    ResultSetHandler resultSetHandler = <span class="keyword">new</span> DefaultResultSetHandler(executor, mappedStatement, parameterHandler, resultHandler, boundSql, rowBounds);</span><br><span class="line">    <span class="comment">//调用pluginAll方法，生成代理对象</span></span><br><span class="line">    resultSetHandler = (ResultSetHandler) interceptorChain.pluginAll(resultSetHandler);</span><br><span class="line">    <span class="keyword">return</span> resultSetHandler;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//创建StatementHandler</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> StatementHandler <span class="title">newStatementHandler</span><span class="params">(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql)</span> </span>&#123;</span><br><span class="line">    StatementHandler statementHandler = <span class="keyword">new</span> RoutingStatementHandler(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);</span><br><span class="line">    <span class="comment">//调用pluginAll方法，生成代理对象</span></span><br><span class="line">    statementHandler = (StatementHandler) interceptorChain.pluginAll(statementHandler);</span><br><span class="line">    <span class="keyword">return</span> statementHandler;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>从上面的源码可以知道，创建四大组件的方法中都会执行<code>pluginAll()</code>这个方法来生成一个代理对象。具体如何生成的，下面详解。</p>
+</li>
+</ul>
+<h3 id="如何生成代理对象？"><a href="#如何生成代理对象？" class="headerlink" title="如何生成代理对象？"></a>如何生成代理对象？</h3><ul>
+<li>创建四大组件过程中都执行了<code>pluginAll()</code>这个方法，此方法源码如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">pluginAll</span><span class="params">(Object target)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//循环遍历插件</span></span><br><span class="line">    <span class="keyword">for</span> (Interceptor interceptor : interceptors) &#123;</span><br><span class="line">      <span class="comment">//调用插件的plugin()方法</span></span><br><span class="line">      target = interceptor.plugin(target);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//返回</span></span><br><span class="line">    <span class="keyword">return</span> target;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></li>
+<li><code>pluginAll()</code>方法很简单，直接循环调用插件的<code>plugin()</code>方法，但是我们调用的是<code>Plugin.wrap(target, this)</code>这行代码，因此要看一下<code>wrap()</code>这个方法的源码，如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">wrap</span><span class="params">(Object target, Interceptor interceptor)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//获取注解的@signature的定义</span></span><br><span class="line">    Map&lt;Class&lt;?&gt;, Set&lt;Method&gt;&gt; signatureMap = getSignatureMap(interceptor);</span><br><span class="line">    <span class="comment">//目标类</span></span><br><span class="line">    Class&lt;?&gt; type = target.getClass();</span><br><span class="line">    <span class="comment">//获取需要拦截的接口</span></span><br><span class="line">    Class&lt;?&gt;[] interfaces = getAllInterfaces(type, signatureMap);</span><br><span class="line">    <span class="keyword">if</span> (interfaces.length &gt; <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="comment">//生成代理对象</span></span><br><span class="line">      <span class="keyword">return</span> Proxy.newProxyInstance(</span><br><span class="line">          type.getClassLoader(),</span><br><span class="line">          interfaces,</span><br><span class="line">          <span class="keyword">new</span> Plugin(target, interceptor, signatureMap));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> target;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></li>
+<li><code>Plugin.wrap()</code>这个方法的逻辑很简单，判断这个插件是否是拦截对应的组件，如果拦截了，生成代理对象（<code>Plugin</code>）返回，没有拦截直接返回，上面例子中生成的代理对象如下图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Myabtis-%E6%8F%92%E4%BB%B6/3.png"></li>
+</ul>
+<h3 id="如何执行？"><a href="#如何执行？" class="headerlink" title="如何执行？"></a>如何执行？</h3><ul>
+<li>上面讲了Mybatis启动的时候如何根据插件生成代理对象的(<code>Plugin</code>)。现在就来看看这个代理对象是如何执行的？</li>
+<li>既然是动态代理，肯定会执行的<code>invoke()</code>这个方法，<code>Plugin</code>类中的<code>invoke()</code>源码如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span> <span class="keyword">throws</span> Throwable </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="comment">//获取@signature标注的方法</span></span><br><span class="line">      Set&lt;Method&gt; methods = signatureMap.get(method.getDeclaringClass());</span><br><span class="line">      <span class="comment">//如果这个方法被拦截了</span></span><br><span class="line">      <span class="keyword">if</span> (methods != <span class="keyword">null</span> &amp;&amp; methods.contains(method)) &#123;</span><br><span class="line">      <span class="comment">//直接执行插件的intercept()这个方法</span></span><br><span class="line">        <span class="keyword">return</span> interceptor.intercept(<span class="keyword">new</span> Invocation(target, method, args));</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">//没有被拦截，执行原方法</span></span><br><span class="line">      <span class="keyword">return</span> method.invoke(target, args);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">      <span class="keyword">throw</span> ExceptionUtil.unwrapThrowable(e);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></li>
+<li>逻辑很简单，这个方法被拦截了就执行插件的<code>intercept()</code>方法，没有被拦截，则执行原方法。</li>
+<li>还是以上面自定义的插件来看看执行的流程：<ul>
+<li><code>setParameters()</code>这个方法在<code>PreparedStatementHandler</code>中被调用，如下图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Myabtis-%E6%8F%92%E4%BB%B6/4.png"></li>
+<li>执行<code>invoke()</code>方法，发现<code>setParameters()</code>这个方法被拦截了，因此直接执行的是<code>intercept()</code>方法。</li>
+</ul>
+</li>
+</ul>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ul>
+<li>Mybatis中插件的原理其实很简单，分为以下几步：<ol>
+<li>在项目启动的时候判断组件是否有被拦截，如果没有直接返回原对象。</li>
+<li>如果有被拦截，返回动态代理的对象（<code>Plugin</code>）。</li>
+<li>执行到的组件的中的方法时，如果不是代理对象，直接执行原方法</li>
+<li>如果是代理对象，执行<code>Plugin</code>的<code>invoke()</code>方法。</li>
+</ol>
+</li>
+</ul>
+<h2 id="分页插件的原理分析"><a href="#分页插件的原理分析" class="headerlink" title="分页插件的原理分析"></a>分页插件的原理分析</h2><ul>
+<li>此处安利一款经常用的分页插件<code>pagehelper</code>，Maven依赖如下：<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.github.pagehelper<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>pagehelper<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>5.1.6<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+<li>分页插件很显然也是根据Mybatis的插件来定制的，来看看插件<code>PageInterceptor</code>的源码如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Intercepts(</span></span><br><span class="line"><span class="meta">        &#123;</span></span><br><span class="line"><span class="meta">                @Signature(type = Executor.class, method = &quot;query&quot;, args = &#123;MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class&#125;),</span></span><br><span class="line"><span class="meta">                @Signature(type = Executor.class, method = &quot;query&quot;, args = &#123;MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class, CacheKey.class, BoundSql.class&#125;),</span></span><br><span class="line"><span class="meta">        &#125;</span></span><br><span class="line"><span class="meta">)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PageInterceptor</span> <span class="keyword">implements</span> <span class="title">Interceptor</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure></li>
+<li>既然是分页功能，肯定是在<code>query()</code>的时候拦截，因此肯定是在<code>Executor</code>这个组件中。</li>
+<li>分页插件的原理其实很简单，不再一一分析源码了，根据的自己定义的分页数据重新赋值<code>RowBounds</code>来达到分页的目的，当然其中涉及到数据库方言等等内容，不是本章重点，有兴趣可以看一下<a target="_blank" rel="noopener" href="https://github.com/pagehelper/Mybatis-PageHelper">GitHub上的文档</a>。</li>
+</ul>
+<h2 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>对于业务开发的程序员来说，插件的这个功能很少用到，但是不用就不应该了解吗？做人要有追求，哈哈。</li>
+<li>欢迎关注作者的微信公众号<code>码猿技术专栏</code>，作者为你们精心准备了<code>springCloud最新精彩视频教程</code>、<code>精选500本电子书</code>、<code>架构师免费视频教程</code>等等免费资源，让我们一起进阶，一起成长。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Mybatis/" rel="tag"># Mybatis</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/04/20/%E9%9D%A2%E8%AF%95%E5%AE%98%E9%97%AE%EF%BC%9AMybatis%E4%B8%AD%E7%9A%84TypeHandler%E4%BD%A0%E7%94%A8%E8%BF%87%E5%90%97%EF%BC%9F/" rel="prev" title="面试官问：Mybatis中的TypeHandler你用过吗？">
+      <i class="fa fa-chevron-left"></i> 面试官问：Mybatis中的TypeHandler你用过吗？
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/04/20/%E3%80%8AMybatis%E8%BF%9B%E9%98%B6%E3%80%8B%E8%82%9D%E4%BA%8630%E5%A4%A9%E4%B8%93%E6%A0%8F%E6%96%87%E7%AB%A0%EF%BC%8C%E6%95%B4%E7%90%86%E6%88%90%E5%86%8C%EF%BC%81%EF%BC%81%EF%BC%81/" rel="next" title="《Mybatis进阶》肝了30天专栏文章，整理成册！！！">
+      《Mybatis进阶》肝了30天专栏文章，整理成册！！！ <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="nav-text">环境配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%8F%92%E4%BB%B6%EF%BC%9F"><span class="nav-text">什么是插件？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8F%92%E4%BB%B6%EF%BC%9F"><span class="nav-text">如何自定义插件？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BE%E4%B8%AA%E6%A0%97%E5%AD%90"><span class="nav-text">举个栗子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%A8%E5%88%B0%E5%93%AA%E4%BA%9B%E6%B3%A8%E8%A7%A3%EF%BC%9F"><span class="nav-text">用到哪些注解？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%B3%A8%E5%85%A5Mybatis%EF%BC%9F"><span class="nav-text">如何注入Mybatis？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-text">测试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%92%E4%BB%B6%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90"><span class="nav-text">插件原理分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E7%94%9F%E6%88%90%E4%BB%A3%E7%90%86%E5%AF%B9%E8%B1%A1%EF%BC%9F"><span class="nav-text">如何生成代理对象？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%89%A7%E8%A1%8C%EF%BC%9F"><span class="nav-text">如何执行？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E9%A1%B5%E6%8F%92%E4%BB%B6%E7%9A%84%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90"><span class="nav-text">分页插件的原理分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-1"><span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某</span>
+</div>
+ <!-- <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

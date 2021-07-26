@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言日常开发中至少有三个环境，分别是开发环境（dev），测试环境（test），生产环境（prod）。 不同的环境的各种配置都不相同，比如数据库，端口，IP地址等信息。 那么这么多环境如何区分，如何打包呢？ 本篇文章就来介绍一下Spring Boot 中多环境如何配置，如何打包。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring Boot多环境配置，你喜欢哪种？">
+<meta property="og:url" content="http://example.com/2020/11/13/SpringBoot%E5%A4%9A%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE%EF%BC%8C%E4%BD%A0%E5%96%9C%E6%AC%A2%E5%93%AA%E7%A7%8D%EF%BC%9F/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="前言日常开发中至少有三个环境，分别是开发环境（dev），测试环境（test），生产环境（prod）。 不同的环境的各种配置都不相同，比如数据库，端口，IP地址等信息。 那么这么多环境如何区分，如何打包呢？ 本篇文章就来介绍一下Spring Boot 中多环境如何配置，如何打包。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/SPring%20Boot%20%E5%A4%9A%E7%8E%AF%E5%A2%83%E6%95%B4%E5%90%88/1.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis%E8%BF%9B%E9%98%B6PDF/2.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png">
+<meta property="article:published_time" content="2020-11-13T05:52:04.000Z">
+<meta property="article:modified_time" content="2020-11-13T09:51:37.700Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="Spring Boot">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/SPring%20Boot%20%E5%A4%9A%E7%8E%AF%E5%A2%83%E6%95%B4%E5%90%88/1.png">
+
+<link rel="canonical" href="http://example.com/2020/11/13/SpringBoot%E5%A4%9A%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE%EF%BC%8C%E4%BD%A0%E5%96%9C%E6%AC%A2%E5%93%AA%E7%A7%8D%EF%BC%9F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Spring Boot多环境配置，你喜欢哪种？ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/13/SpringBoot%E5%A4%9A%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE%EF%BC%8C%E4%BD%A0%E5%96%9C%E6%AC%A2%E5%93%AA%E7%A7%8D%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Spring Boot多环境配置，你喜欢哪种？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-13 13:52:04 / 修改时间：17:51:37" itemprop="dateCreated datePublished" datetime="2020-11-13T13:52:04+08:00">2020-11-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>日常开发中至少有三个环境，分别是开发环境（<code>dev</code>），测试环境（<code>test</code>），生产环境（<code>prod</code>）。</p>
+<p>不同的环境的各种配置都不相同，比如数据库，端口，<code>IP</code>地址等信息。</p>
+<p>那么这么多环境如何区分，如何打包呢？</p>
+<p>本篇文章就来介绍一下<code>Spring Boot</code> 中多环境如何配置，如何打包。</p>
+<span id="more"></span>
+
+<h2 id="Spring-Boot-自带的多环境配置"><a href="#Spring-Boot-自带的多环境配置" class="headerlink" title="Spring Boot 自带的多环境配置"></a>Spring Boot 自带的多环境配置</h2><p>Spring Boot 对多环境整合已经有了很好的支持，能够在打包，运行间自由切换环境。</p>
+<p>那么如何配置呢？下面将会逐步介绍。</p>
+<h3 id="创建不同环境的配置文件"><a href="#创建不同环境的配置文件" class="headerlink" title="创建不同环境的配置文件"></a>创建不同环境的配置文件</h3><p>既然每个环境的配置都不相同，索性将不同环境的配置放在不同的配置文件中，因此需要创建三个不同的配置文件，分别是<code>application-dev.properties</code>、<code>application-test.properties</code>、<code>application-prod.properties</code>。</p>
+<p><strong>注意</strong>：配置文件的名称一定要是<code>application-name.properties</code>或者<code>application-name.yml</code>格式。这个<code>name</code>可以自定义，主要用于区分。</p>
+<blockquote>
+<p>此时整个项目中就有四个配置文件，加上<code>application.properties</code>。</p>
+</blockquote>
+<h3 id="指定运行的环境"><a href="#指定运行的环境" class="headerlink" title="指定运行的环境"></a>指定运行的环境</h3><p>虽然你创建了各个环境的配置文件，但是<code>Spring Boot</code> 仍然不知道你要运行哪个环境，有以下两种方式指定：</p>
+<h4 id="配置文件中指定"><a href="#配置文件中指定" class="headerlink" title="配置文件中指定"></a>配置文件中指定</h4><p>在<code>application.properties</code>或者<code>application.yml</code>文件中指定，内容如下：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 指定运行环境为测试环境</span></span><br><span class="line"><span class="meta">spring.profiles.active</span>=<span class="string">test</span></span><br></pre></td></tr></table></figure>
+
+<p>以上配置有什么作用呢？</p>
+<p>如果没有指定运行的环境，<code>Spring Boot</code> 默认会加载<code>application.properties</code>文件，而这个的文件又告诉<code>Spring Boot</code> 去找<code>test</code>环境的配置文件。</p>
+<h4 id="运行-jar-的时候指定"><a href="#运行-jar-的时候指定" class="headerlink" title="运行 jar 的时候指定"></a>运行 jar 的时候指定</h4><p><code>Spring Boot</code> 内置的环境切换能够在运行<code>Jar</code>包的时候指定环境，命令如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar xxx.jar --spring.profiles.active=<span class="built_in">test</span></span><br></pre></td></tr></table></figure>
+
+<p>以上命令指定了运行的环境是<code>test</code>，是不是很方便呢？</p>
+<h2 id="Maven-的多环境配置"><a href="#Maven-的多环境配置" class="headerlink" title="Maven 的多环境配置"></a>Maven 的多环境配置</h2><p><code>Maven</code>本身也提供了对多环境的支持，不仅仅支持<code>Spring Boot</code>项目，只要是基于<code>Maven</code>的项目都可以配置。</p>
+<p><code>Maven</code>对于多环境的支持在功能方面更加强大，支持<code>JDK版本</code>、<code>资源文件</code>、<code>操作系统</code>等等因素来选择环境。</p>
+<p>如何配置呢？下面逐一介绍。</p>
+<h3 id="创建多环境配置文件"><a href="#创建多环境配置文件" class="headerlink" title="创建多环境配置文件"></a>创建多环境配置文件</h3><p>创建不同环境的配置文件，分别是<code>application-dev.properties</code>、<code>application-test.properties</code>、<code>application-prod.properties</code>。</p>
+<p>加上默认的配置文件<code>application.properties</code>同样是四个配置文件。</p>
+<h3 id="定义激活的变量"><a href="#定义激活的变量" class="headerlink" title="定义激活的变量"></a>定义激活的变量</h3><p>需要将<code>Maven</code>激活的环境作用于<code>Spring Boot</code>，实际还是利用了<code>spring.profiles.active</code>这个属性，只是现在这个属性的取值将是取值于<code>Maven</code>。配置如下：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">spring.profiles.active</span>=<span class="string">@profile.active@</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><code>profile.active</code>实际上就是一个变量，在<code>maven</code>打包的时候指定的<code>-P test</code>传入的就是值。</p>
+</blockquote>
+<h3 id="pom-文件中定义-profiles"><a href="#pom-文件中定义-profiles" class="headerlink" title="pom 文件中定义 profiles"></a>pom 文件中定义 profiles</h3><p>需要在<code>maven</code>的<code>pom.xml</code>文件中定义不同环境的<code>profile</code>，如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--定义三种开发环境--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">profiles</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">profile</span>&gt;</span></span><br><span class="line">            <span class="comment">&lt;!--不同环境的唯一id--&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">id</span>&gt;</span>dev<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">activation</span>&gt;</span></span><br><span class="line">                <span class="comment">&lt;!--默认激活开发环境--&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">activeByDefault</span>&gt;</span>true<span class="tag">&lt;/<span class="name">activeByDefault</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">activation</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">properties</span>&gt;</span></span><br><span class="line">                <span class="comment">&lt;!--profile.active对应application.yml中的@profile.active@--&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">profile.active</span>&gt;</span>dev<span class="tag">&lt;/<span class="name">profile.active</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">profile</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">&lt;!--测试环境--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">profile</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">id</span>&gt;</span>test<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">properties</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">profile.active</span>&gt;</span>test<span class="tag">&lt;/<span class="name">profile.active</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">profile</span>&gt;</span></span><br><span class="line"></span><br><span class="line">        <span class="comment">&lt;!--生产环境--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">profile</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">id</span>&gt;</span>prod<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">properties</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">profile.active</span>&gt;</span>prod<span class="tag">&lt;/<span class="name">profile.active</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">profile</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">profiles</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+<p>标签<code>&lt;profile.active&gt;</code>正是对应着配置文件中的<code>@profile.active@</code>。</p>
+<p><code>&lt;activeByDefault&gt;</code>标签指定了默认激活的环境，则是打包的时候不指定<code>-P</code>选项默认选择的环境。</p>
+<p>以上配置完成后，将会在IDEA的右侧<code>Maven</code>选项卡中出现以下内容：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/SPring%20Boot%20%E5%A4%9A%E7%8E%AF%E5%A2%83%E6%95%B4%E5%90%88/1.png" alt="1"></p>
+<p>可以选择打包的环境，然后点击<code>package</code>即可。</p>
+<p>或者在项目的根目录下用命令打包，不过需要使用<code>-P</code>指定环境，如下：</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mvn clean package package -P test</span><br></pre></td></tr></table></figure>
+
+<p><code>maven</code>中的<code>profile</code>的激活条件还可以根据<code>jdk</code>、<code>操作系统</code>、<code>文件存在或者缺失</code>来激活。这些内容都是在<code>&lt;activation&gt;</code>标签中配置，如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--activation用来指定激活方式，可以根据jdk环境，环境变量，文件的存在或缺失--&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">activation</span>&gt;</span></span><br><span class="line">       <span class="comment">&lt;!--配置默认激活--&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">activeByDefault</span>&gt;</span>true<span class="tag">&lt;/<span class="name">activeByDefault</span>&gt;</span></span><br><span class="line">                </span><br><span class="line">      <span class="comment">&lt;!--通过jdk版本--&gt;</span></span><br><span class="line">      <span class="comment">&lt;!--当jdk环境版本为1.8时，此profile被激活--&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">jdk</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">jdk</span>&gt;</span></span><br><span class="line">      <span class="comment">&lt;!--当jdk环境版本1.8或以上时，此profile被激活--&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">jdk</span>&gt;</span>[1.8,)<span class="tag">&lt;/<span class="name">jdk</span>&gt;</span></span><br><span class="line"></span><br><span class="line">      <span class="comment">&lt;!--根据当前操作系统--&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">os</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>Windows XP<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">family</span>&gt;</span>Windows<span class="tag">&lt;/<span class="name">family</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">arch</span>&gt;</span>x86<span class="tag">&lt;/<span class="name">arch</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>5.1.2600<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">os</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">activation</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="资源过滤"><a href="#资源过滤" class="headerlink" title="资源过滤"></a>资源过滤</h3><p>如果你不配置这一步，将会在任何环境下打包都会带上全部的配置文件，但是我们可以配置只保留对应环境下的配置文件，这样安全性更高。</p>
+<p>这一步配置很简单，只需要在<code>pom.xml</code>文件中指定<code>&lt;resource&gt;</code>过滤的条件即可，如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">build</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">resources</span>&gt;</span></span><br><span class="line">  <span class="comment">&lt;!--排除配置文件--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">resource</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">directory</span>&gt;</span>src/main/resources<span class="tag">&lt;/<span class="name">directory</span>&gt;</span></span><br><span class="line">      <span class="comment">&lt;!--先排除所有的配置文件--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">excludes</span>&gt;</span></span><br><span class="line">          <span class="comment">&lt;!--使用通配符，当然可以定义多个exclude标签进行排除--&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">exclude</span>&gt;</span>application*.properties<span class="tag">&lt;/<span class="name">exclude</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">excludes</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">resource</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!--根据激活条件引入打包所需的配置和文件--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">resource</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">directory</span>&gt;</span>src/main/resources<span class="tag">&lt;/<span class="name">directory</span>&gt;</span></span><br><span class="line">      <span class="comment">&lt;!--引入所需环境的配置文件--&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">filtering</span>&gt;</span>true<span class="tag">&lt;/<span class="name">filtering</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">includes</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">include</span>&gt;</span>application.yml<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">          <span class="comment">&lt;!--根据maven选择环境导入配置文件--&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">include</span>&gt;</span>application-$&#123;profile.active&#125;.yml<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">includes</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">resource</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">resources</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">build</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>上述配置主要分为两个方面，第一是先排除所有配置文件，第二是根据<code>profile.active</code>动态的引入配置文件。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>至此，<code>Maven</code>的多环境打包已经配置完成，相对来说挺简单，既可以在<code>IDEA</code>中选择环境打包，也同样支持命令<code>-P</code>指定环境打包。</p>
+<h2 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h2><p>本文介绍了Spring Boot 的两种打包方式，每种方式有各自的优缺点，你更喜欢哪种呢？</p>
+<blockquote>
+<p>源码已经上传，回复关键词<code>多环境配置</code>获取。</p>
+</blockquote>
+<p>另外作者的第一本<code>PDF</code>书籍已经整理好了，由浅入深的详细介绍了Mybatis基础以及底层源码，有需要的朋友公众号回复关键词<strong>Mybatis进阶</strong>即可获取，目录如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis%E8%BF%9B%E9%98%B6PDF/2.png"></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Spring-Boot/" rel="tag"># Spring Boot</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/11/13/Jenkins%E9%83%A8%E7%BD%B2SpringBoot%E9%A1%B9%E7%9B%AE/" rel="prev" title="三十二张图教你Jenkins部署Spring Boot 项目">
+      <i class="fa fa-chevron-left"></i> 三十二张图教你Jenkins部署Spring Boot 项目
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/11/18/SpringBoot%E6%95%B4%E5%90%88AOP%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3/" rel="next" title="Spring Boot 整合 AOP 自定义注解">
+      Spring Boot 整合 AOP 自定义注解 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Boot-%E8%87%AA%E5%B8%A6%E7%9A%84%E5%A4%9A%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="nav-text">Spring Boot 自带的多环境配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E4%B8%8D%E5%90%8C%E7%8E%AF%E5%A2%83%E7%9A%84%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-text">创建不同环境的配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%87%E5%AE%9A%E8%BF%90%E8%A1%8C%E7%9A%84%E7%8E%AF%E5%A2%83"><span class="nav-text">指定运行的环境</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E4%B8%AD%E6%8C%87%E5%AE%9A"><span class="nav-text">配置文件中指定</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C-jar-%E7%9A%84%E6%97%B6%E5%80%99%E6%8C%87%E5%AE%9A"><span class="nav-text">运行 jar 的时候指定</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Maven-%E7%9A%84%E5%A4%9A%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="nav-text">Maven 的多环境配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%A4%9A%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-text">创建多环境配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E6%BF%80%E6%B4%BB%E7%9A%84%E5%8F%98%E9%87%8F"><span class="nav-text">定义激活的变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#pom-%E6%96%87%E4%BB%B6%E4%B8%AD%E5%AE%9A%E4%B9%89-profiles"><span class="nav-text">pom 文件中定义 profiles</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B5%84%E6%BA%90%E8%BF%87%E6%BB%A4"><span class="nav-text">资源过滤</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-1"><span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某</span>
+</div>
+ <!-- <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

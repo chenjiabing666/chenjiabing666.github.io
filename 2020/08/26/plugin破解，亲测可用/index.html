@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言 今天重新装了IDEA2020，顺带重装了一些插件，毕竟这些插件都是习惯一直在用，其中一款就是Mybatis  Log plugin，按照往常的思路，在IDEA插件市场搜索安装，艹，眼睛一瞟，竟然收费了，对于我这种支持盗版的人来说太难了，于是自己开始捣鼓各种尝试破解，下文分享自己的破解方式。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mybatis Log plugin破解，亲测可用！！！">
+<meta property="og:url" content="http://example.com/2020/08/26/plugin%E7%A0%B4%E8%A7%A3%EF%BC%8C%E4%BA%B2%E6%B5%8B%E5%8F%AF%E7%94%A8/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="前言 今天重新装了IDEA2020，顺带重装了一些插件，毕竟这些插件都是习惯一直在用，其中一款就是Mybatis  Log plugin，按照往常的思路，在IDEA插件市场搜索安装，艹，眼睛一瞟，竟然收费了，对于我这种支持盗版的人来说太难了，于是自己开始捣鼓各种尝试破解，下文分享自己的破解方式。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-Log-plugin/6.jpg">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-Log-plugin/1.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-Log-plugin/4.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-Log-plugin/2.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-Log-plugin/3.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-Log-plugin/5.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E4%B8%83%E7%A7%92%E7%BC%96%E7%A8%8B.jpg">
+<meta property="article:published_time" content="2020-08-26T06:50:11.000Z">
+<meta property="article:modified_time" content="2020-10-23T13:55:33.740Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="优质资源">
+<meta property="article:tag" content="破解">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-Log-plugin/6.jpg">
+
+<link rel="canonical" href="http://example.com/2020/08/26/plugin%E7%A0%B4%E8%A7%A3%EF%BC%8C%E4%BA%B2%E6%B5%8B%E5%8F%AF%E7%94%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Mybatis Log plugin破解，亲测可用！！！ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/08/26/plugin%E7%A0%B4%E8%A7%A3%EF%BC%8C%E4%BA%B2%E6%B5%8B%E5%8F%AF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Mybatis Log plugin破解，亲测可用！！！
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-08-26 14:50:11" itemprop="dateCreated datePublished" datetime="2020-08-26T14:50:11+08:00">2020-08-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 21:55:33" itemprop="dateModified" datetime="2020-10-23T21:55:33+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">开发工具</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
+<li><p>今天重新装了IDEA2020，顺带重装了一些插件，毕竟这些插件都是习惯一直在用，其中一款就是Mybatis  Log plugin，按照往常的思路，在IDEA插件市场搜索安装，艹，眼睛一瞟，竟然收费了，对于我这种支持盗版的人来说太难了，于是自己开始捣鼓各种尝试破解，下文分享自己的破解方式。</p>
+<span id="more"></span>
+<h2 id="什么是Mybatis-Log-plugin"><a href="#什么是Mybatis-Log-plugin" class="headerlink" title="什么是Mybatis Log plugin"></a>什么是Mybatis Log plugin</h2></li>
+<li><p>举个栗子，通常在找bug的时候都会查看执行了什么SQL，想把这条SQL拼接出来执行调试，可能有些小白还在傻傻的把各个参数复制出来，补到<code>?</code>占位符中，哈哈。</p>
+</li>
+<li><p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-Log-plugin/6.jpg"></p>
+</li>
+</ul>
+<ul>
+<li>简单的说就是能根据log4j的打印的sql日志一键生成执行的<code>sql</code>语句。</li>
+<li>类似如下一个日志信息：</li>
+<li><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-Log-plugin/1.png" alt="日志信息"></li>
+<li>如果使用Log plugin这个插件，将会很容易的把参数添加到sql语句中得到一条完整的sql，效果如下：</li>
+<li><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-Log-plugin/4.png" alt="完整sql"></li>
+<li>一旦开启了<code>Mybatis Log plugin</code>这个插件，在程序运行过程中只要是有SQL语句都会自动生成在<code>Mybatis Log</code>这个界面，当然也可以自己关掉。</li>
+</ul>
+<h2 id="如何安装"><a href="#如何安装" class="headerlink" title="如何安装"></a>如何安装</h2><ul>
+<li><code>Setting-&gt;plugin-&gt;Marketplace</code>搜索框输入<code>Mybatis Log plugin</code>，如下：</li>
+<li><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-Log-plugin/2.png" alt="搜索输入"></li>
+<li>很遗憾的是， IDEA2020中已经开始收费了，艹，对于一向支持盗版的我来说，很不爽~</li>
+</ul>
+<h2 id="如何破解"><a href="#如何破解" class="headerlink" title="如何破解"></a>如何破解</h2><ul>
+<li>下载jar包<code>plugin.intellij.assistant.mybaitslog-2020.1-1.0.3.jar</code>，文末附有下载方式。</li>
+<li><code>setting-&gt;plguin-&gt;设置-&gt; install plugin from Disk...</code></li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-Log-plugin/3.png" alt="破解步骤"></p>
+<h2 id="如何使用"><a href="#如何使用" class="headerlink" title="如何使用"></a>如何使用</h2><ul>
+<li>日志中从<code>Preparing</code>到<code>Parameters</code>这两行的参数选中，右键选择<code>restore sql from Selection</code></li>
+<li><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-Log-plugin/5.png"></li>
+<li>此时将会在<code>Mybatis Log</code>界面出现完整的SQL语句。</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>对于复杂的SQL语句来说，Mybatis Log plugin这款插件简直是太爱了，能够自动拼接参数生成执行的SQL语句。</li>
+<li>老规矩，关注公众号【码猿技术专栏】，公众号回复<code>mybatis log</code>获取破解包。</li>
+<li><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E4%B8%83%E7%A7%92%E7%BC%96%E7%A8%8B.jpg"></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BC%98%E8%B4%A8%E8%B5%84%E6%BA%90/" rel="tag"># 优质资源</a>
+              <a href="/tags/%E7%A0%B4%E8%A7%A3/" rel="tag"># 破解</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/08/select%E8%AF%AD%E5%8F%A5%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88%EF%BC%9F/" rel="prev" title="select语句做了什么？">
+      <i class="fa fa-chevron-left"></i> select语句做了什么？
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/08/27/Navicat%20Premium%2012%E5%85%8D%E8%B4%B9%E7%89%88%E6%9C%AC%E5%AE%89%E8%A3%85/" rel="next" title="Navicat Premium 12破解版安装">
+      Navicat Premium 12破解版安装 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFMybatis-Log-plugin"><span class="nav-text">什么是Mybatis Log plugin</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%AE%89%E8%A3%85"><span class="nav-text">如何安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E7%A0%B4%E8%A7%A3"><span class="nav-text">如何破解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8"><span class="nav-text">如何使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某</span>
+</div>
+ <!-- <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

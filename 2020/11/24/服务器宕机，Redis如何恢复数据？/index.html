@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言Redis作为内存型的数据库，虽然很快，依然有着很大的隐患，一旦服务器宕机重启，内存中数据还会存在吗？ 很容易想到的一个方案是从后台数据恢复这些数据，如果数据量很小，这倒是一个可行的方案。但是如果数据量过大，频繁的从后台数据库访问数据，压力很大；另外一方面恢复数据的时间极慢。 对于Redis来说，实现数据的持久化和快速恢复是至关重要。 今天这篇文章就来介绍一下Redis持久化的两种机制AOF日">
+<meta property="og:type" content="article">
+<meta property="og:title" content="服务器宕机，Redis如何恢复数据？">
+<meta property="og:url" content="http://example.com/2020/11/24/%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%AE%95%E6%9C%BA%EF%BC%8CRedis%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%E6%95%B0%E6%8D%AE%EF%BC%9F/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="前言Redis作为内存型的数据库，虽然很快，依然有着很大的隐患，一旦服务器宕机重启，内存中数据还会存在吗？ 很容易想到的一个方案是从后台数据恢复这些数据，如果数据量很小，这倒是一个可行的方案。但是如果数据量过大，频繁的从后台数据库访问数据，压力很大；另外一方面恢复数据的时间极慢。 对于Redis来说，实现数据的持久化和快速恢复是至关重要。 今天这篇文章就来介绍一下Redis持久化的两种机制AOF日">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E5%AE%95%E6%9C%BA%E5%90%8E%E7%9A%84%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%EF%BC%9F/1.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E5%AE%95%E6%9C%BA%E5%90%8E%E7%9A%84%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%EF%BC%9F/2.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E5%AE%95%E6%9C%BA%E5%90%8E%E7%9A%84%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%EF%BC%9F/3.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png">
+<meta property="article:published_time" content="2020-11-24T06:06:29.000Z">
+<meta property="article:modified_time" content="2020-11-24T07:58:22.216Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E5%AE%95%E6%9C%BA%E5%90%8E%E7%9A%84%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%EF%BC%9F/1.png">
+
+<link rel="canonical" href="http://example.com/2020/11/24/%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%AE%95%E6%9C%BA%EF%BC%8CRedis%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%E6%95%B0%E6%8D%AE%EF%BC%9F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>服务器宕机，Redis如何恢复数据？ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/24/%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%AE%95%E6%9C%BA%EF%BC%8CRedis%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%E6%95%B0%E6%8D%AE%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          服务器宕机，Redis如何恢复数据？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-24 14:06:29 / 修改时间：15:58:22" itemprop="dateCreated datePublished" datetime="2020-11-24T14:06:29+08:00">2020-11-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Redis 进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><code>Redis</code>作为内存型的数据库，虽然很快，依然有着很大的隐患，一旦<strong>服务器宕机</strong>重启，内存中数据还会存在吗？</p>
+<p>很容易想到的一个方案是从后台数据恢复这些数据，如果数据量很小，这倒是一个可行的方案。但是如果数据量过大，频繁的从后台数据库访问数据，压力很大；另外一方面恢复数据的时间极慢。</p>
+<p>对于<code>Redis</code>来说，实现数据的持久化和快速恢复是至关重要。</p>
+<p>今天这篇文章就来介绍一下<code>Redis</code>持久化的两种机制<code>AOF</code>日志、<code>RDB</code>快照。</p>
+<span id="more"></span>
+
+<h2 id="什么是-AOF-日志？"><a href="#什么是-AOF-日志？" class="headerlink" title="什么是 AOF 日志？"></a>什么是 AOF 日志？</h2><p><code>AOF</code>(<code>Append Only File</code>)日志称之为<strong>写后日志</strong>，即是命令先执行完成，把数据写入内存，然后才会记录日志。</p>
+<p><code>AOF</code>日志（文本形式）会将收到每一条的命令且执行成功的命令以一定的格式写入到文本中（追加的方式）。</p>
+<p><strong>写后日志有什么好处呢？</strong> 如下：</p>
+<ol>
+<li>对于写前日志无论命令是否执行成功都会被记录，但是<code>Redis</code>的写后日志则只有命令执行成功才会被写入日志，避免了日志中存在错误命令；</li>
+<li>同时由于是命令执行成功之后才会写入日志，因此不会阻塞当前命令的执行。</li>
+</ol>
+<p>但是<code>AOF</code>日志也有<strong>潜在的风险</strong>，分析如下：</p>
+<ol>
+<li>由于是写后日志，如果在命令执行成功之后，在日志未写入磁盘之前服务器突然宕机，那重启恢复数据的时候，这部分的数据肯定在日志文件中不存在了，那么将会丢失。（无法通过后台数据库恢复的情况下）</li>
+<li>虽然不会阻塞当前命令的执行，由于记录日志也是在主线程中（<code>Redis</code>是单线程），如果日志写入磁盘的时候突然阻塞了，肯定会影响下一个命令的执行。</li>
+</ol>
+<p>为了解决上面的风险，<code>AOF</code>日志提供了三种回写策略。</p>
+<h3 id="三种写回策略"><a href="#三种写回策略" class="headerlink" title="三种写回策略"></a>三种写回策略</h3><p><code>AOF</code>机制提供了三种回写策略，这些都在<code>appendfsync</code>配置，如下：</p>
+<ol>
+<li><code>Always</code>（同步写回）：命令执行完成，立马同步的将日志写入磁盘</li>
+<li><code>Everysec</code>（每秒写回）：命令执行完成后，先将日志写入 AOF 文件的内存缓冲区，每隔一秒把缓冲区中内容写入磁盘。</li>
+<li><code>No</code>(操作系统控制的写回)：每个写命令执行完，只是先把日志写到<code>AOF</code>文件的内存缓冲区，由操作系统决定何时将缓冲区内容写回磁盘。</li>
+</ol>
+<p>其实这三中写回策略都无法解决主线程的阻塞和数据丢失的问题，分析如下：</p>
+<ol>
+<li><code>同步写回</code>：基本不丢失数据，但是每步操作都会有一个慢速的落盘操作，不可避免的影响主线程性能。</li>
+<li><code>每秒写回</code>：采用一秒写一次到 AOF 日志文件中，但是一旦宕机还是会丢失一秒的数据。</li>
+<li><code>操作系统控制的写回</code>：在写完缓冲区之后则会写入磁盘，但是数据始终在缓冲区的时间内一旦宕机，数据还是会丢失。</li>
+</ol>
+<p>以上三种策略优缺点总结如下表：</p>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Always</td>
+<td>可靠性高，数据基本不丢失</td>
+<td>每个写命令都要落盘，性能影响较大</td>
+</tr>
+<tr>
+<td>Everysec</td>
+<td>性能适中</td>
+<td>宕机时丢失一秒数据</td>
+</tr>
+<tr>
+<td>No</td>
+<td>性能好</td>
+<td>宕机时丢失数据较多</td>
+</tr>
+</tbody></table>
+<h3 id="日志文件太大怎么办？"><a href="#日志文件太大怎么办？" class="headerlink" title="日志文件太大怎么办？"></a>日志文件太大怎么办？</h3><p>随着数据量的增大，AOF日志文件难免会很大，这样将会导致写入和恢复数据都将变得非常慢。此时AOF提供了一种<strong>重写机制</strong>解决这一问题。</p>
+<blockquote>
+<p>重写机制理解起来很简单，即是<code>Redis</code>会创建一个新的<code>AOF</code>日志文件，将每个键值对最终的值用一条命令写入日志文件中。</p>
+</blockquote>
+<p>比如读取了键值对<code>key1:value1</code>，重写机制会在新的AOF日志文件中记录如下一条命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set key1 value1</span><br></pre></td></tr></table></figure>
+
+<p>其实即是记录多次修改的最终的值记录在新的AOF日志文件中，这样当恢复数据时可直接执行该命令。</p>
+<p><strong>为什么重写机制能够缩小文件呢？</strong> 当一个键值被多次修改后，<code>AOF</code>日志文件中将会记录多次修改键值的命令，重写机制是根据这个键值最新状态为它生成<strong>写入</strong>命令，这样旧文件中的<strong>多条</strong>命令在重写后的新日志中变成了<strong>一条</strong>命令。</p>
+<p>作者画了一张重写流程图，仅供参考，如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E5%AE%95%E6%9C%BA%E5%90%8E%E7%9A%84%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%EF%BC%9F/1.png" alt="重写机制流程"></p>
+<h3 id="AOF重写会阻塞主线程吗？"><a href="#AOF重写会阻塞主线程吗？" class="headerlink" title="AOF重写会阻塞主线程吗？"></a>AOF重写会阻塞主线程吗？</h3><p>AOF重写虽然能够缩减日志文件的大小，达到减少日志记录和数据恢复的时间，但是在数据量非常的大情况下把整个数据库重写后的日志写入磁盘是一个非常耗时的过程，难道不会阻塞主线程吗？</p>
+<p><strong>答案是：不会阻塞主线程</strong>； 因为AOF重写过程是由后台子进程<code>bgrewriteaof</code>来完成的，这也是为了避免阻塞主线程，导致数据库性能下降。</p>
+<p>其实重写的过程分为两个阶段：<strong>一个拷贝，两处日志</strong>。</p>
+<p><strong>一个拷贝</strong>：指每次执行重写时，主线程都<code>fork</code>一个子线程<code>bgrewriteaof</code>，主线程会把内存数据拷贝一份到子线程，此时子线程中包含了数据库的最新数据。然后子线程就能在不影响主线程的情况下进行AOF重写了。</p>
+<p><strong>两处日志</strong>是什么？如下：</p>
+<ol>
+<li><code>第一处日志</code>：子线程重写并未阻塞主线程，此时主线程仍然会处理请求，此时的AOF日志仍然正在记录着，这样即使宕机了，数据也是齐全的。第一处日志即是值主线程正在使用的日志。</li>
+<li><code>第二处日志</code>：指新的AOF重写日志；重写过程中的操作也会被写到重写日志缓冲区，这样重写日志也不会丢失最新的操作。等到拷贝数据的所有操作记录重写完成后，重写日志记录的这些最新操作也会写入新的 AOF 文件，以保证数据库最新状态的记录。此时，我们就可以用新的 AOF 文件替代旧文件了。</li>
+</ol>
+<blockquote>
+<p><strong>总结</strong>：<code>Redis</code>在进行<code>AOF</code>重写时，会<code>fork</code>一个子线程（不会阻塞主线程）并进行内存拷贝用于重写，然后使用两个日志保证重写过程中，新写入的数据不会丢失。</p>
+</blockquote>
+<h3 id="AOF的缺点"><a href="#AOF的缺点" class="headerlink" title="AOF的缺点"></a>AOF的缺点</h3><p>虽说进行了日志重写后，AOF日志文件会缩减很多，但是在数据恢复过程中仍然是一条命令一条命令（由于单线程，只能顺序执行）的执行恢复数据，这个恢复的过程非常缓慢。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>AOF这种通过逐一记录操作命令的日志方式，提供了三种写回策略保证数据的可靠性，分别是<code>Always</code>、<code>Everysec</code>和<code>No</code>，这三种策略在可靠性上是从高到低，而在性能上则是从低到高。</p>
+<p>为了避免日志文件过大，Redis提供了重写的机制，每次重写都fork一个子线程，拷贝内存数据进行重写，将多条命令缩减成一条生成键值对的命令，最终重写的日志作为新的日志。</p>
+<h2 id="什么是RDB？"><a href="#什么是RDB？" class="headerlink" title="什么是RDB？"></a>什么是RDB？</h2><p><code>RDB</code>(Redis DataBase)是另外一种持久化方式：内存快照。</p>
+<blockquote>
+<p><code>RDB</code>记录的是<strong>某一个时刻</strong>的内存数据，并不是操作命令。</p>
+</blockquote>
+<p>这种方式类似于拍照，只保留某一时刻的形象。内存快照是将某一时刻的状态以文件的形式写入磁盘。这样即使宕机了，数据也不会丢失，这个快照文件就称为<code>RDB</code>文件。</p>
+<blockquote>
+<p>由于记录的是某个时刻的内存数据，数据恢复非常快的，不需要像AOF日志逐一执行记录的命令。</p>
+</blockquote>
+<h3 id="给哪些数据做快照？"><a href="#给哪些数据做快照？" class="headerlink" title="给哪些数据做快照？"></a>给哪些数据做快照？</h3><p>为了保证数据的可靠性，Redis执行的<strong>全量快照</strong>，也就是把内存中的所有数据都写到磁盘中。</p>
+<p>随着数据量的增大，一次性把全部数据都写到磁盘中势必会造成线程阻塞，这就关系到Redis的性能了。</p>
+<p>针对线程阻塞的问题Redis提供了两个命令，如下：</p>
+<ol>
+<li><code>save</code>：在主线程中执行，会导致主线程阻塞。</li>
+<li><code>bgsave</code>：<code>fork</code>一个子进程，专门用于写入<code>RDB</code>文件，避免了主线程的阻塞，这是Redis的默认配置。</li>
+</ol>
+<p>这样就可以使用<code>bgsave</code>命令执行全量快照，既可以保证数据的可靠性也避免了主线程的阻塞。</p>
+<h3 id="快照时能够修改数据吗？"><a href="#快照时能够修改数据吗？" class="headerlink" title="快照时能够修改数据吗？"></a>快照时能够修改数据吗？</h3><p>子线程执行全量快照的同时，主线程仍然在接受着请求，读数据肯定没有问题，但是如果个修改了数据，如何能够保证快照的完整性呢？</p>
+<p><strong>举个栗子</strong>：我在<code>T</code>时刻进行全量快照，假设数据量有<code>8G</code>，写入磁盘的过程至少需要<code>20S</code>，在这<code>20S</code>的时间内，一旦内存中的数据发生了修改，则快照的完整性就破坏了。</p>
+<p>但是如果在快照时不能修改数据，则对Redis的性能有巨大的影响，对于这个问题，Redis是如何解决的呢？</p>
+<blockquote>
+<p><code>Redis</code>借助操作系统提供的<code>写时复制技术</code>（Copy-On-Write, COW），在执行快照的同时，正常处理写操作。</p>
+</blockquote>
+<p>其实很简单，<code>bgsave</code>命令会<code>fork</code>一个子线程，这个子线程共享所有内存的数据，子线程会读取主线程内存中的数据，将他们写入<code>RDB</code>文件。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E5%AE%95%E6%9C%BA%E5%90%8E%E7%9A%84%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%EF%BC%9F/2.png" alt="写时复制保证数据可修改"></p>
+<p>如上图，对于<code>键值对A</code>的读取并不会影响子线程，但是如果主线程一旦修改内存中一块数据（例如<code>键值对D</code>），这块数据将会被复制一个副本，然后<code>bgsave</code>子线程会将其写入<code>RDB</code>文件。</p>
+<h3 id="多久做一次快照？"><a href="#多久做一次快照？" class="headerlink" title="多久做一次快照？"></a>多久做一次快照？</h3><p>快照只是记录某一时刻的数据，一旦时间隔离很久，则服务器一旦宕机，则会丢失那段时间的数据。</p>
+<p>比如在<code>T1</code>时间做了一次快照，在<code>T1+t</code>时又做了一次快照，如果在<code>t</code>这个时间段内服务器突然宕机了，则快照中只保存了<code>T1</code>时刻的快照，在<code>t</code>时间段内的数据修改未被记录（丢失）。如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E5%AE%95%E6%9C%BA%E5%90%8E%E7%9A%84%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%EF%BC%9F/3.png" alt="t时刻宕机，未执行快照"></p>
+<p>从上图明显可以看出，**<code>RDB</code>并不是一个完美的日志记录方案**，只有让<code>t</code>时间逐渐缩小，才能保证丢失的数据缩小。</p>
+<p><strong>那么问题来了，时间能够缩短<code>1秒</code>吗？</strong> 即是每秒执行一次快照。</p>
+<blockquote>
+<p>全量快照是记录某一个时刻的<strong>全部</strong>内存数据，每秒执行一次的对Redis性能影响巨大，于是<strong>增量快照</strong>就出来了。</p>
+</blockquote>
+<h3 id="增量快照"><a href="#增量快照" class="headerlink" title="增量快照"></a>增量快照</h3><p><strong>增量快照是指做了一次全量快照之后，后续的快照只对修改的数据进行快照记录</strong>，这样可以避免每次都全量快照的开销。</p>
+<p>增量快照的前提是Redis能够记住修改的数据，这个功能其实开销也是巨大的，需要保存完整的键值对，这对内存的消耗是巨大的。</p>
+<blockquote>
+<p>为了解决这个问题，Redis使用了<code>AOF</code>和<code>RDB</code>混合使用的方式。</p>
+</blockquote>
+<h3 id="AOF和RDB混合使用"><a href="#AOF和RDB混合使用" class="headerlink" title="AOF和RDB混合使用"></a>AOF和RDB混合使用</h3><p>这个概念是在<code>Redis4.0</code>提出的，简单的说就是<strong>内存快照以一定的频率执行，比如1小时一次，在两次快照之间，使用AOF日志记录这期间的所有命令操作。</strong></p>
+<blockquote>
+<p>混合使用的方式使得内存快照不必频繁的执行，并且AOF记录的也不是全部的操作命令，而是两次快照之间的操作命令，不会出现AOF日志文件过大的情况了，避免了AOF重写的开销了。</p>
+</blockquote>
+<p>这个方案既能够用到的RDB的快速恢复的好处，又能享受都只记录操作命令的简单优势，强烈建议使用。</p>
+<h3 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h3><p><code>RDB</code>内存快照记录的是某一个时刻的内存数据，因此能够快速恢复；<code>AOF</code>和<code>RDB</code>混合使用能够使得宕机后数据快速恢复，又能够避免<code>AOF</code>日志文件过大。</p>
+<h2 id="总结-2"><a href="#总结-2" class="headerlink" title="总结"></a>总结</h2><p>本文介绍了两种数据恢复和持久化的方案，分别是<code>AOF</code>和<code>RDB</code>。</p>
+<p><code>AOF</code>介绍了什么？如下：</p>
+<ol>
+<li><code>AOF</code>是写后日志，通过记录操作命令持久化数据。</li>
+<li>由于<code>AOF</code>是在命令执行之后记录日志，如果在写入磁盘之前服务器宕机，则会丢失数据；如果写入磁盘的时候突然阻塞，则会阻塞主线程；为了解决以上问题，AOF机制提供了三种写回的策略，每种策略都有不同的优缺点。</li>
+<li><code>AOF</code>日志文件过大怎么办？<code>AOF</code>通过<code>fork</code>一个子线程重写一个新的日志文件（共享主线程的内存，记录最新数据的写入命令），同时子线程重写，避免阻塞主线程。</li>
+</ol>
+<p><code>RDB</code>介绍了什么？如下：</p>
+<ol>
+<li><code>RDB</code>是内存快照，记录某一个时刻的内存数据，而不是操作命令。</li>
+<li><code>Redis</code>提供了两个命令，分别是<code>save</code>、<code>bgsave</code>来执行全量快照，这两个命令的区别则是<code>save</code>是在主线程执行，势必会阻塞主线程，<code>bgsave</code>是在<code>fork</code>一个子线程，共享内存。</li>
+<li>RDB通过操作系统的<strong>写时复制技术</strong>，能够保证在执行快照的同时主线程能够修改快照。</li>
+<li>由于两次快照之间是存在间隔的，一旦服务器宕机，则会丢失两次间隔时刻的数据，<code>Redis4.0</code>开始使用<code>AOF</code>日志记录两次快照之间执行的命令（<code>AOF</code>和<code>RDB</code>混合使用）。</li>
+</ol>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Redis/" rel="tag"># Redis</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/11/24/%E5%8D%95%E7%BA%BF%E7%A8%8B%E7%9A%84Redis%EF%BC%8C%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E5%8A%A8%E4%BD%9C/" rel="prev" title="单线程的Redis，有哪些慢动作？">
+      <i class="fa fa-chevron-left"></i> 单线程的Redis，有哪些慢动作？
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/11/27/IDEA2020-2-4%E6%9C%80%E6%96%B0%E6%BF%80%E6%B4%BB%E6%95%99%E7%A8%8B%EF%BC%8C%E6%9C%89%E6%95%88%E6%9C%9F%E5%88%B02089/" rel="next" title="IDEA2020.2.4最新激活教程，有效期到2089~">
+      IDEA2020.2.4最新激活教程，有效期到2089~ <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-AOF-%E6%97%A5%E5%BF%97%EF%BC%9F"><span class="nav-text">什么是 AOF 日志？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E7%A7%8D%E5%86%99%E5%9B%9E%E7%AD%96%E7%95%A5"><span class="nav-text">三种写回策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%E5%A4%AA%E5%A4%A7%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9F"><span class="nav-text">日志文件太大怎么办？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AOF%E9%87%8D%E5%86%99%E4%BC%9A%E9%98%BB%E5%A1%9E%E4%B8%BB%E7%BA%BF%E7%A8%8B%E5%90%97%EF%BC%9F"><span class="nav-text">AOF重写会阻塞主线程吗？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AOF%E7%9A%84%E7%BC%BA%E7%82%B9"><span class="nav-text">AOF的缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFRDB%EF%BC%9F"><span class="nav-text">什么是RDB？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%99%E5%93%AA%E4%BA%9B%E6%95%B0%E6%8D%AE%E5%81%9A%E5%BF%AB%E7%85%A7%EF%BC%9F"><span class="nav-text">给哪些数据做快照？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BF%AB%E7%85%A7%E6%97%B6%E8%83%BD%E5%A4%9F%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE%E5%90%97%EF%BC%9F"><span class="nav-text">快照时能够修改数据吗？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E4%B9%85%E5%81%9A%E4%B8%80%E6%AC%A1%E5%BF%AB%E7%85%A7%EF%BC%9F"><span class="nav-text">多久做一次快照？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A2%9E%E9%87%8F%E5%BF%AB%E7%85%A7"><span class="nav-text">增量快照</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AOF%E5%92%8CRDB%E6%B7%B7%E5%90%88%E4%BD%BF%E7%94%A8"><span class="nav-text">AOF和RDB混合使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-1"><span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-2"><span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某</span>
+</div>
+ <!-- <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言 Mybatis的专题文章写到这里已经是第四篇了，前三篇讲了Mybatis的基本使用，相信只要认真看了的朋友，在实际开发中正常使用应该不是问题。没有看过的朋友，作者建议去看一看，三篇文章分别是Mybatis入门之基本操作、Mybatis结果映射，你射准了吗？、Mybatis动态SQL，你真的会了吗？。 当然，任何一个技术都不能浅藏辄止，今天作者就带大家深入底层源码看一看Mybatis的基础架构">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mybatis源码阅读之六剑客">
+<meta property="og:url" content="http://example.com/2020/04/20/Mybatis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E4%B9%8B%E5%85%AD%E5%89%91%E5%AE%A2/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="前言 Mybatis的专题文章写到这里已经是第四篇了，前三篇讲了Mybatis的基本使用，相信只要认真看了的朋友，在实际开发中正常使用应该不是问题。没有看过的朋友，作者建议去看一看，三篇文章分别是Mybatis入门之基本操作、Mybatis结果映射，你射准了吗？、Mybatis动态SQL，你真的会了吗？。 当然，任何一个技术都不能浅藏辄止，今天作者就带大家深入底层源码看一看Mybatis的基础架构">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-%E5%85%AD%E5%89%91%E5%AE%A2/3.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-%E5%85%AD%E5%89%91%E5%AE%A2/1.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-%E5%85%AD%E5%89%91%E5%AE%A2/2.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E4%B8%83%E7%A7%92%E7%BC%96%E7%A8%8B.jpg">
+<meta property="article:published_time" content="2020-04-20T09:04:42.000Z">
+<meta property="article:modified_time" content="2020-10-23T13:56:05.845Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="Mybatis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-%E5%85%AD%E5%89%91%E5%AE%A2/3.png">
+
+<link rel="canonical" href="http://example.com/2020/04/20/Mybatis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E4%B9%8B%E5%85%AD%E5%89%91%E5%AE%A2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Mybatis源码阅读之六剑客 | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/04/20/Mybatis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E4%B9%8B%E5%85%AD%E5%89%91%E5%AE%A2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Mybatis源码阅读之六剑客
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-04-20 17:04:42" itemprop="dateCreated datePublished" datetime="2020-04-20T17:04:42+08:00">2020-04-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 21:56:05" itemprop="dateModified" datetime="2020-10-23T21:56:05+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Mybatis%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Mybatis进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
+<li>Mybatis的专题文章写到这里已经是第四篇了，前三篇讲了Mybatis的基本使用，相信只要认真看了的朋友，在实际开发中正常使用应该不是问题。没有看过的朋友，作者建议去看一看，三篇文章分别是<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/KdrEvlShnVoYA8nr0qLSNw">Mybatis入门之基本操作</a>、<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/czICR6jv1yz6adi6G3xFgQ">Mybatis结果映射，你射准了吗？</a>、<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/yuYAEXY_OGRsr0Eb3xZkog">Mybatis动态SQL，你真的会了吗？</a>。</li>
+<li>当然，任何一个技术都不能浅藏辄止，今天作者就带大家深入底层源码看一看Mybatis的基础架构。此篇文章只是源码的入门篇，讲一些Mybatis中重要的组件，作者称之为<code>六剑客</code>。<span id="more"></span>
+<h2 id="环境版本"><a href="#环境版本" class="headerlink" title="环境版本"></a>环境版本</h2></li>
+<li>本篇文章讲的一切内容都是基于<code>Mybatis3.5</code>和<code>SpringBoot-2.3.3.RELEASE</code>。</li>
+</ul>
+<h2 id="Myabtis的六剑客"><a href="#Myabtis的六剑客" class="headerlink" title="Myabtis的六剑客"></a>Myabtis的六剑客</h2><ul>
+<li>其实Mybatis的底层源码和Spring比起来还是非常容易读懂的，作者将其中六个重要的接口抽离出来称之为<code>Mybatis的六剑客</code>，分别是<code>SqlSession</code>、<code>Executor</code>、<code>StatementHandler</code>、<code>ParameterHandler</code>、<code>ResultSetHandler</code>、<code>TypeHandler</code>。</li>
+<li>六剑客在Mybatis中分别承担着什么角色？下面将会逐一介绍。</li>
+<li>介绍六剑客之前，先来一张六剑客执行的流程图，如下：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-%E5%85%AD%E5%89%91%E5%AE%A2/3.png"></li>
+</ul>
+<h2 id="SqlSession"><a href="#SqlSession" class="headerlink" title="SqlSession"></a>SqlSession</h2><ul>
+<li>SqlSession是Myabtis中的核心API，主要用来执行命令，获取映射，管理事务。它包含了所有执行语句、提交或回滚事务以及获取映射器实例的方法。</li>
+</ul>
+<h3 id="有何方法"><a href="#有何方法" class="headerlink" title="有何方法"></a>有何方法</h3><ul>
+<li>其中定义了将近20个方法，其中涉及的到语句执行，事务提交回滚等方法。下面对于这些方法进行分类总结。</li>
+</ul>
+<h4 id="语句执行方法"><a href="#语句执行方法" class="headerlink" title="语句执行方法"></a>语句执行方法</h4><ul>
+<li>这些方法被用来执行定义在 SQL 映射 XML 文件中的 SELECT、INSERT、UPDATE 和 DELETE 语句。你可以通过名字快速了解它们的作用，每一方法都接受语句的 ID 以及参数对象，参数可以是原始类型（支持自动装箱或包装类）、JavaBean、POJO 或 Map。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;T&gt; <span class="function">T <span class="title">selectOne</span><span class="params">(String statement, Object parameter)</span></span></span><br><span class="line"><span class="function">&lt;E&gt; List&lt;E&gt; <span class="title">selectList</span><span class="params">(String statement, Object parameter)</span></span></span><br><span class="line"><span class="function">&lt;T&gt; Cursor&lt;T&gt; <span class="title">selectCursor</span><span class="params">(String statement, Object parameter)</span></span></span><br><span class="line"><span class="function">&lt;K,V&gt; Map&lt;K,V&gt; <span class="title">selectMap</span><span class="params">(String statement, Object parameter, String mapKey)</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">insert</span><span class="params">(String statement, Object parameter)</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">update</span><span class="params">(String statement, Object parameter)</span></span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">delete</span><span class="params">(String statement, Object parameter)</span></span></span><br></pre></td></tr></table></figure></li>
+<li>其中的最容易误解的就是<code>selectOne</code>和<code>selectList</code>，从方法名称就很容易知道区别，一个是查询单个，一个是查询多个。如果你对自己的SQL无法确定返回一个还是多个结果的时候，建议使用<code>selectList</code>。</li>
+<li><code>insert</code>，<code>update</code>，<code>delete</code>方法返值是受影响的行数。</li>
+<li>select还有几个重用的方法，用于限制返回行数，在Mysql中对应的就是<code>limit</code>，如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;E&gt; <span class="function">List&lt;E&gt; <span class="title">selectList</span> <span class="params">(String statement, Object parameter, RowBounds rowBounds)</span></span></span><br><span class="line"><span class="function">&lt;T&gt; Cursor&lt;T&gt; <span class="title">selectCursor</span><span class="params">(String statement, Object parameter, RowBounds rowBounds)</span></span></span><br><span class="line"><span class="function">&lt;K,V&gt; Map&lt;K,V&gt; <span class="title">selectMap</span><span class="params">(String statement, Object parameter, String mapKey, RowBounds rowbounds)</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">select</span> <span class="params">(String statement, Object parameter, ResultHandler&lt;T&gt; handler)</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">select</span> <span class="params">(String statement, Object parameter, RowBounds rowBounds, ResultHandler&lt;T&gt; handler)</span></span></span><br></pre></td></tr></table></figure></li>
+<li>其中的<code>RowBounds</code>参数中保存了限制的行数，起始行数。</li>
+</ul>
+<h4 id="立即批量更新方法"><a href="#立即批量更新方法" class="headerlink" title="立即批量更新方法"></a>立即批量更新方法</h4><ul>
+<li>当你将 ExecutorType 设置为 ExecutorType.BATCH 时，可以使用这个方法清除（执行）缓存在 JDBC 驱动类中的批量更新语句。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">List&lt;BatchResult&gt; <span class="title">flushStatements</span><span class="params">()</span></span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="事务控制方法"><a href="#事务控制方法" class="headerlink" title="事务控制方法"></a>事务控制方法</h4><ul>
+<li>有四个方法用来控制事务作用域。当然，如果你已经设置了自动提交或你使用了外部事务管理器，这些方法就没什么作用了。然而，如果你正在使用由 Connection 实例控制的 JDBC 事务管理器，那么这四个方法就会派上用场：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">commit</span><span class="params">()</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">commit</span><span class="params">(<span class="keyword">boolean</span> force)</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">rollback</span><span class="params">()</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">rollback</span><span class="params">(<span class="keyword">boolean</span> force)</span></span></span><br></pre></td></tr></table></figure></li>
+<li>默认情况下 MyBatis 不会自动提交事务，除非它侦测到调用了插入、更新或删除方法改变了数据库。如果你没有使用这些方法提交修改，那么你可以在<code>commit</code> 和 <code>rollback</code> 方法参数中传入 true 值，来保证事务被正常提交（注意，在自动提交模式或者使用了外部事务管理器的情况下，设置 <code>force</code> 值对 <code>session</code> 无效）。大部分情况下你无需调用 <code>rollback()</code>，因为 MyBatis 会在你没有调用 <code>commit</code> 时替你完成回滚操作。不过，当你要在一个可能多次提交或回滚的 session 中详细控制事务，回滚操作就派上用场了。</li>
+</ul>
+<h4 id="本地缓存方法"><a href="#本地缓存方法" class="headerlink" title="本地缓存方法"></a>本地缓存方法</h4><ul>
+<li>Mybatis 使用到了两种缓存：本地缓存（local cache）和二级缓存（second level cache）。</li>
+<li>默认情况下，本地缓存数据的生命周期等同于整个 session 的周期。由于缓存会被用来解决循环引用问题和加快重复嵌套查询的速度，所以无法将其完全禁用。但是你可以通过设置 <code>localCacheScope=STATEMENT</code> 来只在语句执行时使用缓存。</li>
+<li>可以调用以下方法清除本地缓存。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">clearCache</span><span class="params">()</span></span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h4 id="获取映射器"><a href="#获取映射器" class="headerlink" title="获取映射器"></a>获取映射器</h4><ul>
+<li>在SqlSession中你也可以获取自己的映射器，直接使用下面的方法，如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;T&gt; <span class="function">T <span class="title">getMapper</span><span class="params">(Class&lt;T&gt; type)</span></span></span><br></pre></td></tr></table></figure></li>
+<li>比如你需要获取一个<code>UserMapper</code>，如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">UserMapper mapper = sqlSessionTemplate.getMapper(UserMapper.class);</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="有何实现类"><a href="#有何实现类" class="headerlink" title="有何实现类"></a>有何实现类</h3><ul>
+<li>在Mybatis中有三个实现类，分别是<code>DefaultSqlSession</code>，<code>SqlSessionManager</code>、<code>SqlSessionTemplate</code>，其中重要的就是<code>DefaultSqlSession</code>，这个后面讲到Mybatis执行源码的时候会一一分析。</li>
+<li>在与SpringBoot整合时，Mybatis的启动器配置类会默认注入一个<code>SqlSessionTemplate</code>，源码如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Bean</span></span><br><span class="line">  <span class="meta">@ConditionalOnMissingBean</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> SqlSessionTemplate <span class="title">sqlSessionTemplate</span><span class="params">(SqlSessionFactory sqlSessionFactory)</span> </span></span><br><span class="line"><span class="function">    <span class="comment">//根据执行器的类型创建不同的执行器，默认CachingExecutor</span></span></span><br><span class="line"><span class="function">    ExecutorType executorType </span>= <span class="keyword">this</span>.properties.getExecutorType();</span><br><span class="line">    <span class="keyword">if</span> (executorType != <span class="keyword">null</span>) &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">new</span> SqlSessionTemplate(sqlSessionFactory, executorType);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">new</span> SqlSessionTemplate(sqlSessionFactory);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="Executor"><a href="#Executor" class="headerlink" title="Executor"></a>Executor</h2><ul>
+<li>Mybatis的执行器，是Mybatis的调度核心，负责SQL语句的生成和缓存的维护，SqlSession中的crud方法实际上都是调用执行器中的对应方法执行。</li>
+<li>继承结构如下图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-%E5%85%AD%E5%89%91%E5%AE%A2/1.png" alt="继承结构"></li>
+</ul>
+<h3 id="实现类"><a href="#实现类" class="headerlink" title="实现类"></a>实现类</h3><ul>
+<li>下面我们来看看都有哪些实现类，分别有什么作用。</li>
+</ul>
+<h4 id="BaseExecutor"><a href="#BaseExecutor" class="headerlink" title="BaseExecutor"></a>BaseExecutor</h4><ul>
+<li>这是一个抽象类，采用模板方法的模式，有意思的是这个老弟模仿Spring的方式，真正的执行的方法都是<code>doxxx()</code>。</li>
+<li>其中有一个方法值得注意，查询的时候走的<code>一级缓存</code>，因此这里注意下，既然这是个模板类，那么Mybatis执行select的时候默认都会走一级缓存。代码如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> &lt;E&gt; <span class="function">List&lt;E&gt; <span class="title">queryFromDatabase</span><span class="params">(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql)</span> <span class="keyword">throws</span> SQLException </span>&#123;</span><br><span class="line">    List&lt;E&gt; list;</span><br><span class="line">    <span class="comment">//此处的localCache即是一级缓存，是一个Map的结构</span></span><br><span class="line">    localCache.putObject(key, EXECUTION_PLACEHOLDER);</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="comment">//执行真正的查询</span></span><br><span class="line">      list = doQuery(ms, parameter, rowBounds, resultHandler, boundSql);</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">      localCache.removeObject(key);</span><br><span class="line">    &#125;</span><br><span class="line">    localCache.putObject(key, list);</span><br><span class="line">    <span class="keyword">if</span> (ms.getStatementType() == StatementType.CALLABLE) &#123;</span><br><span class="line">      localOutputParameterCache.putObject(key, parameter);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> list;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<h4 id="CachingExecutor"><a href="#CachingExecutor" class="headerlink" title="CachingExecutor"></a>CachingExecutor</h4></li>
+<li>这个比较有名了，二级缓存的维护类，与SpringBoot整合默认创建的就是这个家伙。下面来看一下如何走的二级缓存，源码如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">  <span class="keyword">public</span> &lt;E&gt; <span class="function">List&lt;E&gt; <span class="title">query</span><span class="params">(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql)</span></span></span><br><span class="line"><span class="function">      <span class="keyword">throws</span> SQLException </span>&#123;</span><br><span class="line">    <span class="comment">//查看当前Sql是否使用了二级缓存</span></span><br><span class="line">    Cache cache = ms.getCache();</span><br><span class="line">    <span class="comment">//使用缓存了，直接从缓存中取</span></span><br><span class="line">    <span class="keyword">if</span> (cache != <span class="keyword">null</span>) &#123;</span><br><span class="line">      flushCacheIfRequired(ms);</span><br><span class="line">      <span class="keyword">if</span> (ms.isUseCache() &amp;&amp; resultHandler == <span class="keyword">null</span>) &#123;</span><br><span class="line">        ensureNoOutParams(ms, boundSql);</span><br><span class="line">        <span class="meta">@SuppressWarnings(&quot;unchecked&quot;)</span></span><br><span class="line">        <span class="comment">//从缓存中取数据</span></span><br><span class="line">        List&lt;E&gt; list = (List&lt;E&gt;) tcm.getObject(cache, key);</span><br><span class="line">        <span class="keyword">if</span> (list == <span class="keyword">null</span>) &#123;</span><br><span class="line">          <span class="comment">//没取到数据，则执行SQL从数据库查询</span></span><br><span class="line">          list = delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);</span><br><span class="line">          <span class="comment">//查到了，放入缓存中</span></span><br><span class="line">          tcm.putObject(cache, key, list); <span class="comment">// issue #578 and #116</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//直接返回</span></span><br><span class="line">        <span class="keyword">return</span> list;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//没使用二级缓存，直接执行SQL从数据库查询</span></span><br><span class="line">    <span class="keyword">return</span> delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></li>
+<li>这玩意就是走个二级缓存，其他没什么。</li>
+</ul>
+<h4 id="SimpleExecutor"><a href="#SimpleExecutor" class="headerlink" title="SimpleExecutor"></a>SimpleExecutor</h4><ul>
+<li>这个类像个直男，最简单的一个执行器，就是根据对应的SQL执行，不会做一些额外的操作。</li>
+</ul>
+<h4 id="BatchExecutor"><a href="#BatchExecutor" class="headerlink" title="BatchExecutor"></a>BatchExecutor</h4><ul>
+<li>通过批量操作来优化性能。通常需要注意的是<code>批量更新</code>操作，由于内部有缓存的实现，使用完成后记得调用<code>flushStatements</code>来清除缓存。</li>
+</ul>
+<h4 id="ReuseExecutor"><a href="#ReuseExecutor" class="headerlink" title="ReuseExecutor"></a>ReuseExecutor</h4><ul>
+<li>　可重用的执行器，重用的对象是Statement，也就是说该执行器会缓存同一个sql的<code>Statement</code>，省去Statement的重新创建，优化性能。</li>
+<li>内部的实现是通过一个<code>HashMap</code>来维护Statement对象的。由于当前Map只在该session中有效，所以使用完成后记得调用<code>flushStatements</code>来清除Map。</li>
+</ul>
+<h3 id="SpringBoot中如何创建"><a href="#SpringBoot中如何创建" class="headerlink" title="SpringBoot中如何创建"></a>SpringBoot中如何创建</h3><ul>
+<li><p>在SpringBoot到底创建的是哪个执行器呢？其实只要阅读一下源码可以很清楚的知道，答案就在<code>org.apache.ibatis.session.Configuration</code>类中，其中创建执行器的源码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Executor <span class="title">newExecutor</span><span class="params">(Transaction transaction, ExecutorType executorType)</span> </span>&#123;</span><br><span class="line">    <span class="comment">//没有指定执行器的类型，创建默认的，即是SimpleExecutor</span></span><br><span class="line">    executorType = executorType == <span class="keyword">null</span> ? defaultExecutorType : executorType;</span><br><span class="line">    executorType = executorType == <span class="keyword">null</span> ? ExecutorType.SIMPLE : executorType;</span><br><span class="line">    Executor executor;</span><br><span class="line">    <span class="comment">//类型是BATCH，创建BatchExecutor</span></span><br><span class="line">    <span class="keyword">if</span> (ExecutorType.BATCH == executorType) &#123;</span><br><span class="line">      executor = <span class="keyword">new</span> BatchExecutor(<span class="keyword">this</span>, transaction);</span><br><span class="line">      <span class="comment">//类型为REUSE，创建ReuseExecutor</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (ExecutorType.REUSE == executorType) &#123;</span><br><span class="line">      executor = <span class="keyword">new</span> ReuseExecutor(<span class="keyword">this</span>, transaction);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="comment">//除了上面两种，创建的都是SimpleExecutor</span></span><br><span class="line">      executor = <span class="keyword">new</span> SimpleExecutor(<span class="keyword">this</span>, transaction);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//如果全局配置了二级缓存，则创建CachingExecutor，SpringBoot中这个参数默认是true，可以自己设置为false</span></span><br><span class="line">    <span class="keyword">if</span> (cacheEnabled) &#123;</span><br><span class="line">    <span class="comment">//创建CachingExecutor</span></span><br><span class="line">      executor = <span class="keyword">new</span> CachingExecutor(executor);</span><br><span class="line">    &#125;</span><br><span class="line">    executor = (Executor) interceptorChain.pluginAll(executor);</span><br><span class="line">    <span class="keyword">return</span> executor;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>显而易见，SpringBoot中默认创建的是<code>CachingExecutor</code>，因为默认的<code>cacheEnabled</code>的值为<code>true</code>。</p>
+</li>
+</ul>
+<h2 id="StatementHandler"><a href="#StatementHandler" class="headerlink" title="StatementHandler"></a>StatementHandler</h2><ul>
+<li>熟悉JDBC的朋友应该都能猜到这个接口是干嘛的，很显然，这个是对SQL语句进行处理和参数赋值的。</li>
+</ul>
+<h3 id="实现类-1"><a href="#实现类-1" class="headerlink" title="实现类"></a>实现类</h3><ul>
+<li>该接口也是有很多的实现类，如下图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-%E5%85%AD%E5%89%91%E5%AE%A2/2.png"></li>
+</ul>
+<h4 id="SimpleStatementHandler"><a href="#SimpleStatementHandler" class="headerlink" title="SimpleStatementHandler"></a>SimpleStatementHandler</h4><ul>
+<li>这个很简单了，就是对应我们JDBC中常用的Statement接口，用于简单SQL的处理</li>
+</ul>
+<h4 id="PreparedStatementHandler"><a href="#PreparedStatementHandler" class="headerlink" title="PreparedStatementHandler"></a>PreparedStatementHandler</h4><ul>
+<li>这个对应JDBC中的PreparedStatement，预编译SQL的接口。</li>
+</ul>
+<h4 id="CallableStatementHandler"><a href="#CallableStatementHandler" class="headerlink" title="CallableStatementHandler"></a>CallableStatementHandler</h4><ul>
+<li>这个对应JDBC中CallableStatement，用于执行存储过程相关的接口。</li>
+</ul>
+<h4 id="RoutingStatementHandler"><a href="#RoutingStatementHandler" class="headerlink" title="RoutingStatementHandler"></a>RoutingStatementHandler</h4><ul>
+<li>这个接口是以上三个接口的路由，没有实际操作，只是负责上面三个StatementHandler的创建及调用。</li>
+</ul>
+<h2 id="ParameterHandler"><a href="#ParameterHandler" class="headerlink" title="ParameterHandler"></a>ParameterHandler</h2><ul>
+<li><code>ParameterHandler</code>在Mybatis中负责将sql中的占位符替换为真正的参数，它是一个接口，有且只有一个实现类<code>DefaultParameterHandler</code>。</li>
+<li><code>setParameters</code>是处理参数最核心的方法。这里不再详细的讲，后面会讲到。</li>
+</ul>
+<h2 id="TypeHandler"><a href="#TypeHandler" class="headerlink" title="TypeHandler"></a>TypeHandler</h2><ul>
+<li>这位大神应该都听说过，也都自定义过吧，简单的说就是在预编译设置参数和取出结果的时候将Java类型和JDBC的类型进行相应的转换。当然，Mybatis内置了很多默认的类型处理器，基本够用，除非有特殊的定制，我们才会去自定义，比如需要将Java对象以<code>JSON</code>字符串的形式存入数据库，此时就可以自定义一个类型处理器。</li>
+<li>很简单的东西，此处就不再详细的讲了，后面会单独出一篇如何自定义类型处理器的文章。</li>
+</ul>
+<h2 id="ResultSetHandler"><a href="#ResultSetHandler" class="headerlink" title="ResultSetHandler"></a>ResultSetHandler</h2><ul>
+<li>结果处理器，负责将JDBC返回的ResultSet结果集对象转换成List类型的集合或者<code>Cursor</code>。</li>
+<li>具体实现类就是<code>DefaultResultSetHandler</code>，其实现的步骤就是将Statement执行后的结果集，按照Mapper文件中配置的ResultType或ResultMap来封装成对应的对象，最后将封装的对象返回。</li>
+<li>源码及其复杂，尤其是其中对嵌套查询的解析，这里只做个了解，后续会专门写一篇文章介绍。</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>至此，Mybatis源码第一篇就已经讲完了，本篇文章对Mybatis中的重要组件做了初步的了解，为后面更深入的源码阅读做了铺垫，如果觉得作者写的不错，在看分享一波，谢谢支持。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E4%B8%83%E7%A7%92%E7%BC%96%E7%A8%8B.jpg"></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Mybatis/" rel="tag"># Mybatis</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/04/20/Mybatis%E7%9A%84%E5%87%A0%E7%A7%8D%E4%BC%A0%E5%8F%82%E6%96%B9%E5%BC%8F%EF%BC%8C%E4%BD%A0%E4%BA%86%E8%A7%A3%E5%90%97%EF%BC%9F/" rel="prev" title="Mybatis的几种传参方式，你了解吗？">
+      <i class="fa fa-chevron-left"></i> Mybatis的几种传参方式，你了解吗？
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/04/20/Mybatis%E5%A6%82%E4%BD%95%E9%98%85%E8%AF%BB%E6%BA%90%E7%A0%81%EF%BC%8C%E6%95%99%E4%BD%A0%E4%B8%80%E6%8B%9B/" rel="next" title="Mybatis如何阅读源码，教你一招？">
+      Mybatis如何阅读源码，教你一招？ <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E7%89%88%E6%9C%AC"><span class="nav-text">环境版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Myabtis%E7%9A%84%E5%85%AD%E5%89%91%E5%AE%A2"><span class="nav-text">Myabtis的六剑客</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SqlSession"><span class="nav-text">SqlSession</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%89%E4%BD%95%E6%96%B9%E6%B3%95"><span class="nav-text">有何方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%AD%E5%8F%A5%E6%89%A7%E8%A1%8C%E6%96%B9%E6%B3%95"><span class="nav-text">语句执行方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AB%8B%E5%8D%B3%E6%89%B9%E9%87%8F%E6%9B%B4%E6%96%B0%E6%96%B9%E6%B3%95"><span class="nav-text">立即批量更新方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E6%8E%A7%E5%88%B6%E6%96%B9%E6%B3%95"><span class="nav-text">事务控制方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0%E7%BC%93%E5%AD%98%E6%96%B9%E6%B3%95"><span class="nav-text">本地缓存方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E6%98%A0%E5%B0%84%E5%99%A8"><span class="nav-text">获取映射器</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%89%E4%BD%95%E5%AE%9E%E7%8E%B0%E7%B1%BB"><span class="nav-text">有何实现类</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Executor"><span class="nav-text">Executor</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E7%B1%BB"><span class="nav-text">实现类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#BaseExecutor"><span class="nav-text">BaseExecutor</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CachingExecutor"><span class="nav-text">CachingExecutor</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SimpleExecutor"><span class="nav-text">SimpleExecutor</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#BatchExecutor"><span class="nav-text">BatchExecutor</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ReuseExecutor"><span class="nav-text">ReuseExecutor</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SpringBoot%E4%B8%AD%E5%A6%82%E4%BD%95%E5%88%9B%E5%BB%BA"><span class="nav-text">SpringBoot中如何创建</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#StatementHandler"><span class="nav-text">StatementHandler</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E7%B1%BB-1"><span class="nav-text">实现类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#SimpleStatementHandler"><span class="nav-text">SimpleStatementHandler</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PreparedStatementHandler"><span class="nav-text">PreparedStatementHandler</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#CallableStatementHandler"><span class="nav-text">CallableStatementHandler</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#RoutingStatementHandler"><span class="nav-text">RoutingStatementHandler</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ParameterHandler"><span class="nav-text">ParameterHandler</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TypeHandler"><span class="nav-text">TypeHandler</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ResultSetHandler"><span class="nav-text">ResultSetHandler</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某</span>
+</div>
+ <!-- <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

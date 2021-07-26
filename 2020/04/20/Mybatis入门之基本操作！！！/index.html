@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言 作为一个资深后端码农天天都要和数据库打交道，最早使用的是 Hiberate，一个封装性极强的持久性框架。自从接触到 Mybatis 就被它的灵活性所折服了，可以自己写 SQL，虽然轻量级，但是麻雀虽小，五脏俱全。这篇文章就来讲讲什么是 Mybatis，如何简单的使用 Mybatis。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mybatis入门之基本操作！！！">
+<meta property="og:url" content="http://example.com/2020/04/20/Mybatis%E5%85%A5%E9%97%A8%E4%B9%8B%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C%EF%BC%81%EF%BC%81%EF%BC%81/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="前言 作为一个资深后端码农天天都要和数据库打交道，最早使用的是 Hiberate，一个封装性极强的持久性框架。自从接触到 Mybatis 就被它的灵活性所折服了，可以自己写 SQL，虽然轻量级，但是麻雀虽小，五脏俱全。这篇文章就来讲讲什么是 Mybatis，如何简单的使用 Mybatis。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E4%B8%83%E7%A7%92%E7%BC%96%E7%A8%8B.jpg">
+<meta property="article:published_time" content="2020-04-20T08:59:42.000Z">
+<meta property="article:modified_time" content="2020-10-28T10:10:43.232Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="Mybatis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E4%B8%83%E7%A7%92%E7%BC%96%E7%A8%8B.jpg">
+
+<link rel="canonical" href="http://example.com/2020/04/20/Mybatis%E5%85%A5%E9%97%A8%E4%B9%8B%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C%EF%BC%81%EF%BC%81%EF%BC%81/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Mybatis入门之基本操作！！！ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/04/20/Mybatis%E5%85%A5%E9%97%A8%E4%B9%8B%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C%EF%BC%81%EF%BC%81%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Mybatis入门之基本操作！！！
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-04-20 16:59:42" itemprop="dateCreated datePublished" datetime="2020-04-20T16:59:42+08:00">2020-04-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-28 18:10:43" itemprop="dateModified" datetime="2020-10-28T18:10:43+08:00">2020-10-28</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Mybatis%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Mybatis进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
+<li><p>作为一个资深后端码农天天都要和数据库打交道，最早使用的是 Hiberate，一个封装性极强的持久性框架。自从接触到 Mybatis 就被它的灵活性所折服了，可以自己写 SQL，虽然轻量级，但是麻雀虽小，五脏俱全。这篇文章就来讲讲什么是 Mybatis，如何简单的使用 Mybatis。</p>
+<span id="more"></span>
+<h2 id="什么是-Mybatis"><a href="#什么是-Mybatis" class="headerlink" title="什么是 Mybatis"></a>什么是 Mybatis</h2></li>
+<li><p>MyBatis 是一款优秀的<code>持久层</code>框架，它支持<code>自定义 SQL</code>、<code>存储过程</code>以及<code>高级映射</code>。MyBatis 免除了几乎所有的 JDBC 代码以及设置参数和获取结果集的工作。MyBatis 可以通过简单的 <code>XML</code> 或注解来配置和映射原始类型、接口和 <code>Java POJO</code>（Plain Old Java Objects，普通老式 Java 对象）为数据库中的记录。</p>
+</li>
+</ul>
+<h2 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h2><ul>
+<li>本篇文章使用的环境是<code>SpringBoot+Mybatis+Mysql</code></li>
+</ul>
+<h3 id="Maven-依赖"><a href="#Maven-依赖" class="headerlink" title="Maven 依赖"></a>Maven 依赖</h3><ul>
+<li>MySQL 驱动依赖和 Druid 连接池的依赖</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>mysql<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>mysql-connector-java<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>5.1.40<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">scope</span>&gt;</span>runtime<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!--druid连接池--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.alibaba<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>druid-spring-boot-starter<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.1.9<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Mybatis 启动包依赖，此处导入的是 SpringBoot 和 Mybatis 整合启动器的依赖，点击去可以看到，这个启动包依赖了<code>mybatis</code>和<code>mybatis-spring</code>（Mybatis 和 Spring 整合的 Jar 包），因此使用 SpringBoot 之后只需要导入这个启动器的依赖即可。</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.mybatis.spring.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>mybatis-spring-boot-starter<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.0.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>以上两个依赖添加成功后，Maven 环境就已经配置完了。</li>
+</ul>
+<h3 id="数据库连接池配置（Druid）"><a href="#数据库连接池配置（Druid）" class="headerlink" title="数据库连接池配置（Druid）"></a>数据库连接池配置（Druid）</h3><ul>
+<li>这个不是本文的重点，而且网上很多教程，我就简单的配置一下，在 SpringBoot 的<code>application.properties</code>中配置即可。</li>
+</ul>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">##单一数据源</span></span><br><span class="line"><span class="meta">spring.datasource.url</span>=<span class="string">jdbc\:mysql\://127.0.0.1\:3306/vivachekcloud_pzhdermyy?useUnicode\=true&amp;characterEncoding\=UTF-8&amp;zeroDateTimeBehavior\=convertToNull&amp;useSSL\=false</span></span><br><span class="line"><span class="meta">spring.datasource.username</span>=<span class="string">root</span></span><br><span class="line"><span class="meta">spring.datasource.password</span>=<span class="string">123456</span></span><br><span class="line"><span class="meta">spring.datasource.type</span>=<span class="string">com.alibaba.druid.pool.DruidDataSource</span></span><br><span class="line"><span class="meta">spring.datasource.driver-class-name</span>=<span class="string">com.mysql.jdbc.Driver</span></span><br><span class="line"><span class="comment">#初始化连接大小</span></span><br><span class="line"><span class="meta">spring.datasource.druid.initial-size</span>=<span class="string">0</span></span><br><span class="line"><span class="comment">#连接池最大使用连接数量</span></span><br><span class="line"><span class="meta">spring.datasource.druid.max-active</span>=<span class="string">20</span></span><br><span class="line"><span class="comment">#连接池最小空闲</span></span><br><span class="line"><span class="meta">spring.datasource.druid.min-idle</span>=<span class="string">0</span></span><br><span class="line"><span class="comment">#获取连接最大等待时间</span></span><br><span class="line"><span class="meta">spring.datasource.druid.max-wait</span>=<span class="string">6000</span></span><br><span class="line"><span class="meta">spring.datasource.druid.validation-query</span>=<span class="string">SELECT 1</span></span><br><span class="line"><span class="comment">#spring.datasource.druid.validation-query-timeout=6000</span></span><br><span class="line"><span class="meta">spring.datasource.druid.test-on-borrow</span>=<span class="string">false</span></span><br><span class="line"><span class="meta">spring.datasource.druid.test-on-return</span>=<span class="string">false</span></span><br><span class="line"><span class="meta">spring.datasource.druid.test-while-idle</span>=<span class="string">true</span></span><br><span class="line"><span class="comment">#配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒</span></span><br><span class="line"><span class="meta">spring.datasource.druid.time-between-eviction-runs-millis</span>=<span class="string">60000</span></span><br><span class="line"><span class="comment">#置一个连接在池中最小生存的时间，单位是毫秒</span></span><br><span class="line"><span class="meta">spring.datasource.druid.min-evictable-idle-time-millis</span>=<span class="string">25200000</span></span><br><span class="line"><span class="comment">#spring.datasource.druid.max-evictable-idle-time-millis=</span></span><br><span class="line"><span class="comment">#打开removeAbandoned功能,多少时间内必须关闭连接</span></span><br><span class="line"><span class="meta">spring.datasource.druid.removeAbandoned</span>=<span class="string">true</span></span><br><span class="line"><span class="comment">#1800秒，也就是30分钟</span></span><br><span class="line"><span class="meta">spring.datasource.druid.remove-abandoned-timeout</span>=<span class="string">1800</span></span><br><span class="line"><span class="comment">#&lt;!-- 1800秒，也就是30分钟 --&gt;</span></span><br><span class="line"><span class="meta">spring.datasource.druid.log-abandoned</span>=<span class="string">true</span></span><br><span class="line"><span class="meta">spring.datasource.druid.filters</span>=<span class="string">mergeStat</span></span><br><span class="line"><span class="comment">#spring.datasource.druid.verifyServerCertificate</span></span><br><span class="line"><span class="comment">#spring.datasource.filters=stat,wall,log4j</span></span><br><span class="line"><span class="comment"># 通过connectProperties属性来打开mergeSql功能；慢SQL记录</span></span><br><span class="line"><span class="meta">spring.datasource.connectionProperties</span>=<span class="string">druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="基础概念"><a href="#基础概念" class="headerlink" title="基础概念"></a>基础概念</h2><ul>
+<li><code>dao</code>层：用于存放和数据库交互的文件，Mybatis 的<code>interface</code>都放在此层</li>
+<li><code>service</code>层：用于存放业务逻辑的文件。</li>
+</ul>
+<h2 id="配置-xml-文件存放的位置"><a href="#配置-xml-文件存放的位置" class="headerlink" title="配置 xml 文件存放的位置"></a>配置 xml 文件存放的位置</h2><ul>
+<li>Mybatis 中<code>xml</code>的文件默认是要和<code>interface</code>放在一个包下的，并且文件的名称要一样。</li>
+<li>在和 SpringBoot 整合后有两种配置方式，下面详细介绍。</li>
+</ul>
+<h3 id="application-properties-中设置"><a href="#application-properties-中设置" class="headerlink" title="application.properties 中设置"></a>application.properties 中设置</h3><ul>
+<li>既然是和 SpringBoot 整合，那么万变不离<code>xxxAutoConfiguration</code>这个配置类了，Mybatis 的配置类就是<code>MybatisAutoConfiguration</code>，如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@org</span>.springframework.context.annotation.Configuration</span><br><span class="line"><span class="meta">@ConditionalOnClass(&#123; SqlSessionFactory.class, SqlSessionFactoryBean.class &#125;)</span></span><br><span class="line"><span class="meta">@ConditionalOnSingleCandidate(DataSource.class)</span></span><br><span class="line"><span class="meta">@EnableConfigurationProperties(MybatisProperties.class)</span></span><br><span class="line"><span class="meta">@AutoConfigureAfter(DataSourceAutoConfiguration.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MybatisAutoConfiguration</span> <span class="keyword">implements</span> <span class="title">InitializingBean</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>可以看到<code>@EnableConfigurationProperties(MybatisProperties.class)</code>这行代码，就是将 properties 中的属性映射到 MybatisProperties 这个成员属性中，因此设置的方式就要看其中的属性。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MybatisProperties</span> </span>&#123;</span><br><span class="line">  <span class="comment">//前缀</span></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String MYBATIS_PREFIX = <span class="string">&quot;mybatis&quot;</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * Mybatis配置文件的位置</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">private</span> String configLocation;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * Mybatis的Mapper的xml文件的位置</span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">private</span> String[] mapperLocations;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>因此设置的方式很简单，如下：</li>
+</ul>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## xml文件放置在/src/main/resource/mapper/文件夹下</span></span><br><span class="line"><span class="meta">mybatis.mapper-locations</span>=<span class="string">classpath*:/mapper/**/*.xml</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="配置类中设置"><a href="#配置类中设置" class="headerlink" title="配置类中设置"></a>配置类中设置</h3><ul>
+<li>不是本章重点，后面在讲 Mybatis 和 SpringBoot 整合的文章会涉及到该内容。</li>
+</ul>
+<h2 id="配置扫描-Mybatis-的-interface"><a href="#配置扫描-Mybatis-的-interface" class="headerlink" title="配置扫描 Mybatis 的 interface"></a>配置扫描 Mybatis 的 interface</h2><ul>
+<li>在和 SpringBoot 整合后，扫描 Mybatis 的接口，生成代理对象是一件很简单的事，只需要一个注解即可。</li>
+</ul>
+<h3 id="Mapper"><a href="#Mapper" class="headerlink" title="@Mapper"></a>@Mapper</h3><ul>
+<li>该注解标注在 Mybatis 的<code>interface</code>类上，SpringBoot 启动之后会扫描后会自动生成代理对象。实例如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">UserInfoMapper</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">insert</span><span class="params">(UserInfo record)</span></span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">insertSelective</span><span class="params">(UserInfo record)</span></span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>缺点：每个<code>interface</code>都要标注一个，很鸡肋，一个项目中的 interface 少说也有上百个吧。</li>
+</ul>
+<h3 id="MapperScan"><a href="#MapperScan" class="headerlink" title="@MapperScan"></a>@MapperScan</h3><ul>
+<li><code>@Mapper</code>注解的升级版，标注在配置类上，用于一键扫描 Mybatis 的<code>interface</code>。</li>
+<li>使用也是很简单的，直接指定接口所在的包即可，如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@MapperScan(&#123;&quot;com.xxx.dao&quot;&#125;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ApiApplication</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>@MapperScan</code>和<code>@Mapper</code>这两个注解千万不要重复使用。</li>
+<li>优点：一键扫描，不用每个 interface 配置。</li>
+</ul>
+<h2 id="基本的-crud"><a href="#基本的-crud" class="headerlink" title="基本的 crud"></a>基本的 crud</h2><ul>
+<li>既然和数据库交互，避免不了 crud 操作，就安心做一个妥妥的<code>crud boy</code>吧。</li>
+<li>针对 Mybatis 其实有两套方法映射，一个是 XML 文件的方式，一个是注解的方式。但是今天只讲 XML 文件的方式，原因很简单，注解的方式企业不用，谁用谁倒霉，哈哈。</li>
+</ul>
+<h3 id="查询"><a href="#查询" class="headerlink" title="查询"></a>查询</h3><ul>
+<li>查询语句是 MyBatis 中最常用的元素之一——光能把数据存到数据库中价值并不大，还要能重新取出来才有用，多数应用也都是查询比修改要频繁。 MyBatis 的基本原则之一是：在每个插入、更新或删除操作之间，通常会执行多个查询操作。因此，MyBatis 在查询和结果映射做了相当多的改进。一个简单查询的 select 元素是非常简单的。</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">select</span> <span class="attr">id</span>=<span class="string">&quot;selectPersonById&quot;</span> <span class="attr">parameterType</span>=<span class="string">&quot;int&quot;</span> <span class="attr">resultType</span>=<span class="string">&quot;com.myjszl.domain.Person&quot;</span>&gt;</span></span><br><span class="line">  SELECT name,age,id FROM PERSON WHERE ID = #&#123;id&#125;</span><br><span class="line"><span class="tag">&lt;/<span class="name">select</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>对应的<code>interface</code>的方法如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Person <span class="title">selectPersonById</span><span class="params">(<span class="keyword">int</span> id)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><code>&lt;select&gt;</code>这个标签有很多属性，比较常用的属性如下：</p>
+<ul>
+<li><code>id</code>（必填）：在命名空间中唯一的标识符，可以被用来引用这条语句。和<code>interface</code>中的<code>方法名</code>要一致。</li>
+<li><code>parameterType</code>（可选）：将会传入这条语句的参数的类全限定名或别名。这个属性是可选的，因为 MyBatis 可以通过类型处理器（TypeHandler）推断出具体传入语句的参数，默认值为未设置（unset）。</li>
+<li><code>resultType</code>：期望从这条语句中返回结果的类全限定名或别名。 注意，如果返回的是集合，那应该设置为集合包含的类型，而不是集合本身的类型。 <code>resultType</code> 和 <code>resultMap</code> 之间只能同时使用一个。</li>
+<li><code>resultMap</code>：对外部 <code>resultMap</code> 的命名引用。结果映射是 MyBatis 最强大的特性，如果你对其理解透彻，许多复杂的映射问题都能迎刃而解。 <code>resultType</code> 和 <code>resultMap</code> 之间只能同时使用一个。</li>
+</ul>
+</li>
+</ul>
+<h3 id="变更"><a href="#变更" class="headerlink" title="变更"></a>变更</h3><ul>
+<li>数据变更语句 insert，update 和 delete 的实现非常接近。</li>
+<li>下面是 insert，update 和 delete 语句的示例：</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">insert</span> <span class="attr">id</span>=<span class="string">&quot;insertAuthor&quot;</span>&gt;</span></span><br><span class="line">  insert into Author (id,username,password,email,bio)</span><br><span class="line">  values (#&#123;id&#125;,#&#123;username&#125;,#&#123;password&#125;,#&#123;email&#125;,#&#123;bio&#125;)</span><br><span class="line"><span class="tag">&lt;/<span class="name">insert</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">update</span> <span class="attr">id</span>=<span class="string">&quot;updateAuthor&quot;</span>&gt;</span></span><br><span class="line">  update Author set</span><br><span class="line">    username = #&#123;username&#125;,</span><br><span class="line">    password = #&#123;password&#125;,</span><br><span class="line">    email = #&#123;email&#125;,</span><br><span class="line">    bio = #&#123;bio&#125;</span><br><span class="line">  where id = #&#123;id&#125;</span><br><span class="line"><span class="tag">&lt;/<span class="name">update</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">delete</span> <span class="attr">id</span>=<span class="string">&quot;deleteAuthor&quot;</span>&gt;</span></span><br><span class="line">  delete from Author where id = #&#123;id&#125;</span><br><span class="line"><span class="tag">&lt;/<span class="name">delete</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="和-的区别"><a href="#和-的区别" class="headerlink" title="#{}和${}的区别"></a>#{}和${}的区别</h2><ul>
+<li>上面的例子中我们可以看到使用的都是<code>#&#123;&#125;</code>，关于<code>#&#123;&#125;</code>和<code>$&#123;&#125;</code>的区别也是在很多初级工程师的面试最常被问到的，现在只需要记住区别就是<code>#&#123;&#125;</code>使用了 JDBC 的预编译，可以防止 SQL 注入，提高了安全性，<code>$&#123;&#125;</code>并没有预编译，安全性不够。在后面 Mybatis 的源码讲解中将会涉及到为什么一个用了预编译，一个没用。</li>
+</ul>
+<h2 id="自增-ID-的返回"><a href="#自增-ID-的返回" class="headerlink" title="自增 ID 的返回"></a>自增 ID 的返回</h2><ul>
+<li>关于 Mysql 的文章中有提到，设计一个表最好要有一个自增 ID，无论这个 ID 你是否用到，具体原因不在解释，可以翻看之前的文章。</li>
+<li>有了自增 ID，插入之后并不能自动返回，但是我们又需要这个 ID 值，那么如何返回呢？</li>
+<li><code>&lt;insert&gt;</code>标签提供了两个属性用来解决这个问题，如下：<ul>
+<li><code>useGeneratedKeys</code>：设置为 true，表示使用自增主键返回</li>
+<li><code>keyProperty</code>：指定返回的自增主键映射到<code>parameterType</code>的哪个属性中。</li>
+</ul>
+</li>
+<li>假设插入<code>Person</code>，并且 person 表中的自增主键 id 需要返回，XML 文件如下：</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="meta">&lt;!DOCTYPE <span class="meta-keyword">mapper</span> <span class="meta-keyword">PUBLIC</span> <span class="meta-string">&quot;-//mybatis.org//DTD Mapper 3.0//EN&quot;</span> <span class="meta-string">&quot;http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">mapper</span> <span class="attr">namespace</span>=<span class="string">&quot;com.xxx.dao.PersonMapper&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">insert</span> <span class="attr">id</span>=<span class="string">&#x27;addPerson&#x27;</span> <span class="attr">parameterType</span>=<span class="string">&#x27;com.xxx.domain.Person&#x27;</span> <span class="attr">useGeneratedKeys</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">    <span class="attr">keyProperty</span>=<span class="string">&quot;id&quot;</span> &gt;</span></span><br><span class="line">    insert into person(name,age)</span><br><span class="line">    values(#&#123;name&#125;,#&#123;age&#125;);</span><br><span class="line">  <span class="tag">&lt;/<span class="name">insert</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">mapper</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="SQL-代码片段"><a href="#SQL-代码片段" class="headerlink" title="SQL 代码片段"></a>SQL 代码片段</h2><ul>
+<li>这个元素可以用来定义可重用的 SQL 代码片段，以便在其它语句中使用。 参数可以静态地（在加载的时候）确定下来，并且可以在不同的 include 元素中定义不同的参数值。比如：</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">sql</span> <span class="attr">id</span>=<span class="string">&quot;userColumns&quot;</span>&gt;</span> $&#123;alias&#125;.id,$&#123;alias&#125;.username,$&#123;alias&#125;.password <span class="tag">&lt;/<span class="name">sql</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>这个 SQL 片段可以在其它语句中使用，例如：</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">select</span> <span class="attr">id</span>=<span class="string">&quot;selectUsers&quot;</span> <span class="attr">resultType</span>=<span class="string">&quot;map&quot;</span>&gt;</span></span><br><span class="line">  select</span><br><span class="line">    <span class="tag">&lt;<span class="name">include</span> <span class="attr">refid</span>=<span class="string">&quot;userColumns&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;alias&quot;</span> <span class="attr">value</span>=<span class="string">&quot;t1&quot;</span>/&gt;</span><span class="tag">&lt;/<span class="name">include</span>&gt;</span>,</span><br><span class="line">    <span class="tag">&lt;<span class="name">include</span> <span class="attr">refid</span>=<span class="string">&quot;userColumns&quot;</span>&gt;</span><span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;alias&quot;</span> <span class="attr">value</span>=<span class="string">&quot;t2&quot;</span>/&gt;</span><span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">  from some_table t1</span><br><span class="line">    cross join some_table t2</span><br><span class="line"><span class="tag">&lt;/<span class="name">select</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="开启驼峰映射"><a href="#开启驼峰映射" class="headerlink" title="开启驼峰映射"></a>开启驼峰映射</h2><ul>
+<li>DBA 在设计数据库的时候，往往使用的是下划线(<code>_</code>)的方式，比如<code>user_id</code>。但是 Java 是不规范的，我们通常将它转换为<code>userId</code>，这就是驼峰命名方法。</li>
+<li>但是在使用 Mybatis 查询的时候，比如：</li>
+</ul>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">select</span> <span class="attr">id</span>=<span class="string">&#x27;selectById&#x27;</span> <span class="attr">resultType</span>=<span class="string">&#x27;com.xxx.doamin.User&#x27;</span>&gt;</span></span><br><span class="line">  select user_id from user_info</span><br><span class="line"><span class="tag">&lt;/<span class="name">select</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>上面的<code>user_id</code>和<code>User</code>中的<code>userId</code>根本不对应，也就映射不进去，此时查询的结果就是 userId 是 null，当然我们可以使用别名的方式，SQL 可以改写为<code>select user_id as userId from user_info</code></li>
+<li>另外一种方式是不用别名，直接开启 Mybatis 的驼峰映射规则，会自动映射，开启的方式很简单，就是在<code>application.properties</code>文件配置一下，如下：</li>
+</ul>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">mybatis.configuration.map-underscore-to-camel-case</span>=<span class="string">true</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>本文主要讲了 Mybatis 与 SpringBoot 的整合过程，基本的 crud，各种标签的属性等内容，属于一个入门级别的教程，后续的内容会逐渐深入。</li>
+<li>另外，MySQL 进阶的教程已经写了五篇文章了，每一篇都是经典，已经出了一个专辑，感兴趣的可以收藏一下<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=1493292455318847492&scene=173#wechat_redirect&scene=126&subscene=0&sessionid=1599046435&enterid=1599046439">MySQL 进阶</a>。</li>
+<li>感谢你的阅读，作者会定时的更新原创文章，如果觉得写的不错的话，可以关注一下本公众号。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E4%B8%83%E7%A7%92%E7%BC%96%E7%A8%8B.jpg"></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Mybatis/" rel="tag"># Mybatis</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/04/20/Mysql%E6%9C%80%E5%85%A8%E9%9D%A2%E8%AF%95%E6%8C%87%E5%8D%97/" rel="prev" title="Mysql最全面试指南">
+      <i class="fa fa-chevron-left"></i> Mysql最全面试指南
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/04/20/Mysql%E6%9C%80%E5%85%A8%E9%9D%A2%E8%AF%95%E9%A2%98/" rel="next" title="Mysql最全面试题">
+      Mysql最全面试题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-Mybatis"><span class="nav-text">什么是 Mybatis</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA"><span class="nav-text">环境搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Maven-%E4%BE%9D%E8%B5%96"><span class="nav-text">Maven 依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BF%9E%E6%8E%A5%E6%B1%A0%E9%85%8D%E7%BD%AE%EF%BC%88Druid%EF%BC%89"><span class="nav-text">数据库连接池配置（Druid）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5"><span class="nav-text">基础概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE-xml-%E6%96%87%E4%BB%B6%E5%AD%98%E6%94%BE%E7%9A%84%E4%BD%8D%E7%BD%AE"><span class="nav-text">配置 xml 文件存放的位置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#application-properties-%E4%B8%AD%E8%AE%BE%E7%BD%AE"><span class="nav-text">application.properties 中设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E7%B1%BB%E4%B8%AD%E8%AE%BE%E7%BD%AE"><span class="nav-text">配置类中设置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%89%AB%E6%8F%8F-Mybatis-%E7%9A%84-interface"><span class="nav-text">配置扫描 Mybatis 的 interface</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Mapper"><span class="nav-text">@Mapper</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MapperScan"><span class="nav-text">@MapperScan</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E7%9A%84-crud"><span class="nav-text">基本的 crud</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2"><span class="nav-text">查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%98%E6%9B%B4"><span class="nav-text">变更</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%92%8C-%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-text">#{}和${}的区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%A2%9E-ID-%E7%9A%84%E8%BF%94%E5%9B%9E"><span class="nav-text">自增 ID 的返回</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SQL-%E4%BB%A3%E7%A0%81%E7%89%87%E6%AE%B5"><span class="nav-text">SQL 代码片段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%90%AF%E9%A9%BC%E5%B3%B0%E6%98%A0%E5%B0%84"><span class="nav-text">开启驼峰映射</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某</span>
+</div>
+ <!-- <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

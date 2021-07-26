@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="导读 前几天和一个朋友讨论了他们公司的系统问题，传统的单体应用，集群部署，他说近期服务的并发量可能会出现瞬时增加的风险，虽然部署了集群，但是通过压测后发现请求延迟仍然是很大，想问问我有什么改进的地方。我沉思了一会，现在去改架构显然是不可能的，于是我给出了一个建议，让他去做个接口限流，这样能够保证瞬时并发量飙高也不会出现请求延迟的问题，用户的体验度也会上去。 至于什么是接口限流？怎么实现接口限流？如">
+<meta property="og:type" content="article">
+<meta property="og:title" content="接口限流算法">
+<meta property="og:url" content="http://example.com/2020/03/23/%E6%8E%A5%E5%8F%A3%E9%99%90%E6%B5%81%E7%AE%97%E6%B3%95/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="导读 前几天和一个朋友讨论了他们公司的系统问题，传统的单体应用，集群部署，他说近期服务的并发量可能会出现瞬时增加的风险，虽然部署了集群，但是通过压测后发现请求延迟仍然是很大，想问问我有什么改进的地方。我沉思了一会，现在去改架构显然是不可能的，于是我给出了一个建议，让他去做个接口限流，这样能够保证瞬时并发量飙高也不会出现请求延迟的问题，用户的体验度也会上去。 至于什么是接口限流？怎么实现接口限流？如">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/8ded7a2b90e1482093f92fff555b3615.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/4d03e8e43a8edc3f32376d90e52b85f4.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/ae4d3cd14efb8dc7046d691c90264715.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/75938d1010138ce66e38c6ed0392f103.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/eca0e5eaa35dac938c673fecf2ec9a93.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20200310211704.jpg">
+<meta property="article:published_time" content="2020-03-23T01:38:58.000Z">
+<meta property="article:modified_time" content="2020-10-23T13:57:42.569Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="杂谈">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/8ded7a2b90e1482093f92fff555b3615.png">
+
+<link rel="canonical" href="http://example.com/2020/03/23/%E6%8E%A5%E5%8F%A3%E9%99%90%E6%B5%81%E7%AE%97%E6%B3%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>接口限流算法 | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/03/23/%E6%8E%A5%E5%8F%A3%E9%99%90%E6%B5%81%E7%AE%97%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          接口限流算法
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-03-23 09:38:58" itemprop="dateCreated datePublished" datetime="2020-03-23T09:38:58+08:00">2020-03-23</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 21:57:42" itemprop="dateModified" datetime="2020-10-23T21:57:42+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9D%82%E8%B0%88/" itemprop="url" rel="index"><span itemprop="name">杂谈</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="导读"><a href="#导读" class="headerlink" title="导读"></a>导读</h2><ul>
+<li>前几天和一个朋友讨论了他们公司的系统问题，传统的单体应用，集群部署，他说近期服务的并发量可能会出现瞬时增加的风险，虽然部署了集群，但是通过压测后发现请求延迟仍然是很大，想问问我有什么改进的地方。我沉思了一会，现在去改架构显然是不可能的，于是我给出了一个建议，让他去做个接口限流，这样能够保证瞬时并发量飙高也不会出现请求延迟的问题，用户的体验度也会上去。</li>
+<li>至于什么是接口限流？怎么实现接口限流？如何实现单机应用的限流？如何实现分布式应用的限流？本篇文章将会详细阐述。<span id="more"></span></li>
+</ul>
+<h2 id="限流的常见几种算法"><a href="#限流的常见几种算法" class="headerlink" title="限流的常见几种算法"></a>限流的常见几种算法</h2><ul>
+<li>常见的限流算法有很多，但是最常用的算法无非以下四种。</li>
+</ul>
+<h3 id="固定窗口计数器"><a href="#固定窗口计数器" class="headerlink" title="固定窗口计数器"></a>固定窗口计数器</h3><p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/8ded7a2b90e1482093f92fff555b3615.png"></p>
+<ul>
+<li>固定算法的概念如下</li>
+</ul>
+<ol>
+<li>将时间划分为多个窗口</li>
+<li>在每个窗口内每有一次请求就将计数器加一</li>
+<li>如果计数器超过了限制数量，则本窗口内所有的请求都被丢弃当时间到达下一个窗口时，计数器重置。</li>
+</ol>
+<ul>
+<li>固定窗口计数器是最为简单的算法，但这个算法有时会让通过请求量允许为限制的两倍。考虑如下情况：限制 1 秒内最多通过 5 个请求，在第一个窗口的最后半秒内通过了 5 个请求，第二个窗口的前半秒内又通过了 5 个请求。这样看来就是在 1 秒内通过了 10 个请求。 </li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/4d03e8e43a8edc3f32376d90e52b85f4.png"></p>
+<h3 id="滑动窗口计数器"><a href="#滑动窗口计数器" class="headerlink" title="滑动窗口计数器"></a>滑动窗口计数器</h3><p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/ae4d3cd14efb8dc7046d691c90264715.png"></p>
+<ul>
+<li>滑动窗口计数器算法概念如下：</li>
+</ul>
+<ol>
+<li>将时间划分为多个区间；</li>
+<li>在每个区间内每有一次请求就将计数器加一维持一个时间窗口，占据多个区间；</li>
+<li>每经过一个区间的时间，则抛弃最老的一个区间，并纳入最新的一个区间；</li>
+<li>如果当前窗口内区间的请求计数总和超过了限制数量，则本窗口内所有的请求都被丢弃。</li>
+</ol>
+<ul>
+<li>滑动窗口计数器是通过将窗口再细分，并且按照时间 “ 滑动 “，这种算法避免了固定窗口计数器带来的双倍突发请求，但时间区间的精度越高，算法所需的空间容量就越大。</li>
+</ul>
+<h3 id="漏桶算法"><a href="#漏桶算法" class="headerlink" title="漏桶算法"></a>漏桶算法</h3><p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/75938d1010138ce66e38c6ed0392f103.png"></p>
+<ul>
+<li>漏桶算法概念如下：</li>
+</ul>
+<ol>
+<li>将每个请求视作 “ 水滴 “ 放入 “ 漏桶 “ 进行存储；</li>
+<li>“漏桶 “ 以固定速率向外 “ 漏 “ 出请求来执行如果 “ 漏桶 “ 空了则停止 “ 漏水”；</li>
+<li>如果 “ 漏桶 “ 满了则多余的 “ 水滴 “ 会被直接丢弃。</li>
+</ol>
+<ul>
+<li>漏桶算法多使用队列实现，服务的请求会存到队列中，服务的提供方则按照固定的速率从队列中取出请求并执行，过多的请求则放在队列中排队或直接拒绝。</li>
+<li>漏桶算法的缺陷也很明显，当短时间内有大量的突发请求时，即便此时服务器没有任何负载，每个请求也都得在队列中等待一段时间才能被响应。</li>
+</ul>
+<h3 id="令牌桶算法"><a href="#令牌桶算法" class="headerlink" title="令牌桶算法"></a>令牌桶算法</h3><p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/eca0e5eaa35dac938c673fecf2ec9a93.png"></p>
+<ul>
+<li>令牌桶算法概念如下：</li>
+</ul>
+<ol>
+<li>令牌以固定速率生成。</li>
+<li>生成的令牌放入令牌桶中存放，如果令牌桶满了则多余的令牌会直接丢弃，当请求到达时，会尝试从令牌桶中取令牌，取到了令牌的请求可以执行。</li>
+<li>如果桶空了，那么尝试取令牌的请求会被直接丢弃。</li>
+</ol>
+<ul>
+<li>令牌桶算法既能够将所有的请求平均分布到时间区间内，又能接受服务器能够承受范围内的突发请求，因此是目前使用较为广泛的一种限流算法。 </li>
+</ul>
+<h2 id="单体应用实现"><a href="#单体应用实现" class="headerlink" title="单体应用实现"></a>单体应用实现</h2><ul>
+<li>在传统的单体应用中限流只需要考虑到多线程即可，使用Google开源工具类guava即可。其中有一个RateLimiter专门实现了单体应用的限流，使用的是令牌桶算法。</li>
+<li>单体应用的限流不是本文的重点，官网上现成的API，读者自己去看看即可，这里不再详细解释。</li>
+</ul>
+<h2 id="分布式限流"><a href="#分布式限流" class="headerlink" title="分布式限流"></a>分布式限流</h2><ul>
+<li>分布式限流和熔断现在有很多的现成的工具，比如Hystrix，Sentinel  等，但是还是有些企业不引用外来类库，因此就需要自己实现。</li>
+<li>Redis作为单线程多路复用的特性，很显然能够胜任这项任务。</li>
+</ul>
+<h3 id="Redis如何实现"><a href="#Redis如何实现" class="headerlink" title="Redis如何实现"></a>Redis如何实现</h3><ul>
+<li><p>使用令牌桶的算法实现，根据前面的介绍，我们了解到令牌桶算法的基础需要两个个变量，分别是桶容量，产生令牌的速率。</p>
+</li>
+<li><p>这里我们实现的就是每秒产生的速率加上一个桶容量。但是如何实现呢？这里有几个问题。</p>
+</li>
+<li><p>需要保存什么数据在redis中？</p>
+<ul>
+<li>当前桶的容量，最新的请求时间</li>
+</ul>
+</li>
+<li><p>以什么数据结构存储？</p>
+<ul>
+<li>因为是针对接口限流，每个接口的业务逻辑不同，对并发的处理也是不同，因此要细化到每个接口的限流，此时我们选用HashMap的结构，hashKey是接口的唯一id，可以是请求的uri，里面的分别存储当前桶的容量和最新的请求时间。</li>
+</ul>
+</li>
+<li><p>如何计算需要放令牌？</p>
+<ul>
+<li>根据redis保存的上次的请求时间和当前时间比较，如果相差大于的<strong>产生令牌的时间（陈某实现的是1秒）</strong>则再次产生令牌，此时的桶容量为当前令牌+产生的令牌</li>
+</ul>
+</li>
+<li><p>如何保证redis的原子性？</p>
+<ul>
+<li>保证redis的原子性，使用lua脚本即可解决。</li>
+</ul>
+</li>
+<li><p>有了上述的几个问题，便能很容易的实现。</p>
+</li>
+</ul>
+<h3 id="开撸"><a href="#开撸" class="headerlink" title="开撸"></a>开撸</h3><p>1、lua脚本如下：</p>
+<figure class="highlight lua"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">local</span> ratelimit_info = redis.<span class="built_in">pcall</span>(<span class="string">&#x27;HMGET&#x27;</span>,KEYS[<span class="number">1</span>],<span class="string">&#x27;last_time&#x27;</span>,<span class="string">&#x27;current_token&#x27;</span>)</span><br><span class="line"><span class="keyword">local</span> last_time = ratelimit_info[<span class="number">1</span>]</span><br><span class="line"><span class="keyword">local</span> current_token = <span class="built_in">tonumber</span>(ratelimit_info[<span class="number">2</span>])</span><br><span class="line"><span class="keyword">local</span> max_token = <span class="built_in">tonumber</span>(ARGV[<span class="number">1</span>])</span><br><span class="line"><span class="keyword">local</span> token_rate = <span class="built_in">tonumber</span>(ARGV[<span class="number">2</span>])</span><br><span class="line"><span class="keyword">local</span> current_time = <span class="built_in">tonumber</span>(ARGV[<span class="number">3</span>])</span><br><span class="line"><span class="keyword">if</span> current_token == <span class="literal">nil</span> <span class="keyword">then</span></span><br><span class="line">  current_token = max_token</span><br><span class="line">  last_time = current_time</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">  <span class="keyword">local</span> past_time = current_time-last_time</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">if</span> past_time&gt;<span class="number">1000</span> <span class="keyword">then</span></span><br><span class="line">	  current_token = current_token+token_rate</span><br><span class="line">	  last_time = current_time</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"></span><br><span class="line">  ## 防止溢出</span><br><span class="line">  <span class="keyword">if</span> current_token&gt;max_token <span class="keyword">then</span></span><br><span class="line">    current_token = max_token</span><br><span class="line">	last_time = current_time</span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line"><span class="keyword">end</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">local</span> result = <span class="number">0</span></span><br><span class="line"><span class="keyword">if</span>(current_token&gt;<span class="number">0</span>) <span class="keyword">then</span></span><br><span class="line">  result = <span class="number">1</span></span><br><span class="line">  current_token = current_token<span class="number">-1</span></span><br><span class="line">  last_time = current_time</span><br><span class="line"><span class="keyword">end</span></span><br><span class="line">redis.call(<span class="string">&#x27;HMSET&#x27;</span>,KEYS[<span class="number">1</span>],<span class="string">&#x27;last_time&#x27;</span>,last_time,<span class="string">&#x27;current_token&#x27;</span>,current_token)</span><br><span class="line"><span class="keyword">return</span> result</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>调用lua脚本出四个参数，分别是接口方法唯一id，桶容量，每秒产生令牌的数量，当前请求的时间戳。</li>
+</ul>
+<p>2、 SpringBoot代码实现</p>
+<ul>
+<li>采用Spring-data-redis实现lua脚本的执行。</li>
+<li>Redis序列化配置：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">    * 重新注入模板</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">   <span class="meta">@Bean(value = &quot;redisTemplate&quot;)</span></span><br><span class="line">   <span class="meta">@Primary</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> RedisTemplate <span class="title">redisTemplate</span><span class="params">(RedisConnectionFactory redisConnectionFactory)</span></span>&#123;</span><br><span class="line">       RedisTemplate&lt;String, Object&gt; template = <span class="keyword">new</span> RedisTemplate&lt;&gt;();</span><br><span class="line">       template.setConnectionFactory(redisConnectionFactory);</span><br><span class="line">       ObjectMapper objectMapper = <span class="keyword">new</span> ObjectMapper();</span><br><span class="line">       objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);</span><br><span class="line">       objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);</span><br><span class="line">       <span class="comment">//设置序列化方式，key设置string 方式，value设置成json</span></span><br><span class="line">       StringRedisSerializer stringRedisSerializer = <span class="keyword">new</span> StringRedisSerializer();</span><br><span class="line">       Jackson2JsonRedisSerializer jsonRedisSerializer = <span class="keyword">new</span> Jackson2JsonRedisSerializer(Object.class);</span><br><span class="line">       jsonRedisSerializer.setObjectMapper(objectMapper);</span><br><span class="line">       template.setEnableDefaultSerializer(<span class="keyword">false</span>);</span><br><span class="line">       template.setKeySerializer(stringRedisSerializer);</span><br><span class="line">       template.setHashKeySerializer(stringRedisSerializer);</span><br><span class="line">       template.setValueSerializer(jsonRedisSerializer);</span><br><span class="line">       template.setHashValueSerializer(jsonRedisSerializer);</span><br><span class="line">       <span class="keyword">return</span> template;</span><br><span class="line">   &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>限流工具类</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Description</span> 限流工具类</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Author</span> CJB</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Date</span> 2020/3/19 17:21</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisLimiterUtils</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> StringRedisTemplate stringRedisTemplate=ApplicationContextUtils.applicationContext.getBean(StringRedisTemplate.class);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * lua脚本，限流</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> String TEXT=<span class="string">&quot;local ratelimit_info = redis.pcall(&#x27;HMGET&#x27;,KEYS[1],&#x27;last_time&#x27;,&#x27;current_token&#x27;)\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;local last_time = ratelimit_info[1]\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;local current_token = tonumber(ratelimit_info[2])\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;local max_token = tonumber(ARGV[1])\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;local token_rate = tonumber(ARGV[2])\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;local current_time = tonumber(ARGV[3])\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;if current_token == nil then\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;  current_token = max_token\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;  last_time = current_time\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;else\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;  local past_time = current_time-last_time\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;  \n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;  if past_time&gt;1000 then\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;\t  current_token = current_token+token_rate\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;\t  last_time = current_time\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;  end\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;  if current_token&gt;max_token then\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;    current_token = max_token\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;\tlast_time = current_time\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;  end\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;end\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;local result = 0\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;if(current_token&gt;0) then\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;  result = 1\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;  current_token = current_token-1\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;  last_time = current_time\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;end\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;redis.call(&#x27;HMSET&#x27;,KEYS[1],&#x27;last_time&#x27;,last_time,&#x27;current_token&#x27;,current_token)\n&quot;</span> +</span><br><span class="line">            <span class="string">&quot;return result&quot;</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取令牌</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> key 请求id</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> max 最大能同时承受多少的并发（桶容量）</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> rate  每秒生成多少的令牌</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> 获取令牌返回true，没有获取返回false</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">tryAcquire</span><span class="params">(String key, <span class="keyword">int</span> max,<span class="keyword">int</span> rate)</span> </span>&#123;</span><br><span class="line">        List&lt;String&gt; keyList = <span class="keyword">new</span> ArrayList&lt;&gt;(<span class="number">1</span>);</span><br><span class="line">        keyList.add(key);</span><br><span class="line">        DefaultRedisScript&lt;Long&gt; script = <span class="keyword">new</span> DefaultRedisScript&lt;&gt;();</span><br><span class="line">        script.setResultType(Long.class);</span><br><span class="line">        script.setScriptText(TEXT);</span><br><span class="line">        <span class="keyword">return</span> Long.valueOf(<span class="number">1</span>).equals(stringRedisTemplate.execute(script,keyList,Integer.toString(max), Integer.toString(rate),</span><br><span class="line">                Long.toString(System.currentTimeMillis())));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>采用拦截器+注解的方式实现，注解如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Description</span> 限流的注解，标注在类上或者方法上。在方法上的注解会覆盖类上的注解，同<span class="doctag">@Transactional</span></span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Author</span> CJB</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Date</span> 2020/3/20 13:36</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Inherited</span></span><br><span class="line"><span class="meta">@Target(&#123;ElementType.TYPE, ElementType.METHOD&#125;)</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> RateLimit &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 令牌桶的容量，默认100</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">capacity</span><span class="params">()</span> <span class="keyword">default</span> 100</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 每秒钟默认产生令牌数量，默认10个</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">int</span> <span class="title">rate</span><span class="params">()</span> <span class="keyword">default</span> 10</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>拦截器如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Description</span> 限流的拦器</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Author</span> CJB</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Date</span> 2020/3/19 14:34</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RateLimiterIntercept</span> <span class="keyword">implements</span> <span class="title">HandlerInterceptor</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">preHandle</span><span class="params">(HttpServletRequest request, HttpServletResponse response, Object handler)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (handler <span class="keyword">instanceof</span> HandlerMethod)&#123;</span><br><span class="line">            HandlerMethod handlerMethod=(HandlerMethod)handler;</span><br><span class="line">            Method method = handlerMethod.getMethod();</span><br><span class="line">            <span class="comment">/**</span></span><br><span class="line"><span class="comment">             * 首先获取方法上的注解</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            RateLimit rateLimit = AnnotationUtils.findAnnotation(method, RateLimit.class);</span><br><span class="line">            <span class="comment">//方法上没有标注该注解，尝试获取类上的注解</span></span><br><span class="line">            <span class="keyword">if</span> (Objects.isNull(rateLimit))&#123;</span><br><span class="line">                <span class="comment">//获取类上的注解</span></span><br><span class="line">                rateLimit = AnnotationUtils.findAnnotation(handlerMethod.getBean().getClass(), RateLimit.class);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//没有标注注解，放行</span></span><br><span class="line">            <span class="keyword">if</span> (Objects.isNull(rateLimit))</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//尝试获取令牌，如果没有令牌了</span></span><br><span class="line">            <span class="keyword">if</span> (!RedisLimiterUtils.tryAcquire(request.getRequestURI(),rateLimit.capacity(),rateLimit.rate()))&#123;</span><br><span class="line">                <span class="comment">//抛出请求超时的异常</span></span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span>  TimeOutException();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>SpringBoot配置拦截器的代码就不贴了，以上就是完整的代码，至此分布式限流就完成了。</li>
+</ul>
+<h2 id="笔者有话说"><a href="#笔者有话说" class="headerlink" title="笔者有话说"></a>笔者有话说</h2><ul>
+<li>最近建了一个微信交流群，提供给大家一个交流的平台，扫描下方笔者的微信二维码，备注【交流】，我会把大家拉进群</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E5%BE%AE%E4%BF%A1%E5%9B%BE%E7%89%87_20200310211704.jpg"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9D%82%E8%B0%88/" rel="tag"># 杂谈</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/03/18/SpringBoot%E6%95%B4%E5%90%88%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E7%9A%84%E5%B7%A8%E5%9D%91/" rel="prev" title="SpringBoot整合多数据源的巨坑">
+      <i class="fa fa-chevron-left"></i> SpringBoot整合多数据源的巨坑
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/03/23/Spring%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/" rel="next" title="Spring生命周期">
+      Spring生命周期 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%BC%E8%AF%BB"><span class="nav-text">导读</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%90%E6%B5%81%E7%9A%84%E5%B8%B8%E8%A7%81%E5%87%A0%E7%A7%8D%E7%AE%97%E6%B3%95"><span class="nav-text">限流的常见几种算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%BA%E5%AE%9A%E7%AA%97%E5%8F%A3%E8%AE%A1%E6%95%B0%E5%99%A8"><span class="nav-text">固定窗口计数器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3%E8%AE%A1%E6%95%B0%E5%99%A8"><span class="nav-text">滑动窗口计数器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BC%8F%E6%A1%B6%E7%AE%97%E6%B3%95"><span class="nav-text">漏桶算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A4%E7%89%8C%E6%A1%B6%E7%AE%97%E6%B3%95"><span class="nav-text">令牌桶算法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%95%E4%BD%93%E5%BA%94%E7%94%A8%E5%AE%9E%E7%8E%B0"><span class="nav-text">单体应用实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E9%99%90%E6%B5%81"><span class="nav-text">分布式限流</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0"><span class="nav-text">Redis如何实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%80%E6%92%B8"><span class="nav-text">开撸</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%94%E8%80%85%E6%9C%89%E8%AF%9D%E8%AF%B4"><span class="nav-text">笔者有话说</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某</span>
+</div>
+ <!-- <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

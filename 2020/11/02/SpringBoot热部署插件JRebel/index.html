@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言Spring Boot中的热部署相信大家用的最多的就是devtools，没办法，官推的。 JRebel相对于devtools，个人觉得无论是加载速度还是使用便捷，JRebel完胜。 作为前辈级别的开发利器，JRebel真的值得开一章节来好好介绍下。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring Boot 使用JRebel实现热部署~">
+<meta property="og:url" content="http://example.com/2020/11/02/SpringBoot%E7%83%AD%E9%83%A8%E7%BD%B2%E6%8F%92%E4%BB%B6JRebel/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="前言Spring Boot中的热部署相信大家用的最多的就是devtools，没办法，官推的。 JRebel相对于devtools，个人觉得无论是加载速度还是使用便捷，JRebel完胜。 作为前辈级别的开发利器，JRebel真的值得开一章节来好好介绍下。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/2.jpg">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/3.jpg">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/4.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/5.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/6.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/4.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/7.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/6.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/8.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/8.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png">
+<meta property="article:published_time" content="2020-11-02T10:44:23.000Z">
+<meta property="article:modified_time" content="2020-11-13T09:52:20.038Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="Spring Boot">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/2.jpg">
+
+<link rel="canonical" href="http://example.com/2020/11/02/SpringBoot%E7%83%AD%E9%83%A8%E7%BD%B2%E6%8F%92%E4%BB%B6JRebel/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Spring Boot 使用JRebel实现热部署~ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/02/SpringBoot%E7%83%AD%E9%83%A8%E7%BD%B2%E6%8F%92%E4%BB%B6JRebel/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Spring Boot 使用JRebel实现热部署~
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-11-02 18:44:23" itemprop="dateCreated datePublished" datetime="2020-11-02T18:44:23+08:00">2020-11-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-11-13 17:52:20" itemprop="dateModified" datetime="2020-11-13T17:52:20+08:00">2020-11-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><code>Spring Boot</code>中的热部署相信大家用的最多的就是<code>devtools</code>，没办法，官推的。</p>
+<p><code>JRebel</code>相对于<code>devtools</code>，个人觉得无论是加载速度还是使用便捷，<code>JRebel</code>完胜。</p>
+<p>作为<strong>前辈级别</strong>的开发利器，<code>JRebel</code>真的值得开一章节来好好介绍下。</p>
+<span id="more"></span>
+
+<h2 id="JRebel收费怎么破？"><a href="#JRebel收费怎么破？" class="headerlink" title="JRebel收费怎么破？"></a>JRebel收费怎么破？</h2><p>前面作者单独写过一篇激活<code>JRebel</code>的文章教程，没钱的可以去看看：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/VBGoGMz0y2Y-y6NcdMcaLg">撸了个反向代理工具，搞一搞JRebel</a>。</p>
+<blockquote>
+<p><strong>特此声明</strong>：作者支持原版，不差钱的建议装个原版的，毕竟这么好的工具值得。</p>
+</blockquote>
+<h2 id="什么是本地热部署？"><a href="#什么是本地热部署？" class="headerlink" title="什么是本地热部署？"></a>什么是本地热部署？</h2><p>传统的开发中，项目在启动过程中代码有所改动是不会重新编译运行的，而是要关闭项目重新启动后修改的代码才会生效。</p>
+<blockquote>
+<p><strong>本地热部署</strong>则是能够在项目运行中感知到特定文件代码的修改而使项目不重新启动就能生效。</p>
+</blockquote>
+<h2 id="什么是远程热部署？"><a href="#什么是远程热部署？" class="headerlink" title="什么是远程热部署？"></a>什么是远程热部署？</h2><p>远程热部署的<code>远程</code>两字指的是<strong>远程服务器</strong>，平时开发中，只要本地代码改动了，必须要重新打包上传服务器重新启动之后才会生效，<strong>你这样干过吗？…….</strong></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/2.jpg" alt="嗯？好像干过"></p>
+<blockquote>
+<p><strong>远程热部署</strong>则是本地代码改变之后，不用重新打包上传服务器重启项目就能生效，本地改变之后能够自动改变服务器上的项目代码。</p>
+</blockquote>
+<p>有些人听到这里懵逼了，这是什么鬼？还有这么神奇的东西………..</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/3.jpg" alt="别惊讶，就是这么神奇"></p>
+<h2 id="JRebel和devtools的区别"><a href="#JRebel和devtools的区别" class="headerlink" title="JRebel和devtools的区别"></a>JRebel和devtools的区别</h2><p>前辈和后辈的比较其实没什么可比性，如果不是JRebel<strong>收费</strong>了，绝对是所有程序员的首选。但还是要说说他们之间的区别，如下：</p>
+<ol>
+<li><code>JRebel</code>加载的速度优于<code>devtools</code></li>
+<li>JRebel不仅仅局限于Spring Boot项目，可以用在任何的Java项目中。</li>
+<li><code>devtools</code> 方式的热部署在功能上有限制，方法内的修改可以实现热部署，但新增的方法或者修改方法参数之后热部署是不生效的。</li>
+</ol>
+<h2 id="如何安装JRebel？"><a href="#如何安装JRebel？" class="headerlink" title="如何安装JRebel？"></a>如何安装JRebel？</h2><p>本地热部署只需要在<code>IDEA</code>中装一个JRebel的插件，远程热部署需要在服务器上装一个JRebel，这两种方式在上一篇文章都介绍过，不会的可以去看看：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/VBGoGMz0y2Y-y6NcdMcaLg">撸了个反向代理工具，搞一搞JRebel</a>。</p>
+<h2 id="如何本地热部署？"><a href="#如何本地热部署？" class="headerlink" title="如何本地热部署？"></a>如何本地热部署？</h2><p><code>JRebel</code>插件安装完成之后，将<code>IDEA</code>中的<code>自动编译</code>开启，然后找到<code>IDEA</code>中的<code>JRebel</code>的工具面板，将所需要热部署的项目或者模块勾选上即可，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/4.png"></p>
+<blockquote>
+<p>勾选成功之后将会在项目或者模块的<code>src/resource</code>下生成一个<code>rebel.xml</code>文件。</p>
+</blockquote>
+<p>此时在<code>Spring Boot</code>的主启动类上右键，将会出现以<code>JRebel</code>启动的选项，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/5.png"></p>
+<p>当然在<code>IDEA</code>的右上角也存在启动的按钮，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/6.png"></p>
+<blockquote>
+<p><code>①</code>是本地启动和<code>DEBUG</code>模式启动，<code>②</code>是远程热部署的时候更新按钮。</p>
+</blockquote>
+<p>此时就已经配置成功了，如果勾选的项目或者模块出现了改变，按<code>CRTL+SHIFT+F9</code>则会自动重新编译加载改变的部分，不用再重新启动项目了。</p>
+<h2 id="如何远程热部署？"><a href="#如何远程热部署？" class="headerlink" title="如何远程热部署？"></a>如何远程热部署？</h2><p>远程热部署需要在服务器上安装并激活<code>JRebel</code>，参照上篇文章：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/VBGoGMz0y2Y-y6NcdMcaLg">撸了个反向代理工具，搞一搞JRebel</a>。</p>
+<p>激活成功后需要设置远程连接的密码，在<code>JRebel</code>的根目录下执行以下命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar jrebel.jar -set-remote-password 123456789</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>此处设置的<code>123456789</code>则是远程的密码，在<code>IDEA</code>连接服务器的时候需要。</p>
+</blockquote>
+<p>服务器配置成功后，在IDEA中JRebel的面板中设置远程热部署的模块，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/4.png"></p>
+<blockquote>
+<p>勾选成功后，将会在<code>src/resource</code>下生成一个<code>rebel-remote.xml</code>文件。</p>
+</blockquote>
+<p>此时将<code>Spring Boot</code>项目打包成一个<code>Jar</code>，上传到服务器，执行以下命令启动项目：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nohup java -agentpath:/usr/local/jrebel/lib/libjrebel64.so  -Drebel.remoting_plugin=true -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=9083 -jar xxx.jar &amp;</span><br></pre></td></tr></table></figure>
+
+<p><code>libjrebel64.so</code>这个文件是<code>JRebel</code>的<code>lib</code>目录下的文件。</p>
+<p><code>-Xdebug</code>之后，<code>-jar</code>之前的命令是开启远程调试的，如果不需要的可以去掉，不知道远程调试的，可以看：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/EoJ8OaJWoXZSrP3Lvexd9Q">惊呆了！Spring Boot还能开启远程调试~</a>。</p>
+<blockquote>
+<p>项目启动成功后，服务器上的配置就完成了。</p>
+</blockquote>
+<p>此时在IDEA中需要设置连接到刚才启动的项目，打开<code>File-&gt;setting-&gt;JRbel&amp;XRebel-&gt;JRbel Remote Servers</code>，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/7.png"></p>
+<p>步骤如下：</p>
+<ol>
+<li>点击<code>+</code>号添加一个服务</li>
+<li>填写信息</li>
+</ol>
+<ul>
+<li><code>server name</code>随便起个服务的名字</li>
+<li><code>server URL</code>格式：<code>http://ip:port</code>，这里的<code>ip</code>是服务器的IP，<code>port</code>是项目端口号。</li>
+<li>远程密码则是上文设置的<code>JRebel</code>的密码<code>123456789</code>。</li>
+</ul>
+<ol start="3">
+<li>点击<code>OK</code>，即可添加成功。</li>
+</ol>
+<p>以上设置成功后，点击右上角的远程部署按钮，下图中的<code>②</code>号按钮，则会自动更新服务器上已启动项目的代码使之本地修改在服务端自动生效：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/6.png"></p>
+<p>在<code>JRebel Console</code>这个面板中将会打印出远程热部署更新的日志信息，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/8.png"></p>
+<blockquote>
+<p>只要本地有了更改，点击远程热部署按钮，则会自动上传代码到服务器端并实时更新，不用重新启动项目。</p>
+</blockquote>
+<h2 id="多模块开发的一个坑"><a href="#多模块开发的一个坑" class="headerlink" title="多模块开发的一个坑"></a>多模块开发的一个坑</h2><p>如果是多模块开发，比如分为<code>api</code>（最终的<code>Jar</code>包），<code>core</code>（核心包），<code>service</code>（业务层的包），最终打包运行在服务器端的是<code>api</code>这个模块，其余两个模块都是属于依赖模块，虽然在<code>JRebel</code>远程热部署选项中都勾选了，但是它们的代码更改并不会在服务端生效。</p>
+<p>这个如何解决呢？很简单，在<code>api</code>项目下的<code>rebel-remote.xml</code>文件中将其余两个模块添加进去，默认的如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">rebel-remote</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.zeroturnaround.com/rebel/remote&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">id</span>&gt;</span>xx.xx.xx.api<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">rebel-remote</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>添加之后的代码如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">rebel-remote</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.zeroturnaround.com/rebel/remote&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">id</span>&gt;</span>xx.xxx.xx.api<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">id</span>&gt;</span>xx.xx.xx.service<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">id</span>&gt;</span>xx.xx.xx.core<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">rebel-remote</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>以上的<code>&lt;id&gt;</code>标签中指定的是模块的包名（package）。</p>
+</blockquote>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>作为热部署界的前辈，<code>JRebel</code>依然是敌得过后浪，果然是姜还是老的辣……</p>
+<p>希望这篇文章介绍的<code>JRebel</code>能够提高读者们的开发效率，反正我是提高了，哈哈~</p>
+<p>另外作者为大家准备接近<code>10M</code>的面筋，涵盖后端的各个层面，老规矩，公众号内回复<code>Java面试宝典</code>即可获取。</p>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/8.png"></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Spring-Boot/" rel="tag"># Spring Boot</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/11/01/%E6%92%B8%E4%BA%86%E4%B8%AA%E5%8F%8D%E4%BB%A3%E5%B7%A5%E5%85%B7%E7%94%A8%E4%BA%8E%E6%BF%80%E6%B4%BBJRebel/" rel="prev" title="撸了个反代工具,可用于激活JRebel">
+      <i class="fa fa-chevron-left"></i> 撸了个反代工具,可用于激活JRebel
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/11/03/%E6%8E%A8%E8%8D%90%E4%B8%89%E6%AC%BE%E6%8F%92%E4%BB%B6%EF%BC%8C%E8%AE%A9%E4%BD%A0%E7%8E%A9%E8%BD%ACGithub/" rel="next" title="推荐三款插件，让你玩转Github">
+      推荐三款插件，让你玩转Github <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JRebel%E6%94%B6%E8%B4%B9%E6%80%8E%E4%B9%88%E7%A0%B4%EF%BC%9F"><span class="nav-text">JRebel收费怎么破？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%9C%AC%E5%9C%B0%E7%83%AD%E9%83%A8%E7%BD%B2%EF%BC%9F"><span class="nav-text">什么是本地热部署？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E8%BF%9C%E7%A8%8B%E7%83%AD%E9%83%A8%E7%BD%B2%EF%BC%9F"><span class="nav-text">什么是远程热部署？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JRebel%E5%92%8Cdevtools%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-text">JRebel和devtools的区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%AE%89%E8%A3%85JRebel%EF%BC%9F"><span class="nav-text">如何安装JRebel？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%9C%AC%E5%9C%B0%E7%83%AD%E9%83%A8%E7%BD%B2%EF%BC%9F"><span class="nav-text">如何本地热部署？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%BF%9C%E7%A8%8B%E7%83%AD%E9%83%A8%E7%BD%B2%EF%BC%9F"><span class="nav-text">如何远程热部署？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%9A%E6%A8%A1%E5%9D%97%E5%BC%80%E5%8F%91%E7%9A%84%E4%B8%80%E4%B8%AA%E5%9D%91"><span class="nav-text">多模块开发的一个坑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某</span>
+</div>
+ <!-- <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

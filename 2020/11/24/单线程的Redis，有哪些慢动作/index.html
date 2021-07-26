@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言现在一提到Redis的第一反应就是快、单线程，但是Redis真的快吗？真的是单线程吗？ 你有没有深入了解一下Redis，看看它的底层有哪些”慢动作”呢？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="单线程的Redis，有哪些慢动作？">
+<meta property="og:url" content="http://example.com/2020/11/24/%E5%8D%95%E7%BA%BF%E7%A8%8B%E7%9A%84Redis%EF%BC%8C%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E5%8A%A8%E4%BD%9C/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="前言现在一提到Redis的第一反应就是快、单线程，但是Redis真的快吗？真的是单线程吗？ 你有没有深入了解一下Redis，看看它的底层有哪些”慢动作”呢？">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E6%93%8D%E4%BD%9C/1.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E6%93%8D%E4%BD%9C/2.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E6%93%8D%E4%BD%9C/3.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png">
+<meta property="article:published_time" content="2020-11-24T06:04:34.000Z">
+<meta property="article:modified_time" content="2020-11-24T07:58:17.155Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E6%93%8D%E4%BD%9C/1.png">
+
+<link rel="canonical" href="http://example.com/2020/11/24/%E5%8D%95%E7%BA%BF%E7%A8%8B%E7%9A%84Redis%EF%BC%8C%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E5%8A%A8%E4%BD%9C/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>单线程的Redis，有哪些慢动作？ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/24/%E5%8D%95%E7%BA%BF%E7%A8%8B%E7%9A%84Redis%EF%BC%8C%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E5%8A%A8%E4%BD%9C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          单线程的Redis，有哪些慢动作？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-24 14:04:34 / 修改时间：15:58:17" itemprop="dateCreated datePublished" datetime="2020-11-24T14:04:34+08:00">2020-11-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Redis 进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>现在一提到<code>Redis</code>的第一反应就是<code>快</code>、<code>单线程</code>，但是<code>Redis</code>真的快吗？真的是单线程吗？</p>
+<p>你有没有深入了解一下<code>Redis</code>，看看它的底层有哪些”慢动作”呢？</p>
+<span id="more"></span>
+
+<h2 id="为什么-Redis-这么火？"><a href="#为什么-Redis-这么火？" class="headerlink" title="为什么 Redis 这么火？"></a>为什么 Redis 这么火？</h2><p><code>Redis</code>作为一个内存数据库，它接收一个<code>key</code>到读取数据几乎是<code>微妙级别</code>，一个字<code>快</code>诠释了它火的原因。另一方面就归功于它的数据结构了，你知道<code>Redis</code>有哪些数据结构吗？</p>
+<p>很多人可能会说不就是<code>String</code>（字符串）、<code>List</code>（列表）、<code>Hash</code>（哈希）、<code>Set</code>（集合）和 <code>Sorted Set</code>（有序集合）这五种吗？我想大家可能有一种误区，我说的是底层数据结构，而你说仅仅是数据的保存形式而已。</p>
+<p>那么<code>Redis</code>底层有哪几种数据结构呢？和几种数据保存形式的关系又是什么呢？别着急，先通过一张图了解下，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E6%93%8D%E4%BD%9C/1.png"></p>
+<p>通过上图可以知道只有<code>String</code>对应的是一种数据结构，其他的数据类型对应的都是两种数据结构，我们通常将这四种数据类型称为集合类型，它们的特点是<strong>一个键对应了一个集合的数据</strong>。</p>
+<p>既然数据本身是通过数据结构保存的，那么键和值是什么保存形式呢？</p>
+<h2 id="键和值的保存形式？"><a href="#键和值的保存形式？" class="headerlink" title="键和值的保存形式？"></a>键和值的保存形式？</h2><p>为了实现键和值的快速访问，<code>Redis</code>使用的是<code>哈希表</code>来存放键，使用<code>哈希桶</code>存放值。</p>
+<blockquote>
+<p>一个<code>哈希表</code>其实就是一个数组，数组的每个元素称之为<code>哈希桶</code>。</p>
+</blockquote>
+<p>所以，一个哈希表是由多个哈希桶组成，每个哈希桶中保存了键值对数据。</p>
+<blockquote>
+<p><code>哈希桶</code>中保存的并不是值，而是指向值的<code>指针</code>。</p>
+</blockquote>
+<p>这也解释了为什么<code>哈希桶</code>能够保存集合类型的数据了，也就是说不管是<code>String</code>还是集合类型，<code>哈希桶</code>保存的都是指向具体的值的<code>指针</code>，具体的结构如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E6%93%8D%E4%BD%9C/2.png"></p>
+<p>从上图可以看出，每个<code>entry</code>中保存的是<code>*key</code>和<code>*value</code>分别指向了键和值，这样即使保存的值是集合类型也能通过指针 <code>*value</code>找到。</p>
+<blockquote>
+<p>键是保存在哈希表中，哈希表的时间复杂度是<code>O(1)</code>，也就是无论多少个键，总能通过一次计算就找到对应的键。</p>
+</blockquote>
+<p>但是问题来了，当你往<code>Redis</code>中写入大量的数据就有可能发现操作变<strong>慢</strong>了，这就是一个典型的问题：<strong>哈希冲突</strong>。</p>
+<h2 id="为什么哈希表操作变慢了？"><a href="#为什么哈希表操作变慢了？" class="headerlink" title="为什么哈希表操作变慢了？"></a>为什么哈希表操作变慢了？</h2><p>既然底层用了哈希表，则哈希冲突是不可避免的，那什么是哈希冲突呢？</p>
+<blockquote>
+<p><code>Redis</code>中的哈希冲突则是两个或者多个<code>key</code>通过计算对应关系，正好落在了同一个哈希桶中。</p>
+</blockquote>
+<p>这样则导致了不同的<code>key</code>查找到的值是相同的，但是这种问题在<code>Redis</code>中显然是不存在的，那么<code>Redis</code>用了什么方法解决了哈希冲突呢？</p>
+<blockquote>
+<p><code>Redis</code>底层使用了<code>链式哈希</code>的方式解决了哈希冲突，即是同一个哈希桶中的多个元素用一个<code>链表</code>保存，他们之间用指针<code>*next</code>相连。</p>
+</blockquote>
+<p>此时的哈希表和链式哈希的结构如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E6%93%8D%E4%BD%9C/3.png"></p>
+<p>从上图可以看到，<code>entry1</code>、<code>entry3</code>、<code>entry3</code>都保存在哈希桶 1 中，导致了哈希冲突。但是此时的<code>entry1</code>中的<code>*next</code>指针指向了<code>entry2</code>，同样<code>entry2</code>中的<code>*next</code>指针指向了<code>entry3</code>。这样下来即使哈希桶中有很多个元素，也能通过这样的方式连接起来，称作<code>哈希冲突链</code>。</p>
+<blockquote>
+<p>这里存在一个问题：链表的查询效率很低，如果哈希桶中元素很多，查找起来会很<strong>慢</strong>，显然这个对于<code>Redis</code>来说是不能接受的。</p>
+</blockquote>
+<p><code>Redis</code>使用了一个很巧妙的方式：<strong>渐进式 rehash</strong>。那么什么是渐进是<code>rehash</code>呢？</p>
+<p>想要理解渐进式<code>rehash</code>，首先需要理解下的<code>rehash</code>的过程。</p>
+<blockquote>
+<p><code>rehash</code> 也就是增加现有的哈希桶数量，让逐渐增多的<code>entry</code>元素能在更多的桶之间分散保存，减少单个桶中的元素数量，从而减少单个桶中的冲突。</p>
+</blockquote>
+<p>为了使<code>rehash</code>操作更高效，<code>Redis</code> 默认使用了两个全局哈希表：<code>哈希表1</code>和<code>哈希表2</code>。一开始，当你刚插入数据时，默认使用<code>哈希表1</code>，此时的<code>哈希表2</code>并没有被分配空间。随着数据逐步增多，<code>Redis</code> 开始执行<code>rehash</code>，这个过程分为三步：</p>
+<ol>
+<li>给<code>哈希表2</code>分配更大的空间，例如是当前<code>哈希表1</code>大小的两倍</li>
+<li>把<code>哈希表1</code>中的数据重新映射并拷贝到<code>哈希表2</code> 中</li>
+<li>释放<code>哈希表1</code> 的空间。</li>
+</ol>
+<p>以上这个过程结束，就可以释放掉<code>哈希表1</code>的数据而使用<code>哈希表2</code>了，此时的<code>哈希表1</code>可以留作下次的<code>rehash</code>备用。</p>
+<blockquote>
+<p>此时这里存在一个问题：<code>rehash</code>整个过程的第 2 步涉及到大量的拷贝，一次性的拷贝数据肯定会造成线程阻塞，无法服务其他的请求。此时的<code>Redis</code>就无法快速访问数据了。</p>
+</blockquote>
+<p>为了避免一次性拷贝数据导致线程阻塞，<code>Redis</code>使用了<code>渐进式rehash</code>。</p>
+<p><code>渐进式rehash</code>则是<code>rehash</code>的第 2 步拷贝数据分摊到每个请求中，Redis 仍然正常服务，只不过在处理每次请求的时候，从<code>哈希表1</code>中<code>索引1</code>的位置将所有的<code>entry</code>拷贝到<code>哈希表2</code>中，下一个请求则从<code>索引1</code>的下一个的位置开始。</p>
+<blockquote>
+<p>通过渐进式 rehash 巧妙的将一次性开销分摊到各个请求处理的过程中，避免了一次性的耗时操作。</p>
+</blockquote>
+<p>此时可能有人提出疑问了：<strong>如果没有请求，那么<code>Redis</code>就不会<code>rehash</code>了吗？</strong></p>
+<blockquote>
+<p><code>Redis</code>底层其实还会开启一个定时任务，会定时的拷贝数据，即使没有请求，<code>rehash</code>也会定时的在执行。</p>
+</blockquote>
+<h2 id="集合的操作效率？"><a href="#集合的操作效率？" class="headerlink" title="集合的操作效率？"></a>集合的操作效率？</h2><p>如果是<code>string</code>，找到哈希桶中的<code>entry</code>则能正常的进行增删改查了，但是如果是集合呢？即使通过指针找到了<code>entry</code>中的<code>value</code>,但是此时是一个集合，又是一个不同的数据结构，肯定会有不同的复杂度了。</p>
+<p>集合的操作效率肯定是和集合底层的数据结构相关，比如使用哈希表实现的集合肯定要比使用链表实现的结合访问效率要高。</p>
+<p>接下来就来说说集合的底层数据结构和操作复杂度。</p>
+<h3 id="有哪些数据结构？"><a href="#有哪些数据结构？" class="headerlink" title="有哪些数据结构？"></a>有哪些数据结构？</h3><p>本文的第一张图已经列出了集合的底层数据结构，主要有五种：<code>整数数组</code>、<code>双向链表</code>、<code>哈希表</code>、<code>压缩列表</code>和<code>跳表</code>。</p>
+<p>以上这五种数据结构都是比较常见的，如果读者不是很了解具体的结构请阅读相关的书籍，我就不再赘述了。</p>
+<p>五种数据结构按照查找时间的复杂度分类如下：</p>
+<table>
+<thead>
+<tr>
+<th>数据结构</th>
+<th>时间复杂度</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>哈希表</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>跳表</td>
+<td>O(logN)</td>
+</tr>
+<tr>
+<td>双向链表</td>
+<td>O(N)</td>
+</tr>
+<tr>
+<td>压缩链表</td>
+<td>O(N)</td>
+</tr>
+<tr>
+<td>整数数组</td>
+<td>O(N)</td>
+</tr>
+</tbody></table>
+<h3 id="不同操作的复杂度？"><a href="#不同操作的复杂度？" class="headerlink" title="不同操作的复杂度？"></a>不同操作的复杂度？</h3><p>集合类型的操作类型很多，有读写单个集合元素的，例如 <code>HGET</code>、<code>HSET</code>，也有操作多个元素的，例如<code>SADD</code>，还有对整个集合进行遍历操作的，例如 <code>SMEMBERS</code>。这么多操作，它们的复杂度也各不相同。而复杂度的高低又是我们选择集合类型的重要依据。</p>
+<p>下文列举了一些集合操作的复杂度，总共三点，仅供参考。</p>
+<h4 id="1-单元素操作由底层数据结构决定"><a href="#1-单元素操作由底层数据结构决定" class="headerlink" title="1. 单元素操作由底层数据结构决定"></a>1. 单元素操作由底层数据结构决定</h4><p>每一种集合类型对单元素的增删改查操作这些操作的复杂度由集合采用的数据结构决定。例如，<code>HGET</code>、<code>HSET</code> 和<code>HDEL</code> 是对哈希表做操作，所以它们的复杂度都是<code>O(1)</code>；<code>Set</code>类型用哈希表作为底层数据结构时，它的<code>SADD</code>、<code>SREM</code>、<code>SRANDMEMBER</code> 复杂度也是 <code>O(1)</code>。</p>
+<p>有些集合类型还支持一条命令同时对多个元素的操作，比如<code>Hash</code>类型的<code>HMGET</code>和<code>HMSET</code>。此时的操作复杂度则是<code>O(N)</code>。</p>
+<h4 id="2-范围操作非常耗时，应该避免"><a href="#2-范围操作非常耗时，应该避免" class="headerlink" title="2. 范围操作非常耗时，应该避免"></a>2. 范围操作非常耗时，应该避免</h4><p>范围操作是指集合类型中的遍历操作，可以返回集合中的所有数据或者部分数据。比如<code>List</code>类型的<code>HGETALL</code> 和<code>Set</code> 类型的<code>SMEMBERS</code>，这类操作的复杂度为<code>O(N)</code>，比较耗时，应该避免。</p>
+<p>不过<code>Redis</code>提供了<code>Scan</code>系列操作，比如<code>HSCAN</code>、<code>SSCSCAN</code>和<code>ZSCAN</code>,这类操作实现了渐进式遍历，每次只返回有限数量的数据。这样一来，相比于<code>HGETALL</code>、<code>SMEMBERS</code> 这类操作来说，就避免了一次性返回所有元素而导致的 <code>Redis</code> 阻塞。</p>
+<h4 id="3-统计操作通常比较高效"><a href="#3-统计操作通常比较高效" class="headerlink" title="3. 统计操作通常比较高效"></a>3. 统计操作通常比较高效</h4><p>统计操作是指对集合中的所有元素个数的记录，例如<code>LLEN</code> 和<code>SCARD</code>。这类操作复杂度只有<code>O(1)</code>，这是因为当集合类型采用压缩列表、双向链表、整数数组这些数据结构时，这些结构中专门记录了元素的个数统计，因此可以高效地完成相关操作。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><code>Redis</code>之所以这么快，不仅仅因为全部操作都在内存中，还有底层数据结构的支持，但是数据结构虽好，每种数据结构也有各种<strong>慢</strong>的情况，<code>Redis</code>结合各种数据结构的利弊，完善了整个运行机制。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Redis/" rel="tag"># Redis</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/11/23/SpringBoot%E8%87%AA%E5%AE%9A%E4%B9%89%E5%90%AF%E5%8A%A8%E5%99%A8/" rel="prev" title="Spring Boot自定义启动器">
+      <i class="fa fa-chevron-left"></i> Spring Boot自定义启动器
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/11/24/%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%AE%95%E6%9C%BA%EF%BC%8CRedis%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%E6%95%B0%E6%8D%AE%EF%BC%9F/" rel="next" title="服务器宕机，Redis如何恢复数据？">
+      服务器宕机，Redis如何恢复数据？ <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-Redis-%E8%BF%99%E4%B9%88%E7%81%AB%EF%BC%9F"><span class="nav-text">为什么 Redis 这么火？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%94%AE%E5%92%8C%E5%80%BC%E7%9A%84%E4%BF%9D%E5%AD%98%E5%BD%A2%E5%BC%8F%EF%BC%9F"><span class="nav-text">键和值的保存形式？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E5%93%88%E5%B8%8C%E8%A1%A8%E6%93%8D%E4%BD%9C%E5%8F%98%E6%85%A2%E4%BA%86%EF%BC%9F"><span class="nav-text">为什么哈希表操作变慢了？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9B%86%E5%90%88%E7%9A%84%E6%93%8D%E4%BD%9C%E6%95%88%E7%8E%87%EF%BC%9F"><span class="nav-text">集合的操作效率？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%89%E5%93%AA%E4%BA%9B%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%EF%BC%9F"><span class="nav-text">有哪些数据结构？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E6%93%8D%E4%BD%9C%E7%9A%84%E5%A4%8D%E6%9D%82%E5%BA%A6%EF%BC%9F"><span class="nav-text">不同操作的复杂度？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%8D%95%E5%85%83%E7%B4%A0%E6%93%8D%E4%BD%9C%E7%94%B1%E5%BA%95%E5%B1%82%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%86%B3%E5%AE%9A"><span class="nav-text">1. 单元素操作由底层数据结构决定</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E8%8C%83%E5%9B%B4%E6%93%8D%E4%BD%9C%E9%9D%9E%E5%B8%B8%E8%80%97%E6%97%B6%EF%BC%8C%E5%BA%94%E8%AF%A5%E9%81%BF%E5%85%8D"><span class="nav-text">2. 范围操作非常耗时，应该避免</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E7%BB%9F%E8%AE%A1%E6%93%8D%E4%BD%9C%E9%80%9A%E5%B8%B8%E6%AF%94%E8%BE%83%E9%AB%98%E6%95%88"><span class="nav-text">3. 统计操作通常比较高效</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某</span>
+</div>
+ <!-- <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

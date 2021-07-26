@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言陈某的独立博客搭建已经有三年多时间了，使用Hexo+Git，一直使用的主题是jacman，前几天女票看到说太LOW了，这哪能忍，必须换一个逼格高点的。 其实的三年前看到jacman这个主题还是挺喜欢的，但是现在的看看确实不怎地，哎，老了…. 今天这篇文章来介绍下一款简洁的主题NEXT以及配置方式。先来上一张个人的博客的截图，如下：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo的Next主题优化教程">
+<meta property="og:url" content="http://example.com/2020/10/26/%E5%A5%B3%E6%9C%8B%E5%8F%8B%E7%9C%8B%E4%BA%86%E6%88%91%E7%9A%84%E5%8D%9A%E5%AE%A2%EF%BC%8C%E8%AF%B4%E5%A4%AALOW%E4%BA%86%EF%BC%8C%E4%BA%8E%E6%98%AF%E6%88%91%E6%8A%98%E8%85%BE%E4%BA%86%E4%B8%80%E5%A4%A9/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="前言陈某的独立博客搭建已经有三年多时间了，使用Hexo+Git，一直使用的主题是jacman，前几天女票看到说太LOW了，这哪能忍，必须换一个逼格高点的。 其实的三年前看到jacman这个主题还是挺喜欢的，但是现在的看看确实不怎地，哎，老了…. 今天这篇文章来介绍下一款简洁的主题NEXT以及配置方式。先来上一张个人的博客的截图，如下：">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/1.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/2.gif">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/3.gif">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/4.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/5.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/6.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/7.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/8.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/9.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/10.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/11.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/12.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/13.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/14.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/15.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/16.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/17.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/18.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/19.gif">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/20.gif">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png">
+<meta property="article:published_time" content="2020-10-26T01:47:31.000Z">
+<meta property="article:modified_time" content="2020-10-26T14:15:52.506Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="Hexo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/1.png">
+
+<link rel="canonical" href="http://example.com/2020/10/26/%E5%A5%B3%E6%9C%8B%E5%8F%8B%E7%9C%8B%E4%BA%86%E6%88%91%E7%9A%84%E5%8D%9A%E5%AE%A2%EF%BC%8C%E8%AF%B4%E5%A4%AALOW%E4%BA%86%EF%BC%8C%E4%BA%8E%E6%98%AF%E6%88%91%E6%8A%98%E8%85%BE%E4%BA%86%E4%B8%80%E5%A4%A9/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Hexo的Next主题优化教程 | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/26/%E5%A5%B3%E6%9C%8B%E5%8F%8B%E7%9C%8B%E4%BA%86%E6%88%91%E7%9A%84%E5%8D%9A%E5%AE%A2%EF%BC%8C%E8%AF%B4%E5%A4%AALOW%E4%BA%86%EF%BC%8C%E4%BA%8E%E6%98%AF%E6%88%91%E6%8A%98%E8%85%BE%E4%BA%86%E4%B8%80%E5%A4%A9/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Hexo的Next主题优化教程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-10-26 09:47:31 / 修改时间：22:15:52" itemprop="dateCreated datePublished" datetime="2020-10-26T09:47:31+08:00">2020-10-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9D%82%E8%B0%88/" itemprop="url" rel="index"><span itemprop="name">杂谈</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>陈某的独立博客搭建已经有三年多时间了，使用<code>Hexo</code>+<code>Git</code>，一直使用的主题是<code>jacman</code>，前几天女票看到说太LOW了，这哪能忍，必须换一个逼格高点的。</p>
+<p>其实的三年前看到<code>jacman</code>这个主题还是挺喜欢的，但是现在的看看确实不怎地，哎，老了….</p>
+<p>今天这篇文章来介绍下一款简洁的主题<code>NEXT</code>以及配置方式。先来上一张个人的博客的截图，如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/1.png"></p>
+<span id="more"></span>
+
+
+<h2 id="如何下载？"><a href="#如何下载？" class="headerlink" title="如何下载？"></a>如何下载？</h2><p><code>NEXT</code>这款主题源码都直接托管在GitHub上，可以直接搜索，下载地址：<code>https://github.com/theme-next/hexo-theme-next.git</code>。</p>
+<p>下载源码之后，直接解压到博客的<code>themes</code>的目录下，比如我的主题目录就是<code>G:\hexo\themes\next</code>。</p>
+<h2 id="配置文件的分类"><a href="#配置文件的分类" class="headerlink" title="配置文件的分类"></a>配置文件的分类</h2><p>hexo搭建的博客有两个<code>yml</code>配置文件，一个称之为<code>站点配置文件</code>，是根目录下的<code>_config.yml</code>，另一个是<code>主题配置文件</code>，是主题目录下的<code>_config.yml</code>文件。</p>
+<h2 id="基本信息配置"><a href="#基本信息配置" class="headerlink" title="基本信息配置"></a>基本信息配置</h2><p>基本信息包括：博客标题、作者、描述、语言等等。这些基本信息的配置都在站点配置文件中。如下：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">title:</span> <span class="string">标题</span></span><br><span class="line"><span class="attr">subtitle:</span> <span class="string">副标题</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">描述</span></span><br><span class="line"><span class="attr">author:</span> <span class="string">作者</span></span><br><span class="line"><span class="attr">language:</span> <span class="string">语言（简体中文是zh-Hans）</span></span><br><span class="line"><span class="attr">timezone:</span> <span class="string">网站时区（Hexo</span> <span class="string">默认使用您电脑的时区，不用写）</span></span><br></pre></td></tr></table></figure>
+
+<p>比如我的站点配置文件以上的配置如下：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Site</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">不才陈某技术博客</span></span><br><span class="line"><span class="attr">subtitle:</span> <span class="string">微信公众号：码猿技术专栏</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring</span> <span class="string">Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</span></span><br><span class="line"><span class="attr">author:</span> <span class="string">不才陈某</span></span><br><span class="line"><span class="attr">language:</span> <span class="string">zh-Hans</span></span><br><span class="line"><span class="attr">timezone:</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="修改主题"><a href="#修改主题" class="headerlink" title="修改主题"></a>修改主题</h2><p>hexo博客的主题很多，想要切换也是很简单，直接在<code>站点配置文件</code>中设置即可，如下：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 切换next主题</span></span><br><span class="line"><span class="attr">theme:</span> <span class="string">next</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Next主题样式设置"><a href="#Next主题样式设置" class="headerlink" title="Next主题样式设置"></a>Next主题样式设置</h2><p>Next主题提供了4种风格供我们选择，分别为<code>Muse</code>、<code>Mist</code>、<code>Pisces</code>、<code>Gemini</code>。</p>
+<p>以上4种风格大同小异，作者博客的风格是<code>Gemini</code>，大家可以根据自己的喜好任意切换，在<code>主题配置文件</code>中找到<code>Scheme Settings</code>，如下：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置自己喜欢的风格</span></span><br><span class="line"><span class="attr">scheme:</span> <span class="string">Gemini</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="添加动态背景"><a href="#添加动态背景" class="headerlink" title="添加动态背景"></a>添加动态背景</h2><p>动态背景能瞬间提升博客的逼格，实现的效果如下：<br><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/2.gif"></p>
+<p>配置起来也是很简单，在<code>主题配置文件</code>中，修改如下：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置为true</span></span><br><span class="line"><span class="attr">canvas_nest:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="修改链接的样式"><a href="#修改链接的样式" class="headerlink" title="修改链接的样式"></a>修改链接的样式</h2><p>默认的超链接的样式是灰色的，可以修改成如下效果：<br><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/3.gif"></p>
+<p>修改文件 <code>themes\next\source\css\_common\components\post\post.styl</code> ，在末尾添加如下css样式：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">// 文章内链接文本样式</span><br><span class="line"><span class="selector-class">.post-body</span> <span class="selector-tag">p</span> <span class="selector-tag">a</span>&#123;</span><br><span class="line">  <span class="attribute">color</span>: <span class="number">#0593d3</span>;</span><br><span class="line">  <span class="attribute">border-bottom</span>: none;</span><br><span class="line">  <span class="attribute">border-bottom</span>: <span class="number">1px</span> solid <span class="number">#0593d3</span>;</span><br><span class="line">  &amp;<span class="selector-pseudo">:hover</span> &#123;</span><br><span class="line">    <span class="attribute">color</span>: <span class="number">#fc6423</span>;</span><br><span class="line">    <span class="attribute">border-bottom</span>: none;</span><br><span class="line">    <span class="attribute">border-bottom</span>: <span class="number">1px</span> solid <span class="number">#fc6423</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中选择<code>.post-body</code> 是为了不影响标题，选择<code>p</code> 是为了不影响首页<code>阅读全文</code>的显示样式,颜色可以自己定义。</p>
+<h2 id="添加文章搜索功能"><a href="#添加文章搜索功能" class="headerlink" title="添加文章搜索功能"></a>添加文章搜索功能</h2><p>搜索这个功能是很非常重要的，文章很多的情况下怎样才能快速筛选想要的文章呢？搜索的功能是少不了的。实现的效果如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/4.png" alt="4"></p>
+<p>Next主题添加搜索的功能很简单，首先安装搜索插件：</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-generator-searchdb --save</span><br></pre></td></tr></table></figure>
+
+<p>插件安装完成之后在<code>站点配置文件</code>中找到<code>Extensions</code>，在其下面添加如下内容：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 搜索</span></span><br><span class="line"><span class="attr">search:</span></span><br><span class="line">  <span class="attr">path:</span> <span class="string">search.xml</span></span><br><span class="line">  <span class="attr">field:</span> <span class="string">post</span></span><br><span class="line">  <span class="attr">format:</span> <span class="string">html</span></span><br><span class="line">  <span class="attr">limit:</span> <span class="number">10000</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>搜索功能很强大，但是第一次加载可能有点慢，大概十几秒的时间才能出来搜索框，没办法，毕竟是静态的。</p>
+</blockquote>
+<h2 id="修改文章底部标签的-的样式"><a href="#修改文章底部标签的-的样式" class="headerlink" title="修改文章底部标签的#的样式"></a>修改文章底部标签的<code>#</code>的样式</h2><p>默认的文章标签的样式是带有<code>#</code>这个符号的，比如<code>#Spring Boot</code>，但是可以将<code>#</code>修改成标签的<code>icon</code>，效果如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/5.png" alt="5"></p>
+<p>实现方法很简单，修改模板<code>/themes/next/layout/_macro/post.swig</code>，搜索<code>rel=&quot;tag&quot;&gt;#</code>，将<code>#</code>换成<code>&lt;i class=&quot;fa fa-tag&quot;&gt;&lt;/i&gt;</code>。</p>
+<h2 id="修改作者头像并旋转"><a href="#修改作者头像并旋转" class="headerlink" title="修改作者头像并旋转"></a>修改作者头像并旋转</h2><p>修改头像很简单，找一张尺寸合适、自己喜欢的图片，放在<code>themes\next\source\images</code>下，随后修改<code>主题配置文件</code>，将头像重新设置即可，配置如下：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置自己的头像</span></span><br><span class="line"><span class="attr">avatar:</span> <span class="string">/images/header.jpg</span></span><br></pre></td></tr></table></figure>
+
+<p>头像默认是不带旋转的，想要实现鼠标放在头像上方会自动旋转，只需要在<code>\themes\next\source\css\_common\components\sidebar\sidebar-author.styl</code>文件下添加如下一段代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">.site-author-image &#123;</span><br><span class="line">  <span class="attr">display</span>: block;</span><br><span class="line">  margin: <span class="number">0</span> auto;</span><br><span class="line">  padding: $site-author-image-padding;</span><br><span class="line">  max-width: $site-author-image-width;</span><br><span class="line">  height: $site-author-image-height;</span><br><span class="line">  border: $site-author-image-border-width solid $site-author-image-border-color;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/* 头像圆形 */</span></span><br><span class="line">  border-radius: 80px;</span><br><span class="line">  -webkit-border-radius: 80px;</span><br><span class="line">  -moz-border-radius: 80px;</span><br><span class="line">  box-shadow: inset <span class="number">0</span> -1px <span class="number">0</span> #333sf;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/* 设置循环动画 [animation: (play)动画名称 (2s)动画播放时长单位秒或微秒 (ase-out)动画播放的速度曲线为以低速结束 </span></span><br><span class="line"><span class="comment">    (1s)等待1秒然后开始动画 (1)动画播放次数(infinite为循环播放) ]*/</span></span><br><span class="line"> </span><br><span class="line"></span><br><span class="line">  <span class="comment">/* 鼠标经过头像旋转360度 */</span></span><br><span class="line">  -webkit-transition: -webkit-transform <span class="number">1.</span>0s ease-out;</span><br><span class="line">  -moz-transition: -moz-transform <span class="number">1.</span>0s ease-out;</span><br><span class="line">  transition: transform <span class="number">1.</span>0s ease-out;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="attr">img</span>:hover &#123;</span><br><span class="line">  <span class="comment">/* 鼠标经过停止头像旋转 </span></span><br><span class="line"><span class="comment">  -webkit-animation-play-state:paused;</span></span><br><span class="line"><span class="comment">  animation-play-state:paused;*/</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">/* 鼠标经过头像旋转360度 */</span></span><br><span class="line">  -webkit-transform: rotateZ(360deg);</span><br><span class="line">  -moz-transform: rotateZ(360deg);</span><br><span class="line">  transform: rotateZ(360deg);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Z 轴旋转动画 */</span></span><br><span class="line">@-webkit-keyframes play &#123;</span><br><span class="line">  <span class="number">0</span>% &#123;</span><br><span class="line">    -webkit-transform: rotateZ(0deg);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="number">100</span>% &#123;</span><br><span class="line">    -webkit-transform: rotateZ(-360deg);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">@-moz-keyframes play &#123;</span><br><span class="line">  <span class="number">0</span>% &#123;</span><br><span class="line">    -moz-transform: rotateZ(0deg);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="number">100</span>% &#123;</span><br><span class="line">    -moz-transform: rotateZ(-360deg);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">@keyframes play &#123;</span><br><span class="line">  <span class="number">0</span>% &#123;</span><br><span class="line">    <span class="attr">transform</span>: rotateZ(0deg);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="number">100</span>% &#123;</span><br><span class="line">    <span class="attr">transform</span>: rotateZ(-360deg);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上配置完成之后，将鼠标悬停在头像上方将会自动旋转起来。</p>
+<h2 id="修改-的样式"><a href="#修改-的样式" class="headerlink" title="修改``的样式"></a>修改``的样式</h2><p>Next默认的主题样式是灰色的，不太显眼，颜色也不太好看，可以将其设置成自己喜欢的颜色，效果如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/6.png"></p>
+<p>配置起来也是很简单，只需要在<code>\themes\next\source\css\_custom\custom.styl</code>文件中添加如下代码：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">// Custom styles.</span><br><span class="line"><span class="selector-tag">code</span> &#123;</span><br><span class="line">    <span class="attribute">color</span>: <span class="number">#ff7600</span>;</span><br><span class="line">    <span class="attribute">background</span>: <span class="number">#fbf7f8</span>;</span><br><span class="line">    <span class="attribute">margin</span>: <span class="number">2px</span>;</span><br><span class="line">&#125;</span><br><span class="line">// 大代码块的自定义样式</span><br><span class="line"><span class="selector-class">.highlight</span>, pre &#123;</span><br><span class="line">    <span class="attribute">margin</span>: <span class="number">5px</span> <span class="number">0</span>;</span><br><span class="line">    <span class="attribute">padding</span>: <span class="number">5px</span>;</span><br><span class="line">    <span class="attribute">border-radius</span>: <span class="number">3px</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="selector-class">.highlight</span>, <span class="selector-tag">code</span>, pre &#123;</span><br><span class="line">    <span class="attribute">border</span>: <span class="number">1px</span> solid <span class="number">#d6d6d6</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>以上的颜色可以配置自己喜欢的，比如效果图中的颜色是我个人比较喜欢的。</p>
+</blockquote>
+<h2 id="添加全文阅读的按钮"><a href="#添加全文阅读的按钮" class="headerlink" title="添加全文阅读的按钮"></a>添加全文阅读的按钮</h2><p>Next主题默认是没有全文阅读按钮的，文章是全部展开形式的，但是可以设置成如下效果：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/7.png"></p>
+<p>共有两种配置方法，分别如下：</p>
+<ol>
+<li>在<code>md</code>文件中需要折叠的地方添加<code>&lt;!--more--&gt;</code>，则在其下方的内容都将会折叠起来，只有点击<code>阅读全文</code>按钮才会显示出来。</li>
+<li>在<code>主题配置文件</code>中找到<code>auto_excerpt</code>，这个属性可以设置为自动折叠，比如设置成只显示<code>300</code>个字，这样的后面的内容就会折叠起来，配置如下：<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">auto_excerpt:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">length:</span> <span class="number">300</span></span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="添加站点访问人数计数"><a href="#添加站点访问人数计数" class="headerlink" title="添加站点访问人数计数"></a>添加站点访问人数计数</h2><p>站点访问计数有名的就是<code>不蒜子</code>，使用起来非常方便，安装步骤也是很简单。</p>
+<p>将如下的代码添加到<code>themes/next/layout/_partial/footer.swig</code>文件中：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&lt;div&gt;</span><br><span class="line"><span class="xml"><span class="tag">&lt;<span class="name">script</span> <span class="attr">async</span> <span class="attr">src</span>=<span class="string">&quot;//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span></span><br><span class="line"><span class="xml"><span class="tag">&lt;<span class="name">span</span> <span class="attr">id</span>=<span class="string">&quot;busuanzi_container_site_pv&quot;</span> <span class="attr">style</span>=<span class="string">&#x27;display:none&#x27;</span>&gt;</span></span></span><br><span class="line"><span class="xml">    本站总访问量 <span class="tag">&lt;<span class="name">span</span> <span class="attr">id</span>=<span class="string">&quot;busuanzi_value_site_pv&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span> 次</span></span><br><span class="line"><span class="xml">    <span class="tag">&lt;<span class="name">span</span> <span class="attr">class</span>=<span class="string">&quot;post-meta-divider&quot;</span>&gt;</span>|<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span></span><br><span class="line"><span class="xml"><span class="tag">&lt;/<span class="name">span</span>&gt;</span></span></span><br><span class="line"><span class="xml"><span class="tag">&lt;<span class="name">span</span> <span class="attr">id</span>=<span class="string">&quot;busuanzi_container_site_uv&quot;</span> <span class="attr">style</span>=<span class="string">&#x27;display:none&#x27;</span>&gt;</span></span></span><br><span class="line"><span class="xml">    有<span class="tag">&lt;<span class="name">span</span> <span class="attr">id</span>=<span class="string">&quot;busuanzi_value_site_uv&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span>人看过我的博客啦</span></span><br><span class="line"><span class="xml"><span class="tag">&lt;/<span class="name">span</span>&gt;</span></span></span><br><span class="line">&lt;/div&gt;</span><br></pre></td></tr></table></figure>
+
+<p>添加的位置如下图，可自行根据个人喜好更换位置：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/8.png"></p>
+<p>以上设置完毕后只是显示整个站点的次数，并没有显示每篇文章的访问次数，效果如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/9.png"></p>
+<p>如果想要显示每篇文章的访问次数，在<code>themes/next/layout/_macro/post.swig</code>文件第一行增加<code>is_pv</code>字段，如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;% macro render(post, is_index, is_pv, post_extra_class) %&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后将这段代码插入到其中：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123;% <span class="keyword">if</span> is_pv %&#125;</span><br><span class="line">  &lt;span <span class="class"><span class="keyword">class</span></span>=<span class="string">&quot;post-meta-divider&quot;</span>&gt;|&lt;/span&gt;</span><br><span class="line">  <span class="xml"><span class="tag">&lt;<span class="name">span</span> <span class="attr">id</span>=<span class="string">&quot;busuanzi_value_page_pv&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">span</span>&gt;</span></span>次阅读</span><br><span class="line">&#123;% endif %&#125;</span><br></pre></td></tr></table></figure>
+
+<p>插入的位置如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/10.png"></p>
+<p>然后再打开 <code>themes/next/layout/post.swig</code>，这个文件是文章的模板，给<code>render</code>方法传入参数（对应刚才添加的<code>is_pv</code>字段），如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/11.png"></p>
+<p>最后再打开<code>themes/next/layout/index.swig</code>，这个文件是首页的模板，给<code>render</code>方法传入参数（对应刚才添加的<code>is_pv</code>字段），如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/12.png"></p>
+<p>至此即可配置成功，效果如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/13.png"></p>
+<h2 id="去掉文章目录标题的自动编号"><a href="#去掉文章目录标题的自动编号" class="headerlink" title="去掉文章目录标题的自动编号"></a>去掉文章目录标题的自动编号</h2><p>我们自己写文章的时候一般都会自己带上标题编号，但是默认的主题会给我们带上编号，很是别扭，如何去掉呢？</p>
+<p>在<code>主题配置文件</code>中找到<code>toc</code>属性，将其中的<code>number</code>属性设置成<code>false</code>，如下：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">toc:</span></span><br><span class="line">  <span class="attr">enable:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">number:</span> <span class="literal">false</span></span><br><span class="line">  <span class="attr">wrap:</span> <span class="literal">false</span></span><br></pre></td></tr></table></figure>
+
+<p>最终实现的效果如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/14.png"></p>
+<h2 id="主页文章添加阴影卡片效果"><a href="#主页文章添加阴影卡片效果" class="headerlink" title="主页文章添加阴影卡片效果"></a>主页文章添加阴影卡片效果</h2><p>添加阴影卡片效果的效果图如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/15.png"></p>
+<p>实现方法只需要在<code>\themes\next\source\css\_custom\custom.styl</code>文件中添加如下内容即可：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 主页文章添加阴影效果</span></span><br><span class="line"> .post &#123;</span><br><span class="line">   margin-top: 60px;</span><br><span class="line">   margin-bottom: 60px;</span><br><span class="line">   padding: 25px;</span><br><span class="line">   -webkit-box-shadow: <span class="number">0</span> <span class="number">0</span> 5px rgba(<span class="number">202</span>, <span class="number">203</span>, <span class="number">203</span>, <span class="number">.5</span>);</span><br><span class="line">   -moz-box-shadow: <span class="number">0</span> <span class="number">0</span> 5px rgba(<span class="number">202</span>, <span class="number">203</span>, <span class="number">204</span>, <span class="number">.5</span>);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="网站底部字数统计"><a href="#网站底部字数统计" class="headerlink" title="网站底部字数统计"></a>网站底部字数统计</h2><p>实现的效果如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/16.png"></p>
+<p>首先切换到根目录，安装插件，命令如下：</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-wordcount --save</span><br></pre></td></tr></table></figure>
+
+<p>然后在<code>/themes/next/layout/_partials/footer.swig</code>文件尾部加上：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;theme-info&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span>=<span class="string">&quot;powered-by&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">span</span> <span class="attr">class</span>=<span class="string">&quot;post-count&quot;</span>&gt;</span>博客全站共&#123;&#123; totalcount(site) &#125;&#125;字<span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="设置网站的图标Favicon"><a href="#设置网站的图标Favicon" class="headerlink" title="设置网站的图标Favicon"></a>设置网站的图标Favicon</h2><p>Next会有一个默认的网站图标，但是的我们可以替换成自己喜欢的，效果如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/17.png"></p>
+<p>实现方法很简单，自己设计一张喜欢的logo，并将图标名称改为<code>favicon.ico</code>，然后把图标放在<code>/themes/next/source/images</code>里，并且修改<code>主题配置文件</code>：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Put your favicon.ico into `hexo-site/source/` directory.</span></span><br><span class="line"><span class="attr">favicon:</span> <span class="string">/favicon.ico</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="添加文章字数统计功能"><a href="#添加文章字数统计功能" class="headerlink" title="添加文章字数统计功能"></a>添加文章字数统计功能</h2><p>该功能能够为每篇文章计算字数以及阅读大致需要的时间，效果如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/18.png"></p>
+<p>在根目录下安装<code>hexo-wordcount</code>,执行命令如下：</p>
+<figure class="highlight cmd"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-wordcount --save</span><br></pre></td></tr></table></figure>
+<p>安装完成后在<code>主题配置文件</code>中的配置参数如下：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Post wordcount display settings</span></span><br><span class="line"><span class="comment"># Dependencies: https://github.com/willin/hexo-wordcount</span></span><br><span class="line"><span class="attr">post_wordcount:</span></span><br><span class="line">  <span class="attr">item_text:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">wordcount:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">min2read:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="添加顶部动态加载条"><a href="#添加顶部动态加载条" class="headerlink" title="添加顶部动态加载条"></a>添加顶部动态加载条</h2><p>实现的效果如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/19.gif"></p>
+<p>配置很简单，只需要在<code>主题配置文件</code>中修改<code>pace</code>属性为<code>true</code>，如下：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">pace:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="文章设置置顶"><a href="#文章设置置顶" class="headerlink" title="文章设置置顶"></a>文章设置置顶</h2><p>修改<code>hero-generator-index</code> 插件，把文件：<code>node_modules/hexo-generator-index/lib/generator.js</code> 内的代码替换为：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&#x27;use strict&#x27;</span>;</span><br><span class="line"><span class="keyword">var</span> pagination = <span class="built_in">require</span>(<span class="string">&#x27;hexo-pagination&#x27;</span>);</span><br><span class="line"><span class="built_in">module</span>.exports = <span class="function"><span class="keyword">function</span>(<span class="params">locals</span>)</span>&#123;</span><br><span class="line">  <span class="keyword">var</span> config = <span class="built_in">this</span>.config;</span><br><span class="line">  <span class="keyword">var</span> posts = locals.posts;</span><br><span class="line">    posts.data = posts.data.sort(<span class="function"><span class="keyword">function</span>(<span class="params">a, b</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(a.top &amp;&amp; b.top) &#123; <span class="comment">// 两篇文章top都有定义</span></span><br><span class="line">            <span class="keyword">if</span>(a.top == b.top) <span class="keyword">return</span> b.date - a.date; <span class="comment">// 若top值一样则按照文章日期降序排</span></span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">return</span> b.top - a.top; <span class="comment">// 否则按照top值降序排</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(a.top &amp;&amp; !b.top) &#123; <span class="comment">// 以下是只有一篇文章top有定义，那么将有top的排在前面（这里用异或操作居然不行233）</span></span><br><span class="line">            <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span>(!a.top &amp;&amp; b.top) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">return</span> b.date - a.date; <span class="comment">// 都没定义按照文章日期降序排</span></span><br><span class="line">    &#125;);</span><br><span class="line">  <span class="keyword">var</span> paginationDir = config.pagination_dir || <span class="string">&#x27;page&#x27;</span>;</span><br><span class="line">  <span class="keyword">return</span> pagination(<span class="string">&#x27;&#x27;</span>, posts, &#123;</span><br><span class="line">    <span class="attr">perPage</span>: config.index_generator.per_page,</span><br><span class="line">    <span class="attr">layout</span>: [<span class="string">&#x27;index&#x27;</span>, <span class="string">&#x27;archive&#x27;</span>],</span><br><span class="line">    <span class="attr">format</span>: paginationDir + <span class="string">&#x27;/%d/&#x27;</span>,</span><br><span class="line">    <span class="attr">data</span>: &#123;</span><br><span class="line">      <span class="attr">__index</span>: <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>在文章中添加 <code>top</code> 值，数值越大文章越靠前，如：</p>
+<figure class="highlight md"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title: Spring Boot 与多数据源的那点事儿~</span><br><span class="line">date: 2020-05-22 22:45:48</span><br><span class="line">tags: Spring Boot进阶</span><br><span class="line">categories: Spring Boot</span><br><span class="line"><span class="section">top: 100</span></span><br><span class="line"><span class="section">---</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="文章加密访问"><a href="#文章加密访问" class="headerlink" title="文章加密访问"></a>文章加密访问</h2><p>有些文章涉及到隐私可能需要密码才能访问，此时就可以设置加密，效果如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/HEXO%E7%9A%84NEXT%E4%B8%BB%E9%A2%98%E9%85%8D%E7%BD%AE/20.gif"></p>
+<p>在<code>themes-&gt;next-&gt;layout-&gt;_partials-&gt;head.swig</code>文件中的<code>&lt;meta&gt;</code>标签之后插入以下代码：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&lt;script&gt;</span><br><span class="line">    (<span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="string">&#x27;&#123;&#123; page.password &#125;&#125;&#x27;</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (prompt(<span class="string">&#x27;请输入文章密码&#x27;</span>) !== <span class="string">&#x27;&#123;&#123; page.password &#125;&#125;&#x27;</span>) &#123;</span><br><span class="line">                alert(<span class="string">&#x27;密码错误！&#x27;</span>);</span><br><span class="line">                <span class="keyword">if</span> (history.length === <span class="number">1</span>) &#123;</span><br><span class="line">                    location.replace(<span class="string">&quot;https://chenjiabing666.github.io/&quot;</span>); <span class="comment">// 这里替换成你的首页</span></span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    history.back();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)();</span><br><span class="line">&lt;/script&gt;</span><br></pre></td></tr></table></figure>
+
+<p>然后在文章的的<code>MD</code>文件上方添加一个<code>password</code>，如下：</p>
+<figure class="highlight md"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title: Spring Boot 与多数据源的那点事儿~</span><br><span class="line">date: 2020-05-22 22:45:48</span><br><span class="line">tags: Spring Boot进阶</span><br><span class="line">categories: Spring Boot</span><br><span class="line">top: 100</span><br><span class="line"><span class="section">password: 123456</span></span><br><span class="line"><span class="section">---</span></span><br></pre></td></tr></table></figure>
+
+<p>全部配置完成后，这篇文章必须输入密码<code>123456</code>才能访问。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文主要介绍了<code>Next</code>主题美化的一些方法，关于Hexo博客搭建的教程网上很多，有不会的可以去网上搜搜教程。</p>
+<p>作者的博客并没有设置单独的域名，完全是搭建的在<code>Github</code>上的，个人觉得没必要一个单独的域名，完全是自己的学习以及工作心得，因此没搞这些，不喜勿喷，哈哈………</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Hexo/" rel="tag"># Hexo</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/10/21/SpringBoot%E4%B8%8E%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E7%9A%84%E9%82%A3%E7%82%B9%E4%BA%8B%E5%84%BF/" rel="prev" title="Spring Boot 与多数据源的那点事儿~">
+      <i class="fa fa-chevron-left"></i> Spring Boot 与多数据源的那点事儿~
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/10/27/SpringBoot%E6%95%B4%E5%90%88JSR303/" rel="next" title="SpringBoot整合JSR303实现参数校验~">
+      SpringBoot整合JSR303实现参数校验~ <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E4%B8%8B%E8%BD%BD%EF%BC%9F"><span class="nav-text">如何下载？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E7%9A%84%E5%88%86%E7%B1%BB"><span class="nav-text">配置文件的分类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E4%BF%A1%E6%81%AF%E9%85%8D%E7%BD%AE"><span class="nav-text">基本信息配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E4%B8%BB%E9%A2%98"><span class="nav-text">修改主题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Next%E4%B8%BB%E9%A2%98%E6%A0%B7%E5%BC%8F%E8%AE%BE%E7%BD%AE"><span class="nav-text">Next主题样式设置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E5%8A%A8%E6%80%81%E8%83%8C%E6%99%AF"><span class="nav-text">添加动态背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%93%BE%E6%8E%A5%E7%9A%84%E6%A0%B7%E5%BC%8F"><span class="nav-text">修改链接的样式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E6%90%9C%E7%B4%A2%E5%8A%9F%E8%83%BD"><span class="nav-text">添加文章搜索功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E6%96%87%E7%AB%A0%E5%BA%95%E9%83%A8%E6%A0%87%E7%AD%BE%E7%9A%84-%E7%9A%84%E6%A0%B7%E5%BC%8F"><span class="nav-text">修改文章底部标签的#的样式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E4%BD%9C%E8%80%85%E5%A4%B4%E5%83%8F%E5%B9%B6%E6%97%8B%E8%BD%AC"><span class="nav-text">修改作者头像并旋转</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-%E7%9A%84%E6%A0%B7%E5%BC%8F"><span class="nav-text">修改&#96;&#96;的样式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E5%85%A8%E6%96%87%E9%98%85%E8%AF%BB%E7%9A%84%E6%8C%89%E9%92%AE"><span class="nav-text">添加全文阅读的按钮</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E7%AB%99%E7%82%B9%E8%AE%BF%E9%97%AE%E4%BA%BA%E6%95%B0%E8%AE%A1%E6%95%B0"><span class="nav-text">添加站点访问人数计数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%BB%E6%8E%89%E6%96%87%E7%AB%A0%E7%9B%AE%E5%BD%95%E6%A0%87%E9%A2%98%E7%9A%84%E8%87%AA%E5%8A%A8%E7%BC%96%E5%8F%B7"><span class="nav-text">去掉文章目录标题的自动编号</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BB%E9%A1%B5%E6%96%87%E7%AB%A0%E6%B7%BB%E5%8A%A0%E9%98%B4%E5%BD%B1%E5%8D%A1%E7%89%87%E6%95%88%E6%9E%9C"><span class="nav-text">主页文章添加阴影卡片效果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E7%AB%99%E5%BA%95%E9%83%A8%E5%AD%97%E6%95%B0%E7%BB%9F%E8%AE%A1"><span class="nav-text">网站底部字数统计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E7%BD%91%E7%AB%99%E7%9A%84%E5%9B%BE%E6%A0%87Favicon"><span class="nav-text">设置网站的图标Favicon</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E6%96%87%E7%AB%A0%E5%AD%97%E6%95%B0%E7%BB%9F%E8%AE%A1%E5%8A%9F%E8%83%BD"><span class="nav-text">添加文章字数统计功能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E9%A1%B6%E9%83%A8%E5%8A%A8%E6%80%81%E5%8A%A0%E8%BD%BD%E6%9D%A1"><span class="nav-text">添加顶部动态加载条</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E7%AB%A0%E8%AE%BE%E7%BD%AE%E7%BD%AE%E9%A1%B6"><span class="nav-text">文章设置置顶</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E7%AB%A0%E5%8A%A0%E5%AF%86%E8%AE%BF%E9%97%AE"><span class="nav-text">文章加密访问</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某</span>
+</div>
+ <!-- <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

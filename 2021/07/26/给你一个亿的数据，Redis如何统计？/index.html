@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言不知你大规模的用过Redis吗？还是仅仅作为缓存的工具了？在Redis中使用最多的就是集合了，举个例子，如下场景：  签到系统中，一天对应一系列的用户签到记录。 电商系统中，一个商品对应一系列的评论。 交友系统中，某个用户的一系列的好友。  Redis中集合的特点无非是一个Key对应一系列的数据， 但是数据的作用往往是为了统计的，比如：  交友系统中，需要统计每天的新增好友，以及双方的共同好友">
+<meta property="og:type" content="article">
+<meta property="og:title" content="给你一个亿的数据，Redis如何统计？">
+<meta property="og:url" content="http://example.com/2021/07/26/%E7%BB%99%E4%BD%A0%E4%B8%80%E4%B8%AA%E4%BA%BF%E7%9A%84%E6%95%B0%E6%8D%AE%EF%BC%8CRedis%E5%A6%82%E4%BD%95%E7%BB%9F%E8%AE%A1%EF%BC%9F/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="前言不知你大规模的用过Redis吗？还是仅仅作为缓存的工具了？在Redis中使用最多的就是集合了，举个例子，如下场景：  签到系统中，一天对应一系列的用户签到记录。 电商系统中，一个商品对应一系列的评论。 交友系统中，某个用户的一系列的好友。  Redis中集合的特点无非是一个Key对应一系列的数据， 但是数据的作用往往是为了统计的，比如：  交友系统中，需要统计每天的新增好友，以及双方的共同好友">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/1.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/2.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/3.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/4.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/5.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/6.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%93%E6%A0%8F%E6%96%87%E7%AB%A0/3.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png">
+<meta property="article:published_time" content="2021-07-26T11:10:20.530Z">
+<meta property="article:modified_time" content="2020-12-02T11:23:54.887Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/1.png">
+
+<link rel="canonical" href="http://example.com/2021/07/26/%E7%BB%99%E4%BD%A0%E4%B8%80%E4%B8%AA%E4%BA%BF%E7%9A%84%E6%95%B0%E6%8D%AE%EF%BC%8CRedis%E5%A6%82%E4%BD%95%E7%BB%9F%E8%AE%A1%EF%BC%9F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>给你一个亿的数据，Redis如何统计？ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/26/%E7%BB%99%E4%BD%A0%E4%B8%80%E4%B8%AA%E4%BA%BF%E7%9A%84%E6%95%B0%E6%8D%AE%EF%BC%8CRedis%E5%A6%82%E4%BD%95%E7%BB%9F%E8%AE%A1%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          给你一个亿的数据，Redis如何统计？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-07-26 19:10:20" itemprop="dateCreated datePublished" datetime="2021-07-26T19:10:20+08:00">2021-07-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-12-02 19:23:54" itemprop="dateModified" datetime="2020-12-02T19:23:54+08:00">2020-12-02</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Redis 进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>不知你大规模的用过<code>Redis</code>吗？还是仅仅作为缓存的工具了？在Redis中使用最多的就是集合了，举个例子，如下场景：</p>
+<ol>
+<li>签到系统中，一天对应一系列的用户签到记录。</li>
+<li>电商系统中，一个商品对应一系列的评论。</li>
+<li>交友系统中，某个用户的一系列的好友。</li>
+</ol>
+<p>Redis中集合的特点无非是一个<code>Key</code>对应一系列的数据， 但是数据的作用往往是为了统计的，比如：</p>
+<ol>
+<li>交友系统中，需要统计每天的新增好友，以及双方的共同好友。</li>
+<li>电商系统中，需要统计评论列表中的最新评论。</li>
+<li>签到系统中，需要统计连续一个月的签到的用户数量。</li>
+</ol>
+<p>大型互联网应用中，数据量是巨大的，少说百万，千万，甚至是一个亿，比如电商巨头淘宝，交友巨头微信、微博；办公巨头钉钉等，哪一个的用户不是上亿？</p>
+<p><strong>只有针对不同场景，选择合适的集合，统计才能更方便。</strong> </p>
+<span id="more"></span>
+
+<h2 id="聚合统计"><a href="#聚合统计" class="headerlink" title="聚合统计"></a>聚合统计</h2><p><code>聚合统计</code>指的是多个元素聚合的结果，比如统计多个集合的<strong>交集</strong>、<strong>并集</strong>、<strong>差集</strong></p>
+<p><strong>在你需要对多个集合做聚合统计的时候，Set集合是个不错的选择，除了其中无重复的数据外，Redis还提供了对应的API</strong></p>
+<h3 id="交集"><a href="#交集" class="headerlink" title="交集"></a>交集</h3><p>在上述的例子中交友系统中统计双方的共同好友正是聚合统计中的<code>交集</code>。</p>
+<p>在<code>Redis</code>中可以<code>userid</code>作为<code>key</code>，好友的<code>userid</code>作为<code>value</code>，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/1.png"></p>
+<p>统计两个用户的共同好友只需要两个<code>Set</code>集合的交集，命令如下；</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SINTERSTORE userid:new userid:20002 userid:20003</span><br></pre></td></tr></table></figure>
+<p>上述命令运行完成后，<code>userid:new</code>这个key中存储的将是<code>userid:20002</code>、<code>userid:20003</code>两个集合的交集。</p>
+<h3 id="差集"><a href="#差集" class="headerlink" title="差集"></a>差集</h3><p>举个例子：假设交友系统中需要统计每日新增的好友，此时就需要对临近两天的好友集合取差集了，比如<code>2020/11/1</code>日的好友是<code>set1</code>，<code>2020/11/2</code>日的好友是<code>set2</code>，此时只需要对<code>set1</code>和<code>set2</code>做差集。</p>
+<p>此时的结构应该如何设计呢？如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/2.png"></p>
+<p><code>userid:20201101</code>这个<code>key</code>记录了<code>userid</code>用户的<code>2020/11/1</code>日的好友集合。</p>
+<p>差集很简单，只需要执行<code>SDIFFSTORE</code>命令，如下：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SDIFFSTORE  user:new  userid:20201102 userid:20201101  </span><br></pre></td></tr></table></figure>
+
+<p>执行完毕，此时的<code>user:new</code>这集合将是<code>2020/11/2</code>日新增的好友。</p>
+<p><strong>这里还有一个更贴切的例子，微博上有个可能认识的人功能，可以使用差集，即是你朋友的好友减去你们共同的好友即是可能认识的人。</strong></p>
+<h3 id="并集"><a href="#并集" class="headerlink" title="并集"></a>并集</h3><p>还是差集的那个例子，假设需要统计<code>2020/11/01</code>和<code>2020/11/2</code>总共新增的好友，此时只需要对这两日新增好友的集合做一个并集。命令如下：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SUNIONSTORE  userid:new userid:20201102 userid:20201101</span><br></pre></td></tr></table></figure>
+
+<p>此时新的集合<code>userid:new</code>则是两日新增的好友。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><code>Set</code>集合的交差并的计算复杂度很高，如果数据量很大的情况下，可能会造成Redis的阻塞。</p>
+<p>那么如何规避阻塞呢？建议如下：</p>
+<ol>
+<li>在<code>Redis</code>集群中选一个从库专门负责聚合统计，这样就不会阻塞主库和其他的从库了</li>
+<li>将数据交给客户端，由客户端进行聚合统计。</li>
+</ol>
+<h2 id="排序统计"><a href="#排序统计" class="headerlink" title="排序统计"></a>排序统计</h2><p>在一些电商网站中可以看到商品的评论总是最新的在上面，这个是怎么做的呢？</p>
+<p>最新评论列表包含了所有的评论，这就要<strong>集合对元素进行保序存储</strong>了。也就是说集合中的元素必须按序存储，称之为有序集合。</p>
+<p><code>Redis</code>中的四种集合中<code>List</code>和<code>Sorted Set</code>属于有序集合。</p>
+<p>但是<code>List</code>和<code>Sorted Set</code>有何区别呢？到底使用哪一种呢？</p>
+<p><strong>List是按照元素进入顺序进行排序，而Sorted Set可以根据元素权重来排序。</strong> 比如可以根据元素插入集合的时间确定权值，先插入的元素权重小，后插入的元素权重大。</p>
+<p>针对这一例子中，显然这两种都是能够满足要求的，List中分页查询命令<code>LRANGE </code>和<code>Sorted Set</code>分页查询命令<code>ZRANGEBYSCORE</code>。</p>
+<p>但是就灵活性来说，List肯定不适合，List只能根据先后插入的顺序排序，但是大多数的场景中可能并不只是按照时间先后排序，可能还会按照一些特定的条件，此时<code>Sorted Set</code>就很合适了，只需要根据独有的算法生成相应的权重即可。</p>
+<h2 id="二值状态统计"><a href="#二值状态统计" class="headerlink" title="二值状态统计"></a>二值状态统计</h2><p><strong>二值状态指的是取值0或者1两种</strong>；在签到打卡的场景中，只需要记录签到（1）和未签到（0）两种状态，这就是典型的二值状态统计。</p>
+<p>二值状态的统计可以使用<code>Redis</code>的扩展数据类型<code>Bitmap</code>，底层使用<code>String</code>类型实现，可以把它看成是一个<code>bit</code>数组。关于详细内容后续介绍………</p>
+<p>在签到统计中，<code>0</code>和<code>1</code>只占了一个<code>bit</code>，即使一年的签到数据才365个<code>bit</code>位。大大减少了存储空间。</p>
+<p>Bitmap 提供了<code>GETBIT/SETBIT</code> 操作，使用一个偏移值 <code>offset</code> 对 bit 数组的某一个 bit 位进行读和写。不过，需要注意的是，Bitmap 的偏移量是从 0 开始算的，也就是说 <code>offset</code> 的最小值是 0。当使用 <code>SETBIT</code> 对一个 bit 位进行写操作时，这个 bit 位会被设置为 1。Bitmap 还提供了 <code>BITCOUNT</code> 操作，用来统计这个 bit 数组中所有<code>1</code>的个数。</p>
+<p>键值如何设计呢？key可以是<code>userid:yyyyMM</code>，即是唯一id加上月份。假设员工id为<code>10001</code>，需要统计<code>2020/11</code>月份的签到打卡记录。</p>
+<p>第一步，执行命令设置值，假设11月2号打卡了，命令如下：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SETBIT userid:10001:202011 1 1 </span><br></pre></td></tr></table></figure>
+
+<p>BitMap是从下标0开始，因此2号则是下标为1，值设置为1则表示成功打卡了。</p>
+<p>第二步，检查该用户11月2号是否打卡了，命令如下：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GETBIT userid:10001:202011 1 </span><br></pre></td></tr></table></figure>
+
+<p>第三步，统计11月的打卡次数，命令如下：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BITCOUNT userid:10001:202011</span><br></pre></td></tr></table></figure>
+
+
+<p><strong>那么问题来了，需要统计你这个签到系统中连续20天的签到打卡的用户的总数，如何处理呢？假设用户一个亿。</strong></p>
+<p>比如需要统计<code>2020/11/01</code>到<code>2020/11/20</code>天中连续打卡的人数，如何统计呢？</p>
+<p><code>Bitmap</code>中还支持同时对多个BitMap按位做<code>与</code>、<code>或</code>、<code>异或</code>操作，命令如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/3.png"></p>
+<p>思路来了，我们可以将每天的日期作为一个<code>key</code>，对应的<code>BitMap</code>存储一亿个用户当天的打卡情况。如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/4.png"></p>
+<p>此时我们只需要对<code>2020/11/1</code>到<code>2020/11/20</code>号的<code>Bitmap</code>做按位<code>与</code>操作，最终得到的一个<code>Bitmap</code>中每个bit位置对应的值则代表连续20天打卡的情况，只有连续20天全部打卡，所在的bit位的值才为1。如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/5.png"></p>
+<p>最终可以使用<code>BITCOUNT</code>命令进行统计。</p>
+<p>可以尝试计算下内存开销，每天使用 1 个 1 亿位的 Bitmap，大约占 <code>12MB</code> 的内存（<code>10^8/8/1024/1024</code>），20 天的 Bitmap 的内存开销约为 <code>240MB</code>，内存压力不算太大。不过，在实际应用时，最好对 <code>Bitmap</code> 设置过期时间，让 Redis 自动删除不再需要的签到记录，以节省内存开销。</p>
+<p><strong>如果涉及到二值状态，比如用户是否存在，签到打卡，商品是否存在等情况可以使用Bitmap，可以有效的节省内存空间。</strong></p>
+<h2 id="基数统计"><a href="#基数统计" class="headerlink" title="基数统计"></a>基数统计</h2><p>基数统计指统计一个集合中不重复元素的个数。</p>
+<p>举个栗子：电商网站中通常需要统计每个网页的<code>UV</code>来确定权重，网页的UV肯定是需要去重的，在Redis类型中<code>Set</code>支持去重，第一时间肯定想到的是Set。</p>
+<p>但是这里有一个问题，<code>Set</code>底层使用的是哈希表和整数数组，如果一个网页的UV达到千万级别的话（一个电商网站中何止一个页面），那么对于内存的消耗极大。</p>
+<p><strong>Redis提供了一个扩展类型HyperLogLog用于基数统计，计算2^64个元素大概只需要12KB的内存空间</strong></p>
+<p>是不是很心动？但是<code>HyperLogLog</code>是<strong>存在误差</strong>的，大概是在<code>0.81%</code>，如果需要精准的统计，还是需要使用<code>Set</code>。对于这种网页的UV来说，足够了。</p>
+<p>在统计网页UV的时候，只需要将用户的唯一id存入HyperLogLog中，如下：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PFADD p1:uv 10001 10002 10003 10004</span><br></pre></td></tr></table></figure>
+<p>如果存在重复的元素，将会自动去重。</p>
+<p>统计也很简单，使用<code>PFCOUNT</code>命令，如下：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PFCOUNT p1:uv</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h2><p>本文介绍了统计的几种类型以及应该用什么集合存储，为了方便理解，作者将支持情况和优缺点汇总了一张表格，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/6.png"></p>
+<p><code>Set</code>和<code>Sorted Set</code>支持交集、并集的聚合运算，但是<code>Sorted Set</code>不支差集运算。</p>
+<p><code>Bitmap</code>也能对多个Bitmap做与、异或、或的聚合运算。</p>
+<p><code>List</code>和<code>SortedSet</code>都支持排序统计，但是List是根据元素先后插入顺序排序，Sorted Set支持权重，相对于List排序来说更加灵活。</p>
+<p>对于二值状态统计，判断某个元素是否存在等场景，建议使用<code>Bitmap</code>，节省的内存空间。</p>
+<p>对于基数统计，在大数据量、不要求精准的情况建议使用<code>HyperLogLog</code>，节省内存空间；对于精准的基数统计，最好还是使用<code>Set</code>集合。</p>
+<p>另外，作者已经完成了两个专栏的文章<strong>Mybatis进阶</strong>、<strong>Spring Boot 进阶</strong> ，已经将专栏文章整理成书，有需要的公众号回复关键词<code>Mybatis 进阶</code>、<code>Spring Boot 进阶</code>免费获取。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%93%E6%A0%8F%E6%96%87%E7%AB%A0/3.png"></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Redis/" rel="tag"># Redis</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/12/29/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE%E8%AF%A6%E8%A7%A3/" rel="prev" title="分布式一致性协议详解">
+      <i class="fa fa-chevron-left"></i> 分布式一致性协议详解
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%81%9A%E5%90%88%E7%BB%9F%E8%AE%A1"><span class="nav-text">聚合统计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%A4%E9%9B%86"><span class="nav-text">交集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%AE%E9%9B%86"><span class="nav-text">差集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B6%E9%9B%86"><span class="nav-text">并集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8E%92%E5%BA%8F%E7%BB%9F%E8%AE%A1"><span class="nav-text">排序统计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E5%80%BC%E7%8A%B6%E6%80%81%E7%BB%9F%E8%AE%A1"><span class="nav-text">二值状态统计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E6%95%B0%E7%BB%9F%E8%AE%A1"><span class="nav-text">基数统计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-1"><span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某</span>
+</div>
+ <!-- <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
@@ -17,15 +17,17 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
+  <meta name="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="不才陈某技术博客">
 <meta property="og:url" content="http://example.com/index.html">
-<meta property="og:site_name" content="Hexo">
-<meta property="og:locale" content="en_US">
-<meta property="article:author" content="John Doe">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:author" content="不才陈某">
 <meta name="twitter:card" content="summary">
 
 <link rel="canonical" href="http://example.com/">
@@ -37,11 +39,11 @@
     sidebar: "",
     isHome : true,
     isPost : false,
-    lang   : 'en'
+    lang   : 'zh-CN'
   };
 </script>
 
-  <title>Hexo</title>
+  <title>不才陈某技术博客</title>
   
 
 
@@ -81,7 +83,7 @@
     <header class="header" itemscope itemtype="http://schema.org/WPHeader">
       <div class="header-inner"><div class="site-brand-container">
   <div class="site-nav-toggle">
-    <div class="toggle" aria-label="Toggle navigation bar">
+    <div class="toggle" aria-label="切换导航栏">
       <span class="toggle-line toggle-line-first"></span>
       <span class="toggle-line toggle-line-middle"></span>
       <span class="toggle-line toggle-line-last"></span>
@@ -92,13 +94,15 @@
 
     <a href="/" class="brand" rel="start">
       <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">Hexo</h1>
+      <h1 class="site-title">不才陈某技术博客</h1>
       <span class="logo-line-after"><i></i></span>
     </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
   </div>
 
   <div class="site-nav-right">
     <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
     </div>
   </div>
 </div>
@@ -110,19 +114,61 @@
   <ul id="menu" class="main-menu menu">
         <li class="menu-item menu-item-home">
 
-    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
 
   </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
   </ul>
 </nav>
 
 
 
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
 
 </div>
     </header>
@@ -144,22 +190,22 @@
       
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/26/hello-world/">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/26/%E7%BB%99%E4%BD%A0%E4%B8%80%E4%B8%AA%E4%BA%BF%E7%9A%84%E6%95%B0%E6%8D%AE%EF%BC%8CRedis%E5%A6%82%E4%BD%95%E7%BB%9F%E8%AE%A1%EF%BC%9F/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content="">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="不才陈某技术博客">
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2021/07/26/hello-world/" class="post-title-link" itemprop="url">Hello World</a>
+            <a href="/2021/07/26/%E7%BB%99%E4%BD%A0%E4%B8%80%E4%B8%AA%E4%BA%BF%E7%9A%84%E6%95%B0%E6%8D%AE%EF%BC%8CRedis%E5%A6%82%E4%BD%95%E7%BB%9F%E8%AE%A1%EF%BC%9F/" class="post-title-link" itemprop="url">给你一个亿的数据，Redis如何统计？</a>
         </h2>
 
         <div class="post-meta">
@@ -167,88 +213,24 @@
               <span class="post-meta-item-icon">
                 <i class="far fa-calendar"></i>
               </span>
-              <span class="post-meta-item-text">Posted on</span>
+              <span class="post-meta-item-text">发表于</span>
 
-              <time title="Created: 2021-07-26 15:46:49" itemprop="dateCreated datePublished" datetime="2021-07-26T15:46:49+08:00">2021-07-26</time>
+              <time title="创建时间：2021-07-26 19:10:20" itemprop="dateCreated datePublished" datetime="2021-07-26T19:10:20+08:00">2021-07-26</time>
             </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/04/05/Mysql%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88count%E8%BF%99%E4%B9%88%E6%85%A2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/04/05/Mysql%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88count%E8%BF%99%E4%B9%88%E6%85%A2/" class="post-title-link" itemprop="url">Mysql性能优化：为什么count(*)这么慢？</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-12-02 19:23:54" itemprop="dateModified" datetime="2020-12-02T19:23:54+08:00">2020-12-02</time>
               </span>
-              <span class="post-meta-item-text">Posted on</span>
-              
-
-              <time title="Created: 2020-04-05 21:41:59 / Modified: 21:43:11" itemprop="dateCreated datePublished" datetime="2020-04-05T21:41:59+08:00">2020-04-05</time>
-            </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
               </span>
-              <span class="post-meta-item-text">In</span>
+              <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%B9%B2%E8%B4%A7%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">数据库干货篇</span></a>
+                  <a href="/categories/Redis-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Redis 进阶</span></a>
                 </span>
             </span>
 
@@ -263,73 +245,730 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="导读"><a href="#导读" class="headerlink" title="导读"></a>导读</h2><ul>
-<li>在开发中一定会用到统计一张表的行数，比如一个交易系统，老板会让你每天生成一个报表，这些统计信息少不了sql中的<code>count</code>函数。</li>
-<li>但是随着记录越来越多，查询的速度会越来越慢，为什么会这样呢？Mysql内部到底是怎么处理的？</li>
-<li>今天这篇文章将从Mysql内部对于<code>count</code>函数是怎样处理的？</li>
-</ul>
-<h2 id="count的实现方式"><a href="#count的实现方式" class="headerlink" title="count的实现方式"></a>count的实现方式</h2><ul>
-<li>在Mysql中的不同的存储引擎对<code>count</code>函数有不同的实现方式。</li>
-<li><code>MyISAM</code>引擎把一个表的总行数存在了磁盘上，因此执行<code>count(*)</code>的时候会直接返回这个数，效率很高（没有<code>where</code>查询条件）。</li>
-<li><code>InnoDB</code>引擎并没有直接将总数存在磁盘上，在执行<code>count(*)</code>函数的时候需要一行一行的将数据读出来，然后累计总数。</li>
-</ul>
-<h2 id="为什么InnoDB不将总数存起来？"><a href="#为什么InnoDB不将总数存起来？" class="headerlink" title="为什么InnoDB不将总数存起来？"></a>为什么InnoDB不将总数存起来？</h2><ul>
-<li><p>说道InnoDB相信读者总会想到其支持事务的特性，事务具有隔离性，如果将总数存起来，怎么保证各个事务之间的总数的一致性呢？不明白的看下图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/count/1.png"></p>
-</li>
-<li><p><code>事务A</code>和<code>事务B</code>中的<code>count(*)</code>的执行结果是不同的，因此InnoDB引擎在每个事务中返回多少行是不确定的，只能一行一行的读出来用来判断总数。</p>
-</li>
-</ul>
-<h2 id="如何提升count效率"><a href="#如何提升count效率" class="headerlink" title="如何提升count效率"></a>如何提升count效率</h2><ul>
-<li>在<code>InnoDB</code>对于如何提升<code>count(*)</code>的查询效率，网上有多种解决办法，这里主要介绍三种，并分析可行性。</li>
-</ul>
-<h3 id="show-table-status"><a href="#show-table-status" class="headerlink" title="show table status"></a>show table status</h3><ul>
-<li><code>show table status</code>这个命令能够很快的查询出数据库中每个表的行数，但是真的能够替代<code>count(*)</code>吗？</li>
-<li>答案是不能。原因很简单，这个命令统计出来的值是一个<strong>估值</strong>，因此是不准确的，官方文档说误差大概在<code>40%-50%</code>。</li>
-<li>因此这种方法直接pass，不准确还用它干嘛。</li>
-</ul>
-<h3 id="缓存系统存储总数"><a href="#缓存系统存储总数" class="headerlink" title="缓存系统存储总数"></a>缓存系统存储总数</h3><ul>
-<li><p>这种方法也是最容易想到的，增加一行就<code>+1</code>，删除一行就<code>-1</code>，并且缓存系统读取也是很快，既简单又方便的为什么不用？</p>
-</li>
-<li><p>缓存系统和Mysql是两个系统，比如<code>redis</code>和<code>Mysql</code>这两个是典型的比较。两个系统最难的就是在高并发下无法保证数据的一致性。通过以下两图我们来理解一下：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/count/2.png"><br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/count/3.png"></p>
-</li>
-<li><p>通过上面两张图，无论是<code>redis计数+1</code>还是<code>insert into user</code>先执行，最终都会导致数据在逻辑上的不一致。第一张图会出现<code>redis计数</code>少了，第二张图虽然计数正确了但是并没有查询出插入的那一行数据。</p>
-</li>
-<li><p>在并发系统里面，我们是无法精确控制不同线程的执行时刻的，因为存在图中的这种操作序列，所以，我们说即使Redis正常工作，这个计数值还是逻辑上不精确的。</p>
-</li>
-</ul>
-<h3 id="在数据库保存计数"><a href="#在数据库保存计数" class="headerlink" title="在数据库保存计数"></a>在数据库保存计数</h3><ul>
-<li><p>通过缓存系统保存的分析得知了使用缓存无法保证数据在逻辑上的一致性，因此我们想到了直接使用数据库来保存，有了<strong>事务</strong>的支持，也就保证了数据的一致性了。</p>
-</li>
-<li><p>如何使用呢？很简单，直接将计数保存在一张表中<code>（table_name,total）</code>。</p>
-</li>
-<li><p>至于执行的逻辑只需要将缓存系统中<code>redis计数+1</code>改成<code>total</code>字段+1即可，如下图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/count/4.png"></p>
-</li>
-<li><p>由于在同一个事务中，保证了数据在逻辑上的一致性。</p>
-</li>
-</ul>
-<h2 id="不同count的用法"><a href="#不同count的用法" class="headerlink" title="不同count的用法"></a>不同count的用法</h2><ul>
-<li><code>count()</code>是一个聚合函数，对于返回的结果集，一行行地判断，如果count函数的参数不是NULL，累计值就加1，否则不加。最后返回累计值。</li>
-<li><code>count</code>的用法有多种，分别是<code>count(*)</code>、<code>count(字段)</code>、<code>count(1)</code>、<code>count(主键id)</code>。那么多种用法，到底有什么差别呢？当然，<strong>前提是没有<code>where</code>条件语句</strong>。</li>
-<li><code>count(id)</code>：InnoDB引擎会遍历整张表，把每一行的id值都取出来，返回给server层。server层拿到id后，判断是不可能为空的，就按行累加。</li>
-<li><code>count(1)</code>：InnoDB引擎遍历整张表，但不取值。server层对于返回的每一行，放一个数字<code>1</code>进去，判断是不可能为空的，按行累加。</li>
-<li><code>count(字段)</code>：<ul>
-<li>如果这个“字段”是定义为<code>not null</code>的话，一行行地从记录里面读出这个字段，判断不能为null，按行累加；</li>
-<li>如果这个字段定义允许为<code>null</code>，那么执行的时候，判断到有可能是null，还要把值取出来再判断一下，不是null才累加。</li>
-</ul>
-</li>
-<li><code>count(*)</code>：不会把全部字段取出来，而是专门做了优化，不取值。<code>count(*)</code>肯定不是null，按行累加。</li>
-<li>所以结论很简单：<strong>按照效率排序的话，<code>count(字段)</code>&lt;<code>count(主键id)</code>&lt;<code>count(1)</code>≈<code>count(*)</code>，所以建议读者，尽量使用<code>count(*)</code>。</strong></li>
-<li><strong>注意</strong>：这里肯定有人会问，<code>count(id)</code>不是走的索引吗，为什么查询效率和其他的差不多呢？陈某在这里解释一下，虽然走的索引，但是还是要一行一行的扫描才能统计出来总数。</li>
-</ul>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
-<li><code>MyISAM</code>表虽然<code>count(*)</code>很快，但是不支持事务；</li>
-<li><code>show table status</code>命令虽然返回很快，但是不准确；</li>
-<li><code>InnoDB</code>直接<code>count(*)</code>会遍历全表(没有where条件)，虽然结果准确，但会导致性能问题。</li>
-<li>缓存系统的存储计数虽然简单效率高，但是无法保证数据的一致性。</li>
-<li>数据库保存计数很简单，也能保证数据的一致性，建议使用。</li>
-<li><strong>思考题，读者留言区讨论</strong>：在系统高并发的情况下，使用数据库保存计数，是先<code>更新计数+1</code>,还是先<code>插入数据</code>。即是先<code>update total+=1</code>还是先<code>insert into</code>。</li>
-</ul>
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>不知你大规模的用过<code>Redis</code>吗？还是仅仅作为缓存的工具了？在Redis中使用最多的就是集合了，举个例子，如下场景：</p>
+<ol>
+<li>签到系统中，一天对应一系列的用户签到记录。</li>
+<li>电商系统中，一个商品对应一系列的评论。</li>
+<li>交友系统中，某个用户的一系列的好友。</li>
+</ol>
+<p>Redis中集合的特点无非是一个<code>Key</code>对应一系列的数据， 但是数据的作用往往是为了统计的，比如：</p>
+<ol>
+<li>交友系统中，需要统计每天的新增好友，以及双方的共同好友。</li>
+<li>电商系统中，需要统计评论列表中的最新评论。</li>
+<li>签到系统中，需要统计连续一个月的签到的用户数量。</li>
+</ol>
+<p>大型互联网应用中，数据量是巨大的，少说百万，千万，甚至是一个亿，比如电商巨头淘宝，交友巨头微信、微博；办公巨头钉钉等，哪一个的用户不是上亿？</p>
+<p><strong>只有针对不同场景，选择合适的集合，统计才能更方便。</strong> </p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/07/26/%E7%BB%99%E4%BD%A0%E4%B8%80%E4%B8%AA%E4%BA%BF%E7%9A%84%E6%95%B0%E6%8D%AE%EF%BC%8CRedis%E5%A6%82%E4%BD%95%E7%BB%9F%E8%AE%A1%EF%BC%9F/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
 
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/12/29/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE%E8%AF%A6%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/12/29/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE%E8%AF%A6%E8%A7%A3/" class="post-title-link" itemprop="url">分布式一致性协议详解</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-12-29 11:05:13 / 修改时间：11:12:50" itemprop="dateCreated datePublished" datetime="2020-12-29T11:05:13+08:00">2020-12-29</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>在常见的分布式系统中，总会发生诸如机器宕机或网络异常（包括消息的延迟、丢失、重复、乱序，还有网络分区）等情况。</p>
+<p>一致性算法需要解决的问题就是如何在一个可能发生上述异常的分布式系统中，快速且正确地在集群内部对某个数据的值达成一致，并且保证不论发生以上任何异常，都不会破坏整个系统的一致性。</p>
+<h2 id="CAP-定理"><a href="#CAP-定理" class="headerlink" title="CAP 定理"></a>CAP 定理</h2><p>CAP 理论告诉我们，一个分布式系统不可能同时满足一致性（C:Consistency)，可用性（A: Availability）和分区容错性（P：Partition tolerance）这三个基本需求，最多只能同时满足其中的2个。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1hibicUPzdPLHIdaNrtV5KhgJib9QgicSXzxVibKVz7EWVHj0RIicKzSDpzog/640?wx_fmt=png" alt="null"></p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1vXevN0SaMqT8hljYXeSRgicloPzeS1xuvWMmDTRAtA59b4QQeVOrUWg/640?wx_fmt=png" alt="null"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/12/29/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE%E8%AF%A6%E8%A7%A3/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/27/IDEA2020-2-4%E6%9C%80%E6%96%B0%E6%BF%80%E6%B4%BB%E6%95%99%E7%A8%8B%EF%BC%8C%E6%9C%89%E6%95%88%E6%9C%9F%E5%88%B02089/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/27/IDEA2020-2-4%E6%9C%80%E6%96%B0%E6%BF%80%E6%B4%BB%E6%95%99%E7%A8%8B%EF%BC%8C%E6%9C%89%E6%95%88%E6%9C%9F%E5%88%B02089/" class="post-title-link" itemprop="url">IDEA2020.2.4最新激活教程，有效期到2089~</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-27 12:14:23 / 修改时间：12:16:42" itemprop="dateCreated datePublished" datetime="2020-11-27T12:14:23+08:00">2020-11-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">开发工具</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>昨天又有好多粉丝反馈Idea失效过期，也有群里的小伙伴私聊问我，最新的<code>Idea2020.2.4</code> 版本要如何激活？</p>
+<p>于是自己在网上搜罗了各种注册码、激活码，均以失败告终，有的虽然当时成功了，当时很快就失效了，也许是 IDEA 最近封杀的比较严吧~  但是，最终还是让我找到了破解方法，这里要感谢z大提供的破解补丁。无图无真相，下面就是激活成功的截图！</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/IDEA2.4%E7%A0%B4%E8%A7%A3/1.jpg"></p>
+<blockquote>
+<p><strong>申明</strong>：本教程 IntelliJ IDEA 破解补丁、激活码均收集于网络，请勿商用，仅供个人学习使用，如有侵权，请联系作者删除。</p>
+</blockquote>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/11/27/IDEA2020-2-4%E6%9C%80%E6%96%B0%E6%BF%80%E6%B4%BB%E6%95%99%E7%A8%8B%EF%BC%8C%E6%9C%89%E6%95%88%E6%9C%9F%E5%88%B02089/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/24/%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%AE%95%E6%9C%BA%EF%BC%8CRedis%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%E6%95%B0%E6%8D%AE%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/24/%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%AE%95%E6%9C%BA%EF%BC%8CRedis%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%E6%95%B0%E6%8D%AE%EF%BC%9F/" class="post-title-link" itemprop="url">服务器宕机，Redis如何恢复数据？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-24 14:06:29 / 修改时间：15:58:22" itemprop="dateCreated datePublished" datetime="2020-11-24T14:06:29+08:00">2020-11-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Redis 进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><code>Redis</code>作为内存型的数据库，虽然很快，依然有着很大的隐患，一旦<strong>服务器宕机</strong>重启，内存中数据还会存在吗？</p>
+<p>很容易想到的一个方案是从后台数据恢复这些数据，如果数据量很小，这倒是一个可行的方案。但是如果数据量过大，频繁的从后台数据库访问数据，压力很大；另外一方面恢复数据的时间极慢。</p>
+<p>对于<code>Redis</code>来说，实现数据的持久化和快速恢复是至关重要。</p>
+<p>今天这篇文章就来介绍一下<code>Redis</code>持久化的两种机制<code>AOF</code>日志、<code>RDB</code>快照。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/11/24/%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%AE%95%E6%9C%BA%EF%BC%8CRedis%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%E6%95%B0%E6%8D%AE%EF%BC%9F/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/24/%E5%8D%95%E7%BA%BF%E7%A8%8B%E7%9A%84Redis%EF%BC%8C%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E5%8A%A8%E4%BD%9C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/24/%E5%8D%95%E7%BA%BF%E7%A8%8B%E7%9A%84Redis%EF%BC%8C%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E5%8A%A8%E4%BD%9C/" class="post-title-link" itemprop="url">单线程的Redis，有哪些慢动作？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-24 14:04:34 / 修改时间：15:58:17" itemprop="dateCreated datePublished" datetime="2020-11-24T14:04:34+08:00">2020-11-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Redis 进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>现在一提到<code>Redis</code>的第一反应就是<code>快</code>、<code>单线程</code>，但是<code>Redis</code>真的快吗？真的是单线程吗？</p>
+<p>你有没有深入了解一下<code>Redis</code>，看看它的底层有哪些”慢动作”呢？</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/11/24/%E5%8D%95%E7%BA%BF%E7%A8%8B%E7%9A%84Redis%EF%BC%8C%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E5%8A%A8%E4%BD%9C/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/23/SpringBoot%E8%87%AA%E5%AE%9A%E4%B9%89%E5%90%AF%E5%8A%A8%E5%99%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/23/SpringBoot%E8%87%AA%E5%AE%9A%E4%B9%89%E5%90%AF%E5%8A%A8%E5%99%A8/" class="post-title-link" itemprop="url">Spring Boot自定义启动器</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-23 09:26:44 / 修改时间：09:29:32" itemprop="dateCreated datePublished" datetime="2020-11-23T09:26:44+08:00">2020-11-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>日常工作中对于<code>Spring Boot</code> 提供的一些启动器可能已经足够使用了，但是不可避免的需要自定义启动器，比如整合一个陌生的组件，也想要达到开箱即用的效果。</p>
+<p>在上一章节从底层源码介绍了<code>Spring Boot</code> 的自动配置的原理，未读过的朋友建议看一下：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/cEBvxQ4iDo3QOMYWvwE6nw">Spring Boot 自动配置源码解析</a></p>
+<p>这篇文章将会介绍如何自定义一个启动器，同时对于自动配置类的执行顺序做一个详细的分析。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/11/23/SpringBoot%E8%87%AA%E5%AE%9A%E4%B9%89%E5%90%AF%E5%8A%A8%E5%99%A8/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/23/SpringBoot%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/23/SpringBoot%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" class="post-title-link" itemprop="url">Spring Boot自动配置源码解析~</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-23 09:26:29 / 修改时间：09:28:09" itemprop="dateCreated datePublished" datetime="2020-11-23T09:26:29+08:00">2020-11-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>为什么<code>Spring Boot</code>这么火？因为便捷，开箱即用，但是你思考过为什么会这么便捷吗？传统的SSM架构配置文件至少要写半天，而使用<code>Spring Boot</code>之后只需要引入一个<code>starter</code>之后就能直接使用，why？？？</p>
+<p>原因很简单，每个<code>starter</code>内部做了工作，比如<code>Mybatis</code>的启动器默认内置了可用的<code>SqlSessionFactory</code>。</p>
+<p>至于如何内置的？<code>Spring Boot</code> 又是如何使其生效的？这篇文章就从源码角度介绍一下<code>Spring Boot</code>的自动配置原理。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/11/23/SpringBoot%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/20/SpringBoot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/20/SpringBoot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">SpringBoot启动流程源码分析~</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-20 10:53:38 / 修改时间：10:54:52" itemprop="dateCreated datePublished" datetime="2020-11-20T10:53:38+08:00">2020-11-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><code>Spring Boot</code> 专栏已经写了五十多天了，前面二十章从基础应用到高级整合避重就轻介绍的都是工作、面试中常见的知识点。</p>
+<p>今天开始底层源码介绍的阶段，相对内容比较深一点，作者也尽可能介绍的通俗易懂，层次分明一点。相信读过我写的<code>Mybatis</code>专栏的文章都知道，只要跟着作者的步骤，方法一步步研究，其实源码并不难。</p>
+<p>这篇文章花了四天时间精雕细琢，力求介绍的通俗易懂，毕竟源码相对难度更高些，希望通过作者拆分讲解能够帮助到读者。</p>
+<p>如果没读过作者的前二十篇文章，<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=1532834475389288449&scene=173&from_msgid=2247485960&from_itemidx=1&count=10#wechat_redirect&scene=126&subscene=0&sessionid=1605701276&enterid=1605701280">点击前往</a></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/11/20/SpringBoot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/18/SpringBoot%E6%95%B4%E5%90%88AOP%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/18/SpringBoot%E6%95%B4%E5%90%88AOP%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3/" class="post-title-link" itemprop="url">Spring Boot 整合 AOP 自定义注解</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-18 17:47:09 / 修改时间：17:49:03" itemprop="dateCreated datePublished" datetime="2020-11-18T17:47:09+08:00">2020-11-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>注解相信大家都用过，尤其是<code>Spring Boot</code> 这个框架，比如<code>@Controller</code>。</p>
+<p>这篇文章就来介绍下<code>Spring Boot</code> 中如何自定义一个注解，顺带介绍一下<code>Spring Boot</code> 与 <code>AOP</code>如何整合。</p>
+<h2 id="什么是AOP？"><a href="#什么是AOP？" class="headerlink" title="什么是AOP？"></a>什么是AOP？</h2><p><code>AOP</code>即是面向切面，是<code>Spring</code>的核心功能之一，主要的目的即是针对业务处理过程中的横向拓展，以达到低耦合的效果。</p>
+<p>举个栗子，项目中有记录操作日志的需求、或者流程变更是记录变更履历，无非就是插表操作，很简单的一个<code>save</code>操作，都是一些记录日志或者其他辅助性的代码。一遍又一遍的重写和调用。不仅浪费了时间，又将项目变得更加的冗余，实在得不偿失。</p>
+<p>此时<code>AOP</code>的就该出场了，能够在不改变原逻辑的基础上实现相关功能。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/11/18/SpringBoot%E6%95%B4%E5%90%88AOP%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/13/SpringBoot%E5%A4%9A%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE%EF%BC%8C%E4%BD%A0%E5%96%9C%E6%AC%A2%E5%93%AA%E7%A7%8D%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/11/13/SpringBoot%E5%A4%9A%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE%EF%BC%8C%E4%BD%A0%E5%96%9C%E6%AC%A2%E5%93%AA%E7%A7%8D%EF%BC%9F/" class="post-title-link" itemprop="url">Spring Boot多环境配置，你喜欢哪种？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-11-13 13:52:04 / 修改时间：17:51:37" itemprop="dateCreated datePublished" datetime="2020-11-13T13:52:04+08:00">2020-11-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>日常开发中至少有三个环境，分别是开发环境（<code>dev</code>），测试环境（<code>test</code>），生产环境（<code>prod</code>）。</p>
+<p>不同的环境的各种配置都不相同，比如数据库，端口，<code>IP</code>地址等信息。</p>
+<p>那么这么多环境如何区分，如何打包呢？</p>
+<p>本篇文章就来介绍一下<code>Spring Boot</code> 中多环境如何配置，如何打包。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/11/13/SpringBoot%E5%A4%9A%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE%EF%BC%8C%E4%BD%A0%E5%96%9C%E6%AC%A2%E5%93%AA%E7%A7%8D%EF%BC%9F/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -346,6 +985,9 @@
 
 
   
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+  </nav>
 
 
 
@@ -388,10 +1030,10 @@
 
       <ul class="sidebar-nav motion-element">
         <li class="sidebar-nav-toc">
-          Table of Contents
+          文章目录
         </li>
         <li class="sidebar-nav-overview">
-          Overview
+          站点概览
         </li>
       </ul>
 
@@ -402,25 +1044,25 @@
 
       <div class="site-overview-wrap sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">John Doe</p>
-  <div class="site-description" itemprop="description"></div>
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
 </div>
 <div class="site-state-wrap motion-element">
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">2</span>
-          <span class="site-state-item-name">posts</span>
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
-        <span class="site-state-item-count">1</span>
-        <span class="site-state-item-name">categories</span>
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">1</span>
-        <span class="site-state-item-name">tags</span>
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span>
       </div>
   </nav>
 </div>
@@ -450,10 +1092,10 @@
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">John Doe</span>
+  <span class="author" itemprop="copyrightHolder">不才陈某</span>
 </div>
-  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a>
-  </div>
+ <!-- <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
 
         
 
@@ -478,7 +1120,7 @@
 <script src="/js/motion.js"></script>
 
 
-<script src="/js/schemes/muse.js"></script>
+<script src="/js/schemes/pisces.js"></script>
 
 
 <script src="/js/next-boot.js"></script>
@@ -489,6 +1131,10 @@
   
 
 
+
+
+  
+<script src="/js/local-search.js"></script>
 
 
 

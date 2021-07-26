@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="导读 Mysql在中小型企业中是个香饽饽，目前主流的数据库之一，几乎没有一个后端开发者不会使用的，但是作为一个老司机，仅仅会用真的不够。  今天陈某透过一个简单的查询语句来讲述在Mysql内部的执行过程。 1select * from table where id&#x3D;10;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一条查询语句到底是如何执行的?">
+<meta property="og:url" content="http://example.com/2020/04/01/%E4%B8%80%E6%9D%A1%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5%E5%88%B0%E5%BA%95%E6%98%AF%E5%A6%82%E4%BD%95%E6%89%A7%E8%A1%8C%E7%9A%84/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="导读 Mysql在中小型企业中是个香饽饽，目前主流的数据库之一，几乎没有一个后端开发者不会使用的，但是作为一个老司机，仅仅会用真的不够。  今天陈某透过一个简单的查询语句来讲述在Mysql内部的执行过程。 1select * from table where id&#x3D;10;">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/MYSQL%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/1.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/MYSQL%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/2.png">
+<meta property="article:published_time" content="2020-04-01T02:35:30.000Z">
+<meta property="article:modified_time" content="2020-10-23T13:57:19.695Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="SQL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/MYSQL%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/1.png">
+
+<link rel="canonical" href="http://example.com/2020/04/01/%E4%B8%80%E6%9D%A1%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5%E5%88%B0%E5%BA%95%E6%98%AF%E5%A6%82%E4%BD%95%E6%89%A7%E8%A1%8C%E7%9A%84/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>一条查询语句到底是如何执行的? | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2020/04/01/%E4%B8%80%E6%9D%A1%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5%E5%88%B0%E5%BA%95%E6%98%AF%E5%A6%82%E4%BD%95%E6%89%A7%E8%A1%8C%E7%9A%84/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          一条查询语句到底是如何执行的?
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-04-01 10:35:30" itemprop="dateCreated datePublished" datetime="2020-04-01T10:35:30+08:00">2020-04-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 21:57:19" itemprop="dateModified" datetime="2020-10-23T21:57:19+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%B9%B2%E8%B4%A7%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">数据库干货篇</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="导读"><a href="#导读" class="headerlink" title="导读"></a>导读</h2><ul>
+<li><p>Mysql在中小型企业中是个香饽饽，目前主流的数据库之一，几乎没有一个后端开发者不会使用的，但是作为一个老司机，仅仅会用真的不够。</p>
+</li>
+<li><p>今天陈某透过一个简单的查询语句来讲述在Mysql内部的执行过程。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from table where id=10;</span><br></pre></td></tr></table></figure>
+<span id="more"></span>
+<h2 id="撸它"><a href="#撸它" class="headerlink" title="撸它"></a>撸它</h2></li>
+<li><p>首先通过一张图片来了解一下Mysql的基础架构，如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/MYSQL%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/1.png"></p>
+</li>
+</ul>
+<ul>
+<li>从上图可以看出，Mysql大致分为Server层和存储引擎层两部分。</li>
+<li>Server层包括连接器、查询缓存、分析器、优化器等，其中包含了Mysql的大多数核心功能以及所有的内置函数（如日期，时间函数等），所有跨存储引擎的功能都在这一层实现，比如存储过程、触发器、视图等。</li>
+<li>存储引擎层负责数据的存储和提取。它的架构是可插拔式的，支持InnoDB、MyISAM等多个存储引擎。Mysql中主流的存储引擎是InnoDB，由于它对事务的支持让它从Mysql5.5.5版本开始成为了默认的存储引擎。</li>
+<li>大致了解了整体架构，现在说说每一个基础的模块都承担着怎样的责任。</li>
+</ul>
+<h3 id="1-连接器"><a href="#1-连接器" class="headerlink" title="1. 连接器"></a>1. 连接器</h3><ul>
+<li><p>顾名思义，是客户端和Mysql之间连接的媒介，负责登录、获取权限、维持连接和管理连接。连接命令一般如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql [-h] ip [- P] port -u [user] -p </span><br></pre></td></tr></table></figure></li>
+<li><p>在完成经典的TCP握手后，连接器会开始认证身份，要求输入密码。</p>
+<ul>
+<li>密码认证通过，连接器会查询出拥有的权限，即使管理员修改了权限，也不会影响你这次的连接，只有重新连接才会生效。</li>
+<li>密码认证失败，会收到提示信息Access denied for user。</li>
+</ul>
+</li>
+<li><p>连接完成后，没有后续动作的连接将会变成空闲连接，你可以输入<code>show processlist</code>命令看到它。如下图，其中的Command这一列显示为sleep的这一行表示在系统里面有一个空闲连接。</p>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/MYSQL%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/2.png"></p>
+</li>
+<li><p>客户端如果太长时间没有执行动作，连接器将会自动断开，这个时间由参数<code>wait_timeout</code>控制，默认值是8小时。</p>
+</li>
+<li><p>如果在连接被断开之后，客户端再次发送请求的话，就会收到一个错误提醒： Lost connection to MySQL server during query。这时候如果你要继续，就需要重连，然后再执行请求了。</p>
+</li>
+</ul>
+<h3 id="2-查询缓存【废材，8-0-版本完全删除】"><a href="#2-查询缓存【废材，8-0-版本完全删除】" class="headerlink" title="2. 查询缓存【废材，8.0 版本完全删除】"></a>2. 查询缓存【废材，8.0 版本完全删除】</h3><ul>
+<li><p>连接建立完成后，你就可以select语句了，执行之前会查询缓存。</p>
+</li>
+<li><p>查询缓存在Mysql中的是默认关闭的，因为缓存命中率非常低，只要有对表执行一个更新操作，这个表的所有查询缓存都将被清空。怎么样？一句废材足以形容了！！！</p>
+</li>
+<li><p>废材的东西不必多讲，主流的Redis的缓存你不用，别再搞这废材了。</p>
+</li>
+</ul>
+<h3 id="3-分析器"><a href="#3-分析器" class="headerlink" title="3. 分析器"></a>3. 分析器</h3><ul>
+<li><p>如果没有命中查询缓存，就要执行查询了，但是在执行查询之前，需要对SQL语句做解析，判断你这条语句有没有语法错误。</p>
+</li>
+<li><p>分析器会做 ‘词法分析’ ，你输入的无非可就是多个字符串和空格组成的SQL语句，MYSQL需要识别出里面的字符串是什么，代表什么，有没有关键词等。</p>
+</li>
+<li><p>MYSQL会从你输入的select 这个关键字识别出来是一个查询语句，table是表名，id是列名。</p>
+</li>
+<li><p>做完这些会做 ‘语法分析’ ，根据MYSQL定义的规则来判断你的SQL语句有没有语法错误，如果你的语法不对，就会收到类似如下的提醒：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near &#x27;elect * from t where ID=1&#x27; at line 1</span><br></pre></td></tr></table></figure></li>
+<li><p>一般语法错误会提示第一个出现错误的位置，所以你要关注的是紧接“use near”的内容。</p>
+</li>
+</ul>
+<h3 id="4-优化器"><a href="#4-优化器" class="headerlink" title="4. 优化器"></a>4. 优化器</h3><ul>
+<li><p>经过分析器词法和语法的分析，此时就能知道这条SQL语句是干什么的。但是在开始执行之前，MYSQL底层还要使用优化器对这条SQL语句进行优化处理。</p>
+</li>
+<li><p>MYSQL内部会对这条SQL进行评估，比如涉及到多个索引会比较使用哪个索引代价更小、多表join的时候会考虑决定各个表的连接顺序。</p>
+</li>
+<li><p>优化器的作用一句话总结：根据MYSQL内部的算法决定如何执行这条SQL语句来达到MYSQL认为代价最小目的。</p>
+</li>
+<li><p>优化器阶段完成后，这个语句的执行方案就确定了，接下来就交给执行器执行了。</p>
+</li>
+</ul>
+<h3 id="5-执行器"><a href="#5-执行器" class="headerlink" title="5. 执行器"></a>5. 执行器</h3><ul>
+<li><p>MYSQL通过分析器知道了要做什么，通过优化器知道了如何做，于是就进入了执行器阶段。</p>
+</li>
+<li><p>执行器开始执行之前，需要检查一下用户对表table有没有执行的权限，没有返回权限不足的错误，有的话就执行。</p>
+</li>
+<li><p>执行也是分类的，如果Id不是索引则全表扫描，一行一行的查找，如果是索引则在索引组织表中查询，索引的查询很复杂，其中涉及到B+树等算法，这里不再详细介绍。</p>
+</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li><p>一条SQL语句在MYSQL内部执行的过程涉及到的内部模块有：连接器、查询缓存、分析器、优化器、执行器、存储引擎。</p>
+</li>
+<li><p>至此，MYSQL的基础架构已经讲完了。</p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/SQL/" rel="tag"># SQL</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/04/01/Mysql%E4%B8%AD%E7%9A%84%E4%B8%89%E7%B1%BB%E9%94%81%EF%BC%8C%E4%BD%A0%E7%9F%A5%E9%81%93%E5%90%97%EF%BC%9F/" rel="prev" title="Mysql中的三类锁，你知道吗？">
+      <i class="fa fa-chevron-left"></i> Mysql中的三类锁，你知道吗？
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/04/01/Mysql%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BD%BF%E7%94%A8%E8%A6%86%E7%9B%96%E7%B4%A2%E5%BC%95/" rel="next" title="Mysql性能优化：为什么使用覆盖索引?">
+      Mysql性能优化：为什么使用覆盖索引? <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%BC%E8%AF%BB"><span class="nav-text">导读</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%92%B8%E5%AE%83"><span class="nav-text">撸它</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%BF%9E%E6%8E%A5%E5%99%A8"><span class="nav-text">1. 连接器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%9F%A5%E8%AF%A2%E7%BC%93%E5%AD%98%E3%80%90%E5%BA%9F%E6%9D%90%EF%BC%8C8-0-%E7%89%88%E6%9C%AC%E5%AE%8C%E5%85%A8%E5%88%A0%E9%99%A4%E3%80%91"><span class="nav-text">2. 查询缓存【废材，8.0 版本完全删除】</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%88%86%E6%9E%90%E5%99%A8"><span class="nav-text">3. 分析器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E4%BC%98%E5%8C%96%E5%99%A8"><span class="nav-text">4. 优化器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E6%89%A7%E8%A1%8C%E5%99%A8"><span class="nav-text">5. 执行器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">84</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某</span>
+</div>
+ <!-- <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
