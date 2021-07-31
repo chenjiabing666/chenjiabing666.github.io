@@ -20,30 +20,89 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-<meta property="og:type" content="website">
-<meta property="og:title" content="不才陈某技术博客">
-<meta property="og:url" content="http://example.com/index.html">
+  <meta name="description" content="前言Nacos是阿里巴巴开源的服务注册中心以及配置中心，致力于给开发者提供一款便捷、简单上手的开源框架。 Nacos究竟有什么惊人的地方呢？看下图：  从上图不难看出阿里巴巴的野心，一个Nacos干掉了Spring Cloud的三大组件，分别是注册中心Eureka、服务配置Config，服务总线Bus。 本文目录结构如下图：  为什么Nacos这么受欢迎？Nacos官方文档的介绍中有这么一句话，如">
+<meta property="og:type" content="article">
+<meta property="og:title" content="五十五张图告诉你微服务灵魂摆渡者Nacos究竟有多强？">
+<meta property="og:url" content="http://example.com/2021/07/31/%E4%BA%94%E5%8D%81%E4%BA%94%E5%BC%A0%E5%9B%BE%E5%91%8A%E8%AF%89%E4%BD%A0%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%81%B5%E9%AD%82%E6%91%86%E6%B8%A1%E8%80%85Nacos%E7%A9%B6%E7%AB%9F%E6%9C%89%E5%A4%9A%E5%BC%BA%EF%BC%9F/index.html">
 <meta property="og:site_name" content="不才陈某技术博客">
-<meta property="og:description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+<meta property="og:description" content="前言Nacos是阿里巴巴开源的服务注册中心以及配置中心，致力于给开发者提供一款便捷、简单上手的开源框架。 Nacos究竟有什么惊人的地方呢？看下图：  从上图不难看出阿里巴巴的野心，一个Nacos干掉了Spring Cloud的三大组件，分别是注册中心Eureka、服务配置Config，服务总线Bus。 本文目录结构如下图：  为什么Nacos这么受欢迎？Nacos官方文档的介绍中有这么一句话，如">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/1.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/53.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/2.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/3.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/7.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/4.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/5.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/6.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/8.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/9.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/10.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/11.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/12.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/9.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/13.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/14.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/15.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/16.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/17.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/18.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/19.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/20.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/21.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/22.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/23.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/24.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/25.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/26.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/25.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/27.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/28.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/29.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/30.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/31.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/32.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/33.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/34.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/36.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/35.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/43.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/44.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/37.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/38.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/39.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/40.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/41.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/42.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/45.jpg">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/46.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/47.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/48.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/49.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/50.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/51.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/52.png">
+<meta property="article:published_time" content="2021-07-31T09:48:36.000Z">
+<meta property="article:modified_time" content="2021-07-31T09:49:43.114Z">
 <meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="Spring Cloud">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/1.png">
 
-<link rel="canonical" href="http://example.com/">
+<link rel="canonical" href="http://example.com/2021/07/31/%E4%BA%94%E5%8D%81%E4%BA%94%E5%BC%A0%E5%9B%BE%E5%91%8A%E8%AF%89%E4%BD%A0%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%81%B5%E9%AD%82%E6%91%86%E6%B8%A1%E8%80%85Nacos%E7%A9%B6%E7%AB%9F%E6%9C%89%E5%A4%9A%E5%BC%BA%EF%BC%9F/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : true,
-    isPost : false,
+    isHome : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>不才陈某技术博客</title>
+  <title>五十五张图告诉你微服务灵魂摆渡者Nacos究竟有多强？ | 不才陈某技术博客</title>
   
 
 
@@ -181,9 +240,10 @@
         <div class="content-wrap">
           
 
-          <div class="content index posts-expand">
+          <div class="content post posts-expand">
             
-      
+
+    
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
@@ -199,10 +259,9 @@
       <meta itemprop="name" content="不才陈某技术博客">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/07/31/%E4%BA%94%E5%8D%81%E4%BA%94%E5%BC%A0%E5%9B%BE%E5%91%8A%E8%AF%89%E4%BD%A0%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%81%B5%E9%AD%82%E6%91%86%E6%B8%A1%E8%80%85Nacos%E7%A9%B6%E7%AB%9F%E6%9C%89%E5%A4%9A%E5%BC%BA%EF%BC%9F/" class="post-title-link" itemprop="url">五十五张图告诉你微服务灵魂摆渡者Nacos究竟有多强？</a>
-        </h2>
+        <h1 class="post-title" itemprop="name headline">
+          五十五张图告诉你微服务灵魂摆渡者Nacos究竟有多强？
+        </h1>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -225,6 +284,13 @@
             </span>
 
           
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
 
         </div>
       </header>
@@ -235,7 +301,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Nacos是阿里巴巴开源的服务注册中心以及配置中心，致力于给开发者提供一款便捷、简单上手的开源框架。</p>
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Nacos是阿里巴巴开源的服务注册中心以及配置中心，致力于给开发者提供一款便捷、简单上手的开源框架。</p>
 <p>Nacos究竟有什么惊人的地方呢？看下图：</p>
 <p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/1.png"></p>
 <p>从上图不难看出阿里巴巴的野心，一个Nacos干掉了Spring Cloud的三大组件，分别是<code>注册中心Eureka</code>、<code>服务配置Config</code>，<code>服务总线Bus</code>。</p>
@@ -573,742 +639,70 @@
 <p>以上源码已经上传GitHub，需要的公众号回复关键词<code>9528</code>获取。</p>
 </blockquote>
 
-      
     </div>
 
     
     
     
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2021/07/26/%E7%BB%99%E4%BD%A0%E4%B8%80%E4%B8%AA%E4%BA%BF%E7%9A%84%E6%95%B0%E6%8D%AE%EF%BC%8CRedis%E5%A6%82%E4%BD%95%E7%BB%9F%E8%AE%A1%EF%BC%9F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/07/26/%E7%BB%99%E4%BD%A0%E4%B8%80%E4%B8%AA%E4%BA%BF%E7%9A%84%E6%95%B0%E6%8D%AE%EF%BC%8CRedis%E5%A6%82%E4%BD%95%E7%BB%9F%E8%AE%A1%EF%BC%9F/" class="post-title-link" itemprop="url">给你一个亿的数据，Redis如何统计？</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-07-26 19:10:20" itemprop="dateCreated datePublished" datetime="2021-07-26T19:10:20+08:00">2021-07-26</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-12-02 19:23:54" itemprop="dateModified" datetime="2020-12-02T19:23:54+08:00">2020-12-02</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Redis-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Redis 进阶</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>不知你大规模的用过<code>Redis</code>吗？还是仅仅作为缓存的工具了？在Redis中使用最多的就是集合了，举个例子，如下场景：</p>
-<ol>
-<li>签到系统中，一天对应一系列的用户签到记录。</li>
-<li>电商系统中，一个商品对应一系列的评论。</li>
-<li>交友系统中，某个用户的一系列的好友。</li>
-</ol>
-<p>Redis中集合的特点无非是一个<code>Key</code>对应一系列的数据， 但是数据的作用往往是为了统计的，比如：</p>
-<ol>
-<li>交友系统中，需要统计每天的新增好友，以及双方的共同好友。</li>
-<li>电商系统中，需要统计评论列表中的最新评论。</li>
-<li>签到系统中，需要统计连续一个月的签到的用户数量。</li>
-</ol>
-<p>大型互联网应用中，数据量是巨大的，少说百万，千万，甚至是一个亿，比如电商巨头淘宝，交友巨头微信、微博；办公巨头钉钉等，哪一个的用户不是上亿？</p>
-<p><strong>只有针对不同场景，选择合适的集合，统计才能更方便。</strong> </p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/07/26/%E7%BB%99%E4%BD%A0%E4%B8%80%E4%B8%AA%E4%BA%BF%E7%9A%84%E6%95%B0%E6%8D%AE%EF%BC%8CRedis%E5%A6%82%E4%BD%95%E7%BB%9F%E8%AE%A1%EF%BC%9F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
-    </div>
 
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>不才陈某
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://example.com/2021/07/31/%E4%BA%94%E5%8D%81%E4%BA%94%E5%BC%A0%E5%9B%BE%E5%91%8A%E8%AF%89%E4%BD%A0%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%81%B5%E9%AD%82%E6%91%86%E6%B8%A1%E8%80%85Nacos%E7%A9%B6%E7%AB%9F%E6%9C%89%E5%A4%9A%E5%BC%BA%EF%BC%9F/" title="五十五张图告诉你微服务灵魂摆渡者Nacos究竟有多强？">http://example.com/2021/07/31/五十五张图告诉你微服务灵魂摆渡者Nacos究竟有多强？/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/27/IDEA2020-2-4%E6%9C%80%E6%96%B0%E6%BF%80%E6%B4%BB%E6%95%99%E7%A8%8B%EF%BC%8C%E6%9C%89%E6%95%88%E6%9C%9F%E5%88%B02089/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/11/27/IDEA2020-2-4%E6%9C%80%E6%96%B0%E6%BF%80%E6%B4%BB%E6%95%99%E7%A8%8B%EF%BC%8C%E6%9C%89%E6%95%88%E6%9C%9F%E5%88%B02089/" class="post-title-link" itemprop="url">IDEA2020.2.4最新激活教程，有效期到2089~</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-11-27 12:14:23 / 修改时间：12:16:42" itemprop="dateCreated datePublished" datetime="2020-11-27T12:14:23+08:00">2020-11-27</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">开发工具</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>昨天又有好多粉丝反馈Idea失效过期，也有群里的小伙伴私聊问我，最新的<code>Idea2020.2.4</code> 版本要如何激活？</p>
-<p>于是自己在网上搜罗了各种注册码、激活码，均以失败告终，有的虽然当时成功了，当时很快就失效了，也许是 IDEA 最近封杀的比较严吧~  但是，最终还是让我找到了破解方法，这里要感谢z大提供的破解补丁。无图无真相，下面就是激活成功的截图！</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/IDEA2.4%E7%A0%B4%E8%A7%A3/1.jpg"></p>
-<blockquote>
-<p><strong>申明</strong>：本教程 IntelliJ IDEA 破解补丁、激活码均收集于网络，请勿商用，仅供个人学习使用，如有侵权，请联系作者删除。</p>
-</blockquote>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/11/27/IDEA2020-2-4%E6%9C%80%E6%96%B0%E6%BF%80%E6%B4%BB%E6%95%99%E7%A8%8B%EF%BC%8C%E6%9C%89%E6%95%88%E6%9C%9F%E5%88%B02089/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
-    </div>
 
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/24/%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%AE%95%E6%9C%BA%EF%BC%8CRedis%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%E6%95%B0%E6%8D%AE%EF%BC%9F/">
+    <div class="social-list">
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/11/24/%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%AE%95%E6%9C%BA%EF%BC%8CRedis%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%E6%95%B0%E6%8D%AE%EF%BC%9F/" class="post-title-link" itemprop="url">服务器宕机，Redis如何恢复数据？</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-11-24 14:06:29 / 修改时间：15:58:22" itemprop="dateCreated datePublished" datetime="2020-11-24T14:06:29+08:00">2020-11-24</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Redis-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Redis 进阶</span></a>
-                </span>
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
             </span>
 
-          
-
+            <span class="label">微信公众号</span>
+          </a>
         </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><code>Redis</code>作为内存型的数据库，虽然很快，依然有着很大的隐患，一旦<strong>服务器宕机</strong>重启，内存中数据还会存在吗？</p>
-<p>很容易想到的一个方案是从后台数据恢复这些数据，如果数据量很小，这倒是一个可行的方案。但是如果数据量过大，频繁的从后台数据库访问数据，压力很大；另外一方面恢复数据的时间极慢。</p>
-<p>对于<code>Redis</code>来说，实现数据的持久化和快速恢复是至关重要。</p>
-<p>今天这篇文章就来介绍一下<code>Redis</code>持久化的两种机制<code>AOF</code>日志、<code>RDB</code>快照。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/11/24/%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%AE%95%E6%9C%BA%EF%BC%8CRedis%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%E6%95%B0%E6%8D%AE%EF%BC%9F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
     </div>
+  </div>
 
-    
-    
-    
+
       <footer class="post-footer">
-        <div class="post-eof"></div>
+          <div class="post-tags">
+              <a href="/tags/Spring-Cloud/" rel="tag"># Spring Cloud</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/07/26/%E7%BB%99%E4%BD%A0%E4%B8%80%E4%B8%AA%E4%BA%BF%E7%9A%84%E6%95%B0%E6%8D%AE%EF%BC%8CRedis%E5%A6%82%E4%BD%95%E7%BB%9F%E8%AE%A1%EF%BC%9F/" rel="prev" title="给你一个亿的数据，Redis如何统计？">
+      <i class="fa fa-chevron-left"></i> 给你一个亿的数据，Redis如何统计？
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
       </footer>
+    
   </article>
   
   
   
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/24/%E5%8D%95%E7%BA%BF%E7%A8%8B%E7%9A%84Redis%EF%BC%8C%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E5%8A%A8%E4%BD%9C/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/11/24/%E5%8D%95%E7%BA%BF%E7%A8%8B%E7%9A%84Redis%EF%BC%8C%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E5%8A%A8%E4%BD%9C/" class="post-title-link" itemprop="url">单线程的Redis，有哪些慢动作？</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-11-24 14:04:34 / 修改时间：15:58:17" itemprop="dateCreated datePublished" datetime="2020-11-24T14:04:34+08:00">2020-11-24</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Redis-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Redis 进阶</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>现在一提到<code>Redis</code>的第一反应就是<code>快</code>、<code>单线程</code>，但是<code>Redis</code>真的快吗？真的是单线程吗？</p>
-<p>你有没有深入了解一下<code>Redis</code>，看看它的底层有哪些”慢动作”呢？</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/11/24/%E5%8D%95%E7%BA%BF%E7%A8%8B%E7%9A%84Redis%EF%BC%8C%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E5%8A%A8%E4%BD%9C/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/23/SpringBoot%E8%87%AA%E5%AE%9A%E4%B9%89%E5%90%AF%E5%8A%A8%E5%99%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/11/23/SpringBoot%E8%87%AA%E5%AE%9A%E4%B9%89%E5%90%AF%E5%8A%A8%E5%99%A8/" class="post-title-link" itemprop="url">Spring Boot自定义启动器</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-11-23 09:26:44 / 修改时间：09:29:32" itemprop="dateCreated datePublished" datetime="2020-11-23T09:26:44+08:00">2020-11-23</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>日常工作中对于<code>Spring Boot</code> 提供的一些启动器可能已经足够使用了，但是不可避免的需要自定义启动器，比如整合一个陌生的组件，也想要达到开箱即用的效果。</p>
-<p>在上一章节从底层源码介绍了<code>Spring Boot</code> 的自动配置的原理，未读过的朋友建议看一下：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/cEBvxQ4iDo3QOMYWvwE6nw">Spring Boot 自动配置源码解析</a></p>
-<p>这篇文章将会介绍如何自定义一个启动器，同时对于自动配置类的执行顺序做一个详细的分析。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/11/23/SpringBoot%E8%87%AA%E5%AE%9A%E4%B9%89%E5%90%AF%E5%8A%A8%E5%99%A8/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/23/SpringBoot%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/11/23/SpringBoot%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/" class="post-title-link" itemprop="url">Spring Boot自动配置源码解析~</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-11-23 09:26:29 / 修改时间：09:28:09" itemprop="dateCreated datePublished" datetime="2020-11-23T09:26:29+08:00">2020-11-23</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>为什么<code>Spring Boot</code>这么火？因为便捷，开箱即用，但是你思考过为什么会这么便捷吗？传统的SSM架构配置文件至少要写半天，而使用<code>Spring Boot</code>之后只需要引入一个<code>starter</code>之后就能直接使用，why？？？</p>
-<p>原因很简单，每个<code>starter</code>内部做了工作，比如<code>Mybatis</code>的启动器默认内置了可用的<code>SqlSessionFactory</code>。</p>
-<p>至于如何内置的？<code>Spring Boot</code> 又是如何使其生效的？这篇文章就从源码角度介绍一下<code>Spring Boot</code>的自动配置原理。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/11/23/SpringBoot%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/20/SpringBoot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/11/20/SpringBoot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">SpringBoot启动流程源码分析~</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-11-20 10:53:38 / 修改时间：10:54:52" itemprop="dateCreated datePublished" datetime="2020-11-20T10:53:38+08:00">2020-11-20</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><code>Spring Boot</code> 专栏已经写了五十多天了，前面二十章从基础应用到高级整合避重就轻介绍的都是工作、面试中常见的知识点。</p>
-<p>今天开始底层源码介绍的阶段，相对内容比较深一点，作者也尽可能介绍的通俗易懂，层次分明一点。相信读过我写的<code>Mybatis</code>专栏的文章都知道，只要跟着作者的步骤，方法一步步研究，其实源码并不难。</p>
-<p>这篇文章花了四天时间精雕细琢，力求介绍的通俗易懂，毕竟源码相对难度更高些，希望通过作者拆分讲解能够帮助到读者。</p>
-<p>如果没读过作者的前二十篇文章，<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=1532834475389288449&scene=173&from_msgid=2247485960&from_itemidx=1&count=10#wechat_redirect&scene=126&subscene=0&sessionid=1605701276&enterid=1605701280">点击前往</a></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/11/20/SpringBoot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/18/SpringBoot%E6%95%B4%E5%90%88AOP%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/11/18/SpringBoot%E6%95%B4%E5%90%88AOP%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3/" class="post-title-link" itemprop="url">Spring Boot 整合 AOP 自定义注解</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-11-18 17:47:09 / 修改时间：17:49:03" itemprop="dateCreated datePublished" datetime="2020-11-18T17:47:09+08:00">2020-11-18</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>注解相信大家都用过，尤其是<code>Spring Boot</code> 这个框架，比如<code>@Controller</code>。</p>
-<p>这篇文章就来介绍下<code>Spring Boot</code> 中如何自定义一个注解，顺带介绍一下<code>Spring Boot</code> 与 <code>AOP</code>如何整合。</p>
-<h2 id="什么是AOP？"><a href="#什么是AOP？" class="headerlink" title="什么是AOP？"></a>什么是AOP？</h2><p><code>AOP</code>即是面向切面，是<code>Spring</code>的核心功能之一，主要的目的即是针对业务处理过程中的横向拓展，以达到低耦合的效果。</p>
-<p>举个栗子，项目中有记录操作日志的需求、或者流程变更是记录变更履历，无非就是插表操作，很简单的一个<code>save</code>操作，都是一些记录日志或者其他辅助性的代码。一遍又一遍的重写和调用。不仅浪费了时间，又将项目变得更加的冗余，实在得不偿失。</p>
-<p>此时<code>AOP</code>的就该出场了，能够在不改变原逻辑的基础上实现相关功能。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/11/18/SpringBoot%E6%95%B4%E5%90%88AOP%E8%87%AA%E5%AE%9A%E4%B9%89%E6%B3%A8%E8%A7%A3/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/11/13/SpringBoot%E5%A4%9A%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE%EF%BC%8C%E4%BD%A0%E5%96%9C%E6%AC%A2%E5%93%AA%E7%A7%8D%EF%BC%9F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/11/13/SpringBoot%E5%A4%9A%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE%EF%BC%8C%E4%BD%A0%E5%96%9C%E6%AC%A2%E5%93%AA%E7%A7%8D%EF%BC%9F/" class="post-title-link" itemprop="url">Spring Boot多环境配置，你喜欢哪种？</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2020-11-13 13:52:04 / 修改时间：17:51:37" itemprop="dateCreated datePublished" datetime="2020-11-13T13:52:04+08:00">2020-11-13</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>日常开发中至少有三个环境，分别是开发环境（<code>dev</code>），测试环境（<code>test</code>），生产环境（<code>prod</code>）。</p>
-<p>不同的环境的各种配置都不相同，比如数据库，端口，<code>IP</code>地址等信息。</p>
-<p>那么这么多环境如何区分，如何打包呢？</p>
-<p>本篇文章就来介绍一下<code>Spring Boot</code> 中多环境如何配置，如何打包。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/11/13/SpringBoot%E5%A4%9A%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE%EF%BC%8C%E4%BD%A0%E5%96%9C%E6%AC%A2%E5%93%AA%E7%A7%8D%EF%BC%9F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-
-  
-  <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
-  </nav>
 
 
 
@@ -1360,6 +754,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88Nacos%E8%BF%99%E4%B9%88%E5%8F%97%E6%AC%A2%E8%BF%8E%EF%BC%9F"><span class="nav-text">为什么Nacos这么受欢迎？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%87%AA%E5%AD%A6%E5%91%A2%EF%BC%9F"><span class="nav-text">如何自学呢？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AC%E6%96%87%E7%89%88%E6%9C%AC%E8%AF%B4%E6%98%8E"><span class="nav-text">本文版本说明</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8Nacos%E6%9C%8D%E5%8A%A1"><span class="nav-text">启动Nacos服务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E5%8F%91%E7%8E%B0"><span class="nav-text">服务注册发现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%BC%94%E7%A4%BA%E6%95%88%E6%9E%9C%E5%91%A2%EF%BC%9F"><span class="nav-text">如何演示效果呢？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#nacos-provider%E6%9C%8D%E5%8A%A1%E6%8F%90%E4%BE%9B%E8%80%85%E5%88%9B%E5%BB%BA"><span class="nav-text">nacos-provider服务提供者创建</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E6%B7%BB%E5%8A%A0Maven%E4%BE%9D%E8%B5%96"><span class="nav-text">1. 添加Maven依赖</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E9%85%8D%E7%BD%AEYML%E6%96%87%E4%BB%B6"><span class="nav-text">2. 配置YML文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E5%BC%80%E5%90%AF%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E5%8F%91%E7%8E%B0%E5%8A%9F%E8%83%BD"><span class="nav-text">3. 开启服务注册发现功能</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E5%86%99%E4%B8%AA%E6%BC%94%E7%A4%BA%E6%9C%8D%E5%8A%A1"><span class="nav-text">4. 写个演示服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-%E5%90%AF%E5%8A%A8%E9%A1%B9%E7%9B%AE"><span class="nav-text">5. 启动项目</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#nacos-consumer%E6%9C%8D%E5%8A%A1%E6%B6%88%E8%B4%B9%E8%80%85%E5%88%9B%E5%BB%BA"><span class="nav-text">nacos-consumer服务消费者创建</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E6%B7%BB%E5%8A%A0Maven%E4%BE%9D%E8%B5%96-1"><span class="nav-text">1. 添加Maven依赖</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E9%85%8D%E7%BD%AEYML%E6%96%87%E4%BB%B6-1"><span class="nav-text">2. 配置YML文件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E5%BC%80%E5%90%AF%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E5%8F%91%E7%8E%B0%E5%8A%9F%E8%83%BD-1"><span class="nav-text">3. 开启服务注册发现功能</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-%E5%86%99%E4%B8%AA%E6%BC%94%E7%A4%BA%E6%9C%8D%E5%8A%A1-1"><span class="nav-text">4. 写个演示服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-%E5%90%AF%E5%8A%A8%E9%A1%B9%E7%9B%AE-1"><span class="nav-text">5. 启动项目</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E9%85%8D%E7%BD%AE%E7%AE%A1%E7%90%86"><span class="nav-text">启动配置管理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E6%BC%94%E7%A4%BA%E6%95%88%E6%9E%9C%E5%91%A2%EF%BC%9F-1"><span class="nav-text">如何演示效果呢？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E4%BE%9D%E8%B5%96"><span class="nav-text">添加依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEYAML%E6%96%87%E4%BB%B6"><span class="nav-text">配置YAML文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Data-ID%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">Data ID是什么？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E4%B8%80%E4%B8%AA%E9%85%8D%E7%BD%AE"><span class="nav-text">添加一个配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96nacos%E4%B8%AD%E7%9A%84%E9%85%8D%E7%BD%AE"><span class="nav-text">获取nacos中的配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E5%A6%82%E4%BD%95%E5%8A%A8%E6%80%81%E5%88%B7%E6%96%B0%EF%BC%9F"><span class="nav-text">配置如何动态刷新？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%9A%E7%8E%AF%E5%A2%83%E5%A6%82%E4%BD%95%E9%9A%94%E7%A6%BB%E9%85%8D%E7%BD%AE%EF%BC%9F%EF%BC%88Namespace%EF%BC%89"><span class="nav-text">多环境如何隔离配置？（Namespace）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%90%8C%E4%B8%9A%E5%8A%A1%E9%85%8D%E7%BD%AE%E5%A6%82%E4%BD%95%E9%9A%94%E7%A6%BB%EF%BC%9F-Group"><span class="nav-text">不同业务配置如何隔离？(Group)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-1"><span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Nacos%E5%A6%82%E4%BD%95%E5%85%B1%E4%BA%AB%E9%85%8D%E7%BD%AE%EF%BC%9F"><span class="nav-text">Nacos如何共享配置？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Nacos%E4%B8%AD%E6%96%B0%E5%BB%BA%E5%85%B1%E4%BA%AB%E9%85%8D%E7%BD%AE"><span class="nav-text">Nacos中新建共享配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B0%E5%BB%BA%E6%A8%A1%E5%9D%97nacos-config-share"><span class="nav-text">新建模块nacos-config-share</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Nacos%E5%A6%82%E4%BD%95%E6%8C%81%E4%B9%85%E5%8C%96%EF%BC%9F"><span class="nav-text">Nacos如何持久化？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="nav-text">初始化数据库</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-text">修改配置文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Nacos%E9%9B%86%E7%BE%A4%E5%A6%82%E4%BD%95%E6%90%AD%E5%BB%BA%EF%BC%9F"><span class="nav-text">Nacos集群如何搭建？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BDLinux%E4%B8%8B%E7%9A%84Nacos"><span class="nav-text">下载Linux下的Nacos</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-1"><span class="nav-text">修改配置文件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E7%AB%AF%E5%8F%A3%E5%8F%B7"><span class="nav-text">修改端口号</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%9B%86%E7%BE%A4%E9%85%8D%E7%BD%AE"><span class="nav-text">修改集群配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE%E6%BA%90"><span class="nav-text">修改数据源</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8Nacos"><span class="nav-text">启动Nacos</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Nginx%E4%B8%AD%E9%85%8D%E7%BD%AE"><span class="nav-text">Nginx中配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E4%B8%AD%E9%85%8D%E7%BD%AEserver-addr"><span class="nav-text">项目中配置server-addr</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-2"><span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Nacos%E6%98%AFCP%E8%BF%98%E6%98%AFAP%EF%BC%9F"><span class="nav-text">Nacos是CP还是AP？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E"><span class="nav-text">写在最后</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

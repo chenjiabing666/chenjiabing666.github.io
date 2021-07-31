@@ -8222,323 +8222,6 @@
       </tags>
   </entry>
   <entry>
-    <title>分布式一致性协议详解</title>
-    <url>/2020/12/29/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE%E8%AF%A6%E8%A7%A3/</url>
-    <content><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>在常见的分布式系统中，总会发生诸如机器宕机或网络异常（包括消息的延迟、丢失、重复、乱序，还有网络分区）等情况。</p>
-<p>一致性算法需要解决的问题就是如何在一个可能发生上述异常的分布式系统中，快速且正确地在集群内部对某个数据的值达成一致，并且保证不论发生以上任何异常，都不会破坏整个系统的一致性。</p>
-<h2 id="CAP-定理"><a href="#CAP-定理" class="headerlink" title="CAP 定理"></a>CAP 定理</h2><p>CAP 理论告诉我们，一个分布式系统不可能同时满足一致性（C:Consistency)，可用性（A: Availability）和分区容错性（P：Partition tolerance）这三个基本需求，最多只能同时满足其中的2个。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1hibicUPzdPLHIdaNrtV5KhgJib9QgicSXzxVibKVz7EWVHj0RIicKzSDpzog/640?wx_fmt=png" alt="null"></p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1vXevN0SaMqT8hljYXeSRgicloPzeS1xuvWMmDTRAtA59b4QQeVOrUWg/640?wx_fmt=png" alt="null"></p>
-<span id="more"></span>
-
-<h2 id="Base-理论"><a href="#Base-理论" class="headerlink" title="Base 理论"></a>Base 理论</h2><p>BASE：全称：Basically Available(基本可用)，Soft state（软状态）,和 Eventually consistent（最终一致性）。</p>
-<p>Base 理论是对 CAP 中一致性和可用性权衡的结果，其来源于对大型互联网分布式实践的总结，是基于 CAP 定理逐步演化而来的。其核心思想是：既是无法做到强一致性（Strong consistency），但每个应用都可以根据自身的业务特点，采用适当的方式来使系统达到最终一致性（Eventual consistency）。</p>
-<blockquote>
-<p>解释一下：什么是软状态呢？相对于原子性而言，要求多个节点的数据副本都是一致的，这是一种 “硬状态”。软状态指的是：允许系统中的数据存在中间状态，并认为该状态不影响系统的整体可用性，即允许系统在多个不同节点的数据副本存在数据延时。</p>
-</blockquote>
-<h2 id="2PC"><a href="#2PC" class="headerlink" title="2PC"></a>2PC</h2><p>Two-Phase Commit，事务的提交过程分成了两个阶段来进行处理。</p>
-<h3 id="2PC-阶段一"><a href="#2PC-阶段一" class="headerlink" title="2PC 阶段一"></a>2PC 阶段一</h3><p>1.事务询问</p>
-<p>协调者向所有的参与者询问，是否准备好了执行事务，并开始等待各参与者的响应。</p>
-<p>1.执行事务</p>
-<p>各参与者节点执行事务操作，并将 Undo 和 Redo 信息记入事务日志中</p>
-<p>1.各参与者向协调者反馈事务询问的响应</p>
-<p>如果参与者成功执行了事务操作，那么就反馈给协调者 Yes 响应，表示事务可以执行；如果参与者没有成功执行事务，就返回 No 给协调者，表示事务不可以执行。</p>
-<h3 id="2PC-阶段二"><a href="#2PC-阶段二" class="headerlink" title="2PC 阶段二"></a>2PC 阶段二</h3><p>在阶段二中，会根据阶段一的投票结果执行 2 种操作：执行事务提交，中断事务。</p>
-<p>执行事务提交步骤如下：</p>
-<p>•发送提交请求：协调者向所有参与者发出 commit 请求。•事务提交：参与者收到 commit 请求后，会正式执行事务提交操作，并在完成提交之后释放整个事务执行期间占用的事务资源。•反馈事务提交结果：参与者在完成事务提交之后，向协调者发送 Ack 信息。•协调者接收到所有参与者反馈的 Ack 信息后，完成事务。</p>
-<p>中断事务步骤如下：</p>
-<p>•发送回滚请求：协调者向所有参与者发出 Rollback 请求。•事务回滚：参与者接收到 Rollback 请求后，会利用其在阶段一种记录的 Undo 信息来执行事务回滚操作，并在完成回滚之后释放在整个事务执行期间占用的资源。•反馈事务回滚结果：参与者在完成事务回滚之后，想协调者发送 Ack 信息。•中断事务：协调者接收到所有参与者反馈的 Ack 信息后，完成事务中断。</p>
-<p>从上面的逻辑可以看出，二阶段提交就做了2个事情：投票，执行。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1ZVRvvg6QA6a5LhOs0bsbdaiajxQqwaVK0TicyrLnz7jah0eQc8CwNxYA/640?wx_fmt=png" alt="null"></p>
-<p>举个例子：</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1VSOebsiaInjDLp6uCNxA2prGWVRibpS8eiaD9sibNEPVK4LbaZvGhqHRrQ/640?wx_fmt=png" alt="null"></p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1ovV1hrMiawBZ4jicgjINwrZhx3wkda7icozPmGQx7CE5xCmQaVI6Z1RqQ/640?wx_fmt=png" alt="null"></p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1fr6iasKqzEQLqDjAQwlQu4hKUt5oLoq4pE2OuzM6HP9xPVlF6ltvTIQ/640?wx_fmt=png" alt="null"></p>
-<p>二阶段提交看起来确实能够提供原子性的操作，但是不幸的事，二阶段提交还是有几个缺点的：</p>
-<p>1、同步阻塞问题。执行过程中，所有参与节点都是事务阻塞型的。当参与者占有公共资源时，其他第三方节点访问公共资源不得不处于阻塞状态。</p>
-<p>2、单点故障。由于协调者的重要性，一旦协调者发生故障。参与者会一直阻塞下去。尤其在第二阶段，协调者发生故障，那么所有的参与者还都处于锁定事务资源的状态中，而无法继续完成事务操作。（如果是协调者挂掉，可以重新选举一个协调者，但是无法解决因为协调者宕机导致的参与者处于阻塞状态的问题）</p>
-<p>3、数据不一致。在二阶段提交的阶段二中，当协调者向参与者发送commit请求之后，发生了局部网络异常或者在发送commit请求过程中协调者发生了故障，这回导致只有一部分参与者接受到了commit请求。而在这部分参与者接到commit请求之后就会执行commit操作。但是其他部分未接到commit请求的机器则无法执行事务提交。于是整个分布式系统便出现了数据部一致性的现象。</p>
-<p>4、二阶段无法解决的问题：协调者再发出commit消息之后宕机，而唯一接收到这条消息的参与者同时也宕机了。那么即使协调者通过选举协议产生了新的协调者，这条事务的状态也是不确定的，没人知道事务是否被已经提交。</p>
-<p>由于二阶段提交存在着诸如同步阻塞、单点问题、脑裂等缺陷，所以，研究者们在二阶段提交的基础上做了改进，提出了三阶段提交。</p>
-<h2 id="3PC"><a href="#3PC" class="headerlink" title="3PC"></a>3PC</h2><p>三阶段提交（Three-phase commit），也叫三阶段提交协议（Three-phase commit protocol），是二阶段提交（2PC）的改进版本。</p>
-<p>与两阶段提交不同的是，三阶段提交有两个改动点。</p>
-<p>•引入超时机制。同时在协调者和参与者中都引入超时机制。•在第一阶段和第二阶段中插入一个准备阶段。保证了在最后提交阶段之前各参与节点的状态是一致的。</p>
-<p>也就是说，除了引入超时机制之外，3PC把2PC的准备阶段再次一分为二，这样三阶段提交就有CanCommit、PreCommit、DoCommit三个阶段。</p>
-<h3 id="CanCommit阶段"><a href="#CanCommit阶段" class="headerlink" title="CanCommit阶段"></a>CanCommit阶段</h3><p>3PC的CanCommit阶段其实和2PC的准备阶段很像。协调者向参与者发送commit请求，参与者如果可以提交就返回Yes响应，否则返回No响应。</p>
-<p>1.事务询问 协调者向参与者发送CanCommit请求。询问是否可以执行事务提交操作。然后开始等待参与者的响应。2.响应反馈 参与者接到CanCommit请求之后，正常情况下，如果其自身认为可以顺利执行事务，则返回Yes响应，并进入预备状态。否则反馈No</p>
-<h3 id="PreCommit阶段"><a href="#PreCommit阶段" class="headerlink" title="PreCommit阶段"></a>PreCommit阶段</h3><p>协调者根据canCommit阶段参与者的反应情况来决定是否可以继续事务的PreCommit操作。根据响应情况，有以下两种可能。</p>
-<p>假如协调者在CanCommit阶段从所有的参与者获得的反馈都是Yes响应，那么就会执行事务的预执行。</p>
-<p>1.<strong>发送预提交请求</strong> 协调者向参与者发送PreCommit请求，并进入Prepared阶段。2.<strong>事务预提交</strong> 参与者接收到PreCommit请求后，会执行事务操作，并将undo和redo信息记录到事务日志中。3.<strong>响应反馈</strong> 如果参与者成功的执行了事务操作，则返回ACK响应，同时开始等待最终指令。</p>
-<p>假如canCommit阶段有任何一个参与者向协调者发送了No响应，或者等待超时之后，协调者都没有接到参与者的响应，那么就执行事务的中断。</p>
-<p>1.<strong>发送中断请求</strong> 协调者向所有参与者发送abort请求。2.<strong>中断事务</strong> 参与者收到来自协调者的abort请求之后（或超时之后，仍未收到协调者的请求），执行事务的中断。</p>
-<h3 id="doCommit阶段"><a href="#doCommit阶段" class="headerlink" title="doCommit阶段"></a>doCommit阶段</h3><p>该阶段进行真正的事务提交，也可以分为以下两种情况。</p>
-<p>执行提交</p>
-<p>1.<strong>发送提交请求</strong> 协调接在preCommit阶段收到参与者发送的ACK响应，那么他将从预提交状态进入到提交状态。并向所有参与者发送doCommit请求。2.<strong>事务提交</strong> 参与者接收到doCommit请求之后，执行正式的事务提交。并在完成事务提交之后释放所有事务资源。3.<strong>响应反馈</strong> 事务提交完之后，向协调者发送Ack响应。4.<strong>完成事务</strong> 协调者接收到所有参与者的ack响应之后，完成事务。</p>
-<p><strong>中断事务</strong>协调者在preCommit阶段没有接收到参与者发送的ACK响应（可能是接受者发送的不是ACK响应，也可能响应超时），那么就会执行中断事务。</p>
-<p>1.发送中断请求 协调者向所有参与者发送abort请求2.事务回滚 参与者接收到abort请求之后，利用其在阶段二记录的undo信息来执行事务的回滚操作，并在完成回滚之后释放所有的事务资源。3.反馈结果 参与者完成事务回滚之后，向协调者发送ACK消息4.中断事务 协调者接收到参与者反馈的ACK消息之后，执行事务的中断。</p>
-<p>在doCommit阶段，如果参与者无法及时接收到来自协调者的doCommit或者abort请求时，会在等待超时之后，会继续进行事务的提交。（其实这个应该是基于概率来决定的，当进入第三阶段时，说明参与者在第二阶段已经收到了PreCommit请求，那么协调者产生PreCommit请求的前提条件是他在第二阶段开始之前，收到所有参与者的CanCommit响应都是Yes。（一旦参与者收到了PreCommit，意味他知道大家其实都同意修改了）所以，一句话概括就是，当进入第三阶段时，由于网络超时等原因，虽然参与者没有收到commit或者abort响应，但是他有理由相信：成功提交的几率很大。）</p>
-<h3 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h3><p>没有任何事情是完美的。特别是在分布式的情况下。事实上，分布式在某个程度上其实是人类社会发展的一个极佳写真。因为人类社会中个体的可靠性显然比分布式系统节点的可靠性要低很多。</p>
-<p>三阶段提交也不完美。但是它比两阶段好。</p>
-<p>两阶段的问题可以这样分解：</p>
-<p>•协调者出错，参与者也出错；•协调者出错，参与者不出错；•协调者不出错，参与者出错；•协调者不出错，参与者也不出错。</p>
-<p>显然第4种不是问题。所以实际上只有3个问题。而问题2可以通过简单地NEW一个新的协调者来解决。问题3的错则显然正是两阶段提交协议的解决目标，所以也没有问题。有问题的只有协调者出错，参与者也出错的问题。</p>
-<p>无论2pc还是3pc只有在以下的情况才会出现数据不一致性：协调者挂了，备份协调者恢复协议时，某个参与者挂了，在剩下参与者都是“YES”的状态下, 备份协调者没法分辨挂了的参与者状态。（此处挂了可理解为宕机或者时网络连不上）</p>
-<p>接下来将对上面段落使用一些替代词：协调者A，备份协调者B，挂了参与者C</p>
-<p>•在2pc中，B需要分辨两种情形：1是C提交了事务（phase 2），2是C在原始投票是abort（phase 1）。如果B决定abort，会违反情形1，如果决定commit，则违背C在表决时的意愿，这个时候需要blocking 。（上面的”YES”, 在这里可认为剩下的参与者在原始投票都是yes。）•在3pc中，B需要分辨两种情形：1是C提交了事务（phase 3），2是B不知道C有没有收到prepare commit(phase 2)，在这种情况下，因为我们已经phase 1对大家的意愿进行了收集，得到的都是commit，所以此处会用比较激进做法，非blocking，所以才有上面的脑裂容错策略，这样也会降低阻塞范围。</p>
-<h2 id="Paxos算法"><a href="#Paxos算法" class="headerlink" title="Paxos算法"></a>Paxos算法</h2><p>Google Chubby的作者Mike Burrows说过这个世界上只有一种一致性算法，那就是Paxos，其它的算法都是残次品。</p>
-<p>Paxos在原作者的《Paxos Made Simple》中内容是比较精简的：</p>
-<p>第一阶段</p>
-<p>（a） 提议者选择一个提议编号n，并向大多数接受者发送一个编号n的准备请求。</p>
-<p>（b） 如果承兑人收到的准备请求的编号n大于其已答复的任何准备请求的编号，则承兑人对该请求作出答复，并承诺不接受任何编号小于n且其已接受的编号最高的提案（如有）。</p>
-<p>第二阶段</p>
-<p>（a） 如果提案人从大多数接受人处收到对其准备请求（编号n）的响应，则它向这些接受人中的每一个发送一个接受请求，请求编号n的提案，其值为v，其中v是响应中编号最高的提案的值，或者如果响应报告没有提案，则v是任何值。</p>
-<p>（b） 如果承兑人收到编号为n的提案的接受请求，则除非承兑人已对编号大于n的准备请求作出响应，否则接受该提案。</p>
-<p>翻译一下：</p>
-<p>Paxos问题指分布式系统中存在故障fault，但不存在恶意corrupt节点场景（消息可能丢失但不会造假）下的共识达成（Consensus）问题。</p>
-<p>Paxos是第一个被证明的共识算法，原理基于两阶段提交并进行扩展。算法中将节点分为三种类型：</p>
-<p>•倡议者proposer：提交一个提案，等待大家批准为结案，往往是客户端担任。•接受者acceptor：负责对提案进行投票，往往服务器担任。提议超过半数的接受者投票及被选中。•学习者learner：被告知提案结果，并与之统一，不参与投票过程。客户端和服务端都可担任。</p>
-<p>每个节点在协议中可以担任多个角色。</p>
-<p>Paxos的特点：</p>
-<p>•一个或多个节点可以提出提议。•系统针对所有提案中的某个提案必须达成一致。•最多只能对一个确定的提案达成一致。•只要超过半数的节点存活且可互相通信，整个系统一定能达成一致状态。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1icHQILGu8ByGBNXHSgDcL3p3icbpAl5YYg8v7Z7w0VkxekkRLoe92gQw/640?wx_fmt=png" alt="null"></p>
-<h3 id="第一阶段A"><a href="#第一阶段A" class="headerlink" title="第一阶段A"></a>第一阶段A</h3><p>Proposer选择一个提议编号n，向所有的Acceptor广播Prepare（n）请求。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1RYUZm9mA4HPv4XxLVSxrRg7BiaEianbsiclO0uAyLZKCQlhl8p7b0iaUvA/640?wx_fmt=png" alt="null"></p>
-<h3 id="第一阶段B"><a href="#第一阶段B" class="headerlink" title="第一阶段B"></a>第一阶段B</h3><p>Acceptor接收到Prepare（n）请求，若提议编号n比之前接收的Prepare请求都要大，则承诺将不会接收提议编号比n小的提议，并且带上之前Accept的提议中编号小于n的最大的提议，否则不予理会。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1aoibltSMd1icZic6psVByAy0we5ffrjZCN9TConXJSvCiaDuiamr7TnbdyQ/640?wx_fmt=png" alt="null"></p>
-<h3 id="第二阶段A"><a href="#第二阶段A" class="headerlink" title="第二阶段A"></a>第二阶段A</h3><p>Proposer得到了多数Acceptor的承诺后，如果没有发现有一个Acceptor接受过一个值，那么向所有的Acceptor发起自己的值和提议编号n，否则，从所有接受过的值中选择对应的提议编号最大的，作为提议的值，提议编号仍然为n。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1iaHsMMAVmukO1zYOd2Slr5aRDnWI4Z1Ev83iaLSz4PdwcGVajNdTm4bA/640?wx_fmt=png" alt="null"></p>
-<h3 id="第二阶段B"><a href="#第二阶段B" class="headerlink" title="第二阶段B"></a>第二阶段B</h3><p>Acceptor接收到提议后，如果该提议编号不违反自己做过的承诺，则接受该提议。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1Go3c4x9PVHOQaeKA4YWbfO39W5zX6rQNk77Tekel4MfMicOcfW76iazQ/640?wx_fmt=png" alt="null"></p>
-<h3 id="Paxos-例子说明"><a href="#Paxos-例子说明" class="headerlink" title="Paxos 例子说明"></a>Paxos 例子说明</h3><p>楼主这个例子来自中文维基百科，但楼主为了形象化，辅以图片解释，但愿不会让人更迷糊。</p>
-<p>例子：</p>
-<p>在 Paxos 岛上，有A1, A2, A3, A4, A5 5位议员，就税率问题进行决议。我们假设几个场景来解释：</p>
-<p><strong>场景 1：</strong></p>
-<p>假设 A1 说：税率应该是 10%。而此时只有他一个人提这个建议。如下图：</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1QOKC4icbPyn2KufVGuic0iaEburRrqdWyNjYAZIS9OfMQYRXoDicL1XVvw/640?wx_fmt=png" alt="null"></p>
-<p>很完美，没有任何人和他竞争提案，他的这个提案毫无阻挠的通过了。A2 - A5 都会回应他：我们收到了你的提案，等待最终的批准。而 A1 在收到 2 份回复后，就可以发布最终的决议：税率定位 10%，不用再讨论了。</p>
-<p>这里有个注意的地方就是：为什么收到了 2 份回复就可以确定提案了呢？答：因为包括他自己，就达到 3 个人了，少数服从多数。如果各位听说过鸽笼原理/抽屉原理，就明白个大概了。有人说，鸽笼原理/抽屉原理就是 Paxos 的核心思想。</p>
-<p><strong>场景 2：</strong></p>
-<p>现在我们假设在 A1 提出 10% 税率提案的同时, A5 决定将税率定为 20%，如果这个提案要通过侍从送到其他议员的案头，A1 的草案将由 4 位侍从送到 A2-A5 那里。但是侍从不靠谱（代表分布式环境不靠谱），负责 A2 和 A3 的侍从顺利送达，而负责 A4 和 A5 的侍从则开溜了！</p>
-<p>而 A5 的草案则送到了 A4 和 A3 的手中。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1DWx5R7OES2BLG92kcHhiaVlFwW3e6Qia12rMKSF81mBqR1PP5MYYuPwA/640?wx_fmt=png" alt="null"></p>
-<p>现在，A1 ，A2，A3 收到了 A1 的提案，A3，A4， A5 收到 A5 的提案，按照 Paxos 的协议，A1，A2，A4，A5 4个侍从将接受他们的提案，侍从拿着回复：我已收到你的提案，等待最终批准 回到提案者那里。</p>
-<p>而 A3 的行为将决定批准哪一个。</p>
-<p>当 A3 同时收到了 A1 和 A5 的请求，该如何抉择呢？不同的抉择将会导致不同的结果。</p>
-<p>有 3 种情况，我们分析一下：</p>
-<p><strong>场景2：情况一</strong></p>
-<p>假设 A1 的提案先送到 A3 那里，并且 A3 接受了该提案并回复了侍从。这样，A1 加上 A2 加上 A3，构成了多数派，成功确定了税率为 10%。而 A5 的侍从由于路上喝酒喝多了，晚到了一天，等他到了，税率已经确定了，A3 回复 A5：兄弟，你来的太晚了，税率已经定好了，不用折腾了，听 A1 的吧。</p>
-<p>如下图：</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1iaUOw50rSmhvRHNrTFDR7XU21U16micTO9jAtcl6gdL4wVSxcJESpBCA/640?wx_fmt=png" alt="null"></p>
-<p>场景2：情况二</p>
-<p>依然假设 A1 的提案先送到 A3 处，但是这次 A5 的侍从不是放假了，只是中途耽搁了一会。这次, A3 依然会将”接受”回复给 A1 .但是在决议成型之前它又收到了 A5 的提案。这时协议根据 A5 的身份地位有两种处理方式，但结果相同。</p>
-<p>•当 A5 地位很高，例如 CEO，就回复 A5：我已收到您的提案，等待最终批准，但是您之前有人提出将税率定为10%,请明察。•当 A5 没地位，普通码农一个，直接不回复。等待 A1 广播：税率定为 10% 啦！！！</p>
-<p>如下图：</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb14wggSiaC4dSYKfqAIJRko1CSIrDoKNPgfYkZxldic48k72KhKDl8Iibicg/640?wx_fmt=png" alt="null"></p>
-<p><strong>场景2：情况三</strong></p>
-<p>在这个情况中，我们将看见，根据提案的时间及提案者的权势决定是否应答是有意义的。在这里，时间和提案者的权势就构成了给提案编号的依据。这样的编号符合”任何两个提案之间构成偏序”的要求。</p>
-<p>A1 和 A5 同样提出上述提案，这时 A1 可以正常联系 A2 和 A3，A5 也可以正常联系这两个人。这次 A2 先收到 A1 的提案; A3 则先收到 A5 的提案。而 A5 更有地位。</p>
-<p>在这种情况下，已经回答 A1 的 A2 发现有比 A1 更有权势的 A5 提出了税率 20% 的新提案，于是回复A5说：我已收到您的提案，等待最终批准。</p>
-<p>而回复 A5 的 A3 发现新的提案者A1是个小人物，没地位不予应答。</p>
-<p>此时，A5 得到了 A2，A3 的回复，于是 A5 说：税率定为 20%，别再讨论了。</p>
-<p>那 A4 呢？A4 由于睡过头了，迷迷糊糊的说：现有的税率是什么? 如果没有决定，则建议将其定为 15%.</p>
-<p>这个时候，其他的议员就告诉他：哥们，已经定为 20% 了，别折腾了。洗洗继续睡吧。</p>
-<p>整个过程如下图：</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1lh7tlfYZd0iarKOcrYz6TFicrBTtvCmF70icHU9EDVoe9eOWURrcQiamvQ/640?wx_fmt=png" alt="null"></p>
-<h3 id="Paxos的死锁情况"><a href="#Paxos的死锁情况" class="headerlink" title="Paxos的死锁情况"></a>Paxos的死锁情况</h3><p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1ibISXfxwXsatcaEgj7RuDTKPKeiaB913Pmoibwjuxy70Tc6t3W5kWKxsA/640?wx_fmt=png" alt="null"></p>
-<p>“活锁”的根本原因在于两个proposer交替提案，避免“活锁”的方式为，如果一个proposer通过accpter返回的消息知道此时有更高编号的提案被提出时，该proposer静默一段时间，而不是马上提出更高的方案，静默期长短为一个提案从提出到被接受的大概时间长度即可，静默期过后，proposer重新提案。系统中之所以要有主proposer的原因在于，如果每次数据更改都用paxos，那实在是太慢了，还是通过主节点下发请求这样来的快，因为省去了不必要的paxos时间。所以选择主proposer用paxos算法，因为选主的频率要比更改数据频率低太多。但是主proposer挂了咋整，整个集群就一直处于不可用状态，所以一般都用租约的方式，如果proposer挂了，则租约会过期，其它proposer就可以再重新选主，如果不挂，则主proposer自己续租。</p>
-<h3 id="小结："><a href="#小结：" class="headerlink" title="小结："></a>小结：</h3><p>Paxos协议最终解决什么问题？</p>
-<p>当一个提议被多数派接受后，这个提议对应的值被Chosen（选定），一旦有一个值被Chosen，那么只要按照协议的规则继续交互，后续被Chosen的值都是同一个值，也就是这个Chosen值的一致性问题。</p>
-<p>Paxos 的目标：保证最终有一个提案会被选定，当提案被选定后，其他议员最终也能获取到被选定的提案。</p>
-<p>Paxos 协议用来解决的问题可以用一句话来简化：将所有节点都写入同一个值，且被写入后不再更改。</p>
-<h2 id="Raft一致性算法"><a href="#Raft一致性算法" class="headerlink" title="Raft一致性算法"></a>Raft一致性算法</h2><p>Raft算法是Paxos算法的一种简化实现。</p>
-<p>包括三种角色：leader，candidate和follower。</p>
-<p>•follow:所有节点都以follower的状态开始，如果没有收到leader消息则会变成candidate状态。•candidate：会向其他节点拉选票，如果得到大部分的票则成为leader，这个过程是Leader选举。•leader：所有对系统的修改都会先经过leader。</p>
-<p>其有两个基本过程：</p>
-<p>•Leader选举：每个candidate随机经过一定时间都会提出选举方案，最近阶段中的票最多者被选为leader。•同步log：leader会找到系统中log（各种事件的发生记录）最新的记录，并强制所有的follow来刷新到这个记录。</p>
-<p>Raft一致性算法是通过选出一个leader来简化日志副本的管理，例如日志项（log entry）只允许从leader流向follower。</p>
-<p>下面是动画演示Raft，清晰理解Raft共识如何达成。</p>
-<p><a href="http://thesecretlivesofdata.com/raft/">http://thesecretlivesofdata.com/raft/</a></p>
-<p>1.针对简化版拜占庭将军问题，Raft 解决方案</p>
-<p>假设将军中没有叛军，信使的信息可靠但有可能被暗杀的情况下，将军们如何达成一致性决定？</p>
-<p>Raft 的解决方案大概可以理解成 先在所有将军中选出一个大将军，所有的决定由大将军来做。选举环节：比如说现在一共有3个将军 A, B, C，每个将军都有一个随机时间的倒计时器，倒计时一结束，这个将军就会把自己当成大将军候选人，然后派信使去问其他几个将军，能不能选我为总将军？假设现在将军A倒计时结束了，他派信使传递选举投票的信息给将军B和C，如果将军B和C还没把自己当成候选人（倒计时还没有结束），并且没有把选举票投给其他，他们把票投给将军A，信使在回到将军A时，将军A知道自己收到了足够的票数，成为了大将军。在这之后，是否要进攻就由大将军决定，然后派信使去通知另外两个将军，如果在一段时间后还没有收到回复（可能信使被暗杀），那就再重派一个信使，直到收到回复。</p>
-<p>1.选主 Leader Election</p>
-<p>2.1 正常情况下选主</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1oiaPW4O1yEvmAfl4FPXdY3C8IVxCbEn6M9Hmlic5ZHClxT6j8jG0mORg/640?wx_fmt=png" alt="null"></p>
-<p>假设现在有如图5个节点，5个节点一开始的状态都是 Follower。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1wJI1d0GPdxBT0zgdltG3ibFjFWECap75NaIF29R2I5quRJPibbWfKk2Q/640?wx_fmt=png" alt="null"></p>
-<p>在一个节点倒计时结束 (Timeout) 后，这个节点的状态变成 Candidate 开始选举，它给其他几个节点发送选举请求 (RequestVote)</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1pCMVfic2Qq6XMmY8BRib71hPN860j85w0HPNH7lF05aamiaibibNf43hodw/640?wx_fmt=png" alt="null"></p>
-<p>其他四个节点都返回成功，这个节点的状态由 Candidate 变成了 Leader，并在每个一小段时间后，就给所有的 Follower 发送一个 Heartbeat 以保持所有节点的状态，Follower 收到 Leader 的 Heartbeat 后重设 Timeout。</p>
-<p>这是最简单的选主情况，只要有超过一半的节点投支持票了，Candidate 才会被选举为 Leader，5个节点的情况下，3个节点 (包括 Candidate 本身) 投了支持就行。</p>
-<p>2.2 Leader 出故障情况下的选主</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1x0hiagwYEbWqI9ev7icGrFRZEmT7cwkic4syvYlA3571t8rib0yvumeiaow/640?wx_fmt=png" alt="null"></p>
-<p>一开始已经有一个 Leader，所有节点正常运行。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1WfQRyNqxVFsdB1gicmicJdfp087mHrjggVVyoGGVX7eibnFa1EP44qelw/640?wx_fmt=png" alt="null"></p>
-<p>Leader 出故障挂掉了，其他四个 Follower 将进行重新选主。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb19GibY26DCmXQmymB6z0ib83QttOc3nibZ4Z4sL1FMGOj2m6qxOd78lpJQ/640?wx_fmt=png" alt="null"></p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1EE1w8xtMS6U2NyPsQquUAL00WibiaF4AVpLzUST8pPN1IFWcMZrzlYbg/640?wx_fmt=png" alt="null"></p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1ABNicicKMgcasaKsDIzpdamMP17wS2eMnpwWLN3PqxqKfmOBexzU3SAQ/640?wx_fmt=png" alt="null"></p>
-<p>4个节点的选主过程和5个节点的类似，在选出一个新的 Leader 后，原来的 Leader 恢复了又重新加入了，这个时候怎么处理？在 Raft 里，第几轮选举是有记录的，重新加入的 Leader 是第一轮选举 (Term 1) 选出来的，而现在的 Leader 则是 Term 2，所有原来的 Leader 会自觉降级为 Follower</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1cFl7leb6Y46n6y2bezum9RMxf0mWcgDHMkd34Fx8OibtWtxcOicZZlAQ/640?wx_fmt=png" alt="null"></p>
-<p>2.3 多个 Candidate 情况下的选主</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1OLACXKI0aczqsVmDyiaI15Fy4O6l5fEbdHbyO2r0ZibKXcE017qmNabw/640?wx_fmt=png" alt="null"></p>
-<p>假设一开始有4个节点，都还是 Follower。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1W1V2r3XKgs4DscggF62hu0W8WUiazSjre6Bxqa3tMXDRzTA5XvrYlCQ/640?wx_fmt=png" alt="null"></p>
-<p>有两个 Follower 同时 Timeout，都变成了 Candidate 开始选举，分别给一个 Follower 发送了投票请求。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1t9Q3DSFxF2Yq5GNQrjT2KHAqkRmSqLAvXluSYQoXffTcdjyIXKLRBA/640?wx_fmt=png" alt="null"></p>
-<p>两个 Follower 分别返回了ok，这时两个 Candidate 都只有2票，要3票才能被选成 Leader。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1maWyzcHx2FFWfusOYp3ATOQfBkOcJo3sYTclXUL7SlOp9tn4vX3u3Q/640?wx_fmt=png" alt="null"></p>
-<p>两个 Candidate 会分别给另外一个还没有给自己投票的 Follower 发送投票请求。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1tNOPSicjDyN5iagCjDdKQp2KI4micn7EkEiaDAmMDqrOMBUJDmQab8JmaQ/640?wx_fmt=png" alt="null"></p>
-<p>但是因为 Follower 在这一轮选举中，都已经投完票了，所以都拒绝了他们的请求。所以在 Term 2 没有 Leader 被选出来。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb151U8Md3e07G4zLaMoDbXJzKuF3l6kR3ZawicBN7sWxNOP0EjdqHjpNQ/640?wx_fmt=png" alt="null"></p>
-<p>这时，两个节点的状态是 Candidate，两个是 Follower，但是他们的倒计时器仍然在运行，最先 Timeout 的那个节点会进行发起新一轮 Term 3 的投票。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1TuKvictNS0tVq7rc4seTLLV76SzBBGtKPXbVrib6cYN1rL6V1srA3FTA/640?wx_fmt=png" alt="null"></p>
-<p>两个 Follower 在 Term 3 还没投过票，所以返回 OK，这时 Candidate 一共有三票，被选为了 Leader。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1ia9sWwQicHoehPliarmXEVkiaMLtJsIWyGc2uXzQdoZAZL2HZHgEqdEQqA/640?wx_fmt=png" alt="null"></p>
-<p>如果 Leader Heartbeat 的时间晚于另外一个 Candidate timeout 的时间，另外一个 Candidate 仍然会发送选举请求。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1Tyz4qVkA29YGG8WHD8euHv5ibPZRWNfdpSQ64Rib38HFXCWtReAoRAWg/640?wx_fmt=png" alt="null"></p>
-<p>两个 Follower 已经投完票了，拒绝了这个 Candidate 的投票请求。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1r3ZU4JJc3BmLYTe5gqZaUvQRtVhHFTMD7Oa1icgXlNxicLiaUCp0XrwdQ/640?wx_fmt=png" alt="null"></p>
-<p>Leader 进行 Heartbeat， Candidate 收到后状态自动转为 Follower，完成选主。</p>
-<p>以上是 Raft 最重要活动之一选主的介绍，以及在不同情况下如何进行选主。</p>
-<h3 id="3-复制日志-Log-Replication"><a href="#3-复制日志-Log-Replication" class="headerlink" title="3. 复制日志 Log Replication"></a>3. 复制日志 Log Replication</h3><p>3.1 正常情况下复制日志</p>
-<p>Raft 在实际应用场景中的一致性更多的是体现在不同节点之间的数据一致性，客户端发送请求到任何一个节点都能收到一致的返回，当一个节点出故障后，其他节点仍然能以已有的数据正常进行。在选主之后的复制日志就是为了达到这个目的。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1gCMXeicBGazDicCqDdplOvXnCCibBGnm50iabUsxbUR4LRicQvXRMbU5yNw/640?wx_fmt=png" alt="null"></p>
-<p>一开始，Leader 和 两个 Follower 都没有任何数据。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1Z1TQ7gw0AVGMKRdtsiavNYcm9XVYQFiaTrdjzuhSAxFCf5cbIQJ6f3OQ/640?wx_fmt=png" alt="null"></p>
-<p>客户端发送请求给 Leader，储存数据 “sally”，Leader 先将数据写在本地日志，这时候数据还是 Uncommitted (还没最终确认，红色表示)</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1h5yQ0VLEf0blGmLFrHAmUXANNPSrPAU4HgiaJsEvjjKFw2CiawV3m8Kw/640?wx_fmt=png" alt="null"></p>
-<p>Leader 给两个 Follower 发送 AppendEntries 请求，数据在 Follower 上没有冲突，则将数据暂时写在本地日志，Follower 的数据也还是 Uncommitted。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1Q7AQynwu5S7T8G2xNcm44xq14XsibUCBg7326sVT3aV2mo9YHZfl2mA/640?wx_fmt=png" alt="null"></p>
-<p>Follower 将数据写到本地后，返回 OK。Leader 收到后成功返回，只要收到的成功的返回数量超过半数 (包含Leader)，Leader 将数据 “sally” 的状态改成 Committed。( 这个时候 Leader 就可以返回给客户端了)</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1U4LCkEv17qib0CKmTiciazs6SUo0NYDjTOCiaHmSvn5GXErbEqZgLI4tUw/640?wx_fmt=png" alt="null"></p>
-<p>Leader 再次给 Follower 发送 AppendEntries 请求，收到请求后，Follower 将本地日志里 Uncommitted 数据改成 Committed。这样就完成了一整个复制日志的过程，三个节点的数据是一致的，</p>
-<p>3.2 Network Partition 情况下进行复制日志</p>
-<p>在 Network Partition 的情况下，部分节点之间没办法互相通信，Raft 也能保证在这种情况下数据的一致性。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1mCU7kUpa7Nd1qcNzUxDlkHZEsdOk7137cef8ZJpCKjLhNticZBlK9Ew/640?wx_fmt=png" alt="null"></p>
-<p>一开始有 5 个节点处于同一网络状态下。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1JApyoscTFV40AoupdsnHOfGu30KR91k06bx9c2SBjAUzbJYPhENiaFA/640?wx_fmt=png" alt="null"></p>
-<p>Network Partition 将节点分成两边，一边有两个节点，一边三个节点。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1SDDwP0RZwtHun56j79QctribkWLYMUemvquysRWJ0kia3pFB4gHZicohQ/640?wx_fmt=png" alt="null"></p>
-<p>两个节点这边已经有 Leader 了，来自客户端的数据 “bob” 通过 Leader 同步到 Follower。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1icURs5xWXO9DtvuibKu6ujyZs8FWyTLRtWQ8ia4kJUQ3QcIhYtrUzvt4A/640?wx_fmt=png" alt="null"></p>
-<p>因为只有两个节点，少于3个节点，所以 “bob” 的状态仍是 Uncommitted。所以在这里，服务器会返回错误给客户端</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1zIHtc9bib8bzmgia7FIHSGSZ99YYuHgzLMgDtdMmRzFEe2U8Tld5a6ug/640?wx_fmt=png" alt="null"></p>
-<p>另外一个 Partition 有三个节点，进行重新选主。客户端数据 “tom” 发到新的 Leader，通过和上节网络状态下相似的过程，同步到另外两个 Follower。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb16h3deTLrSKRraqFLia2uQfTm2nu0DDsytSxocvczU4V5v0JuyDeicWPg/640?wx_fmt=png" alt="null"></p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1tOic0WibC7FYakfPa52k6VeQofpqQKs437xRCmm6YQ2JdR1cDjDjkG1A/640?wx_fmt=png" alt="null"></p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1tKGrHpr0HTG9pO7fqVYNM9SY6B5dvxy0icp00uUMIpoqS0GRUszXKWQ/640?wx_fmt=png" alt="null"></p>
-<p>因为这个 Partition 有3个节点，超过半数，所以数据 “tom” 都 Commit 了。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1LMXbfiarQvajrUMkquCUc6iaRYwUbY4nUMxUL1HmCwxxADT8DmDUYrsw/640?wx_fmt=png" alt="null"></p>
-<p>网络状态恢复，5个节点再次处于同一个网络状态下。但是这里出现了数据冲突 “bob” 和 “tom”</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb199DTFxNwWFwHTvgqqPps7HGQ1aictoZoSFUGsiaLlibbsBgB1BMlVic5mQ/640?wx_fmt=png" alt="null"></p>
-<p>三个节点的 Leader 广播 AppendEntries</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1OTLYcZib137Sgq7ju1ibSDBOqOSX0y1O2J0dFPib65Lf25VscGX2G68nQ/640?wx_fmt=png" alt="null"></p>
-<p>两个节点 Partition 的 Leader 自动降级为 Follower，因为这个 Partition 的数据 “bob” 没有 Commit，返回给客户端的是错误，客户端知道请求没有成功，所以 Follower 在收到 AppendEntries 请求时，可以把 “bob“ 删除，然后同步 ”tom”，通过这么一个过程，就完成了在 Network Partition 情况下的复制日志，保证了数据的一致性。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb1zX2OwO7XKGyX0lzwgz5PGmBP5icicibkkeribXvp2GhRB1QLPIJYwv48Nw/640?wx_fmt=png" alt="null"></p>
-<h3 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h3><p>Raft 是能够实现分布式系统强一致性的算法，每个系统节点有三种状态 Follower，Candidate，Leader。实现 Raft 算法两个最重要的事是：选主和复制日志。</p>
-<p>一致性协议之 ZAB</p>
-<p>什么是 ZAB 协议？ZAB 协议介绍</p>
-<p>ZAB 协议全称：Zookeeper Atomic Broadcast（Zookeeper 原子广播协议）。</p>
-<p>ZAB 协议是为分布式协调服务 Zookeeper 专门设计的一种支持 崩溃恢复 和 原子广播 协议。</p>
-<p>整个 Zookeeper 就是在这两个模式之间切换。简而言之，当 Leader 服务可以正常使用，就进入消息广播模式，当 Leader 不可用时，则进入崩溃恢复模式。</p>
-<p>基于该协议，Zookeeper 实现了一种 主备模式 的系统架构来保持集群中各个副本之间数据一致性。其中所有客户端写入数据都是写入到 主进程（称为 Leader）中，然后，由 Leader 复制到备份进程（称为 Follower）中。【涉及到2PC单点问题的解决，崩溃恢复】</p>
-<h3 id="选择机制中的概念"><a href="#选择机制中的概念" class="headerlink" title="选择机制中的概念"></a>选择机制中的概念</h3><p>1、Serverid：服务器ID</p>
-<p>比如有三台服务器，编号分别是1,2,3。</p>
-<blockquote>
-<p>编号越大在选择算法中的权重越大。</p>
-</blockquote>
-<p>2、Zxid：数据ID</p>
-<p>服务器中存放的最大数据ID。【zxid实际上是一个64位的数字，高32位是epoch（时期; 纪元; 世; 新时代）用来标识leader是否发生改变，如果有新的leader产生出来，epoch会自增，低32位用来递增计数。】</p>
-<blockquote>
-<p>值越大说明数据越新，在选举算法中数据越新权重越大。</p>
-</blockquote>
-<p>3、Epoch：逻辑时钟</p>
-<p>或者叫投票的次数，同一轮投票过程中的逻辑时钟值是相同的。每投完一次票这个数据就会增加，然后与接收到的其它服务器返回的投票信息中的数值相比，根据不同的值做出不同的判断。</p>
-<p>4、Server状态：选举状态</p>
-<p>LOOKING，竞选状态。</p>
-<p>FOLLOWING，随从状态，同步leader状态，参与投票。</p>
-<p>OBSERVING，观察状态,同步leader状态，不参与投票。</p>
-<p>LEADING，领导者状态。</p>
-<h3 id="选举消息内容"><a href="#选举消息内容" class="headerlink" title="选举消息内容"></a>选举消息内容</h3><p>在投票完成后，需要将投票信息发送给集群中的所有服务器，它包含如下内容：服务器ID、数据ID、逻辑时钟、选举状态。</p>
-<p>zookeeper是如何保证事务的顺序一致性的（保证消息有序） 在整个消息广播中，Leader会将每一个事务请求转换成对应的 proposal 来进行广播，并且在广播 事务Proposal 之前，Leader服务器会首先为这个事务Proposal分配一个全局单递增的唯一ID，称之为事务ID（即zxid），由于Zab协议需要保证每一个消息的严格的顺序关系，因此必须将每一个proposal按照其zxid的先后顺序进行排序和处理。</p>
-<h3 id="消息广播"><a href="#消息广播" class="headerlink" title="消息广播"></a>消息广播</h3><p>1）在zookeeper集群中，数据副本的传递策略就是采用消息广播模式。zookeeper中农数据副本的同步方式与二段提交相似，但是却又不同。二段提交要求协调者必须等到所有的参与者全部反馈ACK确认消息后，再发送commit消息。要求所有的参与者要么全部成功，要么全部失败。二段提交会产生严重的阻塞问题。</p>
-<p>2）Zab协议中 Leader 等待 Follower 的ACK反馈消息是指“只要半数以上的Follower成功反馈即可，不需要收到全部Follower反馈”。</p>
-<p><strong>消息广播具体步骤</strong></p>
-<p>1）客户端发起一个写操作请求。</p>
-<p>2）Leader 服务器将客户端的请求转化为事务 Proposal 提案，同时为每个 Proposal 分配一个全局的ID，即zxid。</p>
-<p>3）Leader 服务器为每个 Follower 服务器分配一个单独的队列，然后将需要广播的 Proposal 依次放到队列中取，并且根据 FIFO 策略进行消息发送。</p>
-<p>4）Follower 接收到 Proposal 后，会首先将其以事务日志的方式写入本地磁盘中，写入成功后向 Leader 反馈一个 Ack 响应消息。</p>
-<p>5）Leader 接收到超过半数以上 Follower 的 Ack 响应消息后，即认为消息发送成功，可以发送 commit 消息。</p>
-<p>6）Leader 向所有 Follower 广播 commit 消息，同时自身也会完成事务提交。Follower 接收到 commit 消息后，会将上一条事务提交。</p>
-<p>zookeeper 采用 Zab 协议的核心，就是只要有一台服务器提交了 Proposal，就要确保所有的服务器最终都能正确提交 Proposal。这也是 CAP/BASE 实现最终一致性的一个体现。</p>
-<p>Leader 服务器与每一个 Follower 服务器之间都维护了一个单独的 FIFO 消息队列进行收发消息，使用队列消息可以做到异步解耦。Leader 和 Follower 之间只需要往队列中发消息即可。如果使用同步的方式会引起阻塞，性能要下降很多。</p>
-<h3 id="崩溃恢复"><a href="#崩溃恢复" class="headerlink" title="崩溃恢复"></a>崩溃恢复</h3><p>崩溃恢复主要包括两部分：Leader选举 和 数据恢复</p>
-<p>zookeeper是如何选取主leader的？</p>
-<p>当leader崩溃或者leader失去大多数的follower，这时zk进入恢复模式，恢复模式需要重新选举出一个新的leader，让所有的Server都恢复到一个正确的状态。</p>
-<p>Zookeeper选主流程 选举流程详述</p>
-<p>一、首先开始选举阶段，每个Server读取自身的zxid。</p>
-<p>二、发送投票信息</p>
-<p>a、首先，每个Server第一轮都会投票给自己。</p>
-<p>b、投票信息包含 ：所选举leader的Serverid，Zxid，Epoch。Epoch会随着选举轮数的增加而递增。</p>
-<p>三、接收投票信息</p>
-<p>1、如果服务器B接收到服务器A的数据（服务器A处于选举状态(LOOKING 状态)</p>
-<p>1）首先，判断逻辑时钟值：</p>
-<p>a）如果发送过来的逻辑时钟Epoch大于目前的逻辑时钟。首先，更新本逻辑时钟Epoch，同时清空本轮逻辑时钟收集到的来自其他server的选举数据。然后，判断是否需要更新当前自己的选举leader Serverid。判断规则rules judging：保存的zxid最大值和leader Serverid来进行判断的。先看数据zxid,数据zxid大者胜出;其次再判断leader Serverid,leader Serverid大者胜出；然后再将自身最新的选举结果(也就是上面提到的三种数据（leader Serverid，Zxid，Epoch）广播给其他server)</p>
-<p>b）如果发送过来的逻辑时钟Epoch小于目前的逻辑时钟。说明对方server在一个相对较早的Epoch中，这里只需要将本机的三种数据（leader Serverid，Zxid，Epoch）发送过去就行。</p>
-<p>c）如果发送过来的逻辑时钟Epoch等于目前的逻辑时钟。再根据上述判断规则rules judging来选举leader ，然后再将自身最新的选举结果(也就是上面提到的三种数据（leader Serverid，Zxid，Epoch）广播给其他server)。</p>
-<p>2）其次，判断服务器是不是已经收集到了所有服务器的选举状态：若是，根据选举结果设置自己的角色(FOLLOWING还是LEADER)，退出选举过程就是了。</p>
-<p>最后，若没有收集到所有服务器的选举状态：也可以判断一下根据以上过程之后最新的选举leader是不是得到了超过半数以上服务器的支持,如果是,那么尝试在200ms内接收一下数据,如果没有新的数据到来,说明大家都已经默认了这个结果,同样也设置角色退出选举过程。</p>
-<p>2、 如果所接收服务器A处在其它状态（FOLLOWING或者LEADING）。</p>
-<p>a)逻辑时钟Epoch等于目前的逻辑时钟，将该数据保存到recvset。此时Server已经处于LEADING状态，说明此时这个server已经投票选出结果。若此时这个接收服务器宣称自己是leader, 那么将判断是不是有半数以上的服务器选举它，如果是则设置选举状态退出选举过程。</p>
-<p>b) 否则这是一条与当前逻辑时钟不符合的消息，那么说明在另一个选举过程中已经有了选举结果，于是将该选举结果加入到outofelection集合中，再根据outofelection来判断是否可以结束选举,如果可以也是保存逻辑时钟，设置选举状态，退出选举过程。【recvset：用来记录选票信息，以方便后续统计;outofelection：用来记录选举逻辑之外的选票，例如当一个服务器加入zookeeper集群时，因为集群已经存在，不用重新选举，只需要在满足一定条件下加入集群即可。】</p>
-<p>描述Leader选择过程中的状态变化，这是假设全部实例中均没有数据，假设服务器启动顺序分别为：A,B,C。</p>
-<p><img src="https://mmbiz.qpic.cn/mmbiz_png/UdK9ByfMT2Ovq5faReCcQ9ElG6fZrXb142gzHJiaaOYSJLmgQI4Euo01St2NAnwSxjBLFgg1FocS19L2ic2ongBw/640?wx_fmt=png" alt="null"></p>
-<h3 id="Zab-协议如何保证数据一致性"><a href="#Zab-协议如何保证数据一致性" class="headerlink" title="Zab 协议如何保证数据一致性"></a>Zab 协议如何保证数据一致性</h3><p>假设两种异常情况：1、一个事务在 Leader 上提交了，并且过半的 Folower 都响应 Ack 了，但是 Leader 在 Commit 消息发出之前挂了。2、假设一个事务在 Leader 提出之后，Leader 挂了。</p>
-<p>要确保如果发生上述两种情况，数据还能保持一致性，那么 Zab 协议选举算法必须满足以下要求：</p>
-<p>Zab 协议崩溃恢复要求满足以下两个要求：1）确保已经被 Leader 提交的 Proposal 必须最终被所有的 Follower 服务器提交。2）确保丢弃已经被 Leader 提出的但是没有被提交的 Proposal。</p>
-<p>根据上述要求 Zab协议需要保证选举出来的Leader需要满足以下条件：1）新选举出来的 Leader 不能包含未提交的 Proposal 。即新选举的 Leader 必须都是已经提交了 Proposal 的 Follower 服务器节点。2）新选举的 Leader 节点中含有最大的 zxid 。这样做的好处是可以避免 Leader 服务器检查 Proposal 的提交和丢弃工作。</p>
-<h3 id="Zab-如何数据同步"><a href="#Zab-如何数据同步" class="headerlink" title="Zab 如何数据同步"></a>Zab 如何数据同步</h3><p>1）完成 Leader 选举后（新的 Leader 具有最高的zxid），在正式开始工作之前（接收事务请求，然后提出新的 Proposal），Leader 服务器会首先确认事务日志中的所有的 Proposal 是否已经被集群中过半的服务器 Commit。</p>
-<p>2）Leader 服务器需要确保所有的 Follower 服务器能够接收到每一条事务的 Proposal ，并且能将所有已经提交的事务 Proposal 应用到内存数据中。等到 Follower 将所有尚未同步的事务 Proposal 都从 Leader 服务器上同步过啦并且应用到内存数据中以后，Leader 才会把该 Follower 加入到真正可用的 Follower 列表中。</p>
-<h3 id="Zab-数据同步过程中，如何处理需要丢弃的-Proposal"><a href="#Zab-数据同步过程中，如何处理需要丢弃的-Proposal" class="headerlink" title="Zab 数据同步过程中，如何处理需要丢弃的 Proposal"></a>Zab 数据同步过程中，如何处理需要丢弃的 Proposal</h3><p>在 Zab 的事务编号 zxid 设计中，zxid是一个64位的数字。</p>
-<p>其中低32位可以看成一个简单的单增计数器，针对客户端每一个事务请求，Leader 在产生新的 Proposal 事务时，都会对该计数器加1。而高32位则代表了 Leader 周期的 epoch 编号。</p>
-<p>epoch 编号可以理解为当前集群所处的年代，或者周期。每次Leader变更之后都会在 epoch 的基础上加1，这样旧的 Leader 崩溃恢复之后，其他Follower 也不会听它的了，因为 Follower 只服从epoch最高的 Leader 命令。</p>
-<p>每当选举产生一个新的 Leader ，就会从这个 Leader 服务器上取出本地事务日志充最大编号 Proposal 的 zxid，并从 zxid 中解析得到对应的 epoch 编号，然后再对其加1，之后该编号就作为新的 epoch 值，并将低32位数字归零，由0开始重新生成zxid。</p>
-<p>Zab 协议通过 epoch 编号来区分 Leader 变化周期，能够有效避免不同的 Leader 错误的使用了相同的 zxid 编号提出了不一样的 Proposal 的异常情况。</p>
-<p>基于以上策略:</p>
-<p>当一个包含了上一个 Leader 周期中尚未提交过的事务 Proposal 的服务器启动时，当这台机器加入集群中，以 Follower 角色连上 Leader 服务器后，Leader 服务器会根据自己服务器上最后提交的 Proposal 来和 Follower 服务器的 Proposal 进行比对，比对的结果肯定是 Leader 要求 Follower 进行一个回退操作，回退到一个确实已经被集群中过半机器 Commit 的最新 Proposal。</p>
-<h3 id="小结-2"><a href="#小结-2" class="headerlink" title="小结"></a>小结</h3><p>ZAB 协议和我们之前看的 Raft 协议实际上是有相似之处的，比如都有一个 Leader，用来保证一致性（Paxos 并没有使用 Leader 机制保证一致性）。再有采取过半即成功的机制保证服务可用（实际上 Paxos 和 Raft 都是这么做的）。</p>
-<p>ZAB 让整个 Zookeeper 集群在两个模式之间转换，消息广播和崩溃恢复，消息广播可以说是一个简化版本的 2PC，通过崩溃恢复解决了 2PC 的单点问题，通过队列解决了 2PC 的同步阻塞问题。</p>
-<p>而支持崩溃恢复后数据准确性的就是数据同步了，数据同步基于事务的 ZXID 的唯一性来保证。通过 + 1 操作可以辨别事务的先后顺序。</p>
-<p>NWR模型</p>
-<p>Amazon Dynamo的NWR模型。NWR模型把CAP的选择权交给了用户，让用户自己的选择你的CAP中的哪两个。</p>
-<p>所谓NWR模型。N代表N个备份，W代表要写入至少W份才认为成功，R表示至少读取R个备份。配置的时候要求W+R &gt; N。因为W+R &gt; N， 所以 R &gt; N-W 这个是什么意思呢？就是读取的份数一定要比总备份数减去确保写成功的倍数的差值要大。</p>
-<p>也就是说，每次读取，都至少读取到一个最新的版本。从而不会读到一份旧数据。当我们需要高可写的环境的时候，我们可以配置W = 1 如果N=3 那么R = 3。这个时候只要写任何节点成功就认为成功，但是读的时候必须从所有的节点都读出数据。如果我们要求读的高效率，我们可以配置 W=N R=1。这个时候任何一个节点读成功就认为成功，但是写的时候必须写所有三个节点成功才认为成功。</p>
-<p>NWR模型的一些设置会造成脏数据的问题，因为这很明显不是像Paxos一样是一个强一致的东西，所以，可能每次的读写操作都不在同一个结点上，于是会出现一些结点上的数据并不是最新版本，但却进行了最新的操作。</p>
-<p>所以，Amazon Dynamo引了数据版本的设计。也就是说，如果你读出来数据的版本是v1，当你计算完成后要回填数据后，却发现数据的版本号已经被人更新成了v2，那么服务器就会拒绝你。版本这个事就像“乐观锁”一样。</p>
-<p>但是，对于分布式和NWR模型来说，版本也会有恶梦的时候——就是版本冲的问题，比如：我们设置了N=3 W=1，如果A结点上接受了一个值，版本由v1 -&gt; v2，但还没有来得及同步到结点B上（异步的，应该W=1，写一份就算成功），B结点上还是v1版本，此时，B结点接到写请求，按道理来说，他需要拒绝掉，但是他一方面并不知道别的结点已经被更新到v2，另一方面他也无法拒绝，因为W=1，所以写一分就成功了。于是，出现了严重的版本冲突。</p>
-<p>Amazon的Dynamo把版本冲突这个问题巧妙地回避掉了——版本冲突这个事交给用户自己来处理。</p>
-<p>于是，Dynamo引入了Vector Clock（矢量钟）这个设计。这个设计让每个结点各自记录自己的版本信息，也就是说，对于同一个数据，需要记录两个事：1）谁更新的我，2）我的版本号是什么。</p>
-<p>下面，我们来看一个操作序列：</p>
-<p>1）一个写请求，第一次被节点A处理了。节点A会增加一个版本信息(A，1)。我们把这个时候的数据记做D1(A，1)。然后另外一个对同样key的请求还是被A处理了于是有D2(A，2)。这个时候，D2是可以覆盖D1的，不会有冲突产生。</p>
-<p>2）现在我们假设D2传播到了所有节点(B和C)，B和C收到的数据不是从客户产生的，而是别人复制给他们的，所以他们不产生新的版本信息，所以现在B和C所持有的数据还是D2(A，2)。于是A，B，C上的数据及其版本号都是一样的。</p>
-<p>3）如果我们有一个新的写请求到了B结点上，于是B结点生成数据D3(A,2; B,1)，意思是：数据D全局版本号为3，A升了两新，B升了一次。这不就是所谓的代码版本的log么？</p>
-<p>4）如果D3没有传播到C的时候又一个请求被C处理了，于是，以C结点上的数据是D4(A,2; C,1)。</p>
-<p>5）好，最精彩的事情来了：如果这个时候来了一个读请求，我们要记得，我们的W=1 那么R=N=3，所以R会从所有三个节点上读，此时，他会读到三个版本：</p>
-<p>•A结点：D2(A,2)•B结点：D3(A,2; B,1);•C结点：D4(A,2; C,1)</p>
-<p>6）这个时候可以判断出，D2已经是旧版本（已经包含在D3/D4中），可以舍弃。</p>
-<p>7）但是D3和D4是明显的版本冲突。于是，交给调用方自己去做版本冲突处理。就像源代码版本管理一样。</p>
-<p>很明显，上述的Dynamo的配置用的是CAP里的A和P。</p>
-]]></content>
-      <categories>
-        <category>架构</category>
-      </categories>
-      <tags>
-        <tag>架构</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>索引的概念和数据结构</title>
     <url>/2020/04/20/%E7%B4%A2%E5%BC%95%E7%9A%84%E6%A6%82%E5%BF%B5%E5%92%8C%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/</url>
     <content><![CDATA[<section id="nice" data-tool="mdnice编辑器" data-website="https://www.mdnice.com" style="padding: 0 10px; word-spacing: 0px; word-wrap: break-word; text-align: left; font-family: Optima-Regular, Optima, PingFangSC-light, PingFangTC-light, 'PingFang SC', Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; line-height: 1.6; letter-spacing: .034em; color: rgb(63, 63, 63); font-size: 16px; word-break: all;"><h2 data-tool="mdnice编辑器" style="padding: 0px; font-weight: bold; color: black; font-size: 22px; display: block; text-align: center; background-image: url(https://my-wechat.mdnice.com/koala-2.png); background-position: center center; background-repeat: no-repeat; background-attachment: initial; background-origin: initial; background-clip: initial; background-size: 50px; margin-top: 1em; margin-bottom: 10px;"><span class="prefix" style="display: none;"></span><span class="content" style="text-align: center; display: inline-block; height: 38px; line-height: 42px; color: #48b378; background-position: left center; background-repeat: no-repeat; background-attachment: initial; background-origin: initial; background-clip: initial; background-size: 63px; margin-top: 38px; font-size: 18px; margin-bottom: 10px;">前言</span><span class="suffix"></span></h2>
@@ -9496,6 +9179,354 @@ NULL 类型比较特殊，SQL 难优化。虽然 MySQL NULL 类型和 Oracle 的
       </categories>
       <tags>
         <tag>SQL</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>五十五张图告诉你微服务灵魂摆渡者Nacos究竟有多强？</title>
+    <url>/2021/07/31/%E4%BA%94%E5%8D%81%E4%BA%94%E5%BC%A0%E5%9B%BE%E5%91%8A%E8%AF%89%E4%BD%A0%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%81%B5%E9%AD%82%E6%91%86%E6%B8%A1%E8%80%85Nacos%E7%A9%B6%E7%AB%9F%E6%9C%89%E5%A4%9A%E5%BC%BA%EF%BC%9F/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Nacos是阿里巴巴开源的服务注册中心以及配置中心，致力于给开发者提供一款便捷、简单上手的开源框架。</p>
+<p>Nacos究竟有什么惊人的地方呢？看下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/1.png"></p>
+<p>从上图不难看出阿里巴巴的野心，一个Nacos干掉了Spring Cloud的三大组件，分别是<code>注册中心Eureka</code>、<code>服务配置Config</code>，<code>服务总线Bus</code>。</p>
+<p>本文目录结构如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/53.png"></p>
+<h2 id="为什么Nacos这么受欢迎？"><a href="#为什么Nacos这么受欢迎？" class="headerlink" title="为什么Nacos这么受欢迎？"></a>为什么Nacos这么受欢迎？</h2><p>Nacos官方文档的介绍中有这么一句话，如下：</p>
+<blockquote>
+<p>Nacos 帮助您更敏捷和容易地构建、交付和管理微服务平台。 Nacos 是构建以“服务”为中心的现代应用架构 (例如微服务范式、云原生范式) 的服务基础设施。</p>
+</blockquote>
+<p>什么意思呢？不着急，有对比才有伤害。</p>
+<p><code>Eureka</code>、<code>Config</code>这两个组件相信大家都用过，有什么感受？</p>
+<p>当然，这两个组件给我最直观的感受就是繁琐，原因如下：</p>
+<ol>
+<li>无论是Eureka还是Config都必须自己搭建个服务</li>
+<li>英文界面不是那么友好</li>
+</ol>
+<p>用过Nacos的开发者都说很爽，不用自己搭建服务，阿里给你准备好了服务，只需要启动即可；界面中英文都有，很适合初学者。</p>
+<p>当然最重要的原因就是以上组件很可能面临<code>停更</code>、比如Eureka已经停更了，谁知道后面其他的组件会不会如此呢？</p>
+<h2 id="如何自学呢？"><a href="#如何自学呢？" class="headerlink" title="如何自学呢？"></a>如何自学呢？</h2><p>对于初学者当然是官方文档了，下面作者列出了Nacos相关的官方文档：</p>
+<ul>
+<li><a href="https://nacos.io/zh-cn/docs/what-is-nacos.html%EF%BC%88%E4%B8%AD%E8%8B%B1%E6%96%87%E5%85%BC%E5%A4%87%EF%BC%89">https://nacos.io/zh-cn/docs/what-is-nacos.html（中英文兼备）</a></li>
+<li><a href="https://spring-cloud-alibaba-group.github.io/github-pages/hoxton/en-us/index.html%EF%BC%88%E8%8B%B1%E6%96%87%EF%BC%89">https://spring-cloud-alibaba-group.github.io/github-pages/hoxton/en-us/index.html（英文）</a></li>
+<li><a href="https://github.com/alibaba/nacos%EF%BC%88Nacos%E9%A1%B9%E7%9B%AE%E4%BB%93%E5%BA%93%EF%BC%89">https://github.com/alibaba/nacos（Nacos项目仓库）</a></li>
+</ul>
+<p>当然很多人不愿意看官方文档，作者也在为大家准备了视频教程。</p>
+<blockquote>
+<p>公众号<code>码猿技术专栏</code>回复关键词<code>9527</code>免费获取。</p>
+</blockquote>
+<h2 id="本文版本说明"><a href="#本文版本说明" class="headerlink" title="本文版本说明"></a>本文版本说明</h2><p>基于Maven构建的微服务项目，各个组件版本如下：</p>
+<ul>
+<li>JDK1.8+</li>
+<li>Spring Boot-2.2.2.RELEASE</li>
+<li>SpringCloud-Hoxton.SR3</li>
+<li>SpringCloud Alibaba-2.2.1.RELEASE</li>
+</ul>
+<p><strong>注意</strong>：Spring Boot、Spring Cloud、Spring Cloud Alibaba的版本可不是随便选择的，官网明确规定了各个版本的适配：<a href="https://github.com/alibaba/spring-cloud-alibaba/wiki%EF%BC%8C%E5%A6%82%E4%B8%8B%E5%9B%BE%EF%BC%9A">https://github.com/alibaba/spring-cloud-alibaba/wiki，如下图：</a></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/2.png"></p>
+<p>不同版本的Alibaba也对应了不同组件的版本，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/3.png"></p>
+<blockquote>
+<p>一定要完全按照文档给出的版本来选择，不然会出现意想不到的BUG，那岂不是鸡鸡….</p>
+</blockquote>
+<p>作者使用的是分模块的聚合项目演示，其中<code>dependencyManagement</code>依赖如下，对应着上文提到的版本：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/7.png"></p>
+<blockquote>
+<p>注意：如果你的版本的不是和作者一样，请一定严格按照官方文档给的版本进行适配，否则会有意想不到的BUG….</p>
+</blockquote>
+<h2 id="启动Nacos服务"><a href="#启动Nacos服务" class="headerlink" title="启动Nacos服务"></a>启动Nacos服务</h2><p>根据上面作者选择的Spring Cloud Alibaba的版本，对应的Nacos版本是<code>1.2.1</code>，直接去GitHub(<a href="https://github.com/alibaba/nacos/tags)%E4%B8%8B%E8%BD%BD%E5%AF%B9%E5%BA%94%E7%9A%84%E7%89%88%E6%9C%AC%E5%8D%B3%E5%8F%AF%EF%BC%8C%E5%8F%AF%E4%BB%A5%E9%80%89%E6%8B%A9windows%E6%88%96%E8%80%85Linux%EF%BC%8C%E5%A6%82%E4%B8%8B%E5%9B%BE%EF%BC%9A">https://github.com/alibaba/nacos/tags)下载对应的版本即可，可以选择windows或者Linux，如下图：</a></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/4.png"></p>
+<p>下载完成之后直接解压即可，从它的目录结构和文件名称一看这就是一个Spring Boot 项目。</p>
+<p>进入<code>/bin</code>目录，有两个脚本，如下：</p>
+<ul>
+<li><code>startup.cmd</code>：windows平台的启动脚本</li>
+<li><code>startup.sh</code>：Linux平台的启动脚本</li>
+</ul>
+<p>由于作者本地是windows，直接双击<code>startup.cmd</code>启动项目，出现以下界面则启动完成：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/5.png"></p>
+<p>在浏览器输入<code>http://localhost:8848/nacos</code>进入Nacos的登录界面。</p>
+<blockquote>
+<p>用户名：nacos；密码：nacos</p>
+</blockquote>
+<p>登录成功的界面如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/6.png"></p>
+<h2 id="服务注册发现"><a href="#服务注册发现" class="headerlink" title="服务注册发现"></a>服务注册发现</h2><p>微服务的服务注册和发现相信都用过Eureka，要自己本地构建一个Eureka微服务，但是整合了Alibaba的Nacos则不用那么复杂，直接启动Alibaba提供的Nacos服务即可，这样让程序员把全部精力放在业务上，下面是一个简单的架构图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/8.png"></p>
+<h3 id="如何演示效果呢？"><a href="#如何演示效果呢？" class="headerlink" title="如何演示效果呢？"></a>如何演示效果呢？</h3><p>参照上面架构图，作者分别创建了两个模块，分别是<code>nacos-provider</code>(服务提供者)、<code>nacos-consumer</code>(服务消费者)，职责如下：</p>
+<ul>
+<li><code>nacos-provider</code>：注册进入nacos-server，对外暴露服务</li>
+<li><code>nacos-consumer</code>：注册进入nacos-server，调用nacos-provider的服务</li>
+</ul>
+<h3 id="nacos-provider服务提供者创建"><a href="#nacos-provider服务提供者创建" class="headerlink" title="nacos-provider服务提供者创建"></a>nacos-provider服务提供者创建</h3><p>由于使用了多模块聚合项目，只需要创建一个nacos-provider模块即可。步骤如下：</p>
+<h4 id="1-添加Maven依赖"><a href="#1-添加Maven依赖" class="headerlink" title="1. 添加Maven依赖"></a>1. 添加Maven依赖</h4><p>需要添加<code>spring-cloud-starter-alibaba-nacos-discovery</code>这个依赖，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/9.png"></p>
+<p>由于父模板中指定了<code>spring-cloud-alibaba-dependencies</code>的版本，子模块中直接引入依赖即可，不需要指定版本号，这样才能达到版本管理的效果。</p>
+<h4 id="2-配置YML文件"><a href="#2-配置YML文件" class="headerlink" title="2. 配置YML文件"></a>2. 配置YML文件</h4><p>在配置文件中指定服务名称、端口号、nacos-server的地址等信息，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">server:</span><br><span class="line">  port: 9001</span><br><span class="line">spring:</span><br><span class="line">  application:</span><br><span class="line">    ## 指定服务名称，在nacos中的名字</span><br><span class="line">    name: nacos-provider</span><br><span class="line">  cloud:</span><br><span class="line">    nacos:</span><br><span class="line">      discovery:</span><br><span class="line">        # nacos的服务地址，nacos-server中IP地址:端口号</span><br><span class="line">        server-addr: 127.0.0.1:8848</span><br><span class="line">management:</span><br><span class="line">  endpoints:</span><br><span class="line">    web:</span><br><span class="line">      exposure:</span><br><span class="line">        ## yml文件中存在特殊字符，必须用单引号包含，否则启动报错</span><br><span class="line">        include: &#x27;*&#x27;</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-开启服务注册发现功能"><a href="#3-开启服务注册发现功能" class="headerlink" title="3. 开启服务注册发现功能"></a>3. 开启服务注册发现功能</h4><p>这个大部分Spring Boot功能模块相同，都需要使用<code>@EnableXxxx</code>注解来开启某个功能，否则无法引入自动配置。这里需要使用Spring Cloud的原生注解<code>@EnableDiscoveryClient</code>来开启服务注册发现的功能，如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/10.png"></p>
+<h4 id="4-写个演示服务"><a href="#4-写个演示服务" class="headerlink" title="4. 写个演示服务"></a>4. 写个演示服务</h4><p>nacos-provider作为服务提供者注册到nacos中，肯定需要提供个服务来供消费者（nacos-consumer）调用，下面是随便写的一个接口：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/11.png"></p>
+<h4 id="5-启动项目"><a href="#5-启动项目" class="headerlink" title="5. 启动项目"></a>5. 启动项目</h4><p>按照上面的5个步骤算是完成了最基本的一个服务，现在只需要启动nacos-provider这个服务即可。</p>
+<p>启动成功之后在nacos的服务管理-&gt;服务列表这里将会发现注册进入的nacos-provider这个服务，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/12.png"></p>
+<p>OK，在nacos中能够看到服务注册成功了，完成任务……….</p>
+<h3 id="nacos-consumer服务消费者创建"><a href="#nacos-consumer服务消费者创建" class="headerlink" title="nacos-consumer服务消费者创建"></a>nacos-consumer服务消费者创建</h3><p>同样是注册进入nacos，因此大致步骤都是一样的，步骤如下：</p>
+<h4 id="1-添加Maven依赖-1"><a href="#1-添加Maven依赖-1" class="headerlink" title="1. 添加Maven依赖"></a>1. 添加Maven依赖</h4><p>需要添加<code>spring-cloud-starter-alibaba-nacos-discovery</code>这个依赖，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/9.png"></p>
+<h4 id="2-配置YML文件-1"><a href="#2-配置YML文件-1" class="headerlink" title="2. 配置YML文件"></a>2. 配置YML文件</h4><p>同样是指定服务名、端口、nacos-server的地址，如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">server:</span></span><br><span class="line">  <span class="attr">port:</span> <span class="number">9002</span></span><br><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">nacos-consumer</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">discovery:</span></span><br><span class="line">        <span class="comment"># nacos的服务地址</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8848</span></span><br><span class="line"><span class="attr">management:</span></span><br><span class="line">  <span class="attr">endpoints:</span></span><br><span class="line">    <span class="attr">web:</span></span><br><span class="line">      <span class="attr">exposure:</span></span><br><span class="line">        <span class="comment">## yml文件中存在特殊字符，必须用单引号包含，否则启动报错</span></span><br><span class="line">        <span class="attr">include:</span> <span class="string">&#x27;*&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="3-开启服务注册发现功能-1"><a href="#3-开启服务注册发现功能-1" class="headerlink" title="3. 开启服务注册发现功能"></a>3. 开启服务注册发现功能</h4><p>使用<code>@EnableDiscoveryClient</code>标注，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/13.png"></p>
+<h4 id="4-写个演示服务-1"><a href="#4-写个演示服务-1" class="headerlink" title="4. 写个演示服务"></a>4. 写个演示服务</h4><p>如何演示呢？nacos-provider提供了一个服务，那么我们就调用它的服务来演示一把。</p>
+<p>其实Nacos集成了Ribbon，何以见得呢？打开<code>spring-cloud-starter-alibaba-nacos-discovery</code>的依赖一看便知，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/14.png"></p>
+<p>因此我们便能使用Ribbon的负载均衡来调用服务，步骤如下：</p>
+<ul>
+<li>创建RestTemplate，使用<code>@LoadBalanced</code>注解标注开启负载均衡，如下图：</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/15.png"></p>
+<ul>
+<li>直接使用注册到nacos的中的服务名作为访问地址调用服务，如下图：</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/16.png"></p>
+<ul>
+<li>上图中的<code>serviceUrl</code>是什么东西呢？难道是IP地址？当然不是，既然nacos-provider和nacos-consumer都已经注册到nacos中，那么可能是可以直接通过服务名直接找到对应得服务，因此这个<code>serviceUrl=http://service-name</code>，如下图：</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/17.png"></p>
+<p>OK，至此nacos-consumer已经准备完成，下面就可以启动项目。</p>
+<h4 id="5-启动项目-1"><a href="#5-启动项目-1" class="headerlink" title="5. 启动项目"></a>5. 启动项目</h4><p>启动成功之后将会在nacos中的服务列表中查看到两个服务，分别是nacos-provider、nacos-consumer，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/18.png"></p>
+<p>此时服务提供者和消费者都已成功注册到Nacos，那么接下来就是测试服务能否调的通的问题了。</p>
+<p>直接调用nacos-consumer的接口，输入地址：<code>http://localhost:9002/nacos/test/16</code>，返回信息如下图则表示相互调用成功：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/19.png"></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>Nacos的服务注册发现很简单，比Eureka简单多了，无需自己构建个注册中心。</p>
+<h2 id="启动配置管理"><a href="#启动配置管理" class="headerlink" title="启动配置管理"></a>启动配置管理</h2><p>为什么要用配置管理？其实这已经不仅仅是微服务的痛点了，单体服务也存在这样的痛点。试问线上的项目如果想要的修改某个配置，比如添加一个数据源，难道要停服更新？显然是不太现实，那么如何解决呢？</p>
+<p>对于单体应用前面已经写过一篇文章，感兴趣的可以看：<a href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247491723&idx=1&sn=4f335dfab579aac6cd40455d88f74fdb&chksm=fcf73f46cb80b6503898214461b5fe173319e46da76d8b5de531db6588a30cb0ccadf53fbdb6&token=1695818683&lang=zh_CN#rd">如何让Spring Boot 的配置 “动” 起来？</a></p>
+<p>微服务环境下可选的方案还是很多的，比如Config+BUS，携程开源的Apollo….</p>
+<p>这都不是今天的重点，用过Config+BUS觉得怎么样？自己要搭建一个Config微服务，还要集成GitHub等，你不难受吗？</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/20.png"></p>
+<p>下面就来介绍一下Nacos是如何完美的实现配置管理以及动态刷新的。</p>
+<h3 id="如何演示效果呢？-1"><a href="#如何演示效果呢？-1" class="headerlink" title="如何演示效果呢？"></a>如何演示效果呢？</h3><p>新建一个模块<code>nacos-config</code>用来整合Nacos实现配置管理，项目结构如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/21.png"></p>
+<p>Nacos配置列表在哪里能看到呢？在管理平台-&gt;配置管理-&gt;配置列表这一栏，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/22.png"></p>
+<h3 id="添加依赖"><a href="#添加依赖" class="headerlink" title="添加依赖"></a>添加依赖</h3><p>由于使用了模块聚合的工程，因此不需要指定版本号，依赖如下：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.alibaba.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-alibaba-nacos-config<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="配置YAML文件"><a href="#配置YAML文件" class="headerlink" title="配置YAML文件"></a>配置YAML文件</h3><p>在<code>bootstrap.yml</code>文件中设置Nacos的配置，如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">nacos-config</span></span><br><span class="line">    <span class="comment">## 当前环境，这个和dataId有关-&gt; $&#123;prefix&#125;-$&#123;spring.profiles.active&#125;.$&#123;file-extension&#125;</span></span><br><span class="line">  <span class="attr">profiles:</span></span><br><span class="line">    <span class="attr">active:</span> <span class="string">dev</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">config:</span></span><br><span class="line">        <span class="comment">## nacos的地址，作为配置中心</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8848</span></span><br><span class="line">        <span class="comment">## 配置内容的数据格式，目前只支持 properties 和 yaml 类型，这个和dataId有关-&gt; $&#123;prefix&#125;-$&#123;spring.profiles.active&#125;.$&#123;file-extension&#125;</span></span><br><span class="line">        <span class="attr">file-extension:</span> <span class="string">properties</span></span><br><span class="line"><span class="attr">management:</span></span><br><span class="line">  <span class="attr">endpoints:</span></span><br><span class="line">    <span class="attr">web:</span></span><br><span class="line">      <span class="attr">exposure:</span></span><br><span class="line">        <span class="comment">## yml文件中存在特殊字符，必须用单引号包含，否则启动报错</span></span><br><span class="line">        <span class="attr">include:</span> <span class="string">&#x27;*&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Data-ID是什么？"><a href="#Data-ID是什么？" class="headerlink" title="Data ID是什么？"></a>Data ID是什么？</h3><p>dataId是一个配置的唯一标识，怎么取值呢？格式如下：</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line">$&#123;prefix&#125;-$&#123;spring.profiles.active&#125;.$&#123;file-extension&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>prefix</code>：前缀，默认是<code>spring.application.name</code>的值，也可以通过配置项 <code>spring.cloud.nacos.config.prefix</code>来配置。</li>
+<li><code>spring.profiles.active</code>： 即为当前环境对应的 profile。当 <code>spring.profiles.active</code> 为空时，对应的连接符 <code>-</code> 也将不存在，dataId 的拼接格式变成 <code>$&#123;prefix&#125;.$&#123;file-extension&#125;</code></li>
+<li><code>file-exetension</code> 为配置内容的数据格式，可以通过配置项 <code>spring.cloud.nacos.config.file-extension</code> 来配置。目前只支持 <code>properties</code> 和 <code>yaml</code> 类型。</li>
+</ul>
+<h3 id="添加一个配置"><a href="#添加一个配置" class="headerlink" title="添加一个配置"></a>添加一个配置</h3><p>下面在nacos中添加一个<code>config.version</code>的配置，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/23.png"></p>
+<p>以上就是添加的<code>config.version</code>的配置，发布之后查看列表如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/24.png"></p>
+<h3 id="获取nacos中的配置"><a href="#获取nacos中的配置" class="headerlink" title="获取nacos中的配置"></a>获取nacos中的配置</h3><p>获取nacos中的配置很简单，使用原生注解<code>@Value()</code>直接读取即可，步骤如下：</p>
+<ul>
+<li>新建一个实体类<code>DynamicConfigEntity</code>：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DynamicConfigEntity</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//直接读取nacos中config.version的配置</span></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;config.version&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String version;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>新建一个controller测试，如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;/nacos&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NacosController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> DynamicConfigEntity entity;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/test/&#123;id&#125;&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">test</span><span class="params">(<span class="meta">@PathVariable(&quot;id&quot;)</span>Integer id)</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;accept one msg id=&quot;</span>+id+<span class="string">&quot;----- version=&quot;</span>+entity.getVersion();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行项目成功后，在浏览器输入地址：<a href="http://localhost:9003/nacos/test/1%EF%BC%8C%E8%BF%94%E5%9B%9E%E5%A6%82%E4%B8%8B%E7%BB%93%E6%9E%9C%EF%BC%9A">http://localhost:9003/nacos/test/1，返回如下结果：</a></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/25.png"></p>
+<p>结果很明显，Nacos中的配置生效了，是不是很简单？</p>
+<h3 id="配置如何动态刷新？"><a href="#配置如何动态刷新？" class="headerlink" title="配置如何动态刷新？"></a>配置如何动态刷新？</h3><p>设想一下：现在由于需求改变了，我需要将<code>config.version</code>这个配置改成2，那么我直接改变Nacos中的配置会生效吗？</p>
+<p>不妨试一下，直接将Nacos中的配置修改成2，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/26.png"></p>
+<p>此时我们再不重启项目的情况下访问：<a href="http://localhost:9003/nacos/test/1%EF%BC%8C%E7%BB%93%E6%9E%9C%E5%A6%82%E4%B8%8B%E5%9B%BE%EF%BC%9A">http://localhost:9003/nacos/test/1，结果如下图：</a></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/25.png"></p>
+<p>what？？？怎么没变呢？不是说Nacos可以自动刷新配置吗？</p>
+<p>其实想要Nacos自动刷新配置还需要结合原生注解<code>@RefreshScope</code>，这个注解是不是很眼熟，在Config中也是用这个注解刷新配置，我们只需要将该注解标注在配置的实体类上即可，如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@RefreshScope</span></span><br><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DynamicConfigEntity</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//直接读取nacos中config.version的配置</span></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;config.version&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String version;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此时加上<code>@RefreshScope</code>重启之后将Nacos中<code>config.version</code>这个配置改成3，然后访问<a href="http://localhost:9003/nacos/test/1%EF%BC%8C%E7%BB%93%E6%9E%9C%E5%A6%82%E4%B8%8B%E5%9B%BE%EF%BC%9A">http://localhost:9003/nacos/test/1，结果如下图：</a></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/27.png"></p>
+<h3 id="多环境如何隔离配置？（Namespace）"><a href="#多环境如何隔离配置？（Namespace）" class="headerlink" title="多环境如何隔离配置？（Namespace）"></a>多环境如何隔离配置？（Namespace）</h3><p>试想一下：正常的业务开发至少有三个环境吧，如下：</p>
+<ul>
+<li>dev：本地开发环境</li>
+<li>test：测试环境</li>
+<li>prod：生产环境</li>
+</ul>
+<p>那么每个环境的配置肯定是不同的，那么问题来了，如何将以上三种不同的配置在Nacos能够很明显的区分呢？</p>
+<p>很多人可能会问：<code>DataId</code>格式中不是有环境的区分吗？这个不是可以满足吗？</p>
+<p><code>DataId</code>当然能够区分，但是微服务配置可不止这几个啊？一旦多了你怎么查找呢？多种环境的配置杂糅到一起，你好辨别吗？</p>
+<p>当然阿里巴巴的Nacos开发团队显然考虑到了这种问题，官方推荐用命名空间（namespace）来解决环境配置隔离的问题。</p>
+<blockquote>
+<p>Namespace（命名空间）：解决多环境及多租户数据的隔离问题<br>在多套不同的环境下，可以根据指定的环境创建不同的Namespace，实现多环境的数据隔离</p>
+</blockquote>
+<p>Nacos中默认提供的命名空间则是<code>public</code>，上述我们创建的<code>config.version</code>这个配置就属于<code>public</code>这个命名空间，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/28.png"></p>
+<p>当然我们可以根据业务需要创建自己的命名空间，操作如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/29.png"></p>
+<p>陈某创建了三个，分别是dev、test、prod，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/30.png"></p>
+<blockquote>
+<p>注意：上图中的<code> 命名空间ID</code>是系统自动生成的唯一ID，后续指定不同的Namespace就用这个ID。</p>
+</blockquote>
+<p>创建完成之后，在配置列表上方则可以看见不同的命名空间，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/31.png"></p>
+<p>既然Nacos中的Namespace配置好了，那么微服务中如何配置呢？前面也说过，Nacos默认指定的命名空间是<code>public</code>，那么如何在项目中指定命名空间呢？</p>
+<p>其实很简单，假设在<code>test</code>这个命名空间中添加一个<code>config.version=4</code>，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/32.png"></p>
+<p>此时只需要在<code>bootstrap.yml</code>配置中指定如下配置：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">nacos-config</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">config:</span></span><br><span class="line">      <span class="comment">## namespace的取值是命名空间ID，这里取的是test命名空间ID</span></span><br><span class="line">        <span class="attr">namespace:</span> <span class="string">d0ffeec2-3deb-4540-9664-fdd77461fd6b</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：Namespace必须在<code>bootstrap.yml</code>配置文件中指定，否则不生效。</p>
+</blockquote>
+<p>至此，已经全部配置完毕，启动项目，浏览器访问<a href="http://localhost:9003/nacos/test/1%EF%BC%8C%E7%BB%93%E6%9E%9C%E5%A6%82%E4%B8%8B%E5%9B%BE%EF%BC%9A">http://localhost:9003/nacos/test/1，结果如下图：</a></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/33.png"></p>
+<h3 id="不同业务配置如何隔离？-Group"><a href="#不同业务配置如何隔离？-Group" class="headerlink" title="不同业务配置如何隔离？(Group)"></a>不同业务配置如何隔离？(Group)</h3><p>试想以下场景：有两个微服务，一个是订单系统，一个是用户系统，但是他们有着相同的配置，比如<code>datasource-url</code>，那么如何区分呢？</p>
+<p>此时Group就派上用场了，顾名思义Group是分组的意思。</p>
+<blockquote>
+<p>Group：Nacos 中的一组配置集，是组织配置的维度之一，简单的说则是不同的系统或微服务的配置文件可以放在一个组里。Nacos如果不指定Group，则默认的分组是DEFAULT_GROUP。</p>
+</blockquote>
+<p>上述场景中订单系统、用户系统可以单独分为一个组，比如<code>ORDER_GROUP</code>、<code>USER_GROUP</code>。当然这是比较细粒度的分组，根据企业的业务也可以多个微服务分为一组。</p>
+<p>下面在Nacos中新建一个<code>config.version=5</code>，命名空间为<code>test</code>，分组为<code>ORDER_GROUP</code>，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/34.png"></p>
+<p>此时命名空间<code>test</code>中的配置如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/36.png"></p>
+<p>在<code>bootstrap.yml</code>配置文件中指定分组，配置如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">nacos-config</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">config:</span></span><br><span class="line">        <span class="comment">## 指定命名空间</span></span><br><span class="line">        <span class="attr">namespace:</span> <span class="string">d0ffeec2-3deb-4540-9664-fdd77461fd6b</span></span><br><span class="line">        <span class="comment">## 指定分组为ORDER_GROUP</span></span><br><span class="line">        <span class="attr">group:</span> <span class="string">ORDER_GROUP</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：Group配置和Namespace一样，要在<code>bootstrap.yml</code>文件中配置。</p>
+</blockquote>
+<p>至此，已经全部配置完毕，启动项目，浏览器访问<a href="http://localhost:9003/nacos/test/1%EF%BC%8C%E7%BB%93%E6%9E%9C%E5%A6%82%E4%B8%8B%E5%9B%BE%EF%BC%9A">http://localhost:9003/nacos/test/1，结果如下图：</a></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/35.png"></p>
+<h3 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h3><p>Nacos实现配置管理和动态配置刷新很简单，总结如下步骤：</p>
+<ol>
+<li>添加对应<code>spring-cloud-starter-alibaba-nacos-config</code>依赖</li>
+<li>使用原生注解<code>@Value()</code>导入配置</li>
+<li>使用原生注解<code>@RefreshScope</code>刷新配置</li>
+<li>根据自己业务场景做好多环境配置隔离(Namespace)、不同业务配置隔离(Group)</li>
+<li>切记：命名空间和分组的配置一定要放在<code>bootstrap.yml</code>或者<code>bootstrap.properties</code>配置文件中</li>
+</ol>
+<h2 id="Nacos如何共享配置？"><a href="#Nacos如何共享配置？" class="headerlink" title="Nacos如何共享配置？"></a>Nacos如何共享配置？</h2><p>场景：一个项目的微服务数量逐渐增多，势必会有相同的配置，那么我们可以将相同的配置抽取出来作为项目中共有的配置，比如集群中的数据源信息..</p>
+<p>Nacos的共享配置能够完美的解决上述问题，配置起来也是很简单，没办法，就是这么强大。</p>
+<h3 id="Nacos中新建共享配置"><a href="#Nacos中新建共享配置" class="headerlink" title="Nacos中新建共享配置"></a>Nacos中新建共享配置</h3><p>陈某这里演示两个共享配置，<code>DataId</code>分别是<code>share-config1.properties</code>，<code>share-config2.properties</code>，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/43.png"></p>
+<blockquote>
+<p>注意：<code>DataId</code>一定要带有后缀<code>properties</code>或者<code>yml</code></p>
+</blockquote>
+<p><code>share-config1.properties</code>配置中的内容如下：</p>
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">database.url</span>=<span class="string">jdbc:mysql://112.111.0.135:3306/nacos_config?characterEncoding=utf8&amp;connectTimeout=1000&amp;socketTimeout=3000&amp;autoReconnect=true</span></span><br></pre></td></tr></table></figure>
+
+<p><code>share-config2.properties</code>配置中的内容如下：</p>
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">database.user</span>=<span class="string">root</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="新建模块nacos-config-share"><a href="#新建模块nacos-config-share" class="headerlink" title="新建模块nacos-config-share"></a>新建模块nacos-config-share</h3><p>此处新建一个模块nacos-config-share来演示效果，依赖同<code>nacos-config</code></p>
+<p><code>bootstrap.yml</code>配置如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">nacos-config-share</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">config:</span></span><br><span class="line">        <span class="comment">## 指定命名空间</span></span><br><span class="line">        <span class="attr">namespace:</span> <span class="string">51f0479b-a88d-4646-902b-f2a063801502</span></span><br><span class="line">        <span class="comment">## nacos的地址，作为配置中心</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8848</span></span><br><span class="line">        <span class="comment">## 配置内容的数据格式，目前只支持 properties 和 yaml 类型，这个和dataId有关-&gt; $&#123;prefix&#125;-$&#123;spring.profiles.active&#125;.$&#123;file-extension&#125;</span></span><br><span class="line">        <span class="attr">file-extension:</span> <span class="string">properties</span></span><br><span class="line"><span class="attr">management:</span></span><br><span class="line">  <span class="attr">endpoints:</span></span><br><span class="line">    <span class="attr">web:</span></span><br><span class="line">      <span class="attr">exposure:</span></span><br><span class="line">        <span class="comment">## yml文件中存在特殊字符，必须用单引号包含，否则启动报错</span></span><br><span class="line">        <span class="attr">include:</span> <span class="string">&#x27;*&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>以上的配置和<code>nacos-config</code>差不多，指定<code>application.name</code>、命名空间、<code>file-extension</code>、nacos服务地址….</p>
+<p>当然除了以上配置肯定是不够的，要想共享配置还需要添加以下配置：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">nacos-config-share</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">config:</span></span><br><span class="line">        <span class="comment">## 共享配置，List集合，可以配置多个</span></span><br><span class="line">        <span class="attr">shared-configs:</span></span><br><span class="line">          <span class="comment">## dataId：配置文件的dataId，必须带有后缀</span></span><br><span class="line">          <span class="bullet">-</span> <span class="attr">dataId:</span> <span class="string">share-config1.properties</span></span><br><span class="line">          <span class="comment">## refresh：指定是否能够动态刷新，默认是false</span></span><br><span class="line">            <span class="attr">refresh:</span> <span class="literal">true</span></span><br><span class="line">          <span class="bullet">-</span> <span class="attr">dataId:</span> <span class="string">share-config2.properties</span></span><br><span class="line">          <span class="comment">## 指定配置文件的分组，默认是DEFAULT_GROUP</span></span><br><span class="line">            <span class="attr">group:</span> <span class="string">ORDER_GROUP</span></span><br><span class="line">            <span class="attr">refresh:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<p>想要看到效果，肯定是需要通过<code>@Value()</code>导入配置，如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@RefreshScope</span></span><br><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DynamicConfigEntity</span> </span>&#123;</span><br><span class="line">    <span class="comment">//获取共享配置文件中database.url</span></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;database.url&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String databaseUrl;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//获取共享配置文件中database.user</span></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;database.user&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String user;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面配置完毕，启动nacos-config-share这个项目，访问：<a href="http://localhost:9003/nacos/test/1%EF%BC%8C%E7%BB%93%E6%9E%9C%E5%A6%82%E4%B8%8B%E5%9B%BE%EF%BC%9A">http://localhost:9003/nacos/test/1，结果如下图：</a></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/44.png"></p>
+<p>动态刷新配置这里就不再演示了，自己动手玩一下……</p>
+<h2 id="Nacos如何持久化？"><a href="#Nacos如何持久化？" class="headerlink" title="Nacos如何持久化？"></a>Nacos如何持久化？</h2><p>前面讲了这么多，大家有没有思考过一个问题，Nacos的一系列的配置究竟存储在哪里呢？</p>
+<p>其实Nacos默认使用的是内嵌的数据库<code>Derby</code>，这个在Nacos-server文件下的<code>/data</code>目录下就可以验证，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/37.png"></p>
+<p>那么问题来了，这些配置如何用自己的数据库存储呢？</p>
+<blockquote>
+<p>目前Nacos仅支持<code>Mysql</code>数据库，且版本要求：<code>5.6.5+</code></p>
+</blockquote>
+<h3 id="初始化数据库"><a href="#初始化数据库" class="headerlink" title="初始化数据库"></a>初始化数据库</h3><p>首先在Mysql中新建一个数据库<code>nacos-config</code>（名称随意），然后执行Nacos中的SQL脚本，该脚本是Nacos-server文件夹中的<code>nacos-mysql.sql</code>，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/38.png"></p>
+<p>执行该脚本，将会自动创建表，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/39.png"></p>
+<h3 id="修改配置文件"><a href="#修改配置文件" class="headerlink" title="修改配置文件"></a>修改配置文件</h3><p>Nacos-server也是一个Spring Boot 项目，想要连接自己的数据库，当然要配置数据源了，那么在哪里配置呢？</p>
+<p>配置文件同样在Nacos-server中的conf目录下，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/40.png"></p>
+<p>只需要将<code>application.properties</code>中的Mysql配置取消注释并且配置好自己的数据源即可，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/41.png"></p>
+<p>修改完毕，重新启动Nacos-server。</p>
+<p>如何验证是否持久化呢？很简单，只需要创建一个配置，然后在<code>his_config_info</code>表中查看下是否存在即可，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/42.png"></p>
+<h2 id="Nacos集群如何搭建？"><a href="#Nacos集群如何搭建？" class="headerlink" title="Nacos集群如何搭建？"></a>Nacos集群如何搭建？</h2><p>真是够了，又来扯皮高可用了，真是头大……….</p>
+<p>Nacos推荐集群模式部署，这样可以避免单点故障，那么如何搭建集群呢？请看官方文档：<a href="https://nacos.io/zh-cn/docs/cluster-mode-quick-start.html">https://nacos.io/zh-cn/docs/cluster-mode-quick-start.html</a></p>
+<p>话不多说，偷一张官网的架构图，如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/45.jpg"></p>
+<p>上图什么意思呢？说实话，这文档写的真不咋的，很多除初学者一看就懵，请看陈某的架构图，如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/46.png"></p>
+<p>看了陈某画的图是不是更清楚了呢？请求进来先共同Nginx集群进行转发到Nacos集群中，当然为了保持高可用，数据库必须也是集群模式。</p>
+<p>Nacos官方推荐Linux下搭建集群模式，因此陈某尝试在Linux环境下搭建。Nginx和Mysql这里集群就不再演示如何搭建了，不是今天的重点，主要演示下Nacos集群的搭建方法。</p>
+<h3 id="下载Linux下的Nacos"><a href="#下载Linux下的Nacos" class="headerlink" title="下载Linux下的Nacos"></a>下载Linux下的Nacos</h3><p>在GitHub上下载自己对应的版本，陈某用的版本是1.2.1，地址：<a href="https://github.com/alibaba/nacos/releases/tag/1.2.1">https://github.com/alibaba/nacos/releases/tag/1.2.1</a></p>
+<p>找到后缀为<code>tar.gz</code>的文件下载，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/47.png"></p>
+<h3 id="修改配置文件-1"><a href="#修改配置文件-1" class="headerlink" title="修改配置文件"></a>修改配置文件</h3><p>由于条件限制，陈某仅仅在一台服务器上启动三个Nacos服务演示。Nacos的端口分别为8848、8849、8850。</p>
+<h4 id="修改端口号"><a href="#修改端口号" class="headerlink" title="修改端口号"></a>修改端口号</h4><p>Nacos默认的端口号是8848，那么如何修改端口呢？只需要修改<code>conf</code>目录下的<code>application.properties</code>中的<code>server.port</code>即可，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/48.png"></p>
+<h4 id="修改集群配置"><a href="#修改集群配置" class="headerlink" title="修改集群配置"></a>修改集群配置</h4><p>那么如何配置集群呢？在<code>conf</code>目录下有一个<code>cluster.conf.example</code>文件，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/49.png"></p>
+<p>只需要将<code>cluster.conf.example</code>这个文件复制一份为<code>cluster.conf</code>放在<code>conf</code>目录下，其中配置的内容如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">172.16.1.84:8848</span><br><span class="line">172.16.1.84:8849</span><br><span class="line">172.16.1.84:8850</span><br></pre></td></tr></table></figure>
+
+<p>什么意思呢？<code>172.16.1.84</code>是服务器的IP地址，这里填写自己服务器的IP，<code>:</code>后面的是Nacos的端口号。</p>
+<h4 id="修改数据源"><a href="#修改数据源" class="headerlink" title="修改数据源"></a>修改数据源</h4><p>这个在持久化的那里已经讲过了，只需要将<code>application.properties</code>中的数据源替换掉，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/50.png"></p>
+<h3 id="启动Nacos"><a href="#启动Nacos" class="headerlink" title="启动Nacos"></a>启动Nacos</h3><p>经过上述的步骤Nacos集群已经配置好了，现在分别启动Nacos，命令如下：</p>
+<figure class="highlight sh"><table><tr><td class="code"><pre><span class="line">bash -f ./startup.sh</span><br></pre></td></tr></table></figure>
+
+<p>启动成功，访问任意一个端口的Nacos服务，在<code>集群管理-&gt;节点列表</code>中将会看到自己搭建的三个节点，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/51.png"></p>
+<p>至此，Nacos集群算是搭建完成了……</p>
+<h3 id="Nginx中配置"><a href="#Nginx中配置" class="headerlink" title="Nginx中配置"></a>Nginx中配置</h3><p>此处就不演示Nginx集群搭建了，直接在单机的Nginx中配置。直接修改nginx的conf文件，内容如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">upstream nacos&#123;</span><br><span class="line">		server 172.16.1.84:8848;</span><br><span class="line">		server 172.16.1.84:8849;</span><br><span class="line">		server 172.16.1.84:8850;</span><br><span class="line">	 &#125;</span><br><span class="line">	 </span><br><span class="line">	 server&#123;</span><br><span class="line">		listen 80;</span><br><span class="line">		location / &#123;</span><br><span class="line">			proxy_pass http://nacos;</span><br><span class="line">		&#125;</span><br><span class="line">	 &#125;</span><br></pre></td></tr></table></figure>
+
+<p>相信大家都能看懂，此处就不再做过多解释了…..配置完成后，启动Nginx，直接访问：<a href="http://ip/nacos%E3%80%82">http://ip/nacos。</a></p>
+<h3 id="项目中配置server-addr"><a href="#项目中配置server-addr" class="headerlink" title="项目中配置server-addr"></a>项目中配置server-addr</h3><p>既然搭建了集群，那么项目中也要配置一下，有两种方式，下面分别介绍。</p>
+<p>第一种：通过直连的方式配置，如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="comment">## 指定服务名称，在nacos中的名字</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">nacos-provider</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">discovery:</span></span><br><span class="line">        <span class="comment"># nacos的服务地址，nacos-server中IP地址:端口号</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">172.16</span><span class="number">.1</span><span class="number">.84</span><span class="string">:8848,172.16.1.84:8849,172.16.1.84:8850</span></span><br></pre></td></tr></table></figure>
+
+<p>第二种：直接连接Nginx，如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="comment">## 指定服务名称，在nacos中的名字</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">nacos-provider</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">discovery:</span></span><br><span class="line">        <span class="comment"># nacos的服务地址，nacos-server中IP地址:端口号</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">172.16</span><span class="number">.1</span><span class="number">.84</span><span class="string">:80</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="总结-2"><a href="#总结-2" class="headerlink" title="总结"></a>总结</h3><p>Nacos集群搭建非常简单，唯一的配置就是<code>cluster.conf</code>中设置三个Nacos服务，这也正是Nacos的设计理念，让开发者能够尽快上手，专注业务的开发。</p>
+<h2 id="Nacos是CP还是AP？"><a href="#Nacos是CP还是AP？" class="headerlink" title="Nacos是CP还是AP？"></a>Nacos是CP还是AP？</h2><p>先来简单复习下CAP的概念吧，如下：</p>
+<ul>
+<li>一致性（C）：在分布式系统中的所有数据备份，在同一时刻是否同样的值。（等同于所有节点访问同一份最新的数据副本）</li>
+<li>可用性（A）：在集群中一部分节点故障后，集群整体是否还能响应客户端的读写请求。（对数据更新具备高可用性）</li>
+<li>分区容错性（P）：以实际效果而言，分区相当于对通信的时限要求。系统如果不能在时限内达成数据一致性，就意味着发生了分区的情况，必须就当前操作在C和A之间做出选择。</li>
+</ul>
+<p>一般分布式系统中，肯定是优先保证P，剩下的就是C和A的取舍。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/52.png"></p>
+<p>当然不同的注册中心遵循的CAP也是不同的，如下：</p>
+<ul>
+<li>Zookeeper：保证CP，放弃可用性；一旦zookeeper集群中master节点宕了，则会重新选举leader，这个过程可能非常漫长，在这过程中服务不可用。</li>
+<li>Eureka：保证AP，放弃一致性；Eureka集群中的各个节点都是平等的，一旦某个节点宕了，其他节点正常服务（一旦客户端发现注册失败，则将会连接集群中其他节点），虽然保证了可用性，但是每个节点的数据可能不是最新的。</li>
+<li>Nacos：同时支持CP和AP，默认是AP，可以切换；AP模式下以临时实例注册，CP模式下服务永久实例注册。</li>
+</ul>
+<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>Spring Cloud 进阶这个专栏已经蕴量很久了，前段时间一直忙着工作，铁粉都知道陈某已经完成了两个专栏文章，分别是Spring Boot 进阶、Mybatis 进阶；总之原创不易，且看且珍惜，随手一个赞是美德哦！！！</p>
+<blockquote>
+<p>以上源码已经上传GitHub，需要的公众号回复关键词<code>9528</code>获取。</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>Spring Cloud 进阶</category>
+      </categories>
+      <tags>
+        <tag>Spring Cloud</tag>
       </tags>
   </entry>
 </search>
