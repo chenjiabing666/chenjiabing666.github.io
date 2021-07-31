@@ -17,13 +17,13 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"chenjiabing666.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="前言大约在19年的这个时候，老同事公司在做医疗系统，需要和HIS系统对接一些信息，比如患者、医护、医嘱、科室等信息。但是起初并不知道如何与HIS无缝对接，于是向我取经。 最终经过讨论采用了视图对接的方式，大致就是HIS系统提供视图，他们进行对接。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Spring Boot 与多数据源的那点事儿~">
-<meta property="og:url" content="http://example.com/2020/10/21/SpringBoot%E4%B8%8E%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E7%9A%84%E9%82%A3%E7%82%B9%E4%BA%8B%E5%84%BF/index.html">
+<meta property="og:url" content="https://chenjiabing666.github.io/2020/10/21/SpringBoot%E4%B8%8E%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E7%9A%84%E9%82%A3%E7%82%B9%E4%BA%8B%E5%84%BF/index.html">
 <meta property="og:site_name" content="不才陈某技术博客">
 <meta property="og:description" content="前言大约在19年的这个时候，老同事公司在做医疗系统，需要和HIS系统对接一些信息，比如患者、医护、医嘱、科室等信息。但是起初并不知道如何与HIS无缝对接，于是向我取经。 最终经过讨论采用了视图对接的方式，大致就是HIS系统提供视图，他们进行对接。">
 <meta property="og:locale" content="zh_CN">
@@ -36,7 +36,7 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%B8%89%E5%BC%B9%EF%BC%8C%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E6%95%B4%E5%90%88/1.jpg">
 
-<link rel="canonical" href="http://example.com/2020/10/21/SpringBoot%E4%B8%8E%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E7%9A%84%E9%82%A3%E7%82%B9%E4%BA%8B%E5%84%BF/">
+<link rel="canonical" href="https://chenjiabing666.github.io/2020/10/21/SpringBoot%E4%B8%8E%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E7%9A%84%E9%82%A3%E7%82%B9%E4%BA%8B%E5%84%BF/">
 
 
 <script id="page-configurations">
@@ -194,7 +194,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/10/21/SpringBoot%E4%B8%8E%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E7%9A%84%E9%82%A3%E7%82%B9%E4%BA%8B%E5%84%BF/">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/10/21/SpringBoot%E4%B8%8E%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E7%9A%84%E9%82%A3%E7%82%B9%E4%BA%8B%E5%84%BF/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/header.jpg">
@@ -430,7 +430,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://example.com/2020/10/21/SpringBoot%E4%B8%8E%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E7%9A%84%E9%82%A3%E7%82%B9%E4%BA%8B%E5%84%BF/" title="Spring Boot 与多数据源的那点事儿~">http://example.com/2020/10/21/SpringBoot与多数据源的那点事儿/</a>
+    <a href="https://chenjiabing666.github.io/2020/10/21/SpringBoot%E4%B8%8E%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E7%9A%84%E9%82%A3%E7%82%B9%E4%BA%8B%E5%84%BF/" title="Spring Boot 与多数据源的那点事儿~">https://chenjiabing666.github.io/2020/10/21/SpringBoot与多数据源的那点事儿/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！

@@ -17,13 +17,13 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"chenjiabing666.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="前言 Mybatis专栏文章写到至今已经有一个月了，从基础到源码详细的介绍了每个知识点，没什么多余的废话，全是工作、面试中常用到的姿势。有读者建议将文章汇总，这样方便阅读，于是特意花费了一天时间整理成册。  全册总计92页，总计想3万多字，耗时30多天完成。  由于作者水平有限，如果书中有不理解和错误的内容，感谢及时把疑惑或意见提交给我，作者会及时修正。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="《Mybatis进阶》肝了30天专栏文章，整理成册！！！">
-<meta property="og:url" content="http://example.com/2020/04/20/%E3%80%8AMybatis%E8%BF%9B%E9%98%B6%E3%80%8B%E8%82%9D%E4%BA%8630%E5%A4%A9%E4%B8%93%E6%A0%8F%E6%96%87%E7%AB%A0%EF%BC%8C%E6%95%B4%E7%90%86%E6%88%90%E5%86%8C%EF%BC%81%EF%BC%81%EF%BC%81/index.html">
+<meta property="og:url" content="https://chenjiabing666.github.io/2020/04/20/%E3%80%8AMybatis%E8%BF%9B%E9%98%B6%E3%80%8B%E8%82%9D%E4%BA%8630%E5%A4%A9%E4%B8%93%E6%A0%8F%E6%96%87%E7%AB%A0%EF%BC%8C%E6%95%B4%E7%90%86%E6%88%90%E5%86%8C%EF%BC%81%EF%BC%81%EF%BC%81/index.html">
 <meta property="og:site_name" content="不才陈某技术博客">
 <meta property="og:description" content="前言 Mybatis专栏文章写到至今已经有一个月了，从基础到源码详细的介绍了每个知识点，没什么多余的废话，全是工作、面试中常用到的姿势。有读者建议将文章汇总，这样方便阅读，于是特意花费了一天时间整理成册。  全册总计92页，总计想3万多字，耗时30多天完成。  由于作者水平有限，如果书中有不理解和错误的内容，感谢及时把疑惑或意见提交给我，作者会及时修正。">
 <meta property="og:locale" content="zh_CN">
@@ -38,7 +38,7 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis%E8%BF%9B%E9%98%B6PDF/2.png">
 
-<link rel="canonical" href="http://example.com/2020/04/20/%E3%80%8AMybatis%E8%BF%9B%E9%98%B6%E3%80%8B%E8%82%9D%E4%BA%8630%E5%A4%A9%E4%B8%93%E6%A0%8F%E6%96%87%E7%AB%A0%EF%BC%8C%E6%95%B4%E7%90%86%E6%88%90%E5%86%8C%EF%BC%81%EF%BC%81%EF%BC%81/">
+<link rel="canonical" href="https://chenjiabing666.github.io/2020/04/20/%E3%80%8AMybatis%E8%BF%9B%E9%98%B6%E3%80%8B%E8%82%9D%E4%BA%8630%E5%A4%A9%E4%B8%93%E6%A0%8F%E6%96%87%E7%AB%A0%EF%BC%8C%E6%95%B4%E7%90%86%E6%88%90%E5%86%8C%EF%BC%81%EF%BC%81%EF%BC%81/">
 
 
 <script id="page-configurations">
@@ -196,7 +196,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/04/20/%E3%80%8AMybatis%E8%BF%9B%E9%98%B6%E3%80%8B%E8%82%9D%E4%BA%8630%E5%A4%A9%E4%B8%93%E6%A0%8F%E6%96%87%E7%AB%A0%EF%BC%8C%E6%95%B4%E7%90%86%E6%88%90%E5%86%8C%EF%BC%81%EF%BC%81%EF%BC%81/">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/20/%E3%80%8AMybatis%E8%BF%9B%E9%98%B6%E3%80%8B%E8%82%9D%E4%BA%8630%E5%A4%A9%E4%B8%93%E6%A0%8F%E6%96%87%E7%AB%A0%EF%BC%8C%E6%95%B4%E7%90%86%E6%88%90%E5%86%8C%EF%BC%81%EF%BC%81%EF%BC%81/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/header.jpg">
@@ -305,7 +305,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://example.com/2020/04/20/%E3%80%8AMybatis%E8%BF%9B%E9%98%B6%E3%80%8B%E8%82%9D%E4%BA%8630%E5%A4%A9%E4%B8%93%E6%A0%8F%E6%96%87%E7%AB%A0%EF%BC%8C%E6%95%B4%E7%90%86%E6%88%90%E5%86%8C%EF%BC%81%EF%BC%81%EF%BC%81/" title="《Mybatis进阶》肝了30天专栏文章，整理成册！！！">http://example.com/2020/04/20/《Mybatis进阶》肝了30天专栏文章，整理成册！！！/</a>
+    <a href="https://chenjiabing666.github.io/2020/04/20/%E3%80%8AMybatis%E8%BF%9B%E9%98%B6%E3%80%8B%E8%82%9D%E4%BA%8630%E5%A4%A9%E4%B8%93%E6%A0%8F%E6%96%87%E7%AB%A0%EF%BC%8C%E6%95%B4%E7%90%86%E6%88%90%E5%86%8C%EF%BC%81%EF%BC%81%EF%BC%81/" title="《Mybatis进阶》肝了30天专栏文章，整理成册！！！">https://chenjiabing666.github.io/2020/04/20/《Mybatis进阶》肝了30天专栏文章，整理成册！！！/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！

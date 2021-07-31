@@ -9190,6 +9190,8 @@ NULL 类型比较特殊，SQL 难优化。虽然 MySQL NULL 类型和 Oracle 的
 <p>从上图不难看出阿里巴巴的野心，一个Nacos干掉了Spring Cloud的三大组件，分别是<code>注册中心Eureka</code>、<code>服务配置Config</code>，<code>服务总线Bus</code>。</p>
 <p>本文目录结构如下图：</p>
 <p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/53.png"></p>
+<span id="more"></span>
+
 <h2 id="为什么Nacos这么受欢迎？"><a href="#为什么Nacos这么受欢迎？" class="headerlink" title="为什么Nacos这么受欢迎？"></a>为什么Nacos这么受欢迎？</h2><p>Nacos官方文档的介绍中有这么一句话，如下：</p>
 <blockquote>
 <p>Nacos 帮助您更敏捷和容易地构建、交付和管理微服务平台。 Nacos 是构建以“服务”为中心的现代应用架构 (例如微服务范式、云原生范式) 的服务基础设施。</p>

@@ -17,13 +17,13 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"chenjiabing666.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="前言 Mybatis的专题文章写到这里已经是第四篇了，前三篇讲了Mybatis的基本使用，相信只要认真看了的朋友，在实际开发中正常使用应该不是问题。没有看过的朋友，作者建议去看一看，三篇文章分别是Mybatis入门之基本操作、Mybatis结果映射，你射准了吗？、Mybatis动态SQL，你真的会了吗？。 当然，任何一个技术都不能浅藏辄止，今天作者就带大家深入底层源码看一看Mybatis的基础架构">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Mybatis源码阅读之六剑客">
-<meta property="og:url" content="http://example.com/2020/04/20/Mybatis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E4%B9%8B%E5%85%AD%E5%89%91%E5%AE%A2/index.html">
+<meta property="og:url" content="https://chenjiabing666.github.io/2020/04/20/Mybatis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E4%B9%8B%E5%85%AD%E5%89%91%E5%AE%A2/index.html">
 <meta property="og:site_name" content="不才陈某技术博客">
 <meta property="og:description" content="前言 Mybatis的专题文章写到这里已经是第四篇了，前三篇讲了Mybatis的基本使用，相信只要认真看了的朋友，在实际开发中正常使用应该不是问题。没有看过的朋友，作者建议去看一看，三篇文章分别是Mybatis入门之基本操作、Mybatis结果映射，你射准了吗？、Mybatis动态SQL，你真的会了吗？。 当然，任何一个技术都不能浅藏辄止，今天作者就带大家深入底层源码看一看Mybatis的基础架构">
 <meta property="og:locale" content="zh_CN">
@@ -38,7 +38,7 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-%E5%85%AD%E5%89%91%E5%AE%A2/3.png">
 
-<link rel="canonical" href="http://example.com/2020/04/20/Mybatis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E4%B9%8B%E5%85%AD%E5%89%91%E5%AE%A2/">
+<link rel="canonical" href="https://chenjiabing666.github.io/2020/04/20/Mybatis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E4%B9%8B%E5%85%AD%E5%89%91%E5%AE%A2/">
 
 
 <script id="page-configurations">
@@ -196,7 +196,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/04/20/Mybatis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E4%B9%8B%E5%85%AD%E5%89%91%E5%AE%A2/">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/20/Mybatis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E4%B9%8B%E5%85%AD%E5%89%91%E5%AE%A2/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/header.jpg">
@@ -379,7 +379,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://example.com/2020/04/20/Mybatis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E4%B9%8B%E5%85%AD%E5%89%91%E5%AE%A2/" title="Mybatis源码阅读之六剑客">http://example.com/2020/04/20/Mybatis源码阅读之六剑客/</a>
+    <a href="https://chenjiabing666.github.io/2020/04/20/Mybatis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E4%B9%8B%E5%85%AD%E5%89%91%E5%AE%A2/" title="Mybatis源码阅读之六剑客">https://chenjiabing666.github.io/2020/04/20/Mybatis源码阅读之六剑客/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！

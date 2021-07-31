@@ -17,13 +17,13 @@
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"chenjiabing666.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="前言 通过前两篇的文章我们了解了Mybatis基本的CRUD操作、一些基本标签的属性以及如何映射结果，感兴趣的可以看我的前两篇文章，分别是Mybatis入门之基础操作和Mybatis结果映射，你射准了吗？，如果有什么疑问的地方可以在文章下方留言，作者统一回复。 这篇文章就来聊一聊Mybatis的动态SQL，在实际的开发中Mybatis的这项功能是非常重要的，至于什么是动态SQL？如何实现动态SQL">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Mybatis.动态SQL，你真的会了吗？">
-<meta property="og:url" content="http://example.com/2020/04/20/Mybatis.%E5%8A%A8%E6%80%81SQL%EF%BC%8C%E4%BD%A0%E7%9C%9F%E7%9A%84%E4%BC%9A%E4%BA%86%E5%90%97%EF%BC%9F/index.html">
+<meta property="og:url" content="https://chenjiabing666.github.io/2020/04/20/Mybatis.%E5%8A%A8%E6%80%81SQL%EF%BC%8C%E4%BD%A0%E7%9C%9F%E7%9A%84%E4%BC%9A%E4%BA%86%E5%90%97%EF%BC%9F/index.html">
 <meta property="og:site_name" content="不才陈某技术博客">
 <meta property="og:description" content="前言 通过前两篇的文章我们了解了Mybatis基本的CRUD操作、一些基本标签的属性以及如何映射结果，感兴趣的可以看我的前两篇文章，分别是Mybatis入门之基础操作和Mybatis结果映射，你射准了吗？，如果有什么疑问的地方可以在文章下方留言，作者统一回复。 这篇文章就来聊一聊Mybatis的动态SQL，在实际的开发中Mybatis的这项功能是非常重要的，至于什么是动态SQL？如何实现动态SQL">
 <meta property="og:locale" content="zh_CN">
@@ -36,7 +36,7 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-%E5%8A%A8%E6%80%81SQL/1.png">
 
-<link rel="canonical" href="http://example.com/2020/04/20/Mybatis.%E5%8A%A8%E6%80%81SQL%EF%BC%8C%E4%BD%A0%E7%9C%9F%E7%9A%84%E4%BC%9A%E4%BA%86%E5%90%97%EF%BC%9F/">
+<link rel="canonical" href="https://chenjiabing666.github.io/2020/04/20/Mybatis.%E5%8A%A8%E6%80%81SQL%EF%BC%8C%E4%BD%A0%E7%9C%9F%E7%9A%84%E4%BC%9A%E4%BA%86%E5%90%97%EF%BC%9F/">
 
 
 <script id="page-configurations">
@@ -194,7 +194,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2020/04/20/Mybatis.%E5%8A%A8%E6%80%81SQL%EF%BC%8C%E4%BD%A0%E7%9C%9F%E7%9A%84%E4%BC%9A%E4%BA%86%E5%90%97%EF%BC%9F/">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/20/Mybatis.%E5%8A%A8%E6%80%81SQL%EF%BC%8C%E4%BD%A0%E7%9C%9F%E7%9A%84%E4%BC%9A%E4%BA%86%E5%90%97%EF%BC%9F/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/header.jpg">
@@ -377,7 +377,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://example.com/2020/04/20/Mybatis.%E5%8A%A8%E6%80%81SQL%EF%BC%8C%E4%BD%A0%E7%9C%9F%E7%9A%84%E4%BC%9A%E4%BA%86%E5%90%97%EF%BC%9F/" title="Mybatis.动态SQL，你真的会了吗？">http://example.com/2020/04/20/Mybatis.动态SQL，你真的会了吗？/</a>
+    <a href="https://chenjiabing666.github.io/2020/04/20/Mybatis.%E5%8A%A8%E6%80%81SQL%EF%BC%8C%E4%BD%A0%E7%9C%9F%E7%9A%84%E4%BC%9A%E4%BA%86%E5%90%97%EF%BC%9F/" title="Mybatis.动态SQL，你真的会了吗？">https://chenjiabing666.github.io/2020/04/20/Mybatis.动态SQL，你真的会了吗？/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
