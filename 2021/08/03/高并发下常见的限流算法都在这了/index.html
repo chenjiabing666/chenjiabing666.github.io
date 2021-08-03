@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"chenjiabing666.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="限流简介现在说到高可用系统，都会说到高可用的保护手段：缓存、降级和限流，本博文就主要说说限流。限流是流量限速（Rate Limit）的简称，是指只允许指定的事件进入系统，超过的部分将被拒绝服务、排队或等待、降级等处理。对于server服务而言，限流为了保证一部分的请求流量可以得到正常的响应，总好过全部的请求都不能得到响应，甚至导致系统雪崩。限流与熔断经常被人弄混，博主认为它们最大的区别在于限流主要">
+<meta property="og:type" content="article">
+<meta property="og:title" content="高并发下常见的限流算法都在这了！">
+<meta property="og:url" content="https://chenjiabing666.github.io/2021/08/03/%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%8B%E5%B8%B8%E8%A7%81%E7%9A%84%E9%99%90%E6%B5%81%E7%AE%97%E6%B3%95%E9%83%BD%E5%9C%A8%E8%BF%99%E4%BA%86/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="限流简介现在说到高可用系统，都会说到高可用的保护手段：缓存、降级和限流，本博文就主要说说限流。限流是流量限速（Rate Limit）的简称，是指只允许指定的事件进入系统，超过的部分将被拒绝服务、排队或等待、降级等处理。对于server服务而言，限流为了保证一部分的请求流量可以得到正常的响应，总好过全部的请求都不能得到响应，甚至导致系统雪崩。限流与熔断经常被人弄混，博主认为它们最大的区别在于限流主要">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/1.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/2.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/3.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/4.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/5.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/6.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/6.png">
+<meta property="article:published_time" content="2021-08-03T03:29:56.000Z">
+<meta property="article:modified_time" content="2021-08-03T03:35:21.587Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="算法">
+<meta property="article:tag" content="限流">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/1.png">
+
+<link rel="canonical" href="https://chenjiabing666.github.io/2021/08/03/%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%8B%E5%B8%B8%E8%A7%81%E7%9A%84%E9%99%90%E6%B5%81%E7%AE%97%E6%B3%95%E9%83%BD%E5%9C%A8%E8%BF%99%E4%BA%86/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>高并发下常见的限流算法都在这了！ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/08/03/%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%8B%E5%B8%B8%E8%A7%81%E7%9A%84%E9%99%90%E6%B5%81%E7%AE%97%E6%B3%95%E9%83%BD%E5%9C%A8%E8%BF%99%E4%BA%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          高并发下常见的限流算法都在这了！
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-08-03 11:29:56 / 修改时间：11:35:21" itemprop="dateCreated datePublished" datetime="2021-08-03T11:29:56+08:00">2021-08-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9D%82%E8%B0%88/" itemprop="url" rel="index"><span itemprop="name">杂谈</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="限流简介"><a href="#限流简介" class="headerlink" title="限流简介"></a>限流简介</h2><p>现在说到高可用系统，都会说到高可用的保护手段：缓存、降级和限流，本博文就主要说说限流。限流是流量限速（Rate Limit）的简称，是指只允许指定的事件进入系统，超过的部分将被拒绝服务、排队或等待、降级等处理。对于server服务而言，限流为了保证一部分的请求流量可以得到正常的响应，总好过全部的请求都不能得到响应，甚至导致系统雪崩。限流与熔断经常被人弄混，博主认为它们最大的区别在于限流主要在server实现，而熔断主要在client实现，当然了，一个服务既可以充当server也可以充当client，这也是让限流与熔断同时存在一个服务中，这两个概念才容易被混淆。</p>
+<p>那为什么需要限流呢？很多人第一反应就是服务扛不住了所以需要限流。这是不全面的说法，博主认为限流是因为资源的稀缺或出于安全防范的目的，采取的自我保护的措施。限流可以保证使用有限的资源提供最大化的服务能力，按照预期流量提供服务，超过的部分将会拒绝服务、排队或等待、降级等处理。关注公众号‘码猿技术专栏’，回复关键词‘9527’获取Spring Cloud Alibaba实战视频教程！</p>
+<p>现在的系统对限流的支持各有不同，但是存在一些标准。在HTTP RFC 6585标准中规定了『429 Too Many Requests 』，429状态码表示用户在给定时间内发送了太多的请求，需要进行限流（“速率限制”），同时包含一个 Retry-After 响应头用于告诉客户端多长时间后可以再次请求服务.</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">HTTP/1.1 429 Too Many Requests</span><br><span class="line">Content-Type: text/html</span><br><span class="line">Retry-After: 3600</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  </span><br><span class="line">     <span class="tag">&lt;<span class="name">title</span>&gt;</span>Too Many Requests<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line">     <span class="tag">&lt;<span class="name">h1</span>&gt;</span>Too Many Requests<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">p</span>&gt;</span>I only allow 50 requests per hour to this Web site per</span><br><span class="line">        logged in user.  Try again soon.<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">  </span><br></pre></td></tr></table></figure>
+
+<p>很多应用框架同样集成了，限流功能并且在返回的Header中给出明确的限流标识。</p>
+<ul>
+<li>X-Rate-Limit-Limit：同一个时间段所允许的请求的最大数目；</li>
+<li>X-Rate-Limit-Remaining：在当前时间段内剩余的请求的数量；</li>
+<li>X-Rate-Limit-Reset：为了得到最大请求数所等待的秒数。</li>
+</ul>
+<p>这是通过响应头告诉调用方服务端的限流频次是怎样的，保证后端的接口访问上限，客户端也可以根据响应的Header调整请求。</p>
+<h2 id="限流分类"><a href="#限流分类" class="headerlink" title="限流分类"></a>限流分类</h2><p><code>限流</code>，拆分来看，就两个字<code>限</code>和<code>流</code>，<code>限</code>就是动词限制，很好理解。但是<code>流</code>在不同的场景之下就是不同资源或指标，多样性就在<code>流</code>中体现。在网络流量中可以是字节流，在数据库中可以是TPS，在API中可以是QPS亦可以是并发请求数，在商品中还可以是库存数… …但是不管是哪一种『流』，这个流必须可以<strong>被量化，可以被度量，可以被观察到、可以统计出来</strong>。我们把限流的分类基于不同的方式分为不同的类别，如下图。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/1.png" alt="img"></p>
+<p>因为篇幅有限，本文只会挑选几个常见的类型分类进行说明。</p>
+<h3 id="限流粒度分类"><a href="#限流粒度分类" class="headerlink" title="限流粒度分类"></a>限流粒度分类</h3><p>根据限流的粒度分类：</p>
+<ul>
+<li>单机限流</li>
+<li>分布式限流</li>
+</ul>
+<p>现状的系统基本上都是分布式架构，单机的模式已经很少了，这里说的单机限流更加准确一点的说法是单服务节点限流。单机限流是指请求进入到某一个服务节点后超过了限流阈值，服务节点采取了一种限流保护措施。关注公众号‘码猿技术专栏’，回复关键词‘9527’获取Spring Cloud Alibaba实战视频教程！</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/2.png" alt="img"></p>
+<p>分布式限流狭义的说法是在接入层实现多节点合并限流，比如NGINX+redis，分布式网关等，广义的分布式限流是多个节点（可以为不同服务节点）有机整合，形成整体的限流服务。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/3.png" alt="img"></p>
+<p>单机限流防止流量压垮服务节点，缺乏对整体流量的感知。分布式限流适合做细粒度不同的限流控制，可以根据场景不同匹配不同的限流规则。与单机限流最大的区别，分布式限流需要中心化存储，常见的使用redis实现。引入了中心化存储，就需要解决以下问题：</p>
+<ul>
+<li><p>数据一致性</p>
+<p>在限流模式中理想的模式为时间点一致性。时间点一致性的定义中要求所有数据组件的数据在任意时刻都是完全一致的，但是一般来说信息传播的速度最大是光速，其实并不能达到任意时刻一致，总有一定的时间不一致，对于我们CAP中的一致性来说只要达到读取到最新数据即可，达到这种情况并不需要严格的任意时间一致。这只能是理论当中的一致性模型，可以在限流中达到线性一致性即可。</p>
+</li>
+<li><p>时间一致性</p>
+<p>这里的时间一致性与上述的时间点一致性不一样，这里就是指各个服务节点的时间一致性。一个集群有3台机器，但是在某一个A/B机器的时间为<code>Tue Dec 3 16:29:28 CST 2019</code>，C为<code>Tue Dec 3 16:29:28 CST 2019</code>，那么它们的时间就不一致。那么使用ntpdate进行同步也会存在一定的误差，对于时间窗口敏感的算法就是误差点。</p>
+</li>
+<li><p>超时</p>
+<p>在分布式系统中就需要网络进行通信，会存在网络抖动问题，或者分布式限流中间件压力过大导致响应变慢，甚至是超时时间阈值设置不合理，导致应用服务节点超时了，此时是放行流量还是拒绝流量？</p>
+</li>
+<li><p>性能与可靠性</p>
+<p>分布式限流中间件的资源总是有限的，甚至可能是单点的（写入单点），性能存在上限。如果分布式限流中间件不可用时候如何退化为单机限流模式也是一个很好的降级方案。</p>
+</li>
+</ul>
+<h3 id="限流对象类型分类"><a href="#限流对象类型分类" class="headerlink" title="限流对象类型分类"></a>限流对象类型分类</h3><p>按照对象类型分类：</p>
+<ul>
+<li>基于请求限流</li>
+<li>基于资源限流</li>
+</ul>
+<p>基于请求限流，一般的实现方式有<strong>限制总量</strong>和<strong>限制QPS</strong>。限制总量就是限制某个指标的上限，比如抢购某一个商品，放量是10w，那么最多只能卖出10w件。微信的抢红包，群里发一个红包拆分为10个，那么最多只能有10人可以抢到，第十一个人打开就会显示『手慢了，红包派完了』。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/4.png" alt="img"></p>
+<p>限制QPS，也是我们常说的限流方式，只要在接口层级进行，某一个接口只允许1秒只能访问100次，那么它的峰值QPS只能为100。限制QPS的方式最难的点就是如何预估阈值，如何定位阈值，下文中会说到。关注公众号‘码猿技术专栏’，回复关键词‘9527’获取Spring Cloud Alibaba实战视频教程！</p>
+<p>基于资源限流是基于服务资源的使用情况进行限制，需要定位到服务的关键资源有哪些，并对其进行限制，如限制TCP连接数、线程数、内存使用量等。限制资源更能有效地反映出服务当前地清理，但与限制QPS类似，面临着如何确认资源的阈值为多少。这个阈值需要不断地调优，不停地实践才可以得到一个较为满意地值。</p>
+<h3 id="限流算法分类"><a href="#限流算法分类" class="headerlink" title="限流算法分类"></a>限流算法分类</h3><p>不论是按照什么维度，基于什么方式的分类，其限流的底层均是需要算法来实现。下面介绍实现常见的限流算法：</p>
+<ul>
+<li>计数器</li>
+<li>令牌桶算法</li>
+<li>漏桶算法</li>
+</ul>
+<h4 id="计数器"><a href="#计数器" class="headerlink" title="计数器"></a>计数器</h4><h5 id="固定窗口计数器"><a href="#固定窗口计数器" class="headerlink" title="固定窗口计数器"></a>固定窗口计数器</h5><p>计数限流是最为简单的限流算法，日常开发中，我们说的限流很多都是说固定窗口计数限流算法，比如某一个接口或服务1s最多只能接收1000个请求，那么我们就会设置其限流为1000QPS。该算法的实现思路非常简单，维护一个固定单位时间内的计数器，如果检测到单位时间已经过去就重置计数器为零。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/5.png" alt="img"></p>
+<p>其操作步骤：</p>
+<ol>
+<li>时间线划分为多个独立且固定大小窗口；</li>
+<li>落在每一个时间窗口内的请求就将计数器加1；</li>
+<li>如果计数器超过了限流阈值，则后续落在该窗口的请求都会被拒绝。但时间达到下一个时间窗口时，计数器会被重置为0。</li>
+</ol>
+<p>下面实现一个简单的代码。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">package</span> limit</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">import</span> <span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">   <span class="string">&quot;sync/atomic&quot;</span></span></span></span><br><span class="line"><span class="params"><span class="function">   <span class="string">&quot;time&quot;</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">type Counter struct </span>&#123;</span><br><span class="line">   Count       uint64   <span class="comment">// 初始计数器</span></span><br><span class="line">   Limit       uint64  <span class="comment">// 单位时间窗口最大请求频次</span></span><br><span class="line">   Interval    int64   <span class="comment">// 单位ms</span></span><br><span class="line">   RefreshTime int64   <span class="comment">// 时间窗口</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function">func <span class="title">NewCounter</span><span class="params">(count, limit uint64, interval, rt int64)</span> *Counter </span>&#123;</span><br><span class="line">   <span class="keyword">return</span> &amp;amp;Counter&#123;</span><br><span class="line">      Count:       count,</span><br><span class="line">      Limit:       limit,</span><br><span class="line">      Interval:    interval,</span><br><span class="line">      RefreshTime: rt,</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">func (c *Counter) RateLimit() bool &#123;</span><br><span class="line">   now := time.Now().UnixNano() / <span class="number">1e6</span></span><br><span class="line">   <span class="keyword">if</span> now &amp;lt; (c.RefreshTime + c.Interval) &#123;</span><br><span class="line">      atomic.AddUint64(&amp;amp;c.Count, <span class="number">1</span>)</span><br><span class="line">      <span class="keyword">return</span> c.Count &amp;lt;= c.Limit</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      c.RefreshTime = now</span><br><span class="line">      atomic.AddUint64(&amp;amp;c.Count, -c.Count)</span><br><span class="line">      <span class="keyword">return</span> <span class="keyword">true</span></span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>测试代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">package</span> limit</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="title">import</span> <span class="params">(</span></span></span><br><span class="line"><span class="params"><span class="function">   <span class="string">&quot;fmt&quot;</span></span></span></span><br><span class="line"><span class="params"><span class="function">   <span class="string">&quot;testing&quot;</span></span></span></span><br><span class="line"><span class="params"><span class="function">   <span class="string">&quot;time&quot;</span></span></span></span><br><span class="line"><span class="params"><span class="function">)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">func <span class="title">Test_Counter</span><span class="params">(t *testing.T)</span> </span>&#123;</span><br><span class="line">   counter := NewCounter(<span class="number">0</span>, <span class="number">5</span>, <span class="number">100</span>, time.Now().Unix())</span><br><span class="line">   <span class="keyword">for</span> i := <span class="number">0</span>; i &amp;lt; <span class="number">10</span>; i++ &#123;</span><br><span class="line">      <span class="function">go <span class="title">func</span><span class="params">(i <span class="keyword">int</span>)</span> </span>&#123;</span><br><span class="line">         <span class="keyword">for</span> k := <span class="number">0</span>; k &amp;lt;= <span class="number">10</span>; k++ &#123;</span><br><span class="line">            fmt.Println(counter.RateLimit())</span><br><span class="line">            <span class="keyword">if</span> k%<span class="number">3</span> == <span class="number">0</span> &#123;</span><br><span class="line">               time.Sleep(<span class="number">102</span> * time.Millisecond)</span><br><span class="line">            &#125;</span><br><span class="line">         &#125;</span><br><span class="line">      &#125;(i)</span><br><span class="line">   &#125;</span><br><span class="line">   time.Sleep(<span class="number">10</span> * time.Second)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看了上面的逻辑，有没有觉得固定窗口计数器很简单，对，就是这么简单，这就是它的一个优点实现简单。同时也存在两个比较严重缺陷。试想一下，固定时间窗口1s限流阈值为100，但是前100ms，已经请求来了99个，那么后续的900ms只能通过一个了，就是一个缺陷，基本上没有应对突发流量的能力。第二个缺陷，在00:00:00这个时间窗口的后500ms，请求通过了100个，在00:00:01这个时间窗口的前500ms还有100个请求通过，对于服务来说相当于1秒内请求量达到了限流阈值的2倍。</p>
+<h5 id="滑动窗口计数器"><a href="#滑动窗口计数器" class="headerlink" title="滑动窗口计数器"></a>滑动窗口计数器</h5><p>滑动时间窗口算法是对固定时间窗口算法的一种改进，这词被大众所知实在TCP的流量控制中。固定窗口计数器可以说是滑动窗口计数器的一种特例，滑动窗口的操作步骤：</p>
+<ol>
+<li>将单位时间划分为多个区间，一般都是均分为多个小的时间段；</li>
+<li>每一个区间内都有一个计数器，有一个请求落在该区间内，则该区间内的计数器就会加一；</li>
+<li>每过一个时间段，时间窗口就会往右滑动一格，抛弃最老的一个区间，并纳入新的一个区间；</li>
+<li>计算整个时间窗口内的请求总数时会累加所有的时间片段内的计数器，计数总和超过了限制数量，则本窗口内所有的请求都被丢弃。</li>
+</ol>
+<p>时间窗口划分的越细，并且按照时间”滑动”，这种算法避免了固定窗口计数器出现的上述两个问题。缺点是时间区间的精度越高，算法所需的空间容量就越大。</p>
+<p>常见的实现方式主要有基于redis zset的方式和循环队列实现。基于redis zset可将Key为限流标识ID，Value保持唯一，可以用UUID生成，Score 也记为同一时间戳，最好是纳秒级的。使用redis提供的 ZADD、EXPIRE、ZCOUNT 和 zremrangebyscore 来实现，并同时注意开启 Pipeline 来尽可能提升性能。实现很简单，但是缺点就是zset的数据结构会越来越大。</p>
+<h4 id="漏桶算法"><a href="#漏桶算法" class="headerlink" title="漏桶算法"></a>漏桶算法</h4><p>漏桶算法是水先进入到漏桶里，漏桶再以一定的速率出水，当流入水的数量大于流出水时，多余的水直接溢出。把水换成请求来看，漏桶相当于服务器队列，但请求量大于限流阈值时，多出来的请求就会被拒绝服务。漏桶算法使用队列实现，可以以固定的速率控制流量的访问速度，可以做到流量的“平整化”处理。</p>
+<p>大家可以通过网上最流行的一张图来理解。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/6.png" alt="img"></p>
+<p>漏桶算法实现步骤：</p>
+<ol>
+<li>将每个请求放入固定大小的队列进行存储；</li>
+<li>队列以固定速率向外流出请求，如果队列为空则停止流出；</li>
+<li>如队列满了则多余的请求会被直接拒绝·</li>
+</ol>
+<p>漏桶算法有一个明显的缺陷：当短时间内有大量的突发请求时，即使服务器负载不高，每个请求也都得在队列中等待一段时间才能被响应。</p>
+<h4 id="令牌桶算法"><a href="#令牌桶算法" class="headerlink" title="令牌桶算法"></a>令牌桶算法</h4><p>令牌桶算法的原理是系统会以一个恒定的速率往桶里放入令牌，而如果请求需要被处理，则需要先从桶里获取一个令牌，当桶里没有令牌可取时，则拒绝服务。从原理上看，令牌桶算法和漏桶算法是相反的，前者为“进”，后者为“出”。漏桶算法与令牌桶算法除了“方向”上的不同还有一个更加主要的区别：令牌桶算法限制的是平均流入速率（允许突发请求，只要有足够的令牌，支持一次拿多个令牌），并允许一定程度突发流量；</p>
+<p>令牌桶算法的实现步骤：</p>
+<ol>
+<li>令牌以固定速率生成并放入到令牌桶中；</li>
+<li>如果令牌桶满了则多余的令牌会直接丢弃，当请求到达时，会尝试从令牌桶中取令牌，取到了令牌的请求可以执行；</li>
+<li>如果桶空了，则拒绝该请求。</li>
+</ol>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/6.png" alt="img"></p>
+<h4 id="四种策略该如何选择？"><a href="#四种策略该如何选择？" class="headerlink" title="四种策略该如何选择？"></a>四种策略该如何选择？</h4><ul>
+<li>固定窗口：实现简单，但是过于粗暴，除非情况紧急，为了能快速止损眼前的问题可以作为临时应急的方案。</li>
+<li>滑动窗口：限流算法简单易实现，可以应对有少量突增流量场景。</li>
+<li>漏桶：对于流量绝对均匀有很强的要求，资源的利用率上不是极致，但其宽进严出模式，保护系统的同时还留有部分余量，是一个通用性方案。</li>
+<li>令牌桶：系统经常有突增流量，并尽可能的压榨服务的性能。</li>
+</ul>
+<h2 id="怎么做限流？"><a href="#怎么做限流？" class="headerlink" title="怎么做限流？"></a>怎么做限流？</h2><p>不论使用上述的哪一种分类或者实现方式，系统都会面临一个共同的问题：如何确认限流阈值。有人团队根据经验先设定一个小的阈值，后续慢慢进行调整；有的团队是通过进行压力测试后总结出来。这种方式的问题在于压测模型与线上环境不一定一致，接口的单压不能反馈整个系统的状态，全链路压测又难以真实反应实际流量场景流量比例。再换一个思路是通过压测+各应用监控数据。根据系统峰值的QPS与系统资源使用情况，进行等水位放大预估限流阈值，问题在于系统性能拐点未知，单纯的预测不一定准确甚至极大偏离真实场景。正如《Overload Control for Scaling WeChat Microservices》所说，在具有复杂依赖关系的系统中，对特定服务的进行过载控制可能对整个系统有害或者服务的实现有缺陷。希望后续可以出现一个更加AI的运行反馈自动设置限流阈值的系统，可以根据当前QPS、资源状态、RT情况等多种关联数据动态地进行过载保护。</p>
+<p>不论是哪一种方式给出的限流阈值，系统都应该关注以下几点：</p>
+<ol>
+<li>运行指标状态，比如当前服务的QPS、机器资源使用情况、数据库的连接数、线程的并发数等；</li>
+<li>资源间的调用关系，外部链路请求、内部服务之间的关联、服务之间的强弱依赖等；</li>
+<li>控制方式，达到限流后对后续的请求直接拒绝、快速失败、排队等待等处理方式</li>
+</ol>
+<h2 id="go限流类库使用"><a href="#go限流类库使用" class="headerlink" title="go限流类库使用"></a>go限流类库使用</h2><p>限流的类库有很多，不同语言的有不同的类库，如大Java的有concurrency-limits、Sentinel、Guava 等，这些类库都有很多的分析和使用方式了，本文主要介绍Golang的限流类库就是Golang的扩展库：<a target="_blank" rel="noopener" href="https://github.com/golang/time/rate">https://github.com/golang/time/rate</a> 。可以进去语言类库的代码都值得去研读一番，学习过Java的同学是否对AQS的设计之精妙而感叹呢！<code>time/rate</code> 也有其精妙的部分，下面开始进入类库学习阶段。</p>
+<h3 id="github-com-golang-time-rate"><a href="#github-com-golang-time-rate" class="headerlink" title="github.com/golang/time/rate"></a>github.com/golang/time/rate</h3><p>进行源码分析前的，最应该做的是了解类库的使用方式、使用场景和API。对业务有了初步的了解，阅读代码就可以事半功倍。因为篇幅有限后续的博文在对多个限流类库源码做分析。类库的API文档：<a target="_blank" rel="noopener" href="https://godoc.org/golang.org/x/time/rate%E3%80%82time/rate%E7%B1%BB%E5%BA%93%E6%98%AF%E5%9F%BA%E4%BA%8E%E4%BB%A4%E7%89%8C%E6%A1%B6%E7%AE%97%E6%B3%95%E5%AE%9E%E7%8E%B0%E7%9A%84%E9%99%90%E6%B5%81%E5%8A%9F%E8%83%BD%E3%80%82%E5%89%8D%E9%9D%A2%E8%AF%B4%E4%BB%A4%E7%89%8C%E6%A1%B6%E7%AE%97%E6%B3%95%E7%9A%84%E5%8E%9F%E7%90%86%E6%98%AF%E7%B3%BB%E7%BB%9F%E4%BC%9A%E4%BB%A5%E4%B8%80%E4%B8%AA%E6%81%92%E5%AE%9A%E7%9A%84%E9%80%9F%E7%8E%87%E5%BE%80%E6%A1%B6%E9%87%8C%E6%94%BE%E5%85%A5%E4%BB%A4%E7%89%8C%EF%BC%8C%E9%82%A3%E4%B9%88%E6%A1%B6%E5%B0%B1%E6%9C%89%E4%B8%80%E4%B8%AA%E5%9B%BA%E5%AE%9A%E7%9A%84%E5%A4%A7%E5%B0%8F%EF%BC%8C%E5%BE%80%E6%A1%B6%E4%B8%AD%E6%94%BE%E5%85%A5%E4%BB%A4%E7%89%8C%E7%9A%84%E9%80%9F%E7%8E%87%E4%B9%9F%E6%98%AF%E6%81%92%E5%AE%9A%E7%9A%84%EF%BC%8C%E5%B9%B6%E4%B8%94%E5%85%81%E8%AE%B8%E7%AA%81%E5%8F%91%E6%B5%81%E9%87%8F%E3%80%82%E6%9F%A5%E7%9C%8B%E6%96%87%E6%A1%A3%E5%8F%91%E7%8E%B0%E4%B8%80%E4%B8%AA%E5%87%BD%E6%95%B0%EF%BC%9A">https://godoc.org/golang.org/x/time/rate。time/rate类库是基于令牌桶算法实现的限流功能。前面说令牌桶算法的原理是系统会以一个恒定的速率往桶里放入令牌，那么桶就有一个固定的大小，往桶中放入令牌的速率也是恒定的，并且允许突发流量。查看文档发现一个函数：</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">func <span class="title">NewLimiter</span><span class="params">(r Limit, b <span class="keyword">int</span>)</span> *Limiter</span></span><br></pre></td></tr></table></figure>
+
+<p>newLimiter返回一个新的限制器，它允许事件的速率达到r，并允许最多突发b个令牌。也就是说Limter限制时间的发生频率，但这个桶一开始容量就为b，并且装满b个令牌（令牌池中最多有b个令牌，所以一次最多只能允许b个事件发生，一个事件花费掉一个令牌），然后每一个单位时间间隔（默认1s）往桶里放入r个令牌。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">limter := rate.NewLimiter(<span class="number">10</span>, <span class="number">5</span>)</span><br></pre></td></tr></table></figure>
+
+<p>上面的例子表示，令牌桶的容量为5，并且每一秒中就往桶里放入10个令牌。细心的读者都会发现函数NewLimiter第一个参数是Limit类型，可以看源码就会发现Limit实际上就是float64的别名。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Limit defines the maximum frequency of some events.</span></span><br><span class="line"><span class="comment">// Limit is represented as number of events per second.</span></span><br><span class="line"><span class="comment">// A zero Limit allows no events.</span></span><br><span class="line">type Limit float64</span><br></pre></td></tr></table></figure>
+
+<p>限流器还可以指定往桶里放入令牌的时间间隔，实现方式如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">limter := rate.NewLimiter(rate.Every(<span class="number">100</span>*time.Millisecond), <span class="number">5</span>)</span><br></pre></td></tr></table></figure>
+
+<p>这两个例子的效果是一样的，使用第一种方式不会出现在每一秒间隔一下子放入10个令牌，也是均匀分散在100ms的间隔放入令牌。rate.Limiter提供了三类方法用来限速：</p>
+<ul>
+<li>Allow/AllowN</li>
+<li>Wait/WaitN</li>
+<li>Reserve/ReserveN</li>
+</ul>
+<p>下面对比这三类限流方式的使用方式和适用场景。先看第一类方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">func (lim *Limiter) Allow() <span class="function">bool</span></span><br><span class="line"><span class="function"><span class="title">func</span> <span class="params">(lim *Limiter)</span> <span class="title">AllowN</span><span class="params">(now time.Time, n <span class="keyword">int</span>)</span> bool</span></span><br></pre></td></tr></table></figure>
+
+<p>Allow 是AllowN(time.Now(), 1)的简化方法。那么重点就在方法 AllowN上了，API的解释有点抽象，说得云里雾里的，可以看看下面的API文档解释:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">AllowN reports whether n events may happen at time now. </span><br><span class="line">Use <span class="keyword">this</span> method <span class="keyword">if</span> you intend to drop / skip events that exceed the rate limit. </span><br><span class="line">Otherwise use Reserve or Wait.</span><br></pre></td></tr></table></figure>
+
+<p>实际上就是为了说，方法 AllowN在指定的时间时是否可以从令牌桶中取出N个令牌。也就意味着可以限定N个事件是否可以在指定的时间同时发生。这个两个方法是无阻塞，也就是说一旦不满足，就会跳过，不会等待令牌数量足够才执行。也就是文档中的第二行解释，如果打算丢失或跳过超出速率限制的时间，那么久请使用该方法。比如使用之前实例化好的限流器，在某一个时刻，服务器同时收到超过了8个请求，如果令牌桶内令牌小于8个，那么这8个请求就会被丢弃。一个小示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">func <span class="title">AllowDemo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   limter := rate.NewLimiter(rate.Every(<span class="number">200</span>*time.Millisecond), <span class="number">5</span>)</span><br><span class="line">   i := <span class="number">0</span></span><br><span class="line">   <span class="keyword">for</span> &#123;</span><br><span class="line">      i++</span><br><span class="line">      <span class="keyword">if</span> limter.Allow() &#123;</span><br><span class="line">         fmt.Println(i, <span class="string">&quot;====Allow======&quot;</span>, time.Now())</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">         fmt.Println(i, <span class="string">&quot;====Disallow======&quot;</span>, time.Now())</span><br><span class="line">      &#125;</span><br><span class="line">      time.Sleep(<span class="number">80</span> * time.Millisecond)</span><br><span class="line">      <span class="keyword">if</span> i == <span class="number">15</span> &#123;</span><br><span class="line">         <span class="keyword">return</span></span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行结果：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span> ====Allow====== <span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">54</span>:<span class="number">09.9852178</span> +0800 CST m=+<span class="number">0.005998001</span></span><br><span class="line"><span class="number">2</span> ====Allow====== <span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">54</span>:<span class="number">10.1012231</span> +0800 CST m=+<span class="number">0.122003301</span></span><br><span class="line"><span class="number">3</span> ====Allow====== <span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">54</span>:<span class="number">10.1823056</span> +0800 CST m=+<span class="number">0.203085801</span></span><br><span class="line"><span class="number">4</span> ====Allow====== <span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">54</span>:<span class="number">10.263238</span> +0800 CST m=+<span class="number">0.284018201</span></span><br><span class="line"><span class="number">5</span> ====Allow====== <span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">54</span>:<span class="number">10.344224</span> +0800 CST m=+<span class="number">0.365004201</span></span><br><span class="line"><span class="number">6</span> ====Allow====== <span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">54</span>:<span class="number">10.4242458</span> +0800 CST m=+<span class="number">0.445026001</span></span><br><span class="line"><span class="number">7</span> ====Allow====== <span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">54</span>:<span class="number">10.5043101</span> +0800 CST m=+<span class="number">0.525090301</span></span><br><span class="line"><span class="number">8</span> ====Allow====== <span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">54</span>:<span class="number">10.5852232</span> +0800 CST m=+<span class="number">0.606003401</span></span><br><span class="line"><span class="number">9</span> ====Disallow====== <span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">54</span>:<span class="number">10.6662181</span> +0800 CST m=+<span class="number">0.686998301</span></span><br><span class="line"><span class="number">10</span> ====Disallow====== <span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">54</span>:<span class="number">10.7462189</span> +0800 CST m=+<span class="number">0.766999101</span></span><br><span class="line"><span class="number">11</span> ====Allow====== <span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">54</span>:<span class="number">10.8272182</span> +0800 CST m=+<span class="number">0.847998401</span></span><br><span class="line"><span class="number">12</span> ====Disallow====== <span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">54</span>:<span class="number">10.9072192</span> +0800 CST m=+<span class="number">0.927999401</span></span><br><span class="line"><span class="number">13</span> ====Allow====== <span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">54</span>:<span class="number">10.9872224</span> +0800 CST m=+<span class="number">1.008002601</span></span><br><span class="line"><span class="number">14</span> ====Disallow====== <span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">54</span>:<span class="number">11.0672253</span> +0800 CST m=+<span class="number">1.088005501</span></span><br><span class="line"><span class="number">15</span> ====Disallow====== <span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">54</span>:<span class="number">11.1472946</span> +0800 CST m=+<span class="number">1.168074801</span></span><br></pre></td></tr></table></figure>
+
+<p>第二类方法：因为ReserveN比较复杂，第二类先说WaitN。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">func (lim *Limiter) Wait(ctx context.Context) (err error)</span><br><span class="line">func (lim *Limiter) WaitN(ctx context.Context, n <span class="keyword">int</span>) (err error)</span><br></pre></td></tr></table></figure>
+
+<p>类似Wait 是WaitN(ctx, 1)的简化方法。与AllowN不同的是WaitN会阻塞，如果令牌桶内的令牌数不足N个，WaitN会阻塞一段时间，阻塞时间的时长可以用第一个参数ctx进行设置，把 context 实例为context.WithDeadline或context.WithTimeout进行制定阻塞的时长。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">func <span class="title">WaitNDemo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   limter := rate.NewLimiter(<span class="number">10</span>, <span class="number">5</span>)</span><br><span class="line">   i := <span class="number">0</span></span><br><span class="line">   <span class="keyword">for</span> &#123;</span><br><span class="line">      i++</span><br><span class="line">      ctx, canle := context.WithTimeout(context.Background(), <span class="number">400</span>*time.Millisecond)</span><br><span class="line">      <span class="keyword">if</span> i == <span class="number">6</span> &#123;</span><br><span class="line">         <span class="comment">// 取消执行</span></span><br><span class="line">         canle()</span><br><span class="line">      &#125;</span><br><span class="line">      err := limter.WaitN(ctx, <span class="number">4</span>)</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> err != nil &#123;</span><br><span class="line">         fmt.Println(err)</span><br><span class="line">         <span class="keyword">continue</span></span><br><span class="line">      &#125;</span><br><span class="line">      fmt.Println(i, <span class="string">&quot;,执行：&quot;</span>, time.Now())</span><br><span class="line">      <span class="keyword">if</span> i == <span class="number">10</span> &#123;</span><br><span class="line">         <span class="keyword">return</span></span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行结果：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span> ,执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">45</span>:<span class="number">15.538539</span> +0800 CST m=+<span class="number">0.011023401</span></span><br><span class="line"><span class="number">2</span> ,执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">45</span>:<span class="number">15.8395195</span> +0800 CST m=+<span class="number">0.312003901</span></span><br><span class="line"><span class="number">3</span> ,执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">45</span>:<span class="number">16.2396051</span> +0800 CST m=+<span class="number">0.712089501</span></span><br><span class="line"><span class="number">4</span> ,执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">45</span>:<span class="number">16.6395169</span> +0800 CST m=+<span class="number">1.112001301</span></span><br><span class="line"><span class="number">5</span> ,执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">45</span>:<span class="number">17.0385893</span> +0800 CST m=+<span class="number">1.511073701</span></span><br><span class="line">context canceled</span><br><span class="line"><span class="number">7</span> ,执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">45</span>:<span class="number">17.440514</span> +0800 CST m=+<span class="number">1.912998401</span></span><br><span class="line"><span class="number">8</span> ,执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">45</span>:<span class="number">17.8405152</span> +0800 CST m=+<span class="number">2.312999601</span></span><br><span class="line"><span class="number">9</span> ,执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">45</span>:<span class="number">18.2405402</span> +0800 CST m=+<span class="number">2.713024601</span></span><br><span class="line"><span class="number">10</span> ,执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">15</span>:<span class="number">45</span>:<span class="number">18.6405179</span> +0800 CST m=+<span class="number">3.113002301</span></span><br></pre></td></tr></table></figure>
+
+<p>适用于允许阻塞等待的场景，比如消费消息队列的消息，可以限定最大的消费速率，过大了就会被限流避免消费者负载过高。</p>
+<p>第三类方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">func (lim *Limiter) Reserve() *<span class="function">Reservation</span></span><br><span class="line"><span class="function"><span class="title">func</span> <span class="params">(lim *Limiter)</span> <span class="title">ReserveN</span><span class="params">(now time.Time, n <span class="keyword">int</span>)</span> *Reservation</span></span><br></pre></td></tr></table></figure>
+
+<p>与之前的两类方法不同的是Reserve/ReserveN返回了Reservation实例。Reservation在API文档中有5个方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">func (r *Reservation) Cancel() <span class="comment">// 相当于CancelAt(time.Now())</span></span><br><span class="line">func (r *Reservation) CancelAt(now time.Time)</span><br><span class="line">func (r *Reservation) Delay() time.Duration <span class="comment">// 相当于DelayFrom(time.Now())</span></span><br><span class="line">func (r *Reservation) DelayFrom(now time.Time) time.<span class="function">Duration</span></span><br><span class="line"><span class="function"><span class="title">func</span> <span class="params">(r *Reservation)</span> <span class="title">OK</span><span class="params">()</span> bool</span></span><br></pre></td></tr></table></figure>
+
+<p>通过这5个方法可以让开发者根据业务场景进行操作，相比前两类的自动化，这样的操作显得复杂多了。通过一个小示例来学习Reserve/ReserveN：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">func <span class="title">ReserveNDemo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   limter := rate.NewLimiter(<span class="number">10</span>, <span class="number">5</span>)</span><br><span class="line">   i := <span class="number">0</span></span><br><span class="line">   <span class="keyword">for</span> &#123;</span><br><span class="line">      i++</span><br><span class="line">      reserve := limter.ReserveN(time.Now(), <span class="number">4</span>)</span><br><span class="line">      <span class="comment">// 如果为flase说明拿不到指定数量的令牌，比如需要的令牌数大于令牌桶容量的场景</span></span><br><span class="line">      <span class="keyword">if</span> !reserve.OK() &#123;</span><br><span class="line">         <span class="keyword">return</span></span><br><span class="line">      &#125;</span><br><span class="line">      ts := reserve.Delay()</span><br><span class="line">      time.Sleep(ts)</span><br><span class="line">      fmt.Println(<span class="string">&quot;执行：&quot;</span>, time.Now(),ts)</span><br><span class="line">      <span class="keyword">if</span> i == <span class="number">10</span> &#123;</span><br><span class="line">         <span class="keyword">return</span></span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行结果：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">16</span>:<span class="number">22</span>:<span class="number">26.6446468</span> +0800 CST m=+<span class="number">0.008000201</span> 0s</span><br><span class="line">执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">16</span>:<span class="number">22</span>:<span class="number">26.9466454</span> +0800 CST m=+<span class="number">0.309998801</span> <span class="number">247.</span>999299ms</span><br><span class="line">执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">16</span>:<span class="number">22</span>:<span class="number">27.3446473</span> +0800 CST m=+<span class="number">0.708000701</span> <span class="number">398.</span>001399ms</span><br><span class="line">执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">16</span>:<span class="number">22</span>:<span class="number">27.7456488</span> +0800 CST m=+<span class="number">1.109002201</span> <span class="number">399.</span>999499ms</span><br><span class="line">执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">16</span>:<span class="number">22</span>:<span class="number">28.1456465</span> +0800 CST m=+<span class="number">1.508999901</span> <span class="number">398.</span>997999ms</span><br><span class="line">执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">16</span>:<span class="number">22</span>:<span class="number">28.5456457</span> +0800 CST m=+<span class="number">1.908999101</span> <span class="number">399.</span>0003ms</span><br><span class="line">执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">16</span>:<span class="number">22</span>:<span class="number">28.9446482</span> +0800 CST m=+<span class="number">2.308001601</span> <span class="number">399.</span>001099ms</span><br><span class="line">执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">16</span>:<span class="number">22</span>:<span class="number">29.3446524</span> +0800 CST m=+<span class="number">2.708005801</span> <span class="number">399.</span>998599ms</span><br><span class="line">执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">16</span>:<span class="number">22</span>:<span class="number">29.7446514</span> +0800 CST m=+<span class="number">3.108004801</span> <span class="number">399.</span>9944ms</span><br><span class="line">执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">16</span>:<span class="number">22</span>:<span class="number">30.1446475</span> +0800 CST m=+<span class="number">3.508000901</span> <span class="number">399.</span>9954ms</span><br></pre></td></tr></table></figure>
+
+<p>如果在执行<code>Delay()</code>之前操作<code>Cancel()</code>那么返回的时间间隔就会为0，意味着可以立即执行操作，不进行限流。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">func <span class="title">ReserveNDemo2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   limter := rate.NewLimiter(<span class="number">5</span>, <span class="number">5</span>)</span><br><span class="line">   i := <span class="number">0</span></span><br><span class="line">   <span class="keyword">for</span> &#123;</span><br><span class="line">      i++</span><br><span class="line">      reserve := limter.ReserveN(time.Now(), <span class="number">4</span>)</span><br><span class="line">      <span class="comment">// 如果为flase说明拿不到指定数量的令牌，比如需要的令牌数大于令牌桶容量的场景</span></span><br><span class="line">      <span class="keyword">if</span> !reserve.OK() &#123;</span><br><span class="line">         <span class="keyword">return</span></span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> i == <span class="number">6</span> || i == <span class="number">5</span> &#123;</span><br><span class="line">         reserve.Cancel()</span><br><span class="line">      &#125;</span><br><span class="line">      ts := reserve.Delay()</span><br><span class="line">      time.Sleep(ts)</span><br><span class="line">      fmt.Println(i, <span class="string">&quot;执行：&quot;</span>, time.Now(), ts)</span><br><span class="line">      <span class="keyword">if</span> i == <span class="number">10</span> &#123;</span><br><span class="line">         <span class="keyword">return</span></span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行结果：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span> 执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">16</span>:<span class="number">25</span>:<span class="number">45.7974857</span> +0800 CST m=+<span class="number">0.007005901</span> 0s</span><br><span class="line"><span class="number">2</span> 执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">16</span>:<span class="number">25</span>:<span class="number">46.3985135</span> +0800 CST m=+<span class="number">0.608033701</span> <span class="number">552.</span>0048ms</span><br><span class="line"><span class="number">3</span> 执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">16</span>:<span class="number">25</span>:<span class="number">47.1984796</span> +0800 CST m=+<span class="number">1.407999801</span> <span class="number">798.</span>9722ms</span><br><span class="line"><span class="number">4</span> 执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">16</span>:<span class="number">25</span>:<span class="number">47.9975269</span> +0800 CST m=+<span class="number">2.207047101</span> <span class="number">799.</span>0061ms</span><br><span class="line"><span class="number">5</span> 执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">16</span>:<span class="number">25</span>:<span class="number">48.7994803</span> +0800 CST m=+<span class="number">3.009000501</span> <span class="number">799.</span>9588ms</span><br><span class="line"><span class="number">6</span> 执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">16</span>:<span class="number">25</span>:<span class="number">48.7994803</span> +0800 CST m=+<span class="number">3.009000501</span> 0s</span><br><span class="line"><span class="number">7</span> 执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">16</span>:<span class="number">25</span>:<span class="number">48.7994803</span> +0800 CST m=+<span class="number">3.009000501</span> 0s</span><br><span class="line"><span class="number">8</span> 执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">16</span>:<span class="number">25</span>:<span class="number">49.5984782</span> +0800 CST m=+<span class="number">3.807998401</span> <span class="number">798.</span>0054ms</span><br><span class="line"><span class="number">9</span> 执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">16</span>:<span class="number">25</span>:<span class="number">50.3984779</span> +0800 CST m=+<span class="number">4.607998101</span> <span class="number">799.</span>0075ms</span><br><span class="line"><span class="number">10</span> 执行：<span class="number">2019</span>-<span class="number">12</span>-<span class="number">14</span> <span class="number">16</span>:<span class="number">25</span>:<span class="number">51.1995131</span> +0800 CST m=+<span class="number">5.409033301</span> <span class="number">799.</span>0078ms</span><br></pre></td></tr></table></figure>
+
+<p>看到这里time/rate的限流方式已经完成，除了上述的三类限流方式，time/rate还提供了动态调整限流器参数的功能。相关API如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">func (lim *Limiter) SetBurst(newBurst <span class="keyword">int</span>) <span class="comment">// 相当于SetBurstAt(time.Now(), newBurst).</span></span><br><span class="line">func (lim *Limiter) SetBurstAt(now time.Time, newBurst <span class="keyword">int</span>)<span class="comment">// 重设令牌桶的容量</span></span><br><span class="line">func (lim *Limiter) SetLimit(newLimit Limit) <span class="comment">// 相当于SetLimitAt(time.Now(), newLimit)</span></span><br><span class="line">func (lim *Limiter) SetLimitAt(now time.Time, newLimit Limit)<span class="comment">// 重设放入令牌的速率</span></span><br></pre></td></tr></table></figure>
+
+<p>这四个方法可以让程序根据自身的状态动态的调整令牌桶速率和令牌桶容量。</p>
+<h2 id="结尾"><a href="#结尾" class="headerlink" title="结尾"></a>结尾</h2><p>通过上述一系列讲解，相信大家对各个限流的应用场景和优缺点也有了大致的掌握，希望在日常开发中有所帮助。限流仅仅是整个服务治理中的一个小环节，需要与多种技术结合使用，才可以更好的提升服务的稳定性的同时提高用户体验。</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    不才陈某  |  微信公众号【码猿技术专栏】
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://chenjiabing666.github.io/2021/08/03/%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%8B%E5%B8%B8%E8%A7%81%E7%9A%84%E9%99%90%E6%B5%81%E7%AE%97%E6%B3%95%E9%83%BD%E5%9C%A8%E8%BF%99%E4%BA%86/" title="高并发下常见的限流算法都在这了！">https://chenjiabing666.github.io/2021/08/03/高并发下常见的限流算法都在这了/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+  <li class="post-copyright-license">
+    并保留本声明和上方二维码。感谢您的阅读和支持！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">微信公众号</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"># 算法</a>
+              <a href="/tags/%E9%99%90%E6%B5%81/" rel="tag"># 限流</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/07/31/4%E6%AC%BEMySQL%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7%EF%BC%8C%E5%85%AC%E5%8F%B8%E5%A4%A7%E7%A5%9E%E9%83%BD%E5%9C%A8%E7%94%A8%EF%BC%81/" rel="prev" title="4款MySQL调优工具，公司大神都在用！">
+      <i class="fa fa-chevron-left"></i> 4款MySQL调优工具，公司大神都在用！
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%90%E6%B5%81%E7%AE%80%E4%BB%8B"><span class="nav-text">限流简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%90%E6%B5%81%E5%88%86%E7%B1%BB"><span class="nav-text">限流分类</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%99%90%E6%B5%81%E7%B2%92%E5%BA%A6%E5%88%86%E7%B1%BB"><span class="nav-text">限流粒度分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%99%90%E6%B5%81%E5%AF%B9%E8%B1%A1%E7%B1%BB%E5%9E%8B%E5%88%86%E7%B1%BB"><span class="nav-text">限流对象类型分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%99%90%E6%B5%81%E7%AE%97%E6%B3%95%E5%88%86%E7%B1%BB"><span class="nav-text">限流算法分类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%A1%E6%95%B0%E5%99%A8"><span class="nav-text">计数器</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9B%BA%E5%AE%9A%E7%AA%97%E5%8F%A3%E8%AE%A1%E6%95%B0%E5%99%A8"><span class="nav-text">固定窗口计数器</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3%E8%AE%A1%E6%95%B0%E5%99%A8"><span class="nav-text">滑动窗口计数器</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%BC%8F%E6%A1%B6%E7%AE%97%E6%B3%95"><span class="nav-text">漏桶算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A4%E7%89%8C%E6%A1%B6%E7%AE%97%E6%B3%95"><span class="nav-text">令牌桶算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9B%9B%E7%A7%8D%E7%AD%96%E7%95%A5%E8%AF%A5%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%EF%BC%9F"><span class="nav-text">四种策略该如何选择？</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%8E%E4%B9%88%E5%81%9A%E9%99%90%E6%B5%81%EF%BC%9F"><span class="nav-text">怎么做限流？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#go%E9%99%90%E6%B5%81%E7%B1%BB%E5%BA%93%E4%BD%BF%E7%94%A8"><span class="nav-text">go限流类库使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#github-com-golang-time-rate"><span class="nav-text">github.com&#x2F;golang&#x2F;time&#x2F;rate</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E5%B0%BE"><span class="nav-text">结尾</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="不才陈某"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">87</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png" title="微信公众号 → https:&#x2F;&#x2F;gitee.com&#x2F;chenjiabing666&#x2F;BlogImage&#x2F;raw&#x2F;master&#x2F;myjszl_log.png" rel="noopener" target="_blank"><i class="fab fa-weixin fa-fw"></i>微信公众号</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.im/user/2506542244708072" title="掘金 → https:&#x2F;&#x2F;juejin.im&#x2F;user&#x2F;2506542244708072" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>掘金</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某|公众号：码猿技术专栏</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
