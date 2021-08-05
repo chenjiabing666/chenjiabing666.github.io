@@ -406,6 +406,120 @@
       </tags>
   </entry>
   <entry>
+    <title>一口气说出 Redis 16 个常见使用场景</title>
+    <url>/2021/08/05/%E4%B8%80%E5%8F%A3%E6%B0%94%E8%AF%B4%E5%87%BA%E5%8D%81%E5%85%AD%E4%B8%ADRedis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/</url>
+    <content><![CDATA[<h2 id="1、缓存"><a href="#1、缓存" class="headerlink" title="1、缓存"></a>1、缓存</h2><p>String类型</p>
+<p>例如：热点数据缓存（例如报表、明星出轨），对象缓存、全页缓存、可以提升热点数据的访问数据。</p>
+<h2 id="2、数据共享分布式"><a href="#2、数据共享分布式" class="headerlink" title="2、数据共享分布式"></a>2、数据共享分布式</h2><p>String 类型，因为 Redis 是分布式的独立服务，可以在多个应用之间共享</p>
+<p>例如：分布式Session</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span> </span><br><span class="line"> <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.session<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span> </span><br><span class="line"> <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-session-data-redis<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<h2 id="3、分布式锁"><a href="#3、分布式锁" class="headerlink" title="3、分布式锁"></a>3、分布式锁</h2><p>String 类型setnx方法，只有不存在时才能添加成功，返回true</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">getLock</span><span class="params">(String key)</span> </span>&#123;</span><br><span class="line">    Long flag = jedis.setnx(key, <span class="string">&quot;1&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (flag == <span class="number">1</span>) &#123;</span><br><span class="line">        jedis.expire(key, <span class="number">10</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> flag == <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">releaseLock</span><span class="params">(String key)</span> </span>&#123;</span><br><span class="line">    jedis.del(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="4、全局ID"><a href="#4、全局ID" class="headerlink" title="4、全局ID"></a>4、全局ID</h2><p>int类型，incrby，利用原子性</p>
+<p>incrby userid 1000</p>
+<p>分库分表的场景，一次性拿一段</p>
+<h2 id="5、计数器"><a href="#5、计数器" class="headerlink" title="5、计数器"></a>5、计数器</h2><p>int类型，incr方法</p>
+<p>例如：文章的阅读量、微博点赞数、允许一定的延迟，先写入Redis再定时同步到数据库</p>
+<h2 id="6、限流"><a href="#6、限流" class="headerlink" title="6、限流"></a>6、限流</h2><p>int类型，incr方法</p>
+<p>以访问者的ip和其他信息作为key，访问一次增加一次计数，超过次数则返回false</p>
+<h2 id="7、位统计"><a href="#7、位统计" class="headerlink" title="7、位统计"></a>7、位统计</h2><p>String类型的bitcount（1.6.6的bitmap数据结构介绍）</p>
+<p>字符是以8位二进制存储的</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">set k1 a</span><br><span class="line">setbit k1 6 1</span><br><span class="line">setbit k1 7 0</span><br><span class="line">get k1 </span><br><span class="line">/* 6 7 代表的a的二进制位的修改</span><br><span class="line">a 对应的ASCII码是97，转换为二进制数据是01100001</span><br><span class="line">b 对应的ASCII码是98，转换为二进制数据是01100010</span><br><span class="line"></span><br><span class="line">因为bit非常节省空间（1 MB=8388608 bit），可以用来做大数据量的统计。</span><br><span class="line">*/</span><br></pre></td></tr></table></figure>
+
+<p>例如：在线用户统计，留存用户统计</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">setbit onlineusers 01 </span><br><span class="line">setbit onlineusers 11 </span><br><span class="line">setbit onlineusers 20</span><br></pre></td></tr></table></figure>
+
+<p>支持按位与、按位或等等操作</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">BITOPANDdestkeykey[key...] ，对一个或多个 key 求逻辑并，并将结果保存到 destkey 。       </span><br><span class="line">BITOPORdestkeykey[key...] ，对一个或多个 key 求逻辑或，并将结果保存到 destkey 。 </span><br><span class="line">BITOPXORdestkeykey[key...] ，对一个或多个 key 求逻辑异或，并将结果保存到 destkey 。 </span><br><span class="line">BITOPNOTdestkeykey ，对给定 key 求逻辑非，并将结果保存到 destkey 。</span><br></pre></td></tr></table></figure>
+
+<p>计算出7天都在线的用户</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">BITOP &quot;AND&quot; &quot;7_days_both_online_users&quot; &quot;day_1_online_users&quot; &quot;day_2_online_users&quot; ...  &quot;day_7_online_users&quot;</span><br></pre></td></tr></table></figure>
+
+<h2 id="8、购物车"><a href="#8、购物车" class="headerlink" title="8、购物车"></a>8、购物车</h2><p>String 或hash。所有String可以做的hash都可以做</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E5%8F%A3%E6%B0%94%E8%AF%B4%E5%87%BA%E5%8D%81%E5%85%AD%E7%A7%8DRedis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/3.png"></p>
+<ul>
+<li>key：用户id；field：商品id；value：商品数量。</li>
+<li>+1：hincr。-1：hdecr。删除：hdel。全选：hgetall。商品数：hlen。</li>
+</ul>
+<h2 id="9、用户消息时间线timeline"><a href="#9、用户消息时间线timeline" class="headerlink" title="9、用户消息时间线timeline"></a>9、用户消息时间线timeline</h2><p>list，双向链表，直接作为timeline就好了。插入有序</p>
+<h2 id="10、消息队列"><a href="#10、消息队列" class="headerlink" title="10、消息队列"></a>10、消息队列</h2><p>List提供了两个阻塞的弹出操作：blpop/brpop，可以设置超时时间</p>
+<ul>
+<li>blpop：blpop key1 timeout 移除并获取列表的第一个元素，如果列表没有元素会阻塞列表直到等待超时或发现可弹出元素为止。</li>
+<li>brpop：brpop key1 timeout 移除并获取列表的最后一个元素，如果列表没有元素会阻塞列表直到等待超时或发现可弹出元素为止。</li>
+</ul>
+<p>上面的操作。其实就是java的阻塞队列。学习的东西越多。学习成本越低</p>
+<ul>
+<li>队列：先进先除：rpush blpop，左头右尾，右边进入队列，左边出队列</li>
+<li>栈：先进后出：rpush brpop</li>
+</ul>
+<h2 id="11、抽奖"><a href="#11、抽奖" class="headerlink" title="11、抽奖"></a>11、抽奖</h2><p>自带一个随机获得值</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">spop myset</span><br></pre></td></tr></table></figure>
+
+<h2 id="12、点赞、签到、打卡"><a href="#12、点赞、签到、打卡" class="headerlink" title="12、点赞、签到、打卡"></a>12、点赞、签到、打卡</h2><p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E5%8F%A3%E6%B0%94%E8%AF%B4%E5%87%BA%E5%8D%81%E5%85%AD%E7%A7%8DRedis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/4.png"></p>
+<p>假如上面的微博ID是t1001，用户ID是u3001</p>
+<p>用 like:t1001 来维护 t1001 这条微博的所有点赞用户</p>
+<ul>
+<li>点赞了这条微博：sadd like:t1001 u3001</li>
+<li>取消点赞：srem like:t1001 u3001</li>
+<li>是否点赞：sismember like:t1001 u3001</li>
+<li>点赞的所有用户：smembers like:t1001</li>
+<li>点赞数：scard like:t1001</li>
+</ul>
+<p>是不是比数据库简单多了。</p>
+<h2 id="13、商品标签"><a href="#13、商品标签" class="headerlink" title="13、商品标签"></a>13、商品标签</h2><p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E5%8F%A3%E6%B0%94%E8%AF%B4%E5%87%BA%E5%8D%81%E5%85%AD%E7%A7%8DRedis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/5.png" alt="img"></p>
+<p>老规矩，用 tags:i5001 来维护商品所有的标签。</p>
+<ul>
+<li>sadd tags:i5001 画面清晰细腻</li>
+<li>sadd tags:i5001 真彩清晰显示屏</li>
+<li>sadd tags:i5001 流程至极</li>
+</ul>
+<h2 id="14、商品筛选"><a href="#14、商品筛选" class="headerlink" title="14、商品筛选"></a>14、商品筛选</h2><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">// 获取差集</span><br><span class="line">sdiff set1 set2</span><br><span class="line">// 获取交集（intersection ）</span><br><span class="line">sinter set1 set2</span><br><span class="line">// 获取并集</span><br><span class="line">sunion set1 set2</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E5%8F%A3%E6%B0%94%E8%AF%B4%E5%87%BA%E5%8D%81%E5%85%AD%E7%A7%8DRedis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/6.png"></p>
+<p>假如：iPhone11 上市了</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sadd brand:apple iPhone11</span><br><span class="line"></span><br><span class="line">sadd brand:ios iPhone11</span><br><span class="line"></span><br><span class="line">sad screensize:6.0-6.24 iPhone11</span><br><span class="line"></span><br><span class="line">sad screentype:lcd iPhone 11</span><br></pre></td></tr></table></figure>
+
+<p>赛选商品，苹果的、ios的、屏幕在6.0-6.24之间的，屏幕材质是LCD屏幕</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">sinter brand:apple brand:ios screensize:6.0-6.24 screentype:lcd</span><br></pre></td></tr></table></figure>
+
+<h2 id="15、用户关注、推荐模型"><a href="#15、用户关注、推荐模型" class="headerlink" title="15、用户关注、推荐模型"></a>15、用户关注、推荐模型</h2><p>follow 关注 fans 粉丝</p>
+<p>相互关注：</p>
+<ul>
+<li>sadd 1:follow 2</li>
+<li>sadd 2:fans 1</li>
+<li>sadd 1:fans 2</li>
+<li>sadd 2:follow 1</li>
+</ul>
+<p>我关注的人也关注了他(取交集)：</p>
+<ul>
+<li>sinter 1:follow 2:fans</li>
+</ul>
+<p>可能认识的人：</p>
+<ul>
+<li>用户1可能认识的人(差集)：sdiff 2:follow 1:follow</li>
+<li>用户2可能认识的人：sdiff 1:follow 2:follow</li>
+</ul>
+<h2 id="16、排行榜"><a href="#16、排行榜" class="headerlink" title="16、排行榜"></a>16、排行榜</h2><p>id 为6001 的新闻点击数加1：</p>
+<figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="attribute">zincrby</span> hotNews:<span class="number">20190926</span> <span class="number">1</span> n<span class="number">6001</span></span><br></pre></td></tr></table></figure>
+
+<p>获取今天点击最多的15条：</p>
+<figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="attribute">zrevrange</span> hotNews:<span class="number">20190926</span> <span class="number">0</span> <span class="number">15</span> withscores</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E5%8F%A3%E6%B0%94%E8%AF%B4%E5%87%BA%E5%8D%81%E5%85%AD%E7%A7%8DRedis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/7.png"></p>
+<p>Redis 用的好，加薪少不了</p>
+]]></content>
+      <categories>
+        <category>Redis 进阶</category>
+      </categories>
+      <tags>
+        <tag>Redis</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Spring Boot 集成 WebSocket，轻松实现信息推送！</title>
     <url>/2021/08/04/Spring%20Boot%20%E9%9B%86%E6%88%90%20WebSocket%EF%BC%8C%E8%BD%BB%E6%9D%BE%E5%AE%9E%E7%8E%B0%E4%BF%A1%E6%81%AF%E6%8E%A8%E9%80%81%EF%BC%81/</url>
     <content><![CDATA[<p>在一次项目开发中，使用到了Netty 网络应用框架，以及 MQTT 进行消息数据的收发，这其中需要后台来将获取到的消息主动推送给前端，于是就使用到了MQTT，特此记录一下。</p>
