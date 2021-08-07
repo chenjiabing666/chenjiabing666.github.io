@@ -96,6 +96,7 @@
     <url>/2021/07/31/%E5%85%AC%E4%BC%97%E5%8F%B7%E6%96%87%E7%AB%A0%E6%B1%87%E6%80%BB/</url>
     <content><![CDATA[<p>不才陈某的公众号的专栏文章。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。欢迎star</p>
 <p>以下内容全部出自微信公众号<strong>码猿技术专栏</strong>，欢迎关注。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg"></p>
 <span id="more"></span>
 
 <h2 id="Mybatis相关文章"><a href="#Mybatis相关文章" class="headerlink" title="Mybatis相关文章"></a>Mybatis相关文章</h2><ol>
@@ -409,15 +410,98 @@
       </tags>
   </entry>
   <entry>
+    <title>阿里巴巴为什么不建议直接使用 @Async 注解？</title>
+    <url>/2021/08/07/%E9%98%BF%E9%87%8C%E5%B7%B4%E5%B7%B4%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E7%9B%B4%E6%8E%A5%E4%BD%BF%E7%94%A8@Async%E6%B3%A8%E8%A7%A3%EF%BC%9F/</url>
+    <content><![CDATA[<p>对于异步方法调用，从Spring3开始提供了@Async注解，该注解可以被标在方法上，以便异步地调用该方法。调用者将在调用时立即返回，方法的实际执行将提交给Spring TaskExecutor的任务中，由指定的线程池中的线程执行。</p>
+<p>在项目应用中，@Async调用线程池，推荐使用自定义线程池的模式。自定义线程池常用方案：重新实现接口AsyncConfigurer。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/10.png"></p>
+<span id="more"></span>
+
+<h2 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h2><h3 id="同步"><a href="#同步" class="headerlink" title="同步"></a>同步</h3><p>同步就是整个处理过程顺序执行，当各个过程都执行完毕，并返回结果。</p>
+<h3 id="异步"><a href="#异步" class="headerlink" title="异步"></a>异步</h3><p>异步调用则是只是发送了调用的指令，调用者无需等待被调用的方法完全执行完毕；而是继续执行下面的流程。</p>
+<p>例如， 在某个调用中，需要顺序调用 A, B, C三个过程方法；如他们都是同步调用，则需要将他们都顺序执行完毕之后，方算作过程执行完毕；如B为一个异步的调用方法，则在执行完A之后，调用B，并不等待B完成，而是执行开始调用C，待C执行完毕之后，就意味着这个过程执行完毕了。</p>
+<p>在Java中，一般在处理类似的场景之时，都是基于创建独立的线程去完成相应的异步调用逻辑，通过主线程和不同的业务子线程之间的执行流程，从而在启动独立的线程之后，主线程继续执行而不会产生停滞等待的情况。另外关注公众号码猿技术专栏，回复关键词“面试宝典”，送你一份阿里巴巴内部面试宝典！</p>
+<h2 id="Spring-已经实现的线程池"><a href="#Spring-已经实现的线程池" class="headerlink" title="Spring 已经实现的线程池"></a>Spring 已经实现的线程池</h2><ul>
+<li>SimpleAsyncTaskExecutor：不是真的线程池，这个类不重用线程，默认每次调用都会创建一个新的线程。</li>
+<li>SyncTaskExecutor：这个类没有实现异步调用，只是一个同步操作。只适用于不需要多线程的地方。</li>
+<li>ConcurrentTaskExecutor：Executor的适配类，不推荐使用。如果ThreadPoolTaskExecutor不满足要求时，才用考虑使用这个类。</li>
+<li>SimpleThreadPoolTaskExecutor：是Quartz的SimpleThreadPool的类。线程池同时被quartz和非quartz使用，才需要使用此类。</li>
+<li>ThreadPoolTaskExecutor ：最常使用，推荐。其实质是对java.util.concurrent.ThreadPoolExecutor的包装。</li>
+</ul>
+<p>异步的方法有</p>
+<ul>
+<li>最简单的异步调用，返回值为void</li>
+<li>带参数的异步调用，异步方法可以传入参数</li>
+<li>存在返回值，常调用返回Future</li>
+</ul>
+<h2 id="Spring中启用-Async"><a href="#Spring中启用-Async" class="headerlink" title="Spring中启用@Async"></a>Spring中启用@Async</h2><p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/1.png"></p>
+<h2 id="Async应用默认线程池"><a href="#Async应用默认线程池" class="headerlink" title="@Async应用默认线程池"></a>@Async应用默认线程池</h2><p>Spring应用默认的线程池，指在@Async注解在使用时，不指定线程池的名称。查看源码，@Async的默认线程池为SimpleAsyncTaskExecutor。</p>
+<h3 id="无返回值调用"><a href="#无返回值调用" class="headerlink" title="无返回值调用"></a>无返回值调用</h3><p>基于@Async无返回值调用，直接在使用类，使用方法（建议在使用方法）上，加上注解。若需要抛出异常，需手动new一个异常抛出。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/2.png"></p>
+<h3 id="有返回值Future调用"><a href="#有返回值Future调用" class="headerlink" title="有返回值Future调用"></a>有返回值Future调用</h3><p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/3.png"></p>
+<h3 id="有返回值CompletableFuture调用"><a href="#有返回值CompletableFuture调用" class="headerlink" title="有返回值CompletableFuture调用"></a>有返回值CompletableFuture调用</h3><p>CompletableFuture 并不使用@Async注解，可达到调用系统线程池处理业务的功能。</p>
+<p>JDK5新增了Future接口，用于描述一个异步计算的结果。虽然 Future 以及相关使用方法提供了异步执行任务的能力，但是对于结果的获取却是很不方便，只能通过阻塞或者轮询的方式得到任务的结果。阻塞的方式显然和我们的异步编程的初衷相违背，轮询的方式又会耗费无谓的 CPU 资源，而且也不能及时地得到计算结果。另外关注公众号码猿技术专栏，回复关键词“面试宝典”，送你一份阿里巴巴内部面试宝典！</p>
+<ul>
+<li>CompletionStage代表异步计算过程中的某一个阶段，一个阶段完成以后可能会触发另外一个阶段</li>
+<li>一个阶段的计算执行可以是一个Function，Consumer或者Runnable。比如：</li>
+</ul>
+<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line">stage.<span class="keyword">then</span><span class="constructor">Apply(<span class="params">x</span> -&gt; <span class="params">square</span>(<span class="params">x</span>)</span>).<span class="keyword">then</span><span class="constructor">Accept(<span class="params">x</span> -&gt; System.<span class="params">out</span>.<span class="params">print</span>(<span class="params">x</span>)</span>).<span class="keyword">then</span><span class="constructor">Run(()</span> -&gt; <span class="module-access"><span class="module"><span class="identifier">System</span>.</span></span>out.println<span class="literal">()</span>)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>一个阶段的执行可能是被单个阶段的完成触发，也可能是由多个阶段一起触发</li>
+</ul>
+<p>在Java8中，CompletableFuture 提供了非常强大的Future的扩展功能，可以帮助我们简化异步编程的复杂性，并且提供了函数式编程的能力，可以通过回调的方式处理计算结果，也提供了转换和组合 CompletableFuture 的方法。</p>
+<ul>
+<li>它可能代表一个明确完成的Future，也有可能代表一个完成阶段（ CompletionStage ），它支持在计算完成以后触发一些函数或执行某些动作。</li>
+<li>它实现了Future和CompletionStage接口</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/4.png"></p>
+<h3 id="默认线程池的弊端"><a href="#默认线程池的弊端" class="headerlink" title="默认线程池的弊端"></a>默认线程池的弊端</h3><p>在线程池应用中，参考阿里巴巴java开发规范：线程池不允许使用Executors去创建，不允许使用系统默认的线程池，推荐通过ThreadPoolExecutor的方式，这样的处理方式让开发的工程师更加明确线程池的运行规则，规避资源耗尽的风险。</p>
+<p>Executors各个方法的弊端：</p>
+<ul>
+<li>newFixedThreadPool和newSingleThreadExecutor：主要问题是堆积的请求处理队列可能会耗费非常大的内存，甚至OOM。</li>
+<li>newCachedThreadPool和newScheduledThreadPool：要问题是线程数最大数是Integer.MAX_VALUE，可能会创建数量非常多的线程，甚至OOM。</li>
+</ul>
+<p>@Async默认异步配置使用的是SimpleAsyncTaskExecutor，该线程池默认来一个任务创建一个线程，若系统中不断的创建线程，最终会导致系统占用内存过高，引发OutOfMemoryError错误。针对线程创建问题，SimpleAsyncTaskExecutor提供了限流机制，通过concurrencyLimit属性来控制开关，当concurrencyLimit&gt;=0时开启限流机制，默认关闭限流机制即concurrencyLimit=-1，当关闭情况下，会不断创建新的线程来处理任务。基于默认配置，SimpleAsyncTaskExecutor并不是严格意义的线程池，达不到线程复用的功能。</p>
+<h2 id="Async应用自定义线程池"><a href="#Async应用自定义线程池" class="headerlink" title="@Async应用自定义线程池"></a>@Async应用自定义线程池</h2><p>自定义线程池，可对系统中线程池更加细粒度的控制，方便调整线程池大小配置，线程执行异常控制和处理。在设置系统自定义线程池代替默认线程池时，虽可通过多种模式设置，但替换默认线程池最终产生的线程池有且只能设置一个（不能设置多个类继承AsyncConfigurer）自定义线程池有如下模式：</p>
+<ul>
+<li>重新实现接口AsyncConfigurer</li>
+<li>继承AsyncConfigurerSupport</li>
+<li>配置由自定义的TaskExecutor替代内置的任务执行器</li>
+</ul>
+<p>通过查看Spring源码关于@Async的默认调用规则，会优先查询源码中实现AsyncConfigurer这个接口的类，实现这个接口的类为AsyncConfigurerSupport。但默认配置的线程池和异步处理方法均为空，所以，无论是继承或者重新实现接口，都需指定一个线程池。且重新实现 public Executor getAsyncExecutor()方法。</p>
+<h3 id="实现接口AsyncConfigurer"><a href="#实现接口AsyncConfigurer" class="headerlink" title="实现接口AsyncConfigurer"></a>实现接口AsyncConfigurer</h3><p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/5.png"></p>
+<h3 id="继承AsyncConfigurerSupport"><a href="#继承AsyncConfigurerSupport" class="headerlink" title="继承AsyncConfigurerSupport"></a>继承AsyncConfigurerSupport</h3><p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/6.png"></p>
+<h3 id="配置自定义的TaskExecutor"><a href="#配置自定义的TaskExecutor" class="headerlink" title="配置自定义的TaskExecutor"></a>配置自定义的TaskExecutor</h3><p>由于AsyncConfigurer的默认线程池在源码中为空，Spring通过beanFactory.getBean(TaskExecutor.class)先查看是否有线程池，未配置时，通过beanFactory.getBean(DEFAULT_TASK_EXECUTOR_BEAN_NAME, Executor.class)，又查询是否存在默认名称为TaskExecutor的线程池。所以可在项目中，定义名称为TaskExecutor的bean生成一个默认线程池。也可不指定线程池的名称，申明一个线程池，本身底层是基于TaskExecutor.class便可。</p>
+<p>比如：</p>
+<figure class="highlight xl"><table><tr><td class="code"><pre><span class="line">E<span class="function"><span class="title">xecutor</span>.class:ThreadPoolExecutorAdapter-&gt;</span>T<span class="function"><span class="title">hreadPoolExecutor</span>-&gt;</span>A<span class="function"><span class="title">bstractExecutorService</span>-&gt;</span>E<span class="function"><span class="title">xecutorService</span>-&gt;</span>Executor</span><br></pre></td></tr></table></figure>
+
+<p>这样的模式，最终底层为Executor.class，在替换默认的线程池时，需设置默认的线程池名称为TaskExecutor</p>
+<figure class="highlight xl"><table><tr><td class="code"><pre><span class="line">T<span class="function"><span class="title">askExecutor</span>.class:ThreadPoolTaskExecutor-&gt;</span>S<span class="function"><span class="title">chedulingTaskExecutor</span>-&gt;</span>A<span class="function"><span class="title">syncTaskExecutor</span>-&gt;</span>TaskExecutor</span><br></pre></td></tr></table></figure>
+
+<p>这样的模式，最终底层为TaskExecutor.class，在替换默认的线程池时，可不指定线程池名称。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/7.png" alt="img"></p>
+]]></content>
+      <categories>
+        <category>Spring Boot 进阶</category>
+      </categories>
+      <tags>
+        <tag>Spring Boot</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>一口气说出 Redis 16 个常见使用场景</title>
     <url>/2021/08/05/%E4%B8%80%E5%8F%A3%E6%B0%94%E8%AF%B4%E5%87%BA%E5%8D%81%E5%85%AD%E4%B8%ADRedis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/</url>
     <content><![CDATA[<h2 id="1、缓存"><a href="#1、缓存" class="headerlink" title="1、缓存"></a>1、缓存</h2><p>String类型</p>
 <p>例如：热点数据缓存（例如报表、明星出轨），对象缓存、全页缓存、可以提升热点数据的访问数据。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/12.png"></p>
+<span id="more"></span>
+
 <h2 id="2、数据共享分布式"><a href="#2、数据共享分布式" class="headerlink" title="2、数据共享分布式"></a>2、数据共享分布式</h2><p>String 类型，因为 Redis 是分布式的独立服务，可以在多个应用之间共享</p>
 <p>例如：分布式Session</p>
 <figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span> </span><br><span class="line"> <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.session<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span> </span><br><span class="line"> <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-session-data-redis<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
-<span id="more"></span>
+
 
 <h2 id="3、分布式锁"><a href="#3、分布式锁" class="headerlink" title="3、分布式锁"></a>3、分布式锁</h2><p>String 类型setnx方法，只有不存在时才能添加成功，返回true</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">getLock</span><span class="params">(String key)</span> </span>&#123;</span><br><span class="line">    Long flag = jedis.setnx(key, <span class="string">&quot;1&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (flag == <span class="number">1</span>) &#123;</span><br><span class="line">        jedis.expire(key, <span class="number">10</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> flag == <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">releaseLock</span><span class="params">(String key)</span> </span>&#123;</span><br><span class="line">    jedis.del(key);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -578,6 +662,9 @@
     <title>高并发下常见的限流算法都在这了！</title>
     <url>/2021/08/03/%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%8B%E5%B8%B8%E8%A7%81%E7%9A%84%E9%99%90%E6%B5%81%E7%AE%97%E6%B3%95%E9%83%BD%E5%9C%A8%E8%BF%99%E4%BA%86/</url>
     <content><![CDATA[<h2 id="限流简介"><a href="#限流简介" class="headerlink" title="限流简介"></a>限流简介</h2><p>现在说到高可用系统，都会说到高可用的保护手段：缓存、降级和限流，本博文就主要说说限流。限流是流量限速（Rate Limit）的简称，是指只允许指定的事件进入系统，超过的部分将被拒绝服务、排队或等待、降级等处理。对于server服务而言，限流为了保证一部分的请求流量可以得到正常的响应，总好过全部的请求都不能得到响应，甚至导致系统雪崩。限流与熔断经常被人弄混，博主认为它们最大的区别在于限流主要在server实现，而熔断主要在client实现，当然了，一个服务既可以充当server也可以充当client，这也是让限流与熔断同时存在一个服务中，这两个概念才容易被混淆。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/13.png"></p>
+<span id="more"></span>
+
 <p>那为什么需要限流呢？很多人第一反应就是服务扛不住了所以需要限流。这是不全面的说法，博主认为限流是因为资源的稀缺或出于安全防范的目的，采取的自我保护的措施。限流可以保证使用有限的资源提供最大化的服务能力，按照预期流量提供服务，超过的部分将会拒绝服务、排队或等待、降级等处理。关注公众号‘码猿技术专栏’，回复关键词‘9527’获取Spring Cloud Alibaba实战视频教程！</p>
 <p>现在的系统对限流的支持各有不同，但是存在一些标准。在HTTP RFC 6585标准中规定了『429 Too Many Requests 』，429状态码表示用户在给定时间内发送了太多的请求，需要进行限流（“速率限制”），同时包含一个 Retry-After 响应头用于告诉客户端多长时间后可以再次请求服务.</p>
 <figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">HTTP/1.1 429 Too Many Requests</span><br><span class="line">Content-Type: text/html</span><br><span class="line">Retry-After: 3600</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">  </span><br><span class="line">     <span class="tag">&lt;<span class="name">title</span>&gt;</span>Too Many Requests<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">  </span><br><span class="line">  </span><br><span class="line">     <span class="tag">&lt;<span class="name">h1</span>&gt;</span>Too Many Requests<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">p</span>&gt;</span>I only allow 50 requests per hour to this Web site per</span><br><span class="line">        logged in user.  Try again soon.<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line">  </span><br></pre></td></tr></table></figure>
@@ -589,8 +676,6 @@
 <li>X-Rate-Limit-Reset：为了得到最大请求数所等待的秒数。</li>
 </ul>
 <p>这是通过响应头告诉调用方服务端的限流频次是怎样的，保证后端的接口访问上限，客户端也可以根据响应的Header调整请求。</p>
-<span id="more"></span>
-
 <h2 id="限流分类"><a href="#限流分类" class="headerlink" title="限流分类"></a>限流分类</h2><p><code>限流</code>，拆分来看，就两个字<code>限</code>和<code>流</code>，<code>限</code>就是动词限制，很好理解。但是<code>流</code>在不同的场景之下就是不同资源或指标，多样性就在<code>流</code>中体现。在网络流量中可以是字节流，在数据库中可以是TPS，在API中可以是QPS亦可以是并发请求数，在商品中还可以是库存数… …但是不管是哪一种『流』，这个流必须可以<strong>被量化，可以被度量，可以被观察到、可以统计出来</strong>。我们把限流的分类基于不同的方式分为不同的类别，如下图。</p>
 <p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/1.png" alt="img"></p>
 <p>因为篇幅有限，本文只会挑选几个常见的类型分类进行说明。</p>
@@ -1228,6 +1313,9 @@
 <li>电商系统中，一个商品对应一系列的评论。</li>
 <li>交友系统中，某个用户的一系列的好友。</li>
 </ol>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/14.png"></p>
+<span id="more"></span>
+
 <p>Redis中集合的特点无非是一个<code>Key</code>对应一系列的数据， 但是数据的作用往往是为了统计的，比如：</p>
 <ol>
 <li>交友系统中，需要统计每天的新增好友，以及双方的共同好友。</li>
@@ -1236,8 +1324,6 @@
 </ol>
 <p>大型互联网应用中，数据量是巨大的，少说百万，千万，甚至是一个亿，比如电商巨头淘宝，交友巨头微信、微博；办公巨头钉钉等，哪一个的用户不是上亿？</p>
 <p><strong>只有针对不同场景，选择合适的集合，统计才能更方便。</strong> </p>
-<span id="more"></span>
-
 <h2 id="聚合统计"><a href="#聚合统计" class="headerlink" title="聚合统计"></a>聚合统计</h2><p><code>聚合统计</code>指的是多个元素聚合的结果，比如统计多个集合的<strong>交集</strong>、<strong>并集</strong>、<strong>差集</strong></p>
 <p><strong>在你需要对多个集合做聚合统计的时候，Set集合是个不错的选择，除了其中无重复的数据外，Redis还提供了对应的API</strong></p>
 <h3 id="交集"><a href="#交集" class="headerlink" title="交集"></a>交集</h3><p>在上述的例子中交友系统中统计双方的共同好友正是聚合统计中的<code>交集</code>。</p>
