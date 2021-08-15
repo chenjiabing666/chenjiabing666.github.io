@@ -381,6 +381,96 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/08/15/5%E7%A7%8D%E5%85%A8%E5%B1%80ID%E7%94%9F%E6%88%90%E6%96%B9%E5%BC%8F%E3%80%81%E4%BC%98%E7%BC%BA%E7%82%B9%E5%8F%8A%E6%94%B9%E8%BF%9B%E6%96%B9%E6%A1%88%EF%BC%8C%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E5%87%A0%E7%A7%8D%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/08/15/5%E7%A7%8D%E5%85%A8%E5%B1%80ID%E7%94%9F%E6%88%90%E6%96%B9%E5%BC%8F%E3%80%81%E4%BC%98%E7%BC%BA%E7%82%B9%E5%8F%8A%E6%94%B9%E8%BF%9B%E6%96%B9%E6%A1%88%EF%BC%8C%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E5%87%A0%E7%A7%8D%EF%BC%9F/" class="post-title-link" itemprop="url">5种全局ID生成方式、优缺点及改进方案，你知道哪几种？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-08-15 16:27:43 / 修改时间：16:29:12" itemprop="dateCreated datePublished" datetime="2021-08-15T16:27:43+08:00">2021-08-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/08/15/5%E7%A7%8D%E5%85%A8%E5%B1%80ID%E7%94%9F%E6%88%90%E6%96%B9%E5%BC%8F%E3%80%81%E4%BC%98%E7%BC%BA%E7%82%B9%E5%8F%8A%E6%94%B9%E8%BF%9B%E6%96%B9%E6%A1%88%EF%BC%8C%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E5%87%A0%E7%A7%8D%EF%BC%9F/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/08/15/5%E7%A7%8D%E5%85%A8%E5%B1%80ID%E7%94%9F%E6%88%90%E6%96%B9%E5%BC%8F%E3%80%81%E4%BC%98%E7%BC%BA%E7%82%B9%E5%8F%8A%E6%94%B9%E8%BF%9B%E6%96%B9%E6%A1%88%EF%BC%8C%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E5%87%A0%E7%A7%8D%EF%BC%9F/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="全局唯一id介绍"><a href="#全局唯一id介绍" class="headerlink" title="全局唯一id介绍"></a>全局唯一id介绍</h2><p>系统唯一id是我们在设计阶段常常遇到的问题。在复杂的分布式系统中，几乎都需要对大量的数据和消息进行唯一标识。在设计初期，我们需要考虑日后数据量的级别，如果可能会对数据进行分库分表，那么就需要有一个全局唯一id来标识一条数据或记录。生成唯一id的策略有多种，但是每种策略都有它的适用场景、优点以及局限性。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E5%8F%A3%E6%B0%94%E8%AF%B4%E5%87%BA5%E7%A7%8D%E5%85%A8%E5%B1%80ID%E7%94%9F%E6%88%90%E6%96%B9%E6%A1%88/1.png"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/08/15/5%E7%A7%8D%E5%85%A8%E5%B1%80ID%E7%94%9F%E6%88%90%E6%96%B9%E5%BC%8F%E3%80%81%E4%BC%98%E7%BC%BA%E7%82%B9%E5%8F%8A%E6%94%B9%E8%BF%9B%E6%96%B9%E6%A1%88%EF%BC%8C%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E5%87%A0%E7%A7%8D%EF%BC%9F/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/08/13/%E4%B8%A4%E4%B8%87%E5%AD%97%E9%95%BF%E6%96%87%EF%BC%8C%E5%BD%BB%E5%BA%95%E6%90%9E%E6%87%82Kafka/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -406,7 +496,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-08-13 09:22:57 / 修改时间：09:28:28" itemprop="dateCreated datePublished" datetime="2021-08-13T09:22:57+08:00">2021-08-13</time>
+              <time title="创建时间：2021-08-13 09:22:57 / 修改时间：09:31:21" itemprop="dateCreated datePublished" datetime="2021-08-13T09:22:57+08:00">2021-08-13</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -444,14 +534,6 @@
 
       
           <h2 id="1、为什么有消息系统"><a href="#1、为什么有消息系统" class="headerlink" title="1、为什么有消息系统"></a>1、为什么有消息系统</h2><h5 id="1、解耦合"><a href="#1、解耦合" class="headerlink" title="1、解耦合"></a>1、解耦合</h5><h5 id="2、异步处理"><a href="#2、异步处理" class="headerlink" title="2、异步处理"></a>2、异步处理</h5><p>例如电商平台，秒杀活动。</p>
-<p>一般流程会分为：</p>
-<ol>
-<li>风险控制</li>
-<li>库存锁定</li>
-<li>生成订单</li>
-<li>短信通知</li>
-<li>更新数据</li>
-</ol>
 <p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%A4%E4%B8%87%E5%AD%97%E6%90%9E%E6%87%82kafka/18.png"></p>
           <!--noindex-->
             <div class="post-button">
@@ -502,21 +584,23 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2021-08-12 10:44:07 / 修改时间：10:46:55" itemprop="dateCreated datePublished" datetime="2021-08-12T10:44:07+08:00">2021-08-12</time>
+              <time title="创建时间：2021-08-12 10:44:07" itemprop="dateCreated datePublished" datetime="2021-08-12T10:44:07+08:00">2021-08-12</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-08-15 16:30:01" itemprop="dateModified" datetime="2021-08-15T16:30:01+08:00">2021-08-15</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
               </span>
               <span class="post-meta-item-text">分类于</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">开发工具</span></a>
-                </span>
-                  ，
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/%E6%9D%82%E8%B0%88/" itemprop="url" rel="index"><span itemprop="name">杂谈</span></a>
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
                 </span>
             </span>
 
@@ -1047,100 +1131,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/07/31/%E4%BA%94%E5%8D%81%E4%BA%94%E5%BC%A0%E5%9B%BE%E5%91%8A%E8%AF%89%E4%BD%A0%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%81%B5%E9%AD%82%E6%91%86%E6%B8%A1%E8%80%85Nacos%E7%A9%B6%E7%AB%9F%E6%9C%89%E5%A4%9A%E5%BC%BA%EF%BC%9F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/07/31/%E4%BA%94%E5%8D%81%E4%BA%94%E5%BC%A0%E5%9B%BE%E5%91%8A%E8%AF%89%E4%BD%A0%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%81%B5%E9%AD%82%E6%91%86%E6%B8%A1%E8%80%85Nacos%E7%A9%B6%E7%AB%9F%E6%9C%89%E5%A4%9A%E5%BC%BA%EF%BC%9F/" class="post-title-link" itemprop="url">五十五张图告诉你微服务灵魂摆渡者Nacos究竟有多强？</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-07-31 17:48:36 / 修改时间：17:51:49" itemprop="dateCreated datePublished" datetime="2021-07-31T17:48:36+08:00">2021-07-31</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Spring-Cloud-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Cloud 进阶</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2021/07/31/%E4%BA%94%E5%8D%81%E4%BA%94%E5%BC%A0%E5%9B%BE%E5%91%8A%E8%AF%89%E4%BD%A0%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%81%B5%E9%AD%82%E6%91%86%E6%B8%A1%E8%80%85Nacos%E7%A9%B6%E7%AB%9F%E6%9C%89%E5%A4%9A%E5%BC%BA%EF%BC%9F/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2021/07/31/%E4%BA%94%E5%8D%81%E4%BA%94%E5%BC%A0%E5%9B%BE%E5%91%8A%E8%AF%89%E4%BD%A0%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%81%B5%E9%AD%82%E6%91%86%E6%B8%A1%E8%80%85Nacos%E7%A9%B6%E7%AB%9F%E6%9C%89%E5%A4%9A%E5%BC%BA%EF%BC%9F/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>Nacos是阿里巴巴开源的服务注册中心以及配置中心，致力于给开发者提供一款便捷、简单上手的开源框架。</p>
-<p>Nacos究竟有什么惊人的地方呢？看下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/1.png"></p>
-<p>从上图不难看出阿里巴巴的野心，一个Nacos干掉了Spring Cloud的三大组件，分别是<code>注册中心Eureka</code>、<code>服务配置Config</code>，<code>服务总线Bus</code>。</p>
-<p>本文目录结构如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/53.png"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/07/31/%E4%BA%94%E5%8D%81%E4%BA%94%E5%BC%A0%E5%9B%BE%E5%91%8A%E8%AF%89%E4%BD%A0%E5%BE%AE%E6%9C%8D%E5%8A%A1%E7%81%B5%E9%AD%82%E6%91%86%E6%B8%A1%E8%80%85Nacos%E7%A9%B6%E7%AB%9F%E6%9C%89%E5%A4%9A%E5%BC%BA%EF%BC%9F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1212,7 +1202,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">93</span>
+          <span class="site-state-item-count">94</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1225,7 +1215,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-count">19</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
