@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"chenjiabing666.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="整体流程大概如下：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringBoot+Kafka+ELK 完成海量日志收集">
+<meta property="og:url" content="https://chenjiabing666.github.io/2021/08/15/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="整体流程大概如下：">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/1.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/2.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/3.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/4.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/5.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/6.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/7.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/8.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/9.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/10.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/11.png">
+<meta property="article:published_time" content="2021-08-15T12:28:36.000Z">
+<meta property="article:modified_time" content="2021-08-15T12:32:00.267Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="Spring Boot">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/1.png">
+
+<link rel="canonical" href="https://chenjiabing666.github.io/2021/08/15/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SpringBoot+Kafka+ELK 完成海量日志收集 | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+		<div id="container">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/08/15/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SpringBoot+Kafka+ELK 完成海量日志收集
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-08-15 20:28:36 / 修改时间：20:32:00" itemprop="dateCreated datePublished" datetime="2021-08-15T20:28:36+08:00">2021-08-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/08/15/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/08/15/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>整体流程大概如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/1.png"></p>
+<span id="more"></span>
+
+<h3 id="服务器准备"><a href="#服务器准备" class="headerlink" title="服务器准备"></a>服务器准备</h3><p>在这先列出各服务器节点，方便同学们在下文中对照节点查看相应内容</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/2.png"></p>
+<h3 id="SpringBoot项目准备"><a href="#SpringBoot项目准备" class="headerlink" title="SpringBoot项目准备"></a>SpringBoot项目准备</h3><p>引入log4j2替换SpringBoot默认log，demo项目结构如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/3.png"></p>
+<p>pom</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!--  排除spring-boot-starter-logging --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">exclusions</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">exclusion</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-logging<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">exclusion</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">exclusions</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span> </span><br><span class="line"> <span class="comment">&lt;!-- log4j2 --&gt;</span></span><br><span class="line"> <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-log4j2<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span> </span><br><span class="line">   <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.lmax<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>disruptor<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.3.4<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span> </span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span> </span><br></pre></td></tr></table></figure>
+
+<p>log4j2.xml</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">Configuration</span> <span class="attr">status</span>=<span class="string">&quot;INFO&quot;</span> <span class="attr">schema</span>=<span class="string">&quot;Log4J-V2.0.xsd&quot;</span> <span class="attr">monitorInterval</span>=<span class="string">&quot;600&quot;</span> &gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Properties</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Property</span> <span class="attr">name</span>=<span class="string">&quot;LOG_HOME&quot;</span>&gt;</span>logs<span class="tag">&lt;/<span class="name">Property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;FILE_NAME&quot;</span>&gt;</span>collector<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">&quot;patternLayout&quot;</span>&gt;</span>[%d&#123;yyyy-MM-dd&#x27;T&#x27;HH:mm:ss.SSSZZ&#125;] [%level&#123;length=5&#125;] [%thread-%tid] [%logger] [%X&#123;hostName&#125;] [%X&#123;ip&#125;] [%X&#123;applicationName&#125;] [%F,%L,%C,%M] [%m] ## &#x27;%ex&#x27;%n<span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Properties</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Appenders</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">Console</span> <span class="attr">name</span>=<span class="string">&quot;CONSOLE&quot;</span> <span class="attr">target</span>=<span class="string">&quot;SYSTEM_OUT&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">PatternLayout</span> <span class="attr">pattern</span>=<span class="string">&quot;$&#123;patternLayout&#125;&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">Console</span>&gt;</span>  </span><br><span class="line">        <span class="tag">&lt;<span class="name">RollingRandomAccessFile</span> <span class="attr">name</span>=<span class="string">&quot;appAppender&quot;</span> <span class="attr">fileName</span>=<span class="string">&quot;$&#123;LOG_HOME&#125;/app-$&#123;FILE_NAME&#125;.log&quot;</span> <span class="attr">filePattern</span>=<span class="string">&quot;$&#123;LOG_HOME&#125;/app-$&#123;FILE_NAME&#125;-%d&#123;yyyy-MM-dd&#125;-%i.log&quot;</span> &gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">PatternLayout</span> <span class="attr">pattern</span>=<span class="string">&quot;$&#123;patternLayout&#125;&quot;</span> /&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">Policies</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">TimeBasedTriggeringPolicy</span> <span class="attr">interval</span>=<span class="string">&quot;1&quot;</span>/&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">SizeBasedTriggeringPolicy</span> <span class="attr">size</span>=<span class="string">&quot;500MB&quot;</span>/&gt;</span></span><br><span class="line">          <span class="tag">&lt;/<span class="name">Policies</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">DefaultRolloverStrategy</span> <span class="attr">max</span>=<span class="string">&quot;20&quot;</span>/&gt;</span>         </span><br><span class="line">        <span class="tag">&lt;/<span class="name">RollingRandomAccessFile</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">RollingRandomAccessFile</span> <span class="attr">name</span>=<span class="string">&quot;errorAppender&quot;</span> <span class="attr">fileName</span>=<span class="string">&quot;$&#123;LOG_HOME&#125;/error-$&#123;FILE_NAME&#125;.log&quot;</span> <span class="attr">filePattern</span>=<span class="string">&quot;$&#123;LOG_HOME&#125;/error-$&#123;FILE_NAME&#125;-%d&#123;yyyy-MM-dd&#125;-%i.log&quot;</span> &gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">PatternLayout</span> <span class="attr">pattern</span>=<span class="string">&quot;$&#123;patternLayout&#125;&quot;</span> /&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">Filters</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">ThresholdFilter</span> <span class="attr">level</span>=<span class="string">&quot;warn&quot;</span> <span class="attr">onMatch</span>=<span class="string">&quot;ACCEPT&quot;</span> <span class="attr">onMismatch</span>=<span class="string">&quot;DENY&quot;</span>/&gt;</span></span><br><span class="line">          <span class="tag">&lt;/<span class="name">Filters</span>&gt;</span>              </span><br><span class="line">          <span class="tag">&lt;<span class="name">Policies</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">TimeBasedTriggeringPolicy</span> <span class="attr">interval</span>=<span class="string">&quot;1&quot;</span>/&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">SizeBasedTriggeringPolicy</span> <span class="attr">size</span>=<span class="string">&quot;500MB&quot;</span>/&gt;</span></span><br><span class="line">          <span class="tag">&lt;/<span class="name">Policies</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">DefaultRolloverStrategy</span> <span class="attr">max</span>=<span class="string">&quot;20&quot;</span>/&gt;</span>         </span><br><span class="line">        <span class="tag">&lt;/<span class="name">RollingRandomAccessFile</span>&gt;</span>            </span><br><span class="line">    <span class="tag">&lt;/<span class="name">Appenders</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Loggers</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- 业务相关 异步logger --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">AsyncLogger</span> <span class="attr">name</span>=<span class="string">&quot;com.bfxy.*&quot;</span> <span class="attr">level</span>=<span class="string">&quot;info&quot;</span> <span class="attr">includeLocation</span>=<span class="string">&quot;true&quot;</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">AppenderRef</span> <span class="attr">ref</span>=<span class="string">&quot;appAppender&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">AsyncLogger</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">AsyncLogger</span> <span class="attr">name</span>=<span class="string">&quot;com.bfxy.*&quot;</span> <span class="attr">level</span>=<span class="string">&quot;info&quot;</span> <span class="attr">includeLocation</span>=<span class="string">&quot;true&quot;</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">AppenderRef</span> <span class="attr">ref</span>=<span class="string">&quot;errorAppender&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">AsyncLogger</span>&gt;</span>       </span><br><span class="line">        <span class="tag">&lt;<span class="name">Root</span> <span class="attr">level</span>=<span class="string">&quot;info&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">Appender-Ref</span> <span class="attr">ref</span>=<span class="string">&quot;CONSOLE&quot;</span>/&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">Appender-Ref</span> <span class="attr">ref</span>=<span class="string">&quot;appAppender&quot;</span>/&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">AppenderRef</span> <span class="attr">ref</span>=<span class="string">&quot;errorAppender&quot;</span>/&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">Root</span>&gt;</span>         </span><br><span class="line">    <span class="tag">&lt;/<span class="name">Loggers</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Configuration</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>IndexController</p>
+<p>测试Controller，用以打印日志进行调试</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">IndexController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"> <span class="meta">@RequestMapping(value = &quot;/index&quot;)</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> String <span class="title">index</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  InputMDC.putMDC();</span><br><span class="line">  </span><br><span class="line">  log.info(<span class="string">&quot;我是一条info日志&quot;</span>);</span><br><span class="line">  </span><br><span class="line">  log.warn(<span class="string">&quot;我是一条warn日志&quot;</span>);</span><br><span class="line"></span><br><span class="line">  log.error(<span class="string">&quot;我是一条error日志&quot;</span>);</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> <span class="string">&quot;idx&quot;</span>;</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"> <span class="meta">@RequestMapping(value = &quot;/err&quot;)</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> String <span class="title">err</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  InputMDC.putMDC();</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">   <span class="keyword">int</span> a = <span class="number">1</span>/<span class="number">0</span>;</span><br><span class="line">  &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">   log.error(<span class="string">&quot;算术异常&quot;</span>, e);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="string">&quot;err&quot;</span>;</span><br><span class="line"> &#125;</span><br><span class="line"> </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>InputMDC</p>
+<p>用以获取log中的<code>[%X&#123;hostName&#125;]</code>、<code>[%X&#123;ip&#125;]</code>、<code>[%X&#123;applicationName&#125;]</code>三个字段值</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">InputMDC</span> <span class="keyword">implements</span> <span class="title">EnvironmentAware</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">private</span> <span class="keyword">static</span> Environment environment;</span><br><span class="line"> </span><br><span class="line"> <span class="meta">@Override</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setEnvironment</span><span class="params">(Environment environment)</span> </span>&#123;</span><br><span class="line">  InputMDC.environment = environment;</span><br><span class="line"> &#125;</span><br><span class="line"> </span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">putMDC</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  MDC.put(<span class="string">&quot;hostName&quot;</span>, NetUtil.getLocalHostName());</span><br><span class="line">  MDC.put(<span class="string">&quot;ip&quot;</span>, NetUtil.getLocalIp());</span><br><span class="line">  MDC.put(<span class="string">&quot;applicationName&quot;</span>, environment.getProperty(<span class="string">&quot;spring.application.name&quot;</span>));</span><br><span class="line"> &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>NetUtil</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NetUtil</span> </span>&#123;   </span><br><span class="line"> </span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">normalizeAddress</span><span class="params">(String address)</span></span>&#123;</span><br><span class="line">  String[] blocks = address.split(<span class="string">&quot;[:]&quot;</span>);</span><br><span class="line">  <span class="keyword">if</span>(blocks.length &gt; <span class="number">2</span>)&#123;</span><br><span class="line">   <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(address + <span class="string">&quot; is invalid&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  String host = blocks[<span class="number">0</span>];</span><br><span class="line">  <span class="keyword">int</span> port = <span class="number">80</span>;</span><br><span class="line">  <span class="keyword">if</span>(blocks.length &gt; <span class="number">1</span>)&#123;</span><br><span class="line">   port = Integer.valueOf(blocks[<span class="number">1</span>]);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">   address += <span class="string">&quot;:&quot;</span>+port; <span class="comment">//use default 80</span></span><br><span class="line">  &#125; </span><br><span class="line">  String serverAddr = String.format(<span class="string">&quot;%s:%d&quot;</span>, host, port);</span><br><span class="line">  <span class="keyword">return</span> serverAddr;</span><br><span class="line"> &#125;</span><br><span class="line"> </span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">getLocalAddress</span><span class="params">(String address)</span></span>&#123;</span><br><span class="line">  String[] blocks = address.split(<span class="string">&quot;[:]&quot;</span>);</span><br><span class="line">  <span class="keyword">if</span>(blocks.length != <span class="number">2</span>)&#123;</span><br><span class="line">   <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(address + <span class="string">&quot; is invalid address&quot;</span>);</span><br><span class="line">  &#125; </span><br><span class="line">  String host = blocks[<span class="number">0</span>];</span><br><span class="line">  <span class="keyword">int</span> port = Integer.valueOf(blocks[<span class="number">1</span>]);</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">if</span>(<span class="string">&quot;0.0.0.0&quot;</span>.equals(host))&#123;</span><br><span class="line">   <span class="keyword">return</span> String.format(<span class="string">&quot;%s:%d&quot;</span>,NetUtil.getLocalIp(), port);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> address;</span><br><span class="line"> &#125;</span><br><span class="line"> </span><br><span class="line"> <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">matchedIndex</span><span class="params">(String ip, String[] prefix)</span></span>&#123;</span><br><span class="line">  <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;prefix.length; i++)&#123;</span><br><span class="line">   String p = prefix[i];</span><br><span class="line">   <span class="keyword">if</span>(<span class="string">&quot;*&quot;</span>.equals(p))&#123; <span class="comment">//*, assumed to be IP</span></span><br><span class="line">    <span class="keyword">if</span>(ip.startsWith(<span class="string">&quot;127.&quot;</span>) ||</span><br><span class="line">       ip.startsWith(<span class="string">&quot;10.&quot;</span>) || </span><br><span class="line">       ip.startsWith(<span class="string">&quot;172.&quot;</span>) ||</span><br><span class="line">       ip.startsWith(<span class="string">&quot;192.&quot;</span>))&#123;</span><br><span class="line">     <span class="keyword">continue</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> i;</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">if</span>(ip.startsWith(p))&#123;</span><br><span class="line">     <span class="keyword">return</span> i;</span><br><span class="line">    &#125;</span><br><span class="line">   &#125; </span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line"> &#125;</span><br><span class="line"> </span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">getLocalIp</span><span class="params">(String ipPreference)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span>(ipPreference == <span class="keyword">null</span>)&#123;</span><br><span class="line">   ipPreference = <span class="string">&quot;*&gt;10&gt;172&gt;192&gt;127&quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  String[] prefix = ipPreference.split(<span class="string">&quot;[&gt; ]+&quot;</span>);</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">   Pattern pattern = Pattern.compile(<span class="string">&quot;[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+&quot;</span>);</span><br><span class="line">   Enumeration&lt;NetworkInterface&gt; interfaces = NetworkInterface.getNetworkInterfaces();</span><br><span class="line">   String matchedIp = <span class="keyword">null</span>;</span><br><span class="line">   <span class="keyword">int</span> matchedIdx = -<span class="number">1</span>;</span><br><span class="line">   <span class="keyword">while</span> (interfaces.hasMoreElements()) &#123;</span><br><span class="line">    NetworkInterface ni = interfaces.nextElement();</span><br><span class="line">    Enumeration&lt;InetAddress&gt; en = ni.getInetAddresses(); </span><br><span class="line">    <span class="keyword">while</span> (en.hasMoreElements()) &#123;</span><br><span class="line">     InetAddress addr = en.nextElement();</span><br><span class="line">     String ip = addr.getHostAddress();  </span><br><span class="line">     Matcher matcher = pattern.matcher(ip);</span><br><span class="line">     <span class="keyword">if</span> (matcher.matches()) &#123;  </span><br><span class="line">      <span class="keyword">int</span> idx = matchedIndex(ip, prefix);</span><br><span class="line">      <span class="keyword">if</span>(idx == -<span class="number">1</span>) <span class="keyword">continue</span>;</span><br><span class="line">      <span class="keyword">if</span>(matchedIdx == -<span class="number">1</span>)&#123;</span><br><span class="line">       matchedIdx = idx;</span><br><span class="line">       matchedIp = ip;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">       <span class="keyword">if</span>(matchedIdx&gt;idx)&#123;</span><br><span class="line">        matchedIdx = idx;</span><br><span class="line">        matchedIp = ip;</span><br><span class="line">       &#125;</span><br><span class="line">      &#125;</span><br><span class="line">     &#125; </span><br><span class="line">    &#125; </span><br><span class="line">   &#125; </span><br><span class="line">   <span class="keyword">if</span>(matchedIp != <span class="keyword">null</span>) <span class="keyword">return</span> matchedIp;</span><br><span class="line">   <span class="keyword">return</span> <span class="string">&quot;127.0.0.1&quot;</span>;</span><br><span class="line">  &#125; <span class="keyword">catch</span> (Exception e) &#123; </span><br><span class="line">   <span class="keyword">return</span> <span class="string">&quot;127.0.0.1&quot;</span>;</span><br><span class="line">  &#125;</span><br><span class="line"> &#125;</span><br><span class="line"> </span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">getLocalIp</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> getLocalIp(<span class="string">&quot;*&gt;10&gt;172&gt;192&gt;127&quot;</span>);</span><br><span class="line"> &#125;</span><br><span class="line"> </span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">remoteAddress</span><span class="params">(SocketChannel channel)</span></span>&#123;</span><br><span class="line">  SocketAddress addr = channel.socket().getRemoteSocketAddress();</span><br><span class="line">  String res = String.format(<span class="string">&quot;%s&quot;</span>, addr);</span><br><span class="line">  <span class="keyword">return</span> res;</span><br><span class="line"> &#125;</span><br><span class="line"> </span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">localAddress</span><span class="params">(SocketChannel channel)</span></span>&#123;</span><br><span class="line">  SocketAddress addr = channel.socket().getLocalSocketAddress();</span><br><span class="line">  String res = String.format(<span class="string">&quot;%s&quot;</span>, addr);</span><br><span class="line">  <span class="keyword">return</span> addr==<span class="keyword">null</span>? res: res.substring(<span class="number">1</span>);</span><br><span class="line"> &#125;</span><br><span class="line"> </span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">getPid</span><span class="params">()</span></span>&#123;</span><br><span class="line">  RuntimeMXBean runtime = ManagementFactory.getRuntimeMXBean();</span><br><span class="line">        String name = runtime.getName();</span><br><span class="line">        <span class="keyword">int</span> index = name.indexOf(<span class="string">&quot;@&quot;</span>);</span><br><span class="line">        <span class="keyword">if</span> (index != -<span class="number">1</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> name.substring(<span class="number">0</span>, index);</span><br><span class="line">        &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line"> &#125;</span><br><span class="line"> </span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">getLocalHostName</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> (InetAddress.getLocalHost()).getHostName();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (UnknownHostException uhe) &#123;</span><br><span class="line">            String host = uhe.getMessage();</span><br><span class="line">            <span class="keyword">if</span> (host != <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">int</span> colon = host.indexOf(<span class="string">&#x27;:&#x27;</span>);</span><br><span class="line">                <span class="keyword">if</span> (colon &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                    <span class="keyword">return</span> host.substring(<span class="number">0</span>, colon);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;UnknownHost&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>启动项目，访问<code>/index</code>和<code>/ero</code>接口，可以看到项目中生成了<code>app-collector.log</code>和<code>error-collector.log</code>两个日志文件</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/4.png"></p>
+<p>我们将Springboot服务部署在192.168.11.31这台机器上。</p>
+<h3 id="Kafka安装和启用"><a href="#Kafka安装和启用" class="headerlink" title="Kafka安装和启用"></a>Kafka安装和启用</h3><p>kafka下载地址：</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="http://kafka.apache.org/downloads.html">http://kafka.apache.org/downloads.html</a></p>
+</blockquote>
+<p>kafka安装步骤：首先kafka安装需要依赖与zookeeper，所以小伙伴们先准备好zookeeper环境（三个节点即可），然后我们来一起构建kafka broker。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"><span class="comment"># 解压命令：</span></span></span><br><span class="line">tar -zxvf kafka_2.12-2.1.0.tgz -C /usr/local/</span><br><span class="line"><span class="meta">#</span><span class="bash"><span class="comment"># 改名命令：</span></span></span><br><span class="line">mv kafka_2.12-2.1.0/ kafka_2.12</span><br><span class="line"><span class="meta">#</span><span class="bash"><span class="comment"># 进入解压后的目录，修改server.properties文件：</span></span></span><br><span class="line">vim /usr/local/kafka_2.12/config/server.properties</span><br><span class="line"><span class="meta">#</span><span class="bash"><span class="comment"># 修改配置：</span></span></span><br><span class="line">broker.id=0</span><br><span class="line">port=9092</span><br><span class="line">host.name=192.168.11.51</span><br><span class="line">advertised.host.name=192.168.11.51</span><br><span class="line">log.dirs=/usr/local/kafka_2.12/kafka-logs</span><br><span class="line">num.partitions=2</span><br><span class="line">zookeeper.connect=192.168.11.111:2181,192.168.11.112:2181,192.168.11.113:2181</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"><span class="comment"># 建立日志文件夹：</span></span></span><br><span class="line">mkdir /usr/local/kafka_2.12/kafka-logs</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"><span class="comment">#启动kafka：</span></span></span><br><span class="line">/usr/local/kafka_2.12/bin/kafka-server-start.sh /usr/local/kafka_2.12/config/server.properties &amp;</span><br></pre></td></tr></table></figure>
+
+<p>创建两个topic</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"><span class="comment"># 创建topic</span></span></span><br><span class="line">kafka-topics.sh --zookeeper 192.168.11.111:2181 --create --topic app-log-collector --partitions 1  --replication-factor 1</span><br><span class="line">kafka-topics.sh --zookeeper 192.168.11.111:2181 --create --topic error-log-collector --partitions 1  --replication-factor 1 </span><br></pre></td></tr></table></figure>
+
+<p>我们可以查看一下topic情况</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kafka-topics.sh --zookeeper 192.168.11.111:2181 --topic app-log-test --describe</span><br></pre></td></tr></table></figure>
+
+<p>可以看到已经成功启用了<code>app-log-collector</code>和<code>error-log-collector</code>两个topic</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/5.png"></p>
+<h3 id="filebeat安装和启用"><a href="#filebeat安装和启用" class="headerlink" title="filebeat安装和启用"></a>filebeat安装和启用</h3><p>filebeat下载</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/local/software</span><br><span class="line">tar -zxvf filebeat-6.6.0-linux-x86_64.tar.gz -C /usr/local/</span><br><span class="line">cd /usr/local</span><br><span class="line">mv filebeat-6.6.0-linux-x86_64/ filebeat-6.6.0</span><br></pre></td></tr></table></figure>
+
+<p>配置filebeat，可以参考下方yml配置文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">vim /usr/local/filebeat-5.6.2/filebeat.yml</span><br><span class="line"><span class="meta">#</span><span class="bash"><span class="comment">##################### Filebeat Configuration Example #########################</span></span></span><br><span class="line">filebeat.prospectors:</span><br><span class="line"></span><br><span class="line">- input_type: log</span><br><span class="line"></span><br><span class="line">  paths:</span><br><span class="line">    ## app-服务名称.log, 为什么写死，防止发生轮转抓取历史数据</span><br><span class="line">    - /usr/local/logs/app-collector.log</span><br><span class="line"><span class="meta">  #</span><span class="bash">定义写入 ES 时的 _type 值</span></span><br><span class="line">  document_type: &quot;app-log&quot;</span><br><span class="line">  multiline:</span><br><span class="line">    #pattern: &#x27;^\s*(\d&#123;4&#125;|\d&#123;2&#125;)\-(\d&#123;2&#125;|[a-zA-Z]&#123;3&#125;)\-(\d&#123;2&#125;|\d&#123;4&#125;)&#x27;   # 指定匹配的表达式（匹配以 2017-11-15 08:04:23:889 时间格式开头的字符串）</span><br><span class="line">    pattern: &#x27;^\[&#x27;                              # 指定匹配的表达式（匹配以 &quot;&#123; 开头的字符串）</span><br><span class="line">    negate: true                                # 是否匹配到</span><br><span class="line">    match: after                                # 合并到上一行的末尾</span><br><span class="line">    max_lines: 2000                             # 最大的行数</span><br><span class="line">    timeout: 2s                                 # 如果在规定时间没有新的日志事件就不等待后面的日志</span><br><span class="line">  fields:</span><br><span class="line">    logbiz: collector</span><br><span class="line">    logtopic: app-log-collector   ## 按服务划分用作kafka topic</span><br><span class="line">    evn: dev</span><br><span class="line"></span><br><span class="line">- input_type: log</span><br><span class="line"></span><br><span class="line">  paths:</span><br><span class="line">    - /usr/local/logs/error-collector.log</span><br><span class="line">  document_type: &quot;error-log&quot;</span><br><span class="line">  multiline:</span><br><span class="line">    #pattern: &#x27;^\s*(\d&#123;4&#125;|\d&#123;2&#125;)\-(\d&#123;2&#125;|[a-zA-Z]&#123;3&#125;)\-(\d&#123;2&#125;|\d&#123;4&#125;)&#x27;   # 指定匹配的表达式（匹配以 2017-11-15 08:04:23:889 时间格式开头的字符串）</span><br><span class="line">    pattern: &#x27;^\[&#x27;                              # 指定匹配的表达式（匹配以 &quot;&#123; 开头的字符串）</span><br><span class="line">    negate: true                                # 是否匹配到</span><br><span class="line">    match: after                                # 合并到上一行的末尾</span><br><span class="line">    max_lines: 2000                             # 最大的行数</span><br><span class="line">    timeout: 2s                                 # 如果在规定时间没有新的日志事件就不等待后面的日志</span><br><span class="line">  fields:</span><br><span class="line">    logbiz: collector</span><br><span class="line">    logtopic: error-log-collector   ## 按服务划分用作kafka topic</span><br><span class="line">    evn: dev</span><br><span class="line">    </span><br><span class="line">output.kafka:</span><br><span class="line">  enabled: true</span><br><span class="line">  hosts: [&quot;192.168.11.51:9092&quot;]</span><br><span class="line">  topic: &#x27;%&#123;[fields.logtopic]&#125;&#x27;</span><br><span class="line">  partition.hash:</span><br><span class="line">    reachable_only: true</span><br><span class="line">  compression: gzip</span><br><span class="line">  max_message_bytes: 1000000</span><br><span class="line">  required_acks: 1</span><br><span class="line">logging.to_files: true</span><br></pre></td></tr></table></figure>
+
+<p>filebeat启动：</p>
+<p>检查配置是否正确</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/local/filebeat-6.6.0</span><br><span class="line">./filebeat -c filebeat.yml -configtest</span><br><span class="line"><span class="meta">#</span><span class="bash"><span class="comment"># Config OK</span></span></span><br></pre></td></tr></table></figure>
+
+<p>启动filebeat</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/filebeat-6.6.0/filebeat &amp;</span><br></pre></td></tr></table></figure>
+
+<p>检查是否启动成功</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ps -ef | grep filebeat</span><br></pre></td></tr></table></figure>
+
+<p>可以看到filebeat已经启动成功</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/6.png"></p>
+<p>然后我们访问192.168.11.31:8001/index和192.168.11.31:8001/err，再查看kafka的logs文件，可以看到已经生成了app-log-collector-0和error-log-collector-0文件，说明filebeat已经帮我们把数据收集好放到了kafka上。</p>
+<h3 id="logstash安装"><a href="#logstash安装" class="headerlink" title="logstash安装"></a>logstash安装</h3><p>我们在logstash的安装目录下新建一个文件夹</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir scrpit</span><br></pre></td></tr></table></figure>
+
+<p>然后cd进该文件，创建一个<code>logstash-script.conf</code>文件</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line">cd scrpit</span><br><span class="line">vim logstash-script.conf</span><br><span class="line"><span class="meta">#</span><span class="bash"><span class="comment"># multiline 插件也可以用于其他类似的堆栈式信息，比如 linux 的内核日志。</span></span></span><br><span class="line">input &#123;</span><br><span class="line">  kafka &#123;</span><br><span class="line">    ## app-log-服务名称</span><br><span class="line">    topics_pattern =&gt; &quot;app-log-.*&quot;</span><br><span class="line">    bootstrap_servers =&gt; &quot;192.168.11.51:9092&quot;</span><br><span class="line"> codec =&gt; json</span><br><span class="line"> consumer_threads =&gt; 1 ## 增加consumer的并行消费线程数</span><br><span class="line"> decorate_events =&gt; true</span><br><span class="line">    #auto_offset_rest =&gt; &quot;latest&quot;</span><br><span class="line"> group_id =&gt; &quot;app-log-group&quot;</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">   kafka &#123;</span><br><span class="line">    ## error-log-服务名称</span><br><span class="line">    topics_pattern =&gt; &quot;error-log-.*&quot;</span><br><span class="line">    bootstrap_servers =&gt; &quot;192.168.11.51:9092&quot;</span><br><span class="line"> codec =&gt; json</span><br><span class="line"> consumer_threads =&gt; 1</span><br><span class="line"> decorate_events =&gt; true</span><br><span class="line">    #auto_offset_rest =&gt; &quot;latest&quot;</span><br><span class="line"> group_id =&gt; &quot;error-log-group&quot;</span><br><span class="line">   &#125;</span><br><span class="line">   </span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">filter &#123;</span><br><span class="line">  </span><br><span class="line"><span class="meta">  #</span><span class="bash"><span class="comment"># 时区转换</span></span></span><br><span class="line">  ruby &#123;</span><br><span class="line"> code =&gt; &quot;event.set(&#x27;index_time&#x27;,event.timestamp.time.localtime.strftime(&#x27;%Y.%m.%d&#x27;))&quot;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  if &quot;app-log&quot; in [fields][logtopic]&#123;</span><br><span class="line">    grok &#123;</span><br><span class="line">        ## 表达式,这里对应的是Springboot输出的日志格式</span><br><span class="line">        match =&gt; [&quot;message&quot;, &quot;\[%&#123;NOTSPACE:currentDateTime&#125;\] \[%&#123;NOTSPACE:level&#125;\] \[%&#123;NOTSPACE:thread-id&#125;\] \[%&#123;NOTSPACE:class&#125;\] \[%&#123;DATA:hostName&#125;\] \[%&#123;DATA:ip&#125;\] \[%&#123;DATA:applicationName&#125;\] \[%&#123;DATA:location&#125;\] \[%&#123;DATA:messageInfo&#125;\] ## (\&#x27;\&#x27;|%&#123;QUOTEDSTRING:throwable&#125;)&quot;]</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  if &quot;error-log&quot; in [fields][logtopic]&#123;</span><br><span class="line">    grok &#123;</span><br><span class="line">        ## 表达式</span><br><span class="line">        match =&gt; [&quot;message&quot;, &quot;\[%&#123;NOTSPACE:currentDateTime&#125;\] \[%&#123;NOTSPACE:level&#125;\] \[%&#123;NOTSPACE:thread-id&#125;\] \[%&#123;NOTSPACE:class&#125;\] \[%&#123;DATA:hostName&#125;\] \[%&#123;DATA:ip&#125;\] \[%&#123;DATA:applicationName&#125;\] \[%&#123;DATA:location&#125;\] \[%&#123;DATA:messageInfo&#125;\] ## (\&#x27;\&#x27;|%&#123;QUOTEDSTRING:throwable&#125;)&quot;]</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">&#125;</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"><span class="comment"># 测试输出到控制台：</span></span></span><br><span class="line">output &#123;</span><br><span class="line">  stdout &#123; codec =&gt; rubydebug &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="meta">#</span><span class="bash"><span class="comment"># elasticsearch：</span></span></span><br><span class="line">output &#123;</span><br><span class="line"></span><br><span class="line">  if &quot;app-log&quot; in [fields][logtopic]&#123;</span><br><span class="line"><span class="meta"> #</span><span class="bash"><span class="comment"># es插件</span></span></span><br><span class="line"> elasticsearch &#123;</span><br><span class="line">       # es服务地址</span><br><span class="line">        hosts =&gt; [&quot;192.168.11.35:9200&quot;]</span><br><span class="line">        # 用户名密码      </span><br><span class="line">        user =&gt; &quot;elastic&quot;</span><br><span class="line">        password =&gt; &quot;123456&quot;</span><br><span class="line">        ## 索引名，+ 号开头的，就会自动认为后面是时间格式：</span><br><span class="line">        ## javalog-app-service-2019.01.23 </span><br><span class="line">        index =&gt; &quot;app-log-%&#123;[fields][logbiz]&#125;-%&#123;index_time&#125;&quot;</span><br><span class="line">        # 是否嗅探集群ip：一般设置true；http://192.168.11.35:9200/_nodes/http?pretty</span><br><span class="line">        # 通过嗅探机制进行es集群负载均衡发日志消息</span><br><span class="line">        sniffing =&gt; true</span><br><span class="line">        # logstash默认自带一个mapping模板，进行模板覆盖</span><br><span class="line">        template_overwrite =&gt; true</span><br><span class="line">    &#125; </span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  if &quot;error-log&quot; in [fields][logtopic]&#123;</span><br><span class="line"> elasticsearch &#123;</span><br><span class="line">        hosts =&gt; [&quot;192.168.11.35:9200&quot;]    </span><br><span class="line">        user =&gt; &quot;elastic&quot;</span><br><span class="line">        password =&gt; &quot;123456&quot;</span><br><span class="line">        index =&gt; &quot;error-log-%&#123;[fields][logbiz]&#125;-%&#123;index_time&#125;&quot;</span><br><span class="line">        sniffing =&gt; true</span><br><span class="line">        template_overwrite =&gt; true</span><br><span class="line">    &#125; </span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>启动logstash</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/logstash-6.6.0/bin/logstash -f /usr/local/logstash-6.6.0/script/logstash-script.conf &amp;</span><br></pre></td></tr></table></figure>
+
+<p>等待启动成功，我们再次访问<code>192.168.11.31:8001/err</code></p>
+<p>可以看到控制台开始打印日志</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/7.png"></p>
+<h3 id="ElasticSearch与Kibana"><a href="#ElasticSearch与Kibana" class="headerlink" title="ElasticSearch与Kibana"></a>ElasticSearch与Kibana</h3><p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/8.png"></p>
+<p>ES和Kibana的搭建之前没写过博客，网上资料也比较多，大家可以自行搜索。</p>
+<p>搭建完成后，访问Kibana的管理页面<code>192.168.11.35:5601</code>，选择Management -&gt; Kinaba - Index Patterns</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/9.png"></p>
+<p>然后Create index pattern</p>
+<ul>
+<li>index pattern 输入 <code>app-log-*</code></li>
+<li>Time Filter field name 选择 currentDateTime</li>
+</ul>
+<p>这样我们就成功创建了索引。</p>
+<p>我们再次访问<code>192.168.11.31:8001/err</code>，这个时候就可以看到我们已经命中了一条log信息</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/10.png"></p>
+<p>里面展示了日志的全量信息</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/11.png"></p>
+<p>到这里，我们完整的日志收集及可视化就搭建完成了！</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    不才陈某  |  微信公众号【码猿技术专栏】
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://chenjiabing666.github.io/2021/08/15/SpringBoot+Kafka+ELK%20%E5%AE%8C%E6%88%90%E6%B5%B7%E9%87%8F%E6%97%A5%E5%BF%97%E6%94%B6%E9%9B%86/" title="SpringBoot+Kafka+ELK 完成海量日志收集">https://chenjiabing666.github.io/2021/08/15/SpringBoot+Kafka+ELK 完成海量日志收集/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+  <li class="post-copyright-license">
+    并保留本声明和上方二维码。感谢您的阅读和支持！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">微信公众号</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Spring-Boot/" rel="tag"># Spring Boot</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/08/15/5%E7%A7%8D%E5%85%A8%E5%B1%80ID%E7%94%9F%E6%88%90%E6%96%B9%E5%BC%8F%E3%80%81%E4%BC%98%E7%BC%BA%E7%82%B9%E5%8F%8A%E6%94%B9%E8%BF%9B%E6%96%B9%E6%A1%88%EF%BC%8C%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E5%87%A0%E7%A7%8D%EF%BC%9F/" rel="prev" title="5种全局ID生成方式、优缺点及改进方案，你知道哪几种？">
+      <i class="fa fa-chevron-left"></i> 5种全局ID生成方式、优缺点及改进方案，你知道哪几种？
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+		  <script src="https://readmore.openwrite.cn/js/readmore.js" type="text/javascript"></script>
+<script>
+    const btw = new BTWPlugin();
+    btw.init({
+        id: 'container',
+        blogId: '27513-1629019452485-311',
+        name: '码猿技术专栏',
+        qrcode: 'https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg',
+        keyword: 'vip',
+    });
+</script>
+        </div>
+		</div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%87%86%E5%A4%87"><span class="nav-text">服务器准备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SpringBoot%E9%A1%B9%E7%9B%AE%E5%87%86%E5%A4%87"><span class="nav-text">SpringBoot项目准备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kafka%E5%AE%89%E8%A3%85%E5%92%8C%E5%90%AF%E7%94%A8"><span class="nav-text">Kafka安装和启用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#filebeat%E5%AE%89%E8%A3%85%E5%92%8C%E5%90%AF%E7%94%A8"><span class="nav-text">filebeat安装和启用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#logstash%E5%AE%89%E8%A3%85"><span class="nav-text">logstash安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ElasticSearch%E4%B8%8EKibana"><span class="nav-text">ElasticSearch与Kibana</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="不才陈某"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">95</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png" title="微信公众号 → https:&#x2F;&#x2F;gitee.com&#x2F;chenjiabing666&#x2F;BlogImage&#x2F;raw&#x2F;master&#x2F;myjszl_log.png" rel="noopener" target="_blank"><i class="fab fa-weixin fa-fw"></i>微信公众号</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.im/user/2506542244708072" title="掘金 → https:&#x2F;&#x2F;juejin.im&#x2F;user&#x2F;2506542244708072" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>掘金</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某|公众号：码猿技术专栏</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RtlQOgOT3M0hgyMeogykSQjT-gzGzoHsz',
+      appKey     : 'vSCxLU88wnXVf0Pa8mwJrCPm',
+      placeholder: "欢迎关注博主微信公众号【码猿技术专栏】",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
