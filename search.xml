@@ -469,6 +469,8 @@
 <li>IDE: IntelliJ IDEA 2019.2</li>
 <li>Test: Postman 7.23.0</li>
 </ul>
+<span id="more"></span>
+
 <h2 id="Part2功能"><a href="#Part2功能" class="headerlink" title="Part2功能"></a>Part2功能</h2><p>本教程中，使用Spring 2.2.6实现Restful风格的APIs并提供以下的功能：</p>
 <ol>
 <li>客户端上传文件到服务端</li>
@@ -478,8 +480,6 @@
 </ol>
 <p>下面是教程所实现的APIs列表（服务端请求端口默认8080）：</p>
 <p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot%202.0%E5%AE%9E%E7%8E%B0%E5%9F%BA%E4%BA%8ERestful%E9%A3%8E%E6%A0%BC%E7%9A%84%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E4%B8%8E%E4%B8%8B%E8%BD%BD/1.png"></p>
-<span id="more"></span>
-
 <h2 id="Part3工程结构"><a href="#Part3工程结构" class="headerlink" title="Part3工程结构"></a>Part3工程结构</h2><p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/SpringBoot%202.0%E5%AE%9E%E7%8E%B0%E5%9F%BA%E4%BA%8ERestful%E9%A3%8E%E6%A0%BC%E7%9A%84%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E4%B8%8E%E4%B8%8B%E8%BD%BD/2.png"></p>
 <p>工程目录结构说明如下：</p>
 <ol>
