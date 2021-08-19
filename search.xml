@@ -469,6 +469,8 @@
 <li>IDE: IntelliJ IDEA 2019.2</li>
 <li>Test: Postman 7.23.0</li>
 </ul>
+<span id="more"></span>
+
 <h2 id="Part2功能"><a href="#Part2功能" class="headerlink" title="Part2功能"></a>Part2功能</h2><p>本教程中，使用Spring 2.2.6实现Restful风格的APIs并提供以下的功能：</p>
 <ol>
 <li>客户端上传文件到服务端</li>
