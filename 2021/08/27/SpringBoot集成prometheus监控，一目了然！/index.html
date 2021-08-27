@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"chenjiabing666.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="在本文中， 我们来学习使用Spring Actuator，Micrometer，Prometheus和Grafana监控Spring Boot应用程序。你可能觉得这需要大量工作，但是其实很容易！ 1、简介当某个应用程序在生产环境中运行时，监控其运行状况是必要的。通过实时了解应用程序的运行状况，你能在问题出现之前得到警告，也可以在客户注意到问题之前解决问题。在本文中，我们将创建一个Spring Bo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringBoot集成prometheus监控，一目了然！">
+<meta property="og:url" content="https://chenjiabing666.github.io/2021/08/27/SpringBoot%E9%9B%86%E6%88%90prometheus%E7%9B%91%E6%8E%A7%EF%BC%8C%E4%B8%80%E7%9B%AE%E4%BA%86%E7%84%B6%EF%BC%81/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="在本文中， 我们来学习使用Spring Actuator，Micrometer，Prometheus和Grafana监控Spring Boot应用程序。你可能觉得这需要大量工作，但是其实很容易！ 1、简介当某个应用程序在生产环境中运行时，监控其运行状况是必要的。通过实时了解应用程序的运行状况，你能在问题出现之前得到警告，也可以在客户注意到问题之前解决问题。在本文中，我们将创建一个Spring Bo">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/1.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/2.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/3.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/4.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/5.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/6.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/7.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/8.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/9.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/10.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/11.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/12.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/13.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/14.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/15.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/16.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/17.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/18.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/19.png">
+<meta property="article:published_time" content="2021-08-27T02:29:17.000Z">
+<meta property="article:modified_time" content="2021-08-27T02:30:27.973Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="Spring Boot">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/1.png">
+
+<link rel="canonical" href="https://chenjiabing666.github.io/2021/08/27/SpringBoot%E9%9B%86%E6%88%90prometheus%E7%9B%91%E6%8E%A7%EF%BC%8C%E4%B8%80%E7%9B%AE%E4%BA%86%E7%84%B6%EF%BC%81/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>SpringBoot集成prometheus监控，一目了然！ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+		<div id="container">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/08/27/SpringBoot%E9%9B%86%E6%88%90prometheus%E7%9B%91%E6%8E%A7%EF%BC%8C%E4%B8%80%E7%9B%AE%E4%BA%86%E7%84%B6%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          SpringBoot集成prometheus监控，一目了然！
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-08-27 10:29:17 / 修改时间：10:30:27" itemprop="dateCreated datePublished" datetime="2021-08-27T10:29:17+08:00">2021-08-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/08/27/SpringBoot%E9%9B%86%E6%88%90prometheus%E7%9B%91%E6%8E%A7%EF%BC%8C%E4%B8%80%E7%9B%AE%E4%BA%86%E7%84%B6%EF%BC%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/08/27/SpringBoot%E9%9B%86%E6%88%90prometheus%E7%9B%91%E6%8E%A7%EF%BC%8C%E4%B8%80%E7%9B%AE%E4%BA%86%E7%84%B6%EF%BC%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在本文中， 我们来学习使用Spring Actuator，Micrometer，Prometheus和Grafana监控Spring Boot应用程序。你可能觉得这需要大量工作，但是其实很容易！</p>
+<h2 id="1、简介"><a href="#1、简介" class="headerlink" title="1、简介"></a>1、简介</h2><p>当某个应用程序在生产环境中运行时，监控其运行状况是必要的。通过实时了解应用程序的运行状况，你能在问题出现之前得到警告，也可以在客户注意到问题之前解决问题。在本文中，我们将创建一个Spring Boot应用程序，在Spring Actuator，Micrometer，Prometheus和Grafana的帮助下来监控系统。其中，Spring Actuator和Micrometer是Spring Boot App的一部分。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/1.png"></p>
+<span id="more"></span>
+
+<p>简要说明了不同组件的目的：</p>
+<ul>
+<li><code>Spring Actuator</code>：在应用程序里提供众多 Web 接口，通过它们了解应用程序运行时的内部状况。有关更多信息，请参见Spring Boot 2.0中的Spring Boot Actuator。</li>
+<li><code>Micrometer</code>：为 Java 平台上的性能数据收集提供了一个通用的 API，它提供了多种度量指标类型（Timers、Guauges、Counters等），同时支持接入不同的监控系统，例如 Influxdb、Graphite、Prometheus 等。Spring Boot Actuator对此提供了支持。</li>
+<li><code>Prometheus</code>：一个时间序列数据库，用于收集指标。</li>
+<li><code>Grafana</code>：用于显示指标的仪表板。</li>
+</ul>
+<p>下面，我们将分别介绍每个组件。本文中使用的代码存档在GitHub上。</p>
+<h2 id="2、创建示例应用"><a href="#2、创建示例应用" class="headerlink" title="2、创建示例应用"></a>2、创建示例应用</h2><p>首先要做的是创建一个可以监控的应用程序。通过<code>Spring Initializr</code>，并添加Spring Boot Actuator，Prometheus和Spring Web依赖项， 我们创建了一个如下所示的Spring MVC应用程序。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MetricsController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"><span class="meta">@GetMapping(&quot;/endPoint1&quot;)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">endPoint1</span><span class="params">()</span> </span>&#123;</span><br><span class="line"><span class="keyword">return</span> <span class="string">&quot;Metrics for endPoint1&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@GetMapping(&quot;/endPoint2&quot;)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">endPoint2</span><span class="params">()</span> </span>&#123;</span><br><span class="line"><span class="keyword">return</span> <span class="string">&quot;Metrics for endPoint2&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>启动应用程序：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> mvn spring-boot:run</span></span><br></pre></td></tr></table></figure>
+
+<p>验证接口是否正常：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> curl http://localhost:8080/endPoint1Metrics <span class="keyword">for</span> endPoint1$ curl http://localhost:8080/endPoint2Metrics <span class="keyword">for</span> endPoint2</span></span><br></pre></td></tr></table></figure>
+
+<p>验证Spring Actuator接口。为了使响应信息方便可读，我们通过python -mjson.tool来格式化信息。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">$ curl http:<span class="comment">//localhost:8080/actuator | python -mjson.tool</span></span><br><span class="line">...</span><br><span class="line">&#123;</span><br><span class="line"><span class="attr">&quot;_links&quot;</span>:&#123;</span><br><span class="line"><span class="attr">&quot;self&quot;</span>:&#123;</span><br><span class="line"><span class="attr">&quot;href&quot;</span>:<span class="string">&quot;http://localhost:8080/actuator&quot;</span>,</span><br><span class="line"><span class="attr">&quot;templated&quot;</span>:<span class="literal">false</span></span><br><span class="line">      &#125;,</span><br><span class="line"><span class="attr">&quot;health&quot;</span>:&#123;</span><br><span class="line"><span class="attr">&quot;href&quot;</span>:<span class="string">&quot;http://localhost:8080/actuator/health&quot;</span>,</span><br><span class="line"><span class="attr">&quot;templated&quot;</span>:<span class="literal">false</span></span><br><span class="line">      &#125;,</span><br><span class="line"><span class="attr">&quot;health-path&quot;</span>:&#123;</span><br><span class="line"><span class="attr">&quot;href&quot;</span>:<span class="string">&quot;http://localhost:8080/actuator/health/&#123;*path&#125;&quot;</span>,</span><br><span class="line"><span class="attr">&quot;templated&quot;</span>:<span class="literal">true</span></span><br><span class="line">      &#125;,</span><br><span class="line"><span class="attr">&quot;info&quot;</span>:&#123;</span><br><span class="line"><span class="attr">&quot;href&quot;</span>:<span class="string">&quot;http://localhost:8080/actuator/info&quot;</span>,</span><br><span class="line"><span class="attr">&quot;templated&quot;</span>:<span class="literal">false</span></span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>默认情况下，会显示以上信息。除此之外，Spring Actuator可以提供更多信息，但是你需要启用它。为了启用Prometheus，你需要将以下信息添加到application.properties文件中。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">management.endpoints.web.exposure.include=health,info,prometheus</span><br></pre></td></tr></table></figure>
+
+<p>重启应用程序，访问<a target="_blank" rel="noopener" href="http://localhost:8080/actuator/prometheus%E4%BB%8EPrometheus%E6%8B%89%E5%8F%96%E6%95%B0%E6%8D%AE%EF%BC%8C%E8%BF%94%E5%9B%9E%E4%BA%86%E5%A4%A7%E9%87%8F%E5%8F%AF%E7%94%A8%E7%9A%84%E6%8C%87%E6%A0%87%E4%BF%A1%E6%81%AF%E3%80%82%E6%88%91%E4%BB%AC%E8%BF%99%E9%87%8C%E5%8F%AA%E6%98%BE%E7%A4%BA%E8%BE%93%E5%87%BA%E7%9A%84%E4%B8%80%E5%B0%8F%E9%83%A8%E5%88%86%EF%BC%8C%E5%9B%A0%E4%B8%BA%E5%AE%83%E6%98%AF%E4%B8%80%E4%B8%AA%E5%BE%88%E9%95%BF%E7%9A%84%E5%88%97%E8%A1%A8%E3%80%82">http://localhost:8080/actuator/prometheus从Prometheus拉取数据，返回了大量可用的指标信息。我们这里只显示输出的一小部分，因为它是一个很长的列表。</a></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">$ curl http:<span class="comment">//localhost:8080/actuator/prometheus</span></span><br><span class="line"># HELP jvm_gc_pause_seconds Time spent in GC pause</span><br><span class="line"># TYPE jvm_gc_pause_seconds summary</span><br><span class="line">jvm_gc_pause_seconds_count&#123;action=<span class="attr">&quot;end of minor GC&quot;</span>,cause=<span class="attr">&quot;G1 Evacuation Pause&quot;</span>,&#125; <span class="number">2.0</span></span><br><span class="line">jvm_gc_pause_seconds_sum&#123;action=<span class="attr">&quot;end of minor GC&quot;</span>,cause=<span class="attr">&quot;G1 Evacuation Pause&quot;</span>,&#125; <span class="number">0.009</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>如前所述，还需要Micrometer。<code>Micrometer</code>为最流行的监控系统提供了一个简单的仪表板，允许仪表化JVM应用，而无需关心是哪个供应商提供的指标。它的作用和<code>SLF4J</code>类似，只不过它关注的不是Logging（日志），而是application metrics（应用指标）。简而言之，它就是应用监控界的SLF4J。</p>
+<p>Spring Boot Actuator为Micrometer提供了自动配置。Spring Boot2在spring-boot-actuator中引入了micrometer，对1.x的metrics进行了重构，另外支持对接的监控系统也更加丰富(<code>Atlas</code>、<code>Datadog</code>、<code>Ganglia</code>、<code>Graphite</code>、<code>Influx</code>、<code>JMX</code>、<code>NewRelic</code>、<code>Prometheus</code>、<code>SignalFx</code>、<code>StatsD</code>、<code>Wavefront</code>)。</p>
+<p>更新后的<code>application.properties</code>文件如下所示：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">management.endpoints.web.exposure.include</span>=<span class="string">health,info,metrics,prometheus</span></span><br></pre></td></tr></table></figure>
+
+<p>重启应用程序，并从<code>http://localhost:8080/actuator/metrics</code>中检索数据。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">$ curl http:<span class="comment">//localhost:8080/actuator/metrics | python -mjson.tool</span></span><br><span class="line">...</span><br><span class="line">&#123;</span><br><span class="line"><span class="attr">&quot;names&quot;</span>: [</span><br><span class="line"><span class="string">&quot;http.server.requests&quot;</span>,</span><br><span class="line"><span class="string">&quot;jvm.buffer.count&quot;</span>,</span><br><span class="line"><span class="string">&quot;jvm.buffer.memory.used&quot;</span>,</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>可以直接通过指标名来检索具体信息。例如，如果查询<code>http.server.requests</code>指标，可以按以下方式检索：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">$ curl http:<span class="comment">//localhost:8080/actuator/metrics/http.server.requests | python -mjson.tool</span></span><br><span class="line">...</span><br><span class="line">&#123;</span><br><span class="line"><span class="attr">&quot;name&quot;</span>: <span class="string">&quot;http.server.requests&quot;</span>,</span><br><span class="line"><span class="attr">&quot;description&quot;</span>: <span class="literal">null</span>,</span><br><span class="line"><span class="attr">&quot;baseUnit&quot;</span>: <span class="string">&quot;seconds&quot;</span>,</span><br><span class="line"><span class="attr">&quot;measurements&quot;</span>: [</span><br><span class="line">        &#123;</span><br><span class="line"><span class="attr">&quot;statistic&quot;</span>: <span class="string">&quot;COUNT&quot;</span>,</span><br><span class="line"><span class="attr">&quot;value&quot;</span>: <span class="number">3.0</span></span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line"><span class="attr">&quot;statistic&quot;</span>: <span class="string">&quot;TOTAL_TIME&quot;</span>,</span><br><span class="line"><span class="attr">&quot;value&quot;</span>: <span class="number">0.08918682</span></span><br><span class="line">        &#125;,</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h2 id=""><a href="#" class="headerlink" title=""></a></h2><h2 id="3、添加Prometheus"><a href="#3、添加Prometheus" class="headerlink" title="3、添加Prometheus"></a>3、添加Prometheus</h2><p>Prometheus是Cloud Native Computing Foundation的一个开源监控系统。由于我们的应用程序中有一个<code>/actuator/Prometheus</code>端点来供 Prometheus 抓取数据，因此你现在可以配置Prometheus来监控你的Spring Boot应用程序。</p>
+<p>Prometheus有几种安装方法，在本文中，我们将在Docker容器中运行Prometheus。</p>
+<p>你需要创建一个<code>prometheus.yml</code>文件，以添加到Docker容器中。</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">global:</span><br><span class="line">scrape_interval:<span class="number">15</span>s</span><br><span class="line"></span><br><span class="line">scrape_configs:</span><br><span class="line">- job_name: &#x27;myspringmetricsplanet&#x27;</span><br><span class="line">metrics_path: &#x27;/actuator/prometheus&#x27;</span><br><span class="line">static_configs:</span><br><span class="line">- targets: [&#x27;HOST:<span class="number">8080</span>&#x27;]</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>scrape_interval</code>：Prometheus多久轮询一次应用程序的指标</li>
+<li><code>job_name</code>：轮询任务名称</li>
+<li><code>metrics_path</code>：指标的URL的路径</li>
+<li><code>targets</code>：主机名和端口号。使用时，替换HOST为主机的IP地址</li>
+</ul>
+<p>如果在Linux上查找IP地址有困难，则可以使用以下命令：</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$</span> ip <span class="operator">-f</span> inet <span class="literal">-o</span> addr show docker0 | awk <span class="string">&#x27;&#123;print $4&#125;&#x27;</span> | cut <span class="literal">-d</span> <span class="string">&#x27;/&#x27;</span> <span class="operator">-f</span> <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>启动Docker容器并将本地<code>prometheus.yml</code>文件，映射到Docker容器中的文件。</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ docker run \</span><br><span class="line">    -p <span class="number">9090</span>:<span class="number">9090</span> \</span><br><span class="line">    -v <span class="regexp">/path/</span>to<span class="regexp">/prometheus.yml:/</span>etc<span class="regexp">/prometheus/</span>prometheus.yml \</span><br><span class="line">    prom/prometheus</span><br></pre></td></tr></table></figure>
+
+<p>成功启动Docker容器后，首先验证Prometheus是否能够通过 <code>http://localhost:9090/targets</code>收集数据。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/2.png"></p>
+<p>如上图所示，我们遇到<code>context deadline exceeded</code>错误，造成Prometheus无法访问主机上运行的Spring Boot应用程序。如何解决呢？</p>
+<p>可以通过将Docker容器添加到你的主机网络来解决此错误，这将使Prometheus能够访问Spring Boot应用程序。</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">$ docker run \</span><br><span class="line">    --name prometheus \</span><br><span class="line">    --network host \</span><br><span class="line">    -v <span class="regexp">/path/</span>to<span class="regexp">/prometheus.yml:/</span>etc<span class="regexp">/prometheus/</span>prometheus.yml \</span><br><span class="line">    -d \</span><br><span class="line">    prom/prometheus</span><br></pre></td></tr></table></figure>
+
+<p>再次验证，状态指示为UP。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/3.png"></p>
+<p>现在可以显示Prometheus指标。通过访问<code>http://localhost:9090/graph</code>，在搜索框中输入<code>http_server_requests_seconds_max</code>并单击“执行”按钮，将为你提供请求期间的最长执行时间。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/4.png"></p>
+<h2 id="4、添加Grafana"><a href="#4、添加Grafana" class="headerlink" title="4、添加Grafana"></a>4、添加Grafana</h2><p>最后添加的组件是Grafana。尽管Prometheus可以显示指标，但Grafana可以帮助你在更精美的仪表板中显示指标。Grafana也支持几种安装方式，在本文中，我们也将在Docker容器中运行它。</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ docker <span class="built_in">run</span> <span class="comment">--name grafana -d -p 3000:3000 grafana/grafana</span></span><br></pre></td></tr></table></figure>
+
+<p>点击 <code>http://localhost:3000/</code>，就可以访问Grafana。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/5.png"></p>
+<p>默认的用户名/密码为<code>admin/admin</code>。单击“登录”按钮后，你需要更改默认密码。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/6.png"></p>
+<p>接下来要做的是添加一个数据源。单击左侧边栏中的“配置”图标，然后选择“Data Sources(数据源)”。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/7.png"></p>
+<p>单击<code>Add data source</code>（添加数据源）按钮。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/8.png"></p>
+<p>Prometheus在列表的顶部，选择Prometheus。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/9.png"></p>
+<p>填写可访问Prometheus的URL，将<code>HTTP Access</code>设置为<code>Browser</code>，然后单击页面底部的<code>Save＆Test</code>按钮。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/10.png"></p>
+<p>一切正常后，将显示绿色的通知标语，指示数据源正在工作。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/11.png"></p>
+<p>现在该创建仪表板了。你可以自定义一个，但也可以使用开源的仪表板。用于显示Spring Boot指标的一种常用仪表板是JVM仪表板。</p>
+<p>在左侧边栏中，点击+号，然后选择导入。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/12.png"></p>
+<p>输入JVM仪表板的URL <a target="_blank" rel="noopener" href="https://grafana.com/grafana/dashboards/4701%EF%BC%8C%E7%84%B6%E5%90%8E%E5%8D%95%E5%87%BB%E2%80%9CLoad(%E5%8A%A0%E8%BD%BD)%E2%80%9D%E6%8C%89%E9%92%AE%E3%80%82">https://grafana.com/grafana/dashboards/4701，然后单击“Load(加载)”按钮。</a></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/13.png"></p>
+<p>为仪表板输入一个有意义的名称（例如MySpringMonitoringPlanet），选择Prometheus作为数据源，然后单击Import按钮。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/14.png"></p>
+<p>到目前为止，你就可以使用一个很酷的Grafana仪表板。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/15.png"></p>
+<p>也可以将自定义面板添加到仪表板。在仪表板顶部，单击Add panel（添加面板）图标。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/16.png"></p>
+<p>单击Add new panel（添加新面板）。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/17.png"></p>
+<p>在Metrics 字段中，输入http_server_requests_seconds_max，在右侧栏中的Panel title字段中，可以输入面板的名称。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/18.png"></p>
+<p>最后，单击右上角的Apply 按钮，你的面板将添加到仪表板。不要忘记保存仪表板。</p>
+<p>为应用程序设置一些负载，并查看仪表板上的http_server_requests_seconds_max指标发生了什么。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span><span class="bash"> watch -n 5 curl http://localhost:8080/endPoint1$ watch -n 10 curl http://localhost:8080/endPoint2</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/19.png"></p>
+<h2 id="5、结论"><a href="#5、结论" class="headerlink" title="5、结论"></a>5、结论</h2><p>在本文中，我们学习了如何为Spring Boot应用程序添加一些基本监控。这非常容易，只需要通过将Spring Actuator，Micrometer，Prometheus和Grafana组合使用。当然，这只是一个起点，但是从这里开始，你可以为Spring Boot应用程序扩展和配置更多、更具体的指标。</p>
+<p>参考：<a target="_blank" rel="noopener" href="https://www.kubernetes.org.cn/9020.html">https://www.kubernetes.org.cn/9020.html</a></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    不才陈某  |  微信公众号【码猿技术专栏】
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://chenjiabing666.github.io/2021/08/27/SpringBoot%E9%9B%86%E6%88%90prometheus%E7%9B%91%E6%8E%A7%EF%BC%8C%E4%B8%80%E7%9B%AE%E4%BA%86%E7%84%B6%EF%BC%81/" title="SpringBoot集成prometheus监控，一目了然！">https://chenjiabing666.github.io/2021/08/27/SpringBoot集成prometheus监控，一目了然！/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+  <li class="post-copyright-license">
+    并保留本声明和上方二维码。感谢您的阅读和支持！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">微信公众号</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Spring-Boot/" rel="tag"># Spring Boot</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/08/22/%E5%85%AD%E7%A7%8D%E6%96%B9%E5%BC%8F%EF%BC%8C%E6%95%99%E4%BD%A0%E5%9C%A8SpringBoot%E5%88%9D%E5%A7%8B%E5%8C%96%E6%97%B6%E6%90%9E%E7%82%B9%E4%BA%8B%E6%83%85%EF%BC%81/" rel="prev" title="六种方式，教你在SpringBoot初始化时搞点事情！">
+      <i class="fa fa-chevron-left"></i> 六种方式，教你在SpringBoot初始化时搞点事情！
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+		  <script src="https://readmore.openwrite.cn/js/readmore.js" type="text/javascript"></script>
+<script>
+    const btw = new BTWPlugin();
+    btw.init({
+        id: 'container',
+        blogId: '27513-1629019452485-311',
+        name: '码猿技术专栏',
+        qrcode: 'https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg',
+        keyword: 'vip',
+    });
+</script>
+        </div>
+		</div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%E3%80%81%E7%AE%80%E4%BB%8B"><span class="nav-text">1、简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%E3%80%81%E5%88%9B%E5%BB%BA%E7%A4%BA%E4%BE%8B%E5%BA%94%E7%94%A8"><span class="nav-text">2、创建示例应用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link"><span class="nav-text"></span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%E3%80%81%E6%B7%BB%E5%8A%A0Prometheus"><span class="nav-text">3、添加Prometheus</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4%E3%80%81%E6%B7%BB%E5%8A%A0Grafana"><span class="nav-text">4、添加Grafana</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5%E3%80%81%E7%BB%93%E8%AE%BA"><span class="nav-text">5、结论</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="不才陈某"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">101</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png" title="微信公众号 → https:&#x2F;&#x2F;gitee.com&#x2F;chenjiabing666&#x2F;BlogImage&#x2F;raw&#x2F;master&#x2F;myjszl_log.png" rel="noopener" target="_blank"><i class="fab fa-weixin fa-fw"></i>微信公众号</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.im/user/2506542244708072" title="掘金 → https:&#x2F;&#x2F;juejin.im&#x2F;user&#x2F;2506542244708072" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>掘金</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某|公众号：码猿技术专栏</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RtlQOgOT3M0hgyMeogykSQjT-gzGzoHsz',
+      appKey     : 'vSCxLU88wnXVf0Pa8mwJrCPm',
+      placeholder: "欢迎关注博主微信公众号【码猿技术专栏】",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
