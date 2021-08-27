@@ -188,6 +188,202 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/19/Mysql%E4%B8%ADorderby%E5%BA%95%E5%B1%82%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/04/19/Mysql%E4%B8%ADorderby%E5%BA%95%E5%B1%82%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B/" class="post-title-link" itemprop="url">Mysql中orderby底层执行流程</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-04-19 15:46:13" itemprop="dateCreated datePublished" datetime="2020-04-19T15:46:13+08:00">2020-04-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-24 10:22:07" itemprop="dateModified" datetime="2020-10-24T10:22:07+08:00">2020-10-24</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%B9%B2%E8%B4%A7%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">数据库干货篇</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/04/19/Mysql%E4%B8%ADorderby%E5%BA%95%E5%B1%82%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/04/19/Mysql%E4%B8%ADorderby%E5%BA%95%E5%B1%82%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
+<li>在实际的开发中一定会碰到根据某个字段进行排序后来显示结果的需求，但是你真的理解<code>order by</code>在 Mysql 底层是如何执行的吗？</li>
+<li>假设你要查询城市是<code>苏州</code>的所有人名字，并且按照姓名进行排序返回前 1000 个人的姓名、年龄，这条 sql 语句应该如何写？</li>
+<li>首先创建一张用户表，sql 语句如下：</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="keyword">user</span> (</span><br><span class="line">  id <span class="type">int</span>(<span class="number">11</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  city <span class="type">varchar</span>(<span class="number">16</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  name <span class="type">varchar</span>(<span class="number">16</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  age <span class="type">int</span>(<span class="number">11</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  <span class="keyword">PRIMARY</span> KEY (id),</span><br><span class="line">  KEY city (city)</span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>则上述需求的 sql 查询语句如下：</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> city,name,age <span class="keyword">from</span> <span class="keyword">user</span> <span class="keyword">where</span> city<span class="operator">=</span><span class="string">&#x27;苏州&#x27;</span> <span class="keyword">order</span> <span class="keyword">by</span> name limit <span class="number">1000</span>;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>这条 sql 查询语句相信大家都能写出来，但是你了解它在 Mysql 底层的执行流程吗？今天陈某来大家聊一聊这条 sql 语句是如何执行的以及有什么参数会影响执行的流程。</li>
+<li>本篇文章分为如下几个部分进行详细的阐述：<ol>
+<li><strong>全字段排序</strong></li>
+<li><strong>rowid 排序</strong></li>
+<li><strong>全字段排序 VS rowid 排序</strong></li>
+<li><strong>如何避免排序</strong></li>
+</ol>
+</li>
+</ul>
+<h2 id="全字段排序"><a href="#全字段排序" class="headerlink" title="全字段排序"></a>全字段排序</h2><ul>
+<li>前面聊过索引能够避免全表扫描，因此我们给<code>city</code>这个字段上添加了索引，当然城市的字段很小，不用考虑字符串的索引问题，之前有写过一篇关于如何给字符串的加索引的文章，有不了解朋友看一下这篇文章:<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/xaa8ge7LsHWYROOy4qiRJA">Mysql 性能优化：如何给字符串加索引？</a></li>
+<li>此时用<code>Explain</code>来分析一下的这条查询语句的执行情况，结果如下图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/order%20by%20%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/1.png" alt="Explain分析结果"></li>
+<li><code>Extra</code>这个字段中的<code>Using filesort</code>表示的就是需要排序，MySQL 会给每个线程分配一块内存用于排序，称为<code>sort_buffer</code>。</li>
+<li>既然使用了索引进行查询，我们来简单的画一下<code>city</code>这棵索引树的结构，如下图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/order%20by%20%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/2-1.png" alt="city索引树"></li>
+<li>从上图可以看出，满足<code>city=&#39;苏州&#39;</code>是从<code>ID3</code>到<code>IDX</code>这些记录。</li>
+<li>通常情况下，此条 sql 语句执行流程如下：<ol>
+<li>初始化 sort_buffer，确定放入 name、city、age 这三个字段。</li>
+<li>从索引 city 找到第一个满足<code>city=&#39;苏州&#39;</code>条件的<code>主键id</code>，也就是图中的<code>ID3</code>。</li>
+<li>到<code>主键id索引</code>取出整行，取<code>name</code>、<code>city</code>、<code>age</code>三个字段的值，存入<code>sort_buffer</code>中。</li>
+<li>从索引<code>city</code>取下一个记录的主键 id。</li>
+<li>重复步骤 3、4 直到 city 的值不满足查询条件为止，对应的主键 id 也就是图中的<code>IDX</code>。</li>
+<li>对<code>sort_buffer</code>中的数据按照字段<code>name</code>做快速排序。</li>
+<li>按照排序结果取前 1000 行返回给客户端。</li>
+</ol>
+</li>
+<li>我们称这个排序过程为<code>全字段排序</code>，执行的流程图如下：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/order%20by%20%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/3.png" alt="全字段排序"></li>
+<li>图中<code>按name排序</code>这个动作，可能在内存中完成，也可能需要使用外部排序，这取决于排序所需的内存和参数<code>sort_buffer_size</code>。</li>
+<li><code>sort_buffer_size</code>：就是 MySQL 为排序开辟的内存（sort_buffer）的大小。如果要排序的数据量小于 sort_buffer_size，排序就在内存中完成。但如果排序数据量太大，内存放不下，则不得不利用<code>磁盘临时文件</code>辅助排序。</li>
+</ul>
+<h2 id="rowid-排序"><a href="#rowid-排序" class="headerlink" title="rowid 排序"></a>rowid 排序</h2><ul>
+<li>在上面这个算法过程里面，只对原表的数据读了一遍，剩下的操作都是在<code>sort_buffer</code>和<code>临时文件</code>中执行的。<strong>但这个算法有一个问题，就是如果查询要返回的字段很多的话，那么<code>sort_buffer</code>里面要放的字段数太多，这样内存里能够同时放下的行数很少，要分成很多个临时文件，排序的性能会很差</strong>。</li>
+<li>所以如果单行很大，这个方法效率不够好。</li>
+<li>我们可以修改一个<code>max_length_for_sort_data</code>这个参数使其使用另外一种算法。max_length_for_sort_data，是 MySQL 中专门控制用于排序的行数据的长度的一个参数。它的意思是，如果单行的长度超过这个值，MySQL 就认为单行太大，要换一个算法。</li>
+<li><code>city</code>、<code>name</code>、<code>age</code> 这三个字段的定义总长度是<code>36</code>，我把<code>max_length_for_sort_data</code>设置为 16，我们再来看看计算过程有什么改变。设置的 sql 语句如下：</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SET</span> max_length_for_sort_data <span class="operator">=</span> <span class="number">16</span>;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>新的算法放入 sort_buffer 的字段，只有要排序的列（即 name 字段）和主键 id。</p>
+</li>
+<li><p>但这时，排序的结果就因为少了 city 和 age 字段的值，不能直接返回了，整个执行流程就变成如下所示的样子：</p>
+<ol>
+<li>初始化<code>sort_buffer</code>，确定放入两个字段，即<code>name</code>和<code>id</code>。</li>
+<li>从索引 city 找到第一个满足<code>city=&#39;苏州&#39;</code>条件的<code>主键id</code>，也就是图中的<code>ID3</code>。</li>
+<li>到<code>主键id索引</code>取出整行，取 name、id 这两个字段，存入 sort_buffer 中。</li>
+<li>从索引<code>city</code>取下一个记录的主键 id。</li>
+<li>重复步骤 3、4 直到 city 的值不满足查询条件为止，对应的主键 id 也就是图中的<code>IDX</code>。</li>
+<li>对<code>sort_buffer</code>中的数据按照字段<code>name</code>做快速排序。</li>
+<li>遍历排序结果，取前 1000 行，并按照 id 的值回到原表中取出 city、name 和 age 三个字段返回给客户端。</li>
+</ol>
+</li>
+<li><p>这个执行流程的示意图如下，我把它称为<code>rowid排序</code>。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/order%20by%20%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/4.png" alt="rowid排序"></p>
+</li>
+<li><p><strong>对比<code>全字段排序</code>，<code>rowid排序</code>多了一次<code>回表查询</code>，即是多了<code>第7步</code>的查询主键索引树。</strong></p>
+</li>
+</ul>
+<h2 id="全字段排序-VS-rowid-排序"><a href="#全字段排序-VS-rowid-排序" class="headerlink" title="全字段排序 VS rowid 排序"></a>全字段排序 VS rowid 排序</h2><ul>
+<li>如果 MySQL 实在是担心排序内存太小，会影响排序效率，才会采用 rowid 排序算法，这样排序过程中一次可以排序更多行，但是需要再回到原表去取数据。</li>
+<li>如果 MySQL 认为内存足够大，会优先选择全字段排序，把需要的字段都放到 sort_buffer 中，这样排序后就会直接从内存里面返回查询结果了，不用再回到原表去取数据。</li>
+<li>这也就体现了 MySQL 的一个设计思想：<strong>如果内存够，就要多利用内存，尽量减少磁盘访问</strong>。</li>
+<li><strong>对于 InnoDB 表来说，rowid 排序会要求回表多造成磁盘读，因此不会被优先选择。</strong></li>
+</ul>
+<h2 id="如何避免排序"><a href="#如何避免排序" class="headerlink" title="如何避免排序"></a>如何避免排序</h2><ul>
+<li>其实，并不是所有的<code>order by</code>语句，都需要排序操作的。从上面分析的执行过程，我们可以看到，MySQL 之所以需要生成临时表，并且在临时表上做排序操作，其原因是<strong>原来的数据都是无序的</strong>。</li>
+<li>如果能够保证从<code>city</code>这个索引上取出来的行，天然就是按照 name 递增排序的话，是不是就可以不用再排序了呢？</li>
+<li>因此想到了联合索引，创建<code>(city,name)</code>联合索引，sql 语句如下：</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> <span class="keyword">user</span> <span class="keyword">add</span> index city_user(city, name);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>此时的索引树如下：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/order%20by%20%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/5-1.png" alt="city,name索引树"></li>
+<li>在这个索引里面，我们依然可以用树搜索的方式定位到第一个满足<code>city=&#39;苏州&#39;</code>的记录，并且额外确保了，接下来按顺序取“下一条记录”的遍历过程中，只要 city 的值是苏州，name 的值就一定是有序的。</li>
+<li>按照上图，整个查询的流程如下：<ol>
+<li>从索引(city,name)找到第一个满足 city=’苏州’条件的主键 id。</li>
+<li>到主键 id 索引取出整行，取 name、city、age 三个字段的值，作为结果集的一部分直接返回。</li>
+<li>从索引(city,name)取下一个记录主键 id。</li>
+<li>重复步骤 2、3，直到查到第 1000 条记录，或者是不满足 city=’苏州’条件时循环结束。</li>
+</ol>
+</li>
+<li>对应的流程图如下：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/order%20by%20%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/6.png" alt="city，name联合索引的执行流程"></li>
+<li>可以看到，这个查询过程不需要临时表，也不需要排序。接下来，我们用 explain 的结果来印证一下。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/order%20by%20%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/7.png"></li>
+<li>从图中可以看到，<code>Extra</code>字段中没有<code>Using filesort</code>了，也就是不需要排序了。而且由于<code>(city,name)</code>这个联合索引本身有序，<strong>所以这个查询也不用把 4000 行全都读一遍，只要找到满足条件的前 1000 条记录就可以退出了</strong>。也就是说，在我们这个例子里，只需要扫描 1000 次。</li>
+<li>难道仅仅这样就能满足了？此条查询语句是否能再优化呢？<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/order%20by%20%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/8.jpg"></li>
+<li>朋友们还记得覆盖索引吗？覆盖索引的好处就是能够避免再次回表查询，不了解的朋友们可以看一下陈某之前写的文章：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/-IRhK4KyDCkTd_lojeEolw">Mysql 性能优化：如何使用覆盖索引？</a>。</li>
+<li>我们创建<code>(city,name,age)</code>联合索引，这样在执行上面的查询语句就能使用覆盖索引了，避免了回表查询了，sql 语句如下：</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> <span class="keyword">user</span> <span class="keyword">add</span> index city_user_age(city, name, age);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>此时执行流程图如下：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/order%20by%20%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/9-1.png" alt="覆盖索引使用执行流程"></li>
+<li><strong>当然，覆盖索引能够提升效率，但是维护索引也是需要代价的，因此还需要权衡使用。</strong></li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>今天这篇文章，我和你介绍了 MySQL 里面<code>order by</code>语句的几种算法流程。</li>
+<li>在开发系统的时候，你总是不可避免地会使用到 order by 语句。心里要清楚每个语句的排序逻辑是怎么实现的，还要能够分析出在最坏情况下，每个语句的执行对系统资源的消耗，这样才能做到下笔如有神，不犯低级错误。</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/19/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E4%BA%9B%E4%BA%8B%E5%8A%A1%E5%A4%B1%E6%95%88%E7%9A%84%E5%9C%BA%E6%99%AF%EF%BC%9F/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1382,103 +1578,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/03/23/IDEA%E8%B0%83%E8%AF%95%E6%8A%80%E5%B7%A7/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/23/IDEA%E8%B0%83%E8%AF%95%E6%8A%80%E5%B7%A7/" class="post-title-link" itemprop="url">IDEA调试技巧</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-03-23 16:15:12" itemprop="dateCreated datePublished" datetime="2020-03-23T16:15:12+08:00">2020-03-23</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-10-23 21:57:33" itemprop="dateModified" datetime="2020-10-23T21:57:33+08:00">2020-10-23</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%9D%82%E8%B0%88/" itemprop="url" rel="index"><span itemprop="name">杂谈</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2020/03/23/IDEA%E8%B0%83%E8%AF%95%E6%8A%80%E5%B7%A7/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2020/03/23/IDEA%E8%B0%83%E8%AF%95%E6%8A%80%E5%B7%A7/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="导读"><a href="#导读" class="headerlink" title="导读"></a>导读</h2><ul>
-<li>前天面试了一个985高校的实习生，问了他平时用什么开发工具，他想也没想的说IDEA，于是我抛砖引玉的问了一下IDEA的调试用过吧，你说说怎么设置断点条件？那孩子懵了，想了好一会对我说没用过，甚至都没听说过这个。</li>
-<li>作为一名资深的老司机，IDEA调试可以说是家常便饭，如果不会debug，我都不信你读过源码，就别和我说原理了，直接pass掉。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/03/23/IDEA%E8%B0%83%E8%AF%95%E6%8A%80%E5%B7%A7/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1562,7 +1661,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">101</span>
+          <span class="site-state-item-count">102</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
