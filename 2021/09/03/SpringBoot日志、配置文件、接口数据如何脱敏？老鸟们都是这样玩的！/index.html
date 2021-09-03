@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"chenjiabing666.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="一、前言核心隐私数据无论对于企业还是用户来说尤其重要，因此要想办法杜绝各种隐私数据的泄漏。下面陈某带大家从以下三个方面讲解一下隐私数据如何脱敏，也是日常开发中需要注意的：  配置文件数据脱敏 接口返回数据脱敏 日志文件数据脱敏  文章目录如下：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Springboot日志、配置文件、接口数据如何脱敏？老鸟们都是这样玩的！">
+<meta property="og:url" content="https://chenjiabing666.github.io/2021/09/03/SpringBoot%E6%97%A5%E5%BF%97%E3%80%81%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E3%80%81%E6%8E%A5%E5%8F%A3%E6%95%B0%E6%8D%AE%E5%A6%82%E4%BD%95%E8%84%B1%E6%95%8F%EF%BC%9F%E8%80%81%E9%B8%9F%E4%BB%AC%E9%83%BD%E6%98%AF%E8%BF%99%E6%A0%B7%E7%8E%A9%E7%9A%84%EF%BC%81/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="一、前言核心隐私数据无论对于企业还是用户来说尤其重要，因此要想办法杜绝各种隐私数据的泄漏。下面陈某带大家从以下三个方面讲解一下隐私数据如何脱敏，也是日常开发中需要注意的：  配置文件数据脱敏 接口返回数据脱敏 日志文件数据脱敏  文章目录如下：">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%95%B0%E6%8D%AE%E8%84%B1%E6%95%8F/6.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%95%B0%E6%8D%AE%E8%84%B1%E6%95%8F/7.jpg">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%95%B0%E6%8D%AE%E8%84%B1%E6%95%8F/1.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%95%B0%E6%8D%AE%E8%84%B1%E6%95%8F/2.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%95%B0%E6%8D%AE%E8%84%B1%E6%95%8F/3.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%95%B0%E6%8D%AE%E8%84%B1%E6%95%8F/4.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%95%B0%E6%8D%AE%E8%84%B1%E6%95%8F/5.png">
+<meta property="article:published_time" content="2021-09-03T00:53:25.000Z">
+<meta property="article:modified_time" content="2021-09-03T00:55:01.757Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="Spring Boot">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%95%B0%E6%8D%AE%E8%84%B1%E6%95%8F/6.png">
+
+<link rel="canonical" href="https://chenjiabing666.github.io/2021/09/03/SpringBoot%E6%97%A5%E5%BF%97%E3%80%81%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E3%80%81%E6%8E%A5%E5%8F%A3%E6%95%B0%E6%8D%AE%E5%A6%82%E4%BD%95%E8%84%B1%E6%95%8F%EF%BC%9F%E8%80%81%E9%B8%9F%E4%BB%AC%E9%83%BD%E6%98%AF%E8%BF%99%E6%A0%B7%E7%8E%A9%E7%9A%84%EF%BC%81/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Springboot日志、配置文件、接口数据如何脱敏？老鸟们都是这样玩的！ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+		<div id="container">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/09/03/SpringBoot%E6%97%A5%E5%BF%97%E3%80%81%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E3%80%81%E6%8E%A5%E5%8F%A3%E6%95%B0%E6%8D%AE%E5%A6%82%E4%BD%95%E8%84%B1%E6%95%8F%EF%BC%9F%E8%80%81%E9%B8%9F%E4%BB%AC%E9%83%BD%E6%98%AF%E8%BF%99%E6%A0%B7%E7%8E%A9%E7%9A%84%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Springboot日志、配置文件、接口数据如何脱敏？老鸟们都是这样玩的！
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-09-03 08:53:25 / 修改时间：08:55:01" itemprop="dateCreated datePublished" datetime="2021-09-03T08:53:25+08:00">2021-09-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/09/03/SpringBoot%E6%97%A5%E5%BF%97%E3%80%81%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E3%80%81%E6%8E%A5%E5%8F%A3%E6%95%B0%E6%8D%AE%E5%A6%82%E4%BD%95%E8%84%B1%E6%95%8F%EF%BC%9F%E8%80%81%E9%B8%9F%E4%BB%AC%E9%83%BD%E6%98%AF%E8%BF%99%E6%A0%B7%E7%8E%A9%E7%9A%84%EF%BC%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/09/03/SpringBoot%E6%97%A5%E5%BF%97%E3%80%81%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E3%80%81%E6%8E%A5%E5%8F%A3%E6%95%B0%E6%8D%AE%E5%A6%82%E4%BD%95%E8%84%B1%E6%95%8F%EF%BC%9F%E8%80%81%E9%B8%9F%E4%BB%AC%E9%83%BD%E6%98%AF%E8%BF%99%E6%A0%B7%E7%8E%A9%E7%9A%84%EF%BC%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="一、前言"><a href="#一、前言" class="headerlink" title="一、前言"></a>一、前言</h2><p>核心隐私数据无论对于企业还是用户来说尤其重要，因此要想办法杜绝各种隐私数据的泄漏。下面陈某带大家从以下三个方面讲解一下隐私数据如何脱敏，也是日常开发中需要注意的：</p>
+<ol>
+<li>配置文件数据脱敏</li>
+<li>接口返回数据脱敏</li>
+<li>日志文件数据脱敏</li>
+</ol>
+<p>文章目录如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%95%B0%E6%8D%AE%E8%84%B1%E6%95%8F/6.png"></p>
+<span id="more"></span>
+
+<h2 id="二、配置文件如何脱敏？"><a href="#二、配置文件如何脱敏？" class="headerlink" title="二、配置文件如何脱敏？"></a>二、配置文件如何脱敏？</h2><p>经常会遇到这样一种情况：项目的配置文件中总有一些敏感信息，比如数据源的url、用户名、密码….这些信息一旦被暴露那么整个数据库都将会被泄漏，那么如何将这些配置隐藏呢？</p>
+<p>以前都是手动将加密之后的配置写入到配置文件中，提取的时候再手动解密，当然这是一种思路，也能解决问题，但是每次都要手动加密、解密不觉得麻烦吗？</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%95%B0%E6%8D%AE%E8%84%B1%E6%95%8F/7.jpg"></p>
+<p>今天介绍一种方案，让你在无感知的情况下实现配置文件的加密、解密。利用一款开源插件：<code>jasypt-spring-boot</code>。项目地址如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">https:<span class="comment">//github.com/ulisesbocchio/jasypt-spring-boot</span></span><br></pre></td></tr></table></figure>
+
+<p>使用方法很简单，整合Spring Boot 只需要添加一个<code>starter</code>。</p>
+<h3 id="1-添加依赖"><a href="#1-添加依赖" class="headerlink" title="1. 添加依赖"></a>1. 添加依赖</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.github.ulisesbocchio<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>jasypt-spring-boot-starter<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.0.3<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span>		</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-配置秘钥"><a href="#2-配置秘钥" class="headerlink" title="2. 配置秘钥"></a>2. 配置秘钥</h3><p>在配置文件中添加一个加密的秘钥（任意），如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">jasypt:</span></span><br><span class="line">  <span class="attr">encryptor:</span></span><br><span class="line">    <span class="attr">password:</span> <span class="string">Y6M9fAJQdU7jNp5MW</span></span><br></pre></td></tr></table></figure>
+
+<p>当然将秘钥直接放在配置文件中也是不安全的，我们可以在项目启动的时候配置秘钥，命令如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -jar xxx.jar  -Djasypt.encryptor.password=Y6M9fAJQdU7jNp5MW</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-生成加密后的数据"><a href="#3-生成加密后的数据" class="headerlink" title="3. 生成加密后的数据"></a>3. 生成加密后的数据</h3><p>这一步骤是将配置明文进行加密，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootTest</span></span><br><span class="line"><span class="meta">@RunWith(SpringRunner.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SpringbootJasyptApplicationTests</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 注入加密方法</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> StringEncryptor encryptor;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 手动生成密文，此处演示了url，user，password</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Test</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">encrypt</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        String url = encryptor.encrypt(<span class="string">&quot;jdbc\\:mysql\\://127.0.0.1\\:3306/test?useUnicode\\=true&amp;characterEncoding\\=UTF-8&amp;zeroDateTimeBehavior\\=convertToNull&amp;useSSL\\=false&amp;allowMultiQueries\\=true&amp;serverTimezone=Asia/Shanghai&quot;</span>);</span><br><span class="line">        String name = encryptor.encrypt(<span class="string">&quot;root&quot;</span>);</span><br><span class="line">        String password = encryptor.encrypt(<span class="string">&quot;123456&quot;</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;database url: &quot;</span> + url);</span><br><span class="line">        System.out.println(<span class="string">&quot;database name: &quot;</span> + name);</span><br><span class="line">        System.out.println(<span class="string">&quot;database password: &quot;</span> + password);</span><br><span class="line">        Assert.assertTrue(url.length() &gt; <span class="number">0</span>);</span><br><span class="line">        Assert.assertTrue(name.length() &gt; <span class="number">0</span>);</span><br><span class="line">        Assert.assertTrue(password.length() &gt; <span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上述代码对数据源的url、user、password进行了明文加密，输出的结果如下：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">database</span> <span class="string">url: szkFDG56WcAOzG2utv0m2aoAvNFH5g3DXz0o6joZjT26Y5WNA+1Z+pQFpyhFBokqOp2jsFtB+P9b3gB601rfas3dSfvS8Bgo3MyP1nojJgVp6gCVi+B/XUs0keXPn+pbX/19HrlUN1LeEweHS/LCRZslhWJCsIXTwZo1PlpXRv3Vyhf2OEzzKLm3mIAYj51CrEaN3w5cMiCESlwvKUhpAJVz/uXQJ1spLUAMuXCKKrXM/6dSRnWyTtdFRost5cChEU9uRjw5M+8HU3BLemtcK0vM8iYDjEi5zDbZtwxD3hA=</span></span><br><span class="line"></span><br><span class="line"><span class="attr">database</span> <span class="string">name: L8I2RqYPptEtQNL4x8VhRVakSUdlsTGzEND/3TOnVTYPWe0ZnWsW0/5JdUsw9ulm</span></span><br><span class="line"></span><br><span class="line"><span class="attr">database</span> <span class="string">password: EJYCSbBL8Pmf2HubIH7dHhpfDZcLyJCEGMR9jAV3apJtvFtx9TVdhUPsAxjQ2pnJ</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="4-将加密后的密文写入配置"><a href="#4-将加密后的密文写入配置" class="headerlink" title="4. 将加密后的密文写入配置"></a>4. 将加密后的密文写入配置</h3><p><code>jasypt</code>默认使用<code>ENC()</code>包裹，此时的数据源配置如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">datasource:</span></span><br><span class="line">    <span class="comment">#   数据源基本配置</span></span><br><span class="line">    <span class="attr">username:</span> <span class="string">ENC(L8I2RqYPptEtQNL4x8VhRVakSUdlsTGzEND/3TOnVTYPWe0ZnWsW0/5JdUsw9ulm)</span></span><br><span class="line">    <span class="attr">password:</span> <span class="string">ENC(EJYCSbBL8Pmf2HubIH7dHhpfDZcLyJCEGMR9jAV3apJtvFtx9TVdhUPsAxjQ2pnJ)</span></span><br><span class="line">    <span class="attr">driver-class-name:</span> <span class="string">com.mysql.jdbc.Driver</span></span><br><span class="line">    <span class="attr">url:</span> <span class="string">ENC(szkFDG56WcAOzG2utv0m2aoAvNFH5g3DXz0o6joZjT26Y5WNA+1Z+pQFpyhFBokqOp2jsFtB+P9b3gB601rfas3dSfvS8Bgo3MyP1nojJgVp6gCVi+B/XUs0keXPn+pbX/19HrlUN1LeEweHS/LCRZslhWJCsIXTwZo1PlpXRv3Vyhf2OEzzKLm3mIAYj51CrEaN3w5cMiCESlwvKUhpAJVz/uXQJ1spLUAMuXCKKrXM/6dSRnWyTtdFRost5cChEU9uRjw5M+8HU3BLemtcK0vM8iYDjEi5zDbZtwxD3hA=)</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">com.alibaba.druid.pool.DruidDataSource</span></span><br></pre></td></tr></table></figure>
+
+<p>上述配置是使用默认的<code>prefix=ENC(</code>、<code>suffix=)</code>，当然我们可以根据自己的要求更改，只需要在配置文件中更改即可，如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">jasypt:</span></span><br><span class="line">  <span class="attr">encryptor:</span></span><br><span class="line">    <span class="comment">## 指定前缀、后缀</span></span><br><span class="line">    <span class="attr">property:</span></span><br><span class="line">      <span class="attr">prefix:</span> <span class="string">&#x27;PASS(&#x27;</span></span><br><span class="line">      <span class="attr">suffix:</span> <span class="string">&#x27;)&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>那么此时的配置就必须使用<code>PASS()</code>包裹才会被解密，如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">datasource:</span></span><br><span class="line">    <span class="comment">#   数据源基本配置</span></span><br><span class="line">    <span class="attr">username:</span> <span class="string">PASS(L8I2RqYPptEtQNL4x8VhRVakSUdlsTGzEND/3TOnVTYPWe0ZnWsW0/5JdUsw9ulm)</span></span><br><span class="line">    <span class="attr">password:</span> <span class="string">PASS(EJYCSbBL8Pmf2HubIH7dHhpfDZcLyJCEGMR9jAV3apJtvFtx9TVdhUPsAxjQ2pnJ)</span></span><br><span class="line">    <span class="attr">driver-class-name:</span> <span class="string">com.mysql.jdbc.Driver</span></span><br><span class="line">    <span class="attr">url:</span> <span class="string">PASS(szkFDG56WcAOzG2utv0m2aoAvNFH5g3DXz0o6joZjT26Y5WNA+1Z+pQFpyhFBokqOp2jsFtB+P9b3gB601rfas3dSfvS8Bgo3MyP1nojJgVp6gCVi+B/XUs0keXPn+pbX/19HrlUN1LeEweHS/LCRZslhWJCsIXTwZo1PlpXRv3Vyhf2OEzzKLm3mIAYj51CrEaN3w5cMiCESlwvKUhpAJVz/uXQJ1spLUAMuXCKKrXM/6dSRnWyTtdFRost5cChEU9uRjw5M+8HU3BLemtcK0vM8iYDjEi5zDbZtwxD3hA=)</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">com.alibaba.druid.pool.DruidDataSource</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-总结"><a href="#5-总结" class="headerlink" title="5. 总结"></a>5. 总结</h3><p>jasypt还有许多高级用法，比如可以自己配置加密算法，具体的操作可以参考Github上的文档。</p>
+<h2 id="三、接口返回数据如何脱敏？"><a href="#三、接口返回数据如何脱敏？" class="headerlink" title="三、接口返回数据如何脱敏？"></a>三、接口返回数据如何脱敏？</h2><p>通常接口返回值中的一些敏感数据也是要脱敏的，比如身份证号、手机号码、地址…..通常的手段就是用<code>*</code>隐藏一部分数据，当然也可以根据自己需求定制。</p>
+<p>言归正传，如何优雅的实现呢？有两种实现方案，如下：</p>
+<ul>
+<li><p>整合Mybatis插件，在查询的时候针对特定的字段进行脱敏</p>
+</li>
+<li><p>整合Jackson，在序列化阶段对特定字段进行脱敏</p>
+</li>
+<li><p>基于<code>Sharding Sphere</code>实现数据脱敏，查看之前的文章：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247493021&idx=2&sn=f27a4eeb6dd3eb5b1551eabf6e31739e&chksm=fcf73a50cb80b3465e6f7cf1fd841bfec098fcde47c587a2c35e7793bad3b33ebe8f2433d3ff&token=1439687168&lang=zh_CN#rd">基于Sharding Sphere实现数据“一键脱敏”</a></p>
+</li>
+</ul>
+<p>第一种方案网上很多实现方式，下面演示第二种，整合Jackson。</p>
+<h3 id="1-自定义一个Jackson注解"><a href="#1-自定义一个Jackson注解" class="headerlink" title="1. 自定义一个Jackson注解"></a>1. 自定义一个Jackson注解</h3><p>需要自定义一个脱敏注解，一旦有属性被标注，则进行对应得脱敏，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 自定义jackson注解，标注在属性上</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span></span><br><span class="line"><span class="meta">@Target(ElementType.FIELD)</span></span><br><span class="line"><span class="meta">@JacksonAnnotationsInside</span></span><br><span class="line"><span class="meta">@JsonSerialize(using = SensitiveJsonSerializer.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> Sensitive &#123;</span><br><span class="line">    <span class="comment">//脱敏策略</span></span><br><span class="line">    <span class="function">SensitiveStrategy <span class="title">strategy</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-定制脱敏策略"><a href="#2-定制脱敏策略" class="headerlink" title="2. 定制脱敏策略"></a>2. 定制脱敏策略</h3><p>针对项目需求，定制不同字段的脱敏规则，比如手机号中间几位用<code>*</code>替代，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 脱敏策略，枚举类，针对不同的数据定制特定的策略</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">enum</span> <span class="title">SensitiveStrategy</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 用户名</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    USERNAME(s -&gt; s.replaceAll(<span class="string">&quot;(\\S)\\S(\\S*)&quot;</span>, <span class="string">&quot;$1*$2&quot;</span>)),</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 身份证</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    ID_CARD(s -&gt; s.replaceAll(<span class="string">&quot;(\\d&#123;4&#125;)\\d&#123;10&#125;(\\w&#123;4&#125;)&quot;</span>, <span class="string">&quot;$1****$2&quot;</span>)),</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 手机号</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    PHONE(s -&gt; s.replaceAll(<span class="string">&quot;(\\d&#123;3&#125;)\\d&#123;4&#125;(\\d&#123;4&#125;)&quot;</span>, <span class="string">&quot;$1****$2&quot;</span>)),</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 地址</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    ADDRESS(s -&gt; s.replaceAll(<span class="string">&quot;(\\S&#123;3&#125;)\\S&#123;2&#125;(\\S*)\\S&#123;2&#125;&quot;</span>, <span class="string">&quot;$1****$2****&quot;</span>));</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Function&lt;String, String&gt; desensitizer;</span><br><span class="line"></span><br><span class="line">    SensitiveStrategy(Function&lt;String, String&gt; desensitizer) &#123;</span><br><span class="line">        <span class="keyword">this</span>.desensitizer = desensitizer;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Function&lt;String, String&gt; <span class="title">desensitizer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> desensitizer;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>以上只是提供了部分，具体根据自己项目要求进行配置。</p>
+<h3 id="3-定制JSON序列化实现"><a href="#3-定制JSON序列化实现" class="headerlink" title="3. 定制JSON序列化实现"></a>3. 定制JSON序列化实现</h3><p>下面将是重要实现，对标注注解<code>@Sensitive</code>的字段进行脱敏，实现如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 序列化注解自定义实现</span></span><br><span class="line"><span class="comment"> * JsonSerializer&lt;String&gt;：指定String 类型，serialize()方法用于将修改后的数据载入</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SensitiveJsonSerializer</span> <span class="keyword">extends</span> <span class="title">JsonSerializer</span>&lt;<span class="title">String</span>&gt; <span class="keyword">implements</span> <span class="title">ContextualSerializer</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> SensitiveStrategy strategy;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">serialize</span><span class="params">(String value, JsonGenerator gen, SerializerProvider serializers)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        gen.writeString(strategy.desensitizer().apply(value));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取属性上的注解属性</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> JsonSerializer&lt;?&gt; createContextual(SerializerProvider prov, BeanProperty property) <span class="keyword">throws</span> JsonMappingException &#123;</span><br><span class="line"></span><br><span class="line">        Sensitive annotation = property.getAnnotation(Sensitive.class);</span><br><span class="line">        <span class="keyword">if</span> (Objects.nonNull(annotation)&amp;&amp;Objects.equals(String.class, property.getType().getRawClass())) &#123;</span><br><span class="line">            <span class="keyword">this</span>.strategy = annotation.strategy();</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> prov.findValueSerializer(property.getType(), property);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-定义Person类，对其数据脱敏"><a href="#4-定义Person类，对其数据脱敏" class="headerlink" title="4. 定义Person类，对其数据脱敏"></a>4. 定义Person类，对其数据脱敏</h3><p>使用注解<code>@Sensitive</code>注解进行数据脱敏，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 真实姓名</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Sensitive(strategy = SensitiveStrategy.USERNAME)</span></span><br><span class="line">    <span class="keyword">private</span> String realName;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 地址</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Sensitive(strategy = SensitiveStrategy.ADDRESS)</span></span><br><span class="line">    <span class="keyword">private</span> String address;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 电话号码</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Sensitive(strategy = SensitiveStrategy.PHONE)</span></span><br><span class="line">    <span class="keyword">private</span> String phoneNumber;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 身份证号码</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Sensitive(strategy = SensitiveStrategy.ID_CARD)</span></span><br><span class="line">    <span class="keyword">private</span> String idCard;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="5-模拟接口测试"><a href="#5-模拟接口测试" class="headerlink" title="5. 模拟接口测试"></a>5. 模拟接口测试</h3><p>以上4个步骤完成了数据脱敏的Jackson注解，下面写个controller进行测试，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestController</span> </span>&#123;</span><br><span class="line">    <span class="meta">@GetMapping(&quot;/test&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Person <span class="title">test</span><span class="params">()</span></span>&#123;</span><br><span class="line">        Person user = <span class="keyword">new</span> Person();</span><br><span class="line">        user.setRealName(<span class="string">&quot;不才陈某&quot;</span>);</span><br><span class="line">        user.setPhoneNumber(<span class="string">&quot;19796328206&quot;</span>);</span><br><span class="line">        user.setAddress(<span class="string">&quot;浙江省杭州市温州市....&quot;</span>);</span><br><span class="line">        user.setIdCard(<span class="string">&quot;4333333333334334333&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> user;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>调用接口查看数据有没有正常脱敏，结果如下：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;realName&quot;</span>: <span class="string">&quot;不*陈某&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;address&quot;</span>: <span class="string">&quot;浙江省****市温州市..****&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;phoneNumber&quot;</span>: <span class="string">&quot;197****8206&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;idCard&quot;</span>: <span class="string">&quot;4333****34333&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-总结"><a href="#6-总结" class="headerlink" title="6. 总结"></a>6. 总结</h3><p>数据脱敏有很多种实现方式，关键是哪种更加适合，哪种更加优雅…..</p>
+<h2 id="四、日志文件如何数据脱敏？"><a href="#四、日志文件如何数据脱敏？" class="headerlink" title="四、日志文件如何数据脱敏？"></a>四、日志文件如何数据脱敏？</h2><p>上面讲了配置文件、接口返回值的数据脱敏，现在总该轮到日志脱敏了。项目中总避免不了打印日志，肯定会涉及到一些敏感数据被明文打印出来，那么此时就需要过滤掉这些敏感数据（身份证、号码、用户名…..）。</p>
+<p>关于Spring Boot 日志方面的问题有不理解的可以看我之前的文章：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/5hyGi6X6BhfCC5kTEvUyFg">Spring Boot第三弹，一文带你搞懂日志如何配置？</a>、<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/ute0JxWgqPe4VvKMbUQMNw">Spring Boot第二弹，配置文件怎么造？</a>。</p>
+<p>下面以<strong>log4j2</strong>这款日志为例讲解一下日志如何脱敏，其他日志框架大致思路一样。</p>
+<h3 id="1-添加log4j2日志依赖"><a href="#1-添加log4j2日志依赖" class="headerlink" title="1. 添加log4j2日志依赖"></a>1. 添加log4j2日志依赖</h3><p>Spring Boot 默认日志框架是logback，但是我们可以切换到log4j2，依赖如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- 去掉springboot默认配置 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">exclusions</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">exclusion</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-logging<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">exclusion</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">exclusions</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="comment">&lt;!--使用log4j2替换 LogBack--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-log4j2<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-在-resource目录下新建log4j2-xml配置"><a href="#2-在-resource目录下新建log4j2-xml配置" class="headerlink" title="2. 在/resource目录下新建log4j2.xml配置"></a>2. 在/resource目录下新建log4j2.xml配置</h3><p>log4j2的日志配置很简单，只需要在<code>/resource</code>文件夹下新建一个<code>log4j2.xml</code>配置文件，内容如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%95%B0%E6%8D%AE%E8%84%B1%E6%95%8F/1.png"></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%95%B0%E6%8D%AE%E8%84%B1%E6%95%8F/2.png"></p>
+<p>关于每个节点如何配置，含义是什么，在我上面的两篇文章中有详细的介绍。</p>
+<blockquote>
+<p>上图的配置并没有实现数据脱敏，这是普通的配置，使用的是<strong>PatternLayout</strong></p>
+</blockquote>
+<h3 id="3-自定义PatternLayout实现数据脱敏"><a href="#3-自定义PatternLayout实现数据脱敏" class="headerlink" title="3.  自定义PatternLayout实现数据脱敏"></a>3.  自定义PatternLayout实现数据脱敏</h3><p><strong>步骤</strong>2中的配置使用的是<code>PatternLayout</code>实现日志的格式，那么我们也可以自定义一个PatternLayout来实现日志的过滤脱敏。</p>
+<p>PatternLayout的类图继承关系如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%95%B0%E6%8D%AE%E8%84%B1%E6%95%8F/3.png"></p>
+<p>从上图中可以清楚的看出来，PatternLayout继承了一个抽象类<code>AbstractStringLayout</code>，因此想要自定义只需要继承这个抽象类即可。</p>
+<p><strong>1、创建CustomPatternLayout，继承抽象类AbstractStringLayout</strong></p>
+<p>代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * log4j2 脱敏插件</span></span><br><span class="line"><span class="comment"> * 继承AbstractStringLayout</span></span><br><span class="line"><span class="comment"> **/</span></span><br><span class="line"><span class="meta">@Plugin(name = &quot;CustomPatternLayout&quot;, category = Node.CATEGORY, elementType = Layout.ELEMENT_TYPE, printObject = true)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CustomPatternLayout</span> <span class="keyword">extends</span> <span class="title">AbstractStringLayout</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">static</span> Logger logger = LoggerFactory.getLogger(CustomPatternLayout.class);</span><br><span class="line">    <span class="keyword">private</span> PatternLayout patternLayout;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="title">CustomPatternLayout</span><span class="params">(Charset charset, String pattern)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(charset);</span><br><span class="line">        patternLayout = PatternLayout.newBuilder().withPattern(pattern).build();</span><br><span class="line">        initRule();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 要匹配的正则表达式map</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Map&lt;String, Pattern&gt; REG_PATTERN_MAP = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Map&lt;String, String&gt; KEY_REG_MAP = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">initRule</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (MapUtils.isEmpty(Log4j2Rule.regularMap)) &#123;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            Log4j2Rule.regularMap.forEach((a, b) -&gt; &#123;</span><br><span class="line">                <span class="keyword">if</span> (StringUtils.isNotBlank(a)) &#123;</span><br><span class="line">                    Map&lt;String, String&gt; collect = Arrays.stream(a.split(<span class="string">&quot;,&quot;</span>)).collect(Collectors.toMap(c -&gt; c, w -&gt; b, (key1, key2) -&gt; key1));</span><br><span class="line">                    KEY_REG_MAP.putAll(collect);</span><br><span class="line">                &#125;</span><br><span class="line">                Pattern compile = Pattern.compile(b);</span><br><span class="line">                REG_PATTERN_MAP.put(b, compile);</span><br><span class="line">            &#125;);</span><br><span class="line"></span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            logger.info(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt; 初始化日志脱敏规则失败 ERROR：&#123;&#125;&quot;</span>, e);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 处理日志信息，进行脱敏</span></span><br><span class="line"><span class="comment">     * 1.判断配置文件中是否已经配置需要脱敏字段</span></span><br><span class="line"><span class="comment">     * 2.判断内容是否有需要脱敏的敏感信息</span></span><br><span class="line"><span class="comment">     * 2.1 没有需要脱敏信息直接返回</span></span><br><span class="line"><span class="comment">     * 2.2 处理: 身份证 ,姓名,手机号敏感信息</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">hideMarkLog</span><span class="params">(String logStr)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">//1.判断配置文件中是否已经配置需要脱敏字段</span></span><br><span class="line">            <span class="keyword">if</span> (StringUtils.isBlank(logStr) || MapUtils.isEmpty(KEY_REG_MAP) || MapUtils.isEmpty(REG_PATTERN_MAP)) &#123;</span><br><span class="line">                <span class="keyword">return</span> logStr;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">//2.判断内容是否有需要脱敏的敏感信息</span></span><br><span class="line">            Set&lt;String&gt; charKeys = KEY_REG_MAP.keySet();</span><br><span class="line">            <span class="keyword">for</span> (String key : charKeys) &#123;</span><br><span class="line">                <span class="keyword">if</span> (logStr.contains(key)) &#123;</span><br><span class="line">                    String regExp = KEY_REG_MAP.get(key);</span><br><span class="line">                    logStr = matchingAndEncrypt(logStr, regExp, key);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> logStr;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            logger.info(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; 脱敏处理异常 ERROR:&#123;&#125;&quot;</span>, e);</span><br><span class="line">            <span class="comment">//如果抛出异常为了不影响流程，直接返回原信息</span></span><br><span class="line">            <span class="keyword">return</span> logStr;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 正则匹配对应的对象。</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> msg</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> regExp</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> String <span class="title">matchingAndEncrypt</span><span class="params">(String msg, String regExp, String key)</span> </span>&#123;</span><br><span class="line">        Pattern pattern = REG_PATTERN_MAP.get(regExp);</span><br><span class="line">        <span class="keyword">if</span> (pattern == <span class="keyword">null</span>) &#123;</span><br><span class="line">            logger.info(<span class="string">&quot;&gt;&gt;&gt; logger 没有匹配到对应的正则表达式 &quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> msg;</span><br><span class="line">        &#125;</span><br><span class="line">        Matcher matcher = pattern.matcher(msg);</span><br><span class="line">        <span class="keyword">int</span> length = key.length() + <span class="number">5</span>;</span><br><span class="line">        <span class="keyword">boolean</span> contains = Log4j2Rule.USER_NAME_STR.contains(key);</span><br><span class="line">        String hiddenStr = <span class="string">&quot;&quot;</span>;</span><br><span class="line">        <span class="keyword">while</span> (matcher.find()) &#123;</span><br><span class="line">            String originStr = matcher.group();</span><br><span class="line">            <span class="keyword">if</span> (contains) &#123;</span><br><span class="line">                <span class="comment">// 计算关键词和需要脱敏词的距离小于5。</span></span><br><span class="line">                <span class="keyword">int</span> i = msg.indexOf(originStr);</span><br><span class="line">                <span class="keyword">if</span> (i &lt; <span class="number">0</span>) &#123;</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">int</span> span = i - length;</span><br><span class="line">                <span class="keyword">int</span> startIndex = span &gt;= <span class="number">0</span> ? span : <span class="number">0</span>;</span><br><span class="line">                String substring = msg.substring(startIndex, i);</span><br><span class="line">                <span class="keyword">if</span> (StringUtils.isBlank(substring) ||  !substring.contains(key)) &#123;</span><br><span class="line">                    <span class="keyword">continue</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                hiddenStr = hideMarkStr(originStr);</span><br><span class="line">                msg = msg.replace(originStr, hiddenStr);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                hiddenStr = hideMarkStr(originStr);</span><br><span class="line">                msg = msg.replace(originStr, hiddenStr);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> msg;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 标记敏感文字规则</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> needHideMark</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> String <span class="title">hideMarkStr</span><span class="params">(String needHideMark)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (StringUtils.isBlank(needHideMark)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">int</span> startSize = <span class="number">0</span>, endSize = <span class="number">0</span>, mark = <span class="number">0</span>, length = needHideMark.length();</span><br><span class="line"></span><br><span class="line">        StringBuffer hideRegBuffer = <span class="keyword">new</span> StringBuffer(<span class="string">&quot;(\\S&#123;&quot;</span>);</span><br><span class="line">        StringBuffer replaceSb = <span class="keyword">new</span> StringBuffer(<span class="string">&quot;$1&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (length &gt; <span class="number">4</span>) &#123;</span><br><span class="line">            <span class="keyword">int</span> i = length / <span class="number">3</span>;</span><br><span class="line">            startSize = i;</span><br><span class="line">            endSize = i;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            startSize = <span class="number">1</span>;</span><br><span class="line">            endSize = <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        mark = length - startSize - endSize;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; mark; i++) &#123;</span><br><span class="line">            replaceSb.append(<span class="string">&quot;*&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        hideRegBuffer.append(startSize).append(<span class="string">&quot;&#125;)\\S*(\\S&#123;&quot;</span>).append(endSize).append(<span class="string">&quot;&#125;)&quot;</span>);</span><br><span class="line">        replaceSb.append(<span class="string">&quot;$2&quot;</span>);</span><br><span class="line">        needHideMark = needHideMark.replaceAll(hideRegBuffer.toString(), replaceSb.toString());</span><br><span class="line">        <span class="keyword">return</span> needHideMark;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 创建插件</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@PluginFactory</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Layout <span class="title">createLayout</span><span class="params">(<span class="meta">@PluginAttribute(value = &quot;pattern&quot;)</span> <span class="keyword">final</span> String pattern,</span></span></span><br><span class="line"><span class="params"><span class="function">                                      <span class="meta">@PluginAttribute(value = &quot;charset&quot;)</span> <span class="keyword">final</span> Charset charset)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> CustomPatternLayout(charset, pattern);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toSerializable</span><span class="params">(LogEvent event)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> hideMarkLog(patternLayout.toSerializable(event));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>关于其中的一些细节，比如<code>@Plugin</code>、<code>@PluginFactory</code>这两个注解什么意思？log4j2如何实现自定义一个插件，这里不再详细介绍，不是本文重点，有兴趣的可以查看<code>log4j2</code>的官方文档。</p>
+<p><strong>2、自定义自己的脱敏规则</strong></p>
+<p>上述代码中的<code>Log4j2Rule</code>则是脱敏规则静态类，我这里是直接放在了静态类中配置，实际项目中可以设置到配置文件中，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 现在拦截加密的日志有三类:</span></span><br><span class="line"><span class="comment"> * 1，身份证</span></span><br><span class="line"><span class="comment"> * 2，姓名</span></span><br><span class="line"><span class="comment"> * 3，身份证号</span></span><br><span class="line"><span class="comment"> * 加密的规则后续可以优化在配置文件中</span></span><br><span class="line"><span class="comment"> **/</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Log4j2Rule</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 正则匹配 关键词 类别</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Map&lt;String, String&gt; regularMap = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * TODO  可配置</span></span><br><span class="line"><span class="comment">     * 此项可以后期放在配置项中</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String USER_NAME_STR = <span class="string">&quot;Name,name,联系人,姓名&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String USER_IDCARD_STR = <span class="string">&quot;empCard,idCard,身份证,证件号&quot;</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String USER_PHONE_STR = <span class="string">&quot;mobile,Phone,phone,电话,手机&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 正则匹配，自己根据业务要求自定义</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> String IDCARD_REGEXP = <span class="string">&quot;(\\d&#123;17&#125;[0-9Xx]|\\d&#123;14&#125;[0-9Xx])&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> String USERNAME_REGEXP = <span class="string">&quot;[\\u4e00-\\u9fa5]&#123;2,4&#125;&quot;</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> String PHONE_REGEXP = <span class="string">&quot;(?&lt;!\\d)(?:(?:1[3456789]\\d&#123;9&#125;)|(?:861[356789]\\d&#123;9&#125;))(?!\\d)&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        regularMap.put(USER_NAME_STR, USERNAME_REGEXP);</span><br><span class="line">        regularMap.put(USER_IDCARD_STR, IDCARD_REGEXP);</span><br><span class="line">        regularMap.put(USER_PHONE_STR, PHONE_REGEXP);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>经过上述两个步骤，自定义的<code>PatternLayout</code>已经完成，下面将是改写<code>log4j2.xml</code>这个配置文件了。</p>
+<h3 id="4-修改log4j2-xml配置文件"><a href="#4-修改log4j2-xml配置文件" class="headerlink" title="4. 修改log4j2.xml配置文件"></a>4. 修改log4j2.xml配置文件</h3><p>其实这里修改很简单，原配置文件是直接使用<code>PatternLayout</code>进行日志格式化的，那么只需要将默认的<code>&lt;PatternLayout/&gt;</code>这个节点替换成<code>&lt;CustomPatternLayout/&gt;</code>，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%95%B0%E6%8D%AE%E8%84%B1%E6%95%8F/4.png"></p>
+<p>直接全局替换掉即可，至此，这个配置文件就修改完成了。</p>
+<h3 id="5-演示效果"><a href="#5-演示效果" class="headerlink" title="5. 演示效果"></a>5. 演示效果</h3><p>在<strong>步骤3</strong>这边自定义了脱敏规则静态类<code>Log4j2Rule</code>，其中定义了姓名、身份证、号码这三个脱敏规则，如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%95%B0%E6%8D%AE%E8%84%B1%E6%95%8F/5.png"></p>
+<p>下面就来演示这三个规则能否正确脱敏，直接使用日志打印，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">test3</span><span class="params">()</span></span>&#123;</span><br><span class="line">	log.debug(<span class="string">&quot;身份证：&#123;&#125;，姓名：&#123;&#125;，电话：&#123;&#125;&quot;</span>,<span class="string">&quot;320829112334566767&quot;</span>,<span class="string">&quot;不才陈某&quot;</span>,<span class="string">&quot;19896327106&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>控制台打印的日志如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">身份证：<span class="number">320829</span>******<span class="number">566767</span>，姓名：不***，电话：<span class="number">198</span>*****<span class="number">106</span></span><br></pre></td></tr></table></figure>
+
+<p>哦豁，成功了，so easy！！！</p>
+<h3 id="6-总结-1"><a href="#6-总结-1" class="headerlink" title="6. 总结"></a>6. 总结</h3><p>日志脱敏的方案很多，陈某也只是介绍一种常用的，有兴趣的可以研究一下。</p>
+<h2 id="五、总结"><a href="#五、总结" class="headerlink" title="五、总结"></a>五、总结</h2><p>本篇文章从三个维度介绍了隐私数据的脱敏实现方案，码字不易，赶紧点赞收藏吧！！！</p>
+<blockquote>
+<p>源码已经上传GitHub，需要的公众号码猿技术专栏，回复关键词<code>数据脱敏</code>获取。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    不才陈某  |  微信公众号【码猿技术专栏】
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://chenjiabing666.github.io/2021/09/03/SpringBoot%E6%97%A5%E5%BF%97%E3%80%81%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E3%80%81%E6%8E%A5%E5%8F%A3%E6%95%B0%E6%8D%AE%E5%A6%82%E4%BD%95%E8%84%B1%E6%95%8F%EF%BC%9F%E8%80%81%E9%B8%9F%E4%BB%AC%E9%83%BD%E6%98%AF%E8%BF%99%E6%A0%B7%E7%8E%A9%E7%9A%84%EF%BC%81/" title="Springboot日志、配置文件、接口数据如何脱敏？老鸟们都是这样玩的！">https://chenjiabing666.github.io/2021/09/03/SpringBoot日志、配置文件、接口数据如何脱敏？老鸟们都是这样玩的！/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+  <li class="post-copyright-license">
+    并保留本声明和上方二维码。感谢您的阅读和支持！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">微信公众号</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Spring-Boot/" rel="tag"># Spring Boot</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/08/28/8%E7%A7%8D%E6%96%B9%E6%A1%88%E8%A7%A3%E5%86%B3%E9%87%8D%E5%A4%8D%E6%8F%90%E4%BA%A4%E9%97%AE%E9%A2%98%EF%BC%81/" rel="prev" title="8种方案解决重复提交问题！">
+      <i class="fa fa-chevron-left"></i> 8种方案解决重复提交问题！
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+		  <script src="https://readmore.openwrite.cn/js/readmore.js" type="text/javascript"></script>
+<script>
+    const btw = new BTWPlugin();
+    btw.init({
+        id: 'container',
+        blogId: '27513-1629019452485-311',
+        name: '码猿技术专栏',
+        qrcode: 'https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg',
+        keyword: 'vip',
+    });
+</script>
+        </div>
+		</div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%89%8D%E8%A8%80"><span class="nav-text">一、前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E5%A6%82%E4%BD%95%E8%84%B1%E6%95%8F%EF%BC%9F"><span class="nav-text">二、配置文件如何脱敏？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%B7%BB%E5%8A%A0%E4%BE%9D%E8%B5%96"><span class="nav-text">1. 添加依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%85%8D%E7%BD%AE%E7%A7%98%E9%92%A5"><span class="nav-text">2. 配置秘钥</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E7%94%9F%E6%88%90%E5%8A%A0%E5%AF%86%E5%90%8E%E7%9A%84%E6%95%B0%E6%8D%AE"><span class="nav-text">3. 生成加密后的数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E5%B0%86%E5%8A%A0%E5%AF%86%E5%90%8E%E7%9A%84%E5%AF%86%E6%96%87%E5%86%99%E5%85%A5%E9%85%8D%E7%BD%AE"><span class="nav-text">4. 将加密后的密文写入配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E6%80%BB%E7%BB%93"><span class="nav-text">5. 总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E6%8E%A5%E5%8F%A3%E8%BF%94%E5%9B%9E%E6%95%B0%E6%8D%AE%E5%A6%82%E4%BD%95%E8%84%B1%E6%95%8F%EF%BC%9F"><span class="nav-text">三、接口返回数据如何脱敏？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%80%E4%B8%AAJackson%E6%B3%A8%E8%A7%A3"><span class="nav-text">1. 自定义一个Jackson注解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%AE%9A%E5%88%B6%E8%84%B1%E6%95%8F%E7%AD%96%E7%95%A5"><span class="nav-text">2. 定制脱敏策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%AE%9A%E5%88%B6JSON%E5%BA%8F%E5%88%97%E5%8C%96%E5%AE%9E%E7%8E%B0"><span class="nav-text">3. 定制JSON序列化实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E5%AE%9A%E4%B9%89Person%E7%B1%BB%EF%BC%8C%E5%AF%B9%E5%85%B6%E6%95%B0%E6%8D%AE%E8%84%B1%E6%95%8F"><span class="nav-text">4. 定义Person类，对其数据脱敏</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E6%A8%A1%E6%8B%9F%E6%8E%A5%E5%8F%A3%E6%B5%8B%E8%AF%95"><span class="nav-text">5. 模拟接口测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E6%80%BB%E7%BB%93"><span class="nav-text">6. 总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E6%97%A5%E5%BF%97%E6%96%87%E4%BB%B6%E5%A6%82%E4%BD%95%E6%95%B0%E6%8D%AE%E8%84%B1%E6%95%8F%EF%BC%9F"><span class="nav-text">四、日志文件如何数据脱敏？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%B7%BB%E5%8A%A0log4j2%E6%97%A5%E5%BF%97%E4%BE%9D%E8%B5%96"><span class="nav-text">1. 添加log4j2日志依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%9C%A8-resource%E7%9B%AE%E5%BD%95%E4%B8%8B%E6%96%B0%E5%BB%BAlog4j2-xml%E9%85%8D%E7%BD%AE"><span class="nav-text">2. 在&#x2F;resource目录下新建log4j2.xml配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E8%87%AA%E5%AE%9A%E4%B9%89PatternLayout%E5%AE%9E%E7%8E%B0%E6%95%B0%E6%8D%AE%E8%84%B1%E6%95%8F"><span class="nav-text">3.  自定义PatternLayout实现数据脱敏</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E4%BF%AE%E6%94%B9log4j2-xml%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-text">4. 修改log4j2.xml配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E6%BC%94%E7%A4%BA%E6%95%88%E6%9E%9C"><span class="nav-text">5. 演示效果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-%E6%80%BB%E7%BB%93-1"><span class="nav-text">6. 总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E6%80%BB%E7%BB%93"><span class="nav-text">五、总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="不才陈某"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">104</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png" title="微信公众号 → https:&#x2F;&#x2F;gitee.com&#x2F;chenjiabing666&#x2F;BlogImage&#x2F;raw&#x2F;master&#x2F;myjszl_log.png" rel="noopener" target="_blank"><i class="fab fa-weixin fa-fw"></i>微信公众号</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.im/user/2506542244708072" title="掘金 → https:&#x2F;&#x2F;juejin.im&#x2F;user&#x2F;2506542244708072" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>掘金</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某|公众号：码猿技术专栏</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RtlQOgOT3M0hgyMeogykSQjT-gzGzoHsz',
+      appKey     : 'vSCxLU88wnXVf0Pa8mwJrCPm',
+      placeholder: "欢迎关注博主微信公众号【码猿技术专栏】",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
