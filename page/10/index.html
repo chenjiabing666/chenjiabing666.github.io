@@ -188,6 +188,198 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/01/%E6%8E%A5%E5%8F%A3%E5%B9%82%E7%AD%89%E6%80%A7%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/04/01/%E6%8E%A5%E5%8F%A3%E5%B9%82%E7%AD%89%E6%80%A7%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%EF%BC%9F/" class="post-title-link" itemprop="url">接口幂等性如何设计？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-04-01 10:38:34 / 修改时间：10:38:57" itemprop="dateCreated datePublished" datetime="2020-04-01T10:38:34+08:00">2020-04-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9D%82%E8%B0%88/" itemprop="url" rel="index"><span itemprop="name">杂谈</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/04/01/%E6%8E%A5%E5%8F%A3%E5%B9%82%E7%AD%89%E6%80%A7%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%EF%BC%9F/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/04/01/%E6%8E%A5%E5%8F%A3%E5%B9%82%E7%AD%89%E6%80%A7%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%EF%BC%9F/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="导读"><a href="#导读" class="headerlink" title="导读"></a>导读</h2><ul>
+<li>现在这个时代大家可能最关心的就是钱了，那么有没有想过你银行转账给你没有一次是转多的，要么失败，要么成功，为什么不能失误一下多转一笔呢？醒醒吧年轻人，别做梦了，做银行的能那么傻x吗？</li>
+<li>今天我们就来谈一谈为什么银行转账不能多给我转一笔？关乎到钱的问题，小伙伴们打起精神！！！</li>
+<li>要想要理解上述的疑惑，不得不提的一个概念就是幂等性，至于什么是幂等性，如何通过代码实现幂等性，下面将会详细讲述。</li>
+</ul>
+<h2 id="什么是幂等性"><a href="#什么是幂等性" class="headerlink" title="什么是幂等性"></a>什么是幂等性</h2><ul>
+<li>所谓幂等性通俗的将就是一次请求和多次请求同一个资源产生相同的副作用。用数学语言表达就是<code>f(x)=f(f(x))</code>。</li>
+<li>维基百科的幂等性定义如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">幂等（idempotent、idempotence）是一个数学与计算机学概念，常见于抽象代数中。</span><br><span class="line">在编程中一个幂等操作的特点是其任意多次执行所产生的影响均与一次执行的影响相同。幂等函数，或幂等方法，是指可以使用相同参数重复执行，并能获得相同结果的函数。这些函数不会影响系统状态，也不用担心重复执行会对系统造成改变。例如，“setTrue()”函数就是一个幂等函数,无论多次执行，其结果都是一样的，更复杂的操作幂等保证是利用唯一交易号(流水号)实现.</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="为什么需要幂等性"><a href="#为什么需要幂等性" class="headerlink" title="为什么需要幂等性"></a>为什么需要幂等性</h2><ul>
+<li>在系统高并发的环境下，很有可能因为网络，阻塞等等问题导致客户端或者调用方并不能及时的收到服务端的反馈甚至是调用超时的问题。总之，就是请求方调用了你的服务，但是没有收到任何的信息，完全懵逼的状态。比如订单的问题，可能会遇到如下的几个问题：</li>
+</ul>
+<ol>
+<li>创建订单时，第一次调用服务超时，再次调用是否产生两笔订单？</li>
+<li>订单创建成功去减库存时，第一次减库存超时，是否会多扣一次？</li>
+<li>订单支付时，服务端扣钱成功，但是接口反馈超时，此时再次调用支付，是否会多扣一笔呢？</li>
+</ol>
+<ul>
+<li>作为消费者，前两种能接受，第三种情况就MMP了，哈哈哈！！！这种情况一般有如下两种解决方式</li>
+</ul>
+<ol>
+<li>服务方提供一个查询操作是否成功的api，第一次超时之后，调用方调用查询接口，如果查到了就走成功的流程，失败了就走失败的流程。</li>
+<li>另一种就是服务方需要使用幂等的方式保证一次和多次的请求结果一致。</li>
+</ol>
+<h2 id="HTTP的幂等性"><a href="#HTTP的幂等性" class="headerlink" title="HTTP的幂等性"></a>HTTP的幂等性</h2><ul>
+<li>GET：只是获取资源，对资源本身没有任何副作用，天然的幂等性。</li>
+<li>HEAD：本质上和GET一样，获取头信息，主要是探活的作用，具有幂等性。</li>
+<li>OPTIONS：获取当前URL所支持的方法，因此也是具有幂等性的。</li>
+<li>DELETE：用于删除资源，有副作用，但是它应该满足幂等性，比如根据id删除某一个资源，调用方可以调用N次而不用担心引起的错误（根据业务需求而变）。</li>
+<li>PUT：用于更新资源，有副作用，但是它应该满足幂等性，比如根据id更新数据，调用多次和N次的作用是相同的（根据业务需求而变）。</li>
+<li>POST：用于添加资源，多次提交很可能产生副作用，比如订单提交，多次提交很可能产生多笔订单。</li>
+</ul>
+<h2 id="幂等性的实现方式"><a href="#幂等性的实现方式" class="headerlink" title="幂等性的实现方式"></a>幂等性的实现方式</h2><ul>
+<li>对于客户端交互的接口，可以在前端拦截一部分，例如防止表单重复提交，按钮置灰，隐藏，不可点击等方式。但是前端进行拦截器显然是针对普通用户，懂点技术的都可以模拟请求调用接口，所以后端幂等性很重要。</li>
+<li>后端的幂等性如何实现？将会从以下几个方面介绍。</li>
+</ul>
+<h3 id="数据库去重表"><a href="#数据库去重表" class="headerlink" title="数据库去重表"></a>数据库去重表</h3><ul>
+<li>在往数据库中插入数据的时候，利用数据库唯一索引特性，保证数据唯一。比如订单的流水号，也可以是多个字段的组合。</li>
+<li>实现比较简单，读者可以自己实现看看，这里不再提供demo了。</li>
+</ul>
+<h3 id="状态机"><a href="#状态机" class="headerlink" title="状态机"></a>状态机</h3><ul>
+<li>很多业务中多有多个状态，比如订单的状态有提交、待支付、已支付、取消、退款等等状态。后端可以根据不同的状态去保证幂等性，比如在退款的时候，一定要保证这笔订单是已支付的状态。</li>
+<li>业务中常常出现，读者可以自己实现看看，不再提供demo。</li>
+</ul>
+<h3 id="TOKEN机制"><a href="#TOKEN机制" class="headerlink" title="TOKEN机制"></a>TOKEN机制</h3><ul>
+<li>针对客户端连续点击或者调用方的超时重试等情况，例如提交订单，此种操作就可以用Token的机制实现防止重复提交。</li>
+<li>TOKEN机制如何实现？简单的说就是调用方在调用接口的时候先向后端请求一个全局ID（TOKEN），请求的时候携带这个全局ID一起请求，后端需要对这个全局ID校验来保证幂等操作，流程如下图：</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/repeat/1.png"></p>
+<ul>
+<li>主要的流程步骤如下：<ul>
+<li>客户端先发送获取token的请求，服务端会生成一个全局唯一的ID保存在redis中，同时把这个ID返回给客户端。</li>
+<li>客户端调用业务请求的时候必须携带这个token，一般放在请求头上。</li>
+<li>服务端会校验这个Token，如果校验成功，则执行业务。</li>
+<li>如果校验失败，则表示重复操作，直接返回指定的结果给客户端。</li>
+</ul>
+</li>
+<li>通过以上的流程分析，唯一的重点就是这个全局唯一ID如何生成，在分布式服务中往往都会有一个生成全局ID的服务来保证ID的唯一性，但是工程量和实现难度比较大，UUID的数据量相对有些大，此处陈某选择的是雪花算法生成全局唯一ID，不了解雪花算法的读者下一篇文章会着重介绍。</li>
+</ul>
+<h4 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h4><ul>
+<li>陈某选择的环境是SpringBoot+Redis单机环境+注解+拦截器的方式实现，只是演示一下思想，具体的代码可以参照实现。</li>
+<li>redis如何实现，获取Token接口将全局唯一Id存入Redis（一定要设置失效时间，根据业务需求），业务请求的时候直接从redis中删除，根据delete的返回值判断，返回true表示第一次请求，返回false表示重复请求。代码如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TokenServiceImpl</span> <span class="keyword">implements</span> <span class="title">TokenService</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> StringRedisTemplate stringRedisTemplate;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getToken</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//获取全局唯一id</span></span><br><span class="line">        <span class="keyword">long</span> nextId = SnowflakeUtil.nextId();</span><br><span class="line">        <span class="comment">//存入redis，设置10分钟失效</span></span><br><span class="line">        stringRedisTemplate.opsForValue().set(String.valueOf(nextId), UUID.randomUUID().toString(),<span class="number">10</span>, TimeUnit.MINUTES);</span><br><span class="line">        <span class="keyword">return</span> String.valueOf(nextId);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">    * 删除记录，true表示第一次提交，false重复提交</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Boolean <span class="title">checkToken</span><span class="params">(String token)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> stringRedisTemplate.delete(token);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>注解的实现如下，标注在controller类上表示当前类上全部接口都做幂等，标注单个方法上，表示单个接口做幂等操作。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Description</span> 幂等操作的注解</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Author</span> CJB</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Date</span> 2020/3/25 10:19</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Target(&#123;ElementType.TYPE, ElementType.METHOD&#125;)</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span></span><br><span class="line"><span class="meta">@Documented</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> RepeatLimiter &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>请求头的拦截器，用于提取请求头和校验请求头，如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Description</span> 获取请求头的信息，具体校验逻辑读者自己实现</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Author</span> CJB</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Date</span> 2020/3/25 11:09</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HeaderIntercept</span> <span class="keyword">implements</span> <span class="title">HandlerInterceptor</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">preHandle</span><span class="params">(HttpServletRequest request, HttpServletResponse response, Object handler)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">//获取token</span></span><br><span class="line">        String token = request.getHeader(HeaderConstant.TOKEN);</span><br><span class="line">        <span class="comment">//校验逻辑</span></span><br><span class="line">        <span class="keyword">if</span> (!validToken(token))</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> TokenInvalidException(<span class="string">&quot;TOKEN失效&quot;</span>);</span><br><span class="line">        <span class="comment">//获取其他的参数.....</span></span><br><span class="line">        RequestHeader header = RequestHeader.builder()</span><br><span class="line">                .token(token)</span><br><span class="line">                .build();</span><br><span class="line">        <span class="comment">//放入request中</span></span><br><span class="line">        request.setAttribute(HeaderConstant.HEADER_INFO,header);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 校验token，逻辑自己实现</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> token</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">validToken</span><span class="params">(String token)</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Boolean.TRUE;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>保证幂等性的拦截器，直接从redis中删除token，成功则第一次提交，不成功则重复提交。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RepeatIntercept</span> <span class="keyword">implements</span> <span class="title">HandlerInterceptor</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> TokenService tokenService;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">preHandle</span><span class="params">(HttpServletRequest request, HttpServletResponse response, Object handler)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (handler <span class="keyword">instanceof</span> HandlerMethod)&#123;</span><br><span class="line">            <span class="comment">//获取方法上的参数</span></span><br><span class="line">            RepeatLimiter repeatLimiter = AnnotationUtils.findAnnotation(((HandlerMethod) handler).getMethod(), RepeatLimiter.class);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (Objects.isNull(repeatLimiter))&#123;</span><br><span class="line">                <span class="comment">//获取controller类上注解</span></span><br><span class="line">                repeatLimiter=AnnotationUtils.findAnnotation(((HandlerMethod) handler).getBean().getClass(),RepeatLimiter.class);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//使用注解，需要拦截验证</span></span><br><span class="line">            <span class="keyword">if</span> (Objects.nonNull(repeatLimiter))&#123;</span><br><span class="line">                <span class="comment">//获取全局token，表单提交的唯一id</span></span><br><span class="line">                RequestHeader info = RequestContextUtils.getHeaderInfo();</span><br><span class="line"></span><br><span class="line">                <span class="comment">//没有携带token，抛异常，这里的异常需要全局捕获</span></span><br><span class="line">                <span class="keyword">if</span> (StringUtils.isEmpty(info.getToken()))</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> RepeatException();</span><br><span class="line"></span><br><span class="line">                <span class="comment">//校验token</span></span><br><span class="line">                Boolean flag = tokenService.checkToken(info.getToken());</span><br><span class="line"></span><br><span class="line">                <span class="comment">//删除失败，表示</span></span><br><span class="line">                <span class="keyword">if</span> (Boolean.FALSE.equals(flag))</span><br><span class="line">                    <span class="comment">//抛出重复提交的异常</span></span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> RepeatException();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>接口幂等实现，代码如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;/order&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> OrderService orderService;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 下单</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> order</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@PostMapping</span></span><br><span class="line">    <span class="meta">@RepeatLimiter</span>  <span class="comment">//幂等性保证</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> CommenResult <span class="title">add</span><span class="params">(<span class="meta">@RequestBody</span> Order order)</span></span>&#123;</span><br><span class="line">        orderService.save(order);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> CommenResult(<span class="string">&quot;200&quot;</span>,<span class="string">&quot;下单成功&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="演示"><a href="#演示" class="headerlink" title="演示"></a>演示</h4><ul>
+<li>发送getToken的请求获取Token</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/repeat/2.png"></p>
+<ul>
+<li>携带Token下单第一次：</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/repeat/3.png"></p>
+<ul>
+<li>第二次下单：</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/repeat/4.png"></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/01/Mysql%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%EF%BC%9A%E4%BB%80%E4%B9%88%E6%98%AF%E7%B4%A2%E5%BC%95%E4%B8%8B%E6%8E%A8%EF%BC%9F/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1067,114 +1259,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2018/04/16/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/04/16/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/" class="post-title-link" itemprop="url">设计模式之适配器模式</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2018-04-16 13:56:28" itemprop="dateCreated datePublished" datetime="2018-04-16T13:56:28+08:00">2018-04-16</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-10-23 21:58:04" itemprop="dateModified" datetime="2020-10-23T21:58:04+08:00">2020-10-23</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2018/04/16/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2018/04/16/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><ul>
-<li>适配器模式用于将一个接口转化成客户想要的另一个接口，使接口不兼容的那些类可以一起工作，其别名为包装器(Wrapper)。适配器模式既可以作为类结构型模式，也可以作为对象结构型模式。</li>
-</ul>
-<p><img src="http://ono60m7tl.bkt.clouddn.com/adapeter1.png" alt="适配器模式"></p>
-<ul>
-<li><p>Target（目标抽象类）：目标抽象类定义客户所需接口，可以是一个抽象类或接口，也可以是具体类。</p>
-</li>
-<li><p>Adapter（适配器类）：适配器可以调用另一个接口，作为一个转换器，对Adaptee和Target进行适配，适配器类是适配器模式的核心，在对象适配器中，它通过继承Target并关联一个Adaptee对象使二者产生联系。</p>
-</li>
-<li><p>Adaptee（适配者类）：适配者即被适配的角色，它定义了一个已经存在的接口，这个接口需要适配，适配者类一般是一个具体类，包含了客户希望使用的业务方法，在某些情况下可能没有适配者类的源代码。</p>
-</li>
-<li><p>根据对象适配器模式结构图，在对象适配器中，客户端需要调用request()方法，而适配者类Adaptee没有该方法，但是它所提供的specificRequest()方法却是客户端所需要的。为了使客户端能够使用适配者类，需要提供一个包装类Adapter，即适配器类。这个包装类包装了一个适配者的实例，从而将客户端与适配者衔接起来，在适配器的request()方法中调用适配者的specificRequest()方法。因为适配器类与适配者类是关联关系（也可称之为委派关系），所以这种适配器模式称为对象适配器模式</p>
-</li>
-</ul>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/04/16/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1258,7 +1342,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">106</span>
+          <span class="site-state-item-count">107</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

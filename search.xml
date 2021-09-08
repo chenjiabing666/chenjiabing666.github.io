@@ -469,6 +469,108 @@
       </tags>
   </entry>
   <entry>
+    <title>Spring Boot 配置如何实现动态刷新？</title>
+    <url>/2021/09/08/SpringBoot%E9%85%8D%E7%BD%AE%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E5%8A%A8%E6%80%81%E5%88%B7%E6%96%B0%EF%BC%9F/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>对于微服务而言配置本地化是个很大的鸡肋，不可能每次需要改个配置都要重新把服务重新启动一遍，因此最终的解决方案都是将配置外部化，托管在一个平台上达到不用重启服务即可<code>一次修改多处生效</code>的目的。</p>
+<p>但是对于单体应用的Spring Boot项目而言，动态刷新显然是有点多余，反正就一个服务，改下重启不就行了？</p>
+<p>然而在某些特殊的场景下还是必须用到动态刷新的，如下：</p>
+<ol>
+<li><code>添加数据源</code>：对接某个第三方平台的时候，你不可能每次添加一个数据源都要重启下服务</li>
+<li><code>固化的对接</code>：大量的固定对接方式，只是其中的某个固定的代码段不同，比如提供视图中的字段不同，接口服务中字段不同等情况。</li>
+</ol>
+<p>当然以上列举的两种场景每个公司都有不同的解决方案，这里不做深究。</p>
+<span id="more"></span>
+
+<h2 id="微服务下有哪几种主流的方案？"><a href="#微服务下有哪几种主流的方案？" class="headerlink" title="微服务下有哪几种主流的方案？"></a>微服务下有哪几种主流的方案？</h2><p>微服务下的动态配置中心有三种主流的方式，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%8A%A8%E6%80%81%E5%88%B7%E6%96%B0%E9%85%8D%E7%BD%AE/1.png" alt="主流的配置中心"></p>
+<p>上图中的三种配置中心方案可以说是现在企业中使用率最高的，分别是：</p>
+<ol>
+<li><p><strong>Nacos</strong>:阿里巴巴的最近开源的项目，这个家伙很牛逼，一个干掉了<code>Eureka</code>(停更)和<code>Config+Bus</code>，既能作为配置中心也能作为注册中心，并且有自己的独立的 管理平台，可以说是现在最主流的一种。</p>
+</li>
+<li><p><strong>Config+Bus</strong>：早期在用的微服务配置中心，可以依托<code>GitHub</code>管理微服务的配置文件，这种现在也是有不少企业在用，但是需要自己独立部署一个微服务，和<code>Nacos</code>相比逊色了不少。</p>
+</li>
+<li><p><strong>Apollo</strong>：携程开源项目Apollo，这个也是不少企业在用，陈某了解的不多，有兴趣的可以深入研究下。</p>
+</li>
+</ol>
+<h2 id="针对Spring-Boot-适用的几种方案？"><a href="#针对Spring-Boot-适用的几种方案？" class="headerlink" title="针对Spring Boot 适用的几种方案？"></a>针对Spring Boot 适用的几种方案？</h2><p>其实上述三种都可以在Spring Boot项目中适配，但是作为单体应用有些重了，下面作者简单的介绍两种可用的方案。</p>
+<h3 id="Spring-Boot-Nacos（不推荐）"><a href="#Spring-Boot-Nacos（不推荐）" class="headerlink" title="Spring Boot+Nacos（不推荐）"></a>Spring Boot+Nacos（不推荐）</h3><p>不得不说阿里巴巴确实挺有野心，阿里要做其实是一个微服务生态，Nacos不仅仅可以作为Spring Cloud的配置和注册中心，也适配了Dubbo、K8s，官方文档中对于如何适配都做了详细的介绍，作者 这里就不再详细介绍了，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%8A%A8%E6%80%81%E5%88%B7%E6%96%B0%E9%85%8D%E7%BD%AE/2.png" alt="Nacos.io"></p>
+<blockquote>
+<p>当然Nacos对Spring、Spring Boot 项目同样适用。</p>
+</blockquote>
+<p>如何使用呢？这里作者只提供下思路，不做过多的深究，这篇在作者下个专栏<strong>Spring Cloud 进阶</strong>会详细介绍：</p>
+<ol>
+<li><p>下载对应版本的Nacos，启动项目，访问<code>http://localhost:8848</code>进入Nacos的管理界面；</p>
+</li>
+<li><p>Spring Boot 项目引入Nacos的配置依赖<code>nacos-config-spring-boot-starter</code>，配置Nacos管理中心的地址。</p>
+</li>
+<li><p><code>@NacosPropertySource</code>、<code>@NacosValue</code>两个注解结合完成。</p>
+</li>
+</ol>
+<ul>
+<li><code>@NacosPropertySource</code>：指定配置中心的<code>dataId</code>，和是否自动刷新</li>
+<li><code>@NacosValue</code>替代<code>@Value</code>注解完成属性的自动装配</li>
+</ul>
+<ol start="4">
+<li>如果公司项目做了后台管理，则可以直接调用Nacos开放的API修改对应配置的值（替代了Nacos管理界面的手动操作），API的地址：<a href="https://nacos.io/zh-cn/docs/open-api.html">https://nacos.io/zh-cn/docs/open-api.html</a></li>
+</ol>
+<p>此种方案虽说可以实现配置的动态刷新，但是还要集成Nacos，启动一个Nacos的服务，完全是有点大材小用了，实际项目中不推荐使用。</p>
+<h3 id="Spring-Boot-Config-actuator（推荐）"><a href="#Spring-Boot-Config-actuator（推荐）" class="headerlink" title="Spring Boot+Config+actuator（推荐）"></a>Spring Boot+Config+actuator（推荐）</h3><p>此种方案实际使用的是Config配置中心，但是不像Nacos那般重，完全适用于单体应用的SpringBoot项目，只需要做小部分的更改即可达到效果。</p>
+<h4 id="方案一（不推荐）"><a href="#方案一（不推荐）" class="headerlink" title="方案一（不推荐）"></a>方案一（不推荐）</h4><ol>
+<li><p>添加Config的依赖，如下：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!-- springCloud的依赖--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependencyManagement</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-dependencies<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">version</span>&gt;</span>Hoxton.SR3<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">type</span>&gt;</span>pom<span class="tag">&lt;/<span class="name">type</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">scope</span>&gt;</span>import<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencyManagement</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!-- config的依赖--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-config<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment">&lt;!-- actuator的依赖--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-actuator<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+<li><p>配置文件中暴露Spring Boot的端点，如下：</p>
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">management.endpoints.web.exposure.include</span>=<span class="string">*</span></span><br></pre></td></tr></table></figure></li>
+<li><p>配置文件中新增三个属性配置：</p>
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">config.version</span>=<span class="string">22</span></span><br><span class="line"><span class="meta">config.app.name</span>=<span class="string">dynamic-project</span></span><br><span class="line"><span class="meta">config.platform</span>=<span class="string">mysql</span></span><br></pre></td></tr></table></figure></li>
+<li><p>结合<code>@RefreshScope</code>注解动态刷新，写个Controller，如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="comment">//@RefreshScope该注解必须标注，否则无法完成动态更新</span></span><br><span class="line"><span class="meta">@RefreshScope</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DynamicConfigController</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;config.version&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String version;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;config.app.name&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String appName;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;config.platform&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String platform;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/show/version&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">test</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;version=&quot;</span>+version+<span class="string">&quot;-appName=&quot;</span>+appName+<span class="string">&quot;-platform=&quot;</span>+platform;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>启动项目测试，浏览器访问<code>http://localhost:8080/show/version</code>，返回信息如下图：</p>
+</li>
+</ol>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%8A%A8%E6%80%81%E5%88%B7%E6%96%B0%E9%85%8D%E7%BD%AE/3.png"></p>
+<ol start="5">
+<li><p>修改<code>target</code>目录下的配置文件，如下：</p>
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">config.version</span>=<span class="string">33</span></span><br><span class="line"><span class="meta">config.app.name</span>=<span class="string">dynamic-project</span></span><br><span class="line"><span class="meta">config.platform</span>=<span class="string">ORACLE</span></span><br></pre></td></tr></table></figure></li>
+<li><p>POST请求<code>http://localhost:8080/actuator/refresh</code>接口，手动刷新下配置（必须，否则不能自动刷新）</p>
+</li>
+<li><p>浏览器再次输入<code>http://localhost:8080/show/version</code>，结果如下图：</p>
+</li>
+</ol>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%8A%A8%E6%80%81%E5%88%B7%E6%96%B0%E9%85%8D%E7%BD%AE/4.png"></p>
+<p>可以看到，配置已经自动修改了，结束。</p>
+<h5 id="方案二（推荐）"><a href="#方案二（推荐）" class="headerlink" title="方案二（推荐）"></a>方案二（推荐）</h5><p>看到了方案一觉得如何？是不是有点鸡肋了</p>
+<blockquote>
+<p>第一个问题：为什么还要调用一次手动刷新呢？</p>
+</blockquote>
+<blockquote>
+<p>第二个问题：只能手动的在配置文件中改吗？如果想在后台管理系统改怎么办？</p>
+</blockquote>
+<p>想要解决上述两个问题还是要看下<code>Config</code>的源码，代码关键部分在<code>org.springframework.cloud.context.refresh.ContextRefresher#refresh()</code>方法中，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%8A%A8%E6%80%81%E5%88%B7%E6%96%B0%E9%85%8D%E7%BD%AE/5.png"></p>
+<p>因此只需要在修改属性之后调用下<code>ContextRefresher#refresh()</code>（异步，避免一直阻塞等待）方法即可。</p>
+<p>为了方便测试，我们自己手动写一个refresh接口，如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@GetMapping(&quot;/show/refresh&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">refresh</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="comment">//修改配置文件中属性</span></span><br><span class="line">        HashMap&lt;String, Object&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">        map.put(<span class="string">&quot;config.version&quot;</span>,<span class="number">99</span>);</span><br><span class="line">        map.put(<span class="string">&quot;config.app.name&quot;</span>,<span class="string">&quot;appName&quot;</span>);</span><br><span class="line">        map.put(<span class="string">&quot;config.platform&quot;</span>,<span class="string">&quot;ORACLE&quot;</span>);</span><br><span class="line">        MapPropertySource propertySource=<span class="keyword">new</span> MapPropertySource(<span class="string">&quot;dynamic&quot;</span>,map);</span><br><span class="line">        <span class="comment">//将修改后的配置设置到environment中</span></span><br><span class="line">        environment.getPropertySources().addFirst(propertySource);</span><br><span class="line">        <span class="comment">//异步调用refresh方法，避免阻塞一直等待无响应</span></span><br><span class="line">        <span class="keyword">new</span> Thread(() -&gt; contextRefresher.refresh()).start();</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;success&quot;</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>上述代码中作者只是手动设置了配置文件中的值，实际项目中可以通过持久化的方式从数据库中读取配置刷新。</p>
+</blockquote>
+<p>下面我们测试看看，启动项目，访问<code>http://localhost:8080/show/version</code>，发现是之前配置在<code>application.properties</code>中的值，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%8A%A8%E6%80%81%E5%88%B7%E6%96%B0%E9%85%8D%E7%BD%AE/3.png"></p>
+<p>调用<code>refresh</code>接口：<code>http://localhost:8080/show/refresh</code>重新设置属性值；</p>
+<p>再次调用<code>http://localhost:8080/show/version</code>查看下配置是否修改了，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%8A%A8%E6%80%81%E5%88%B7%E6%96%B0%E9%85%8D%E7%BD%AE/6.png"></p>
+<p>从上图可以发现，配置果然修改了，达到了动态刷新的效果。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文从微服务的配置中心介绍到Spring Boot 搭建简易的配置中心，详细介绍了几种可行性的方案，作者强力推荐最后一种方案，简化版的<code>Config</code>，完全适用于单体应用。</p>
+]]></content>
+      <categories>
+        <category>Spring Boot 进阶</category>
+      </categories>
+      <tags>
+        <tag>Spring Boot</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>你还在用 BeanUtils？试试 MapStruct，优雅的对象转换解决方案！</title>
     <url>/2021/09/07/MapStruct-%E4%BC%98%E9%9B%85%E7%9A%84%E5%AF%B9%E8%B1%A1%E8%BD%AC%E6%8D%A2%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%EF%BC%81/</url>
     <content><![CDATA[<h2 id="1、什么是MapStruct"><a href="#1、什么是MapStruct" class="headerlink" title="1、什么是MapStruct"></a>1、什么是MapStruct</h2><h3 id="1-1-JavaBean-的困扰"><a href="#1-1-JavaBean-的困扰" class="headerlink" title="1.1 JavaBean 的困扰"></a>1.1 JavaBean 的困扰</h3><p>对于代码中 JavaBean之间的转换， 一直是困扰我很久的事情。在开发的时候我看到业务代码之间有很多的 JavaBean 之间的相互转化， 非常的影响观感，却又不得不存在。我后来想的一个办法就是通过反射，或者自己写很多的转换器。</p>
