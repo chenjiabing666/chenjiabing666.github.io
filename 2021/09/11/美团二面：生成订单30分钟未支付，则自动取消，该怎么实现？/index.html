@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"chenjiabing666.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="1、前言在开发中，往往会遇到一些关于延时任务的需求。例如  生成订单30分钟未支付，则自动取消 生成订单60秒后,给用户发短信  对上述的任务，我们给一个专业的名字来形容，那就是延时任务。那么这里就会产生一个问题，这个延时任务和定时任务的区别究竟在哪里呢？一共有如下几点区别  定时任务有明确的触发时间，延时任务没有  定时任务有执行周期，而延时任务在某事件触发后一段时间内执行，没有执行周期  定时">
+<meta property="og:type" content="article">
+<meta property="og:title" content="美团二面：生成订单30分钟未支付，则自动取消，该怎么实现？">
+<meta property="og:url" content="https://chenjiabing666.github.io/2021/09/11/%E7%BE%8E%E5%9B%A2%E4%BA%8C%E9%9D%A2%EF%BC%9A%E7%94%9F%E6%88%90%E8%AE%A2%E5%8D%9530%E5%88%86%E9%92%9F%E6%9C%AA%E6%94%AF%E4%BB%98%EF%BC%8C%E5%88%99%E8%87%AA%E5%8A%A8%E5%8F%96%E6%B6%88%EF%BC%8C%E8%AF%A5%E6%80%8E%E4%B9%88%E5%AE%9E%E7%8E%B0%EF%BC%9F/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="1、前言在开发中，往往会遇到一些关于延时任务的需求。例如  生成订单30分钟未支付，则自动取消 生成订单60秒后,给用户发短信  对上述的任务，我们给一个专业的名字来形容，那就是延时任务。那么这里就会产生一个问题，这个延时任务和定时任务的区别究竟在哪里呢？一共有如下几点区别  定时任务有明确的触发时间，延时任务没有  定时任务有执行周期，而延时任务在某事件触发后一段时间内执行，没有执行周期  定时">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/1.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/2.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/3.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/4.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/5.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/6.png">
+<meta property="article:published_time" content="2021-09-11T13:06:42.000Z">
+<meta property="article:modified_time" content="2021-09-11T13:08:06.349Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="面试">
+<meta property="article:tag" content="延迟队列">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/1.png">
+
+<link rel="canonical" href="https://chenjiabing666.github.io/2021/09/11/%E7%BE%8E%E5%9B%A2%E4%BA%8C%E9%9D%A2%EF%BC%9A%E7%94%9F%E6%88%90%E8%AE%A2%E5%8D%9530%E5%88%86%E9%92%9F%E6%9C%AA%E6%94%AF%E4%BB%98%EF%BC%8C%E5%88%99%E8%87%AA%E5%8A%A8%E5%8F%96%E6%B6%88%EF%BC%8C%E8%AF%A5%E6%80%8E%E4%B9%88%E5%AE%9E%E7%8E%B0%EF%BC%9F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>美团二面：生成订单30分钟未支付，则自动取消，该怎么实现？ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+		<div id="container">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/09/11/%E7%BE%8E%E5%9B%A2%E4%BA%8C%E9%9D%A2%EF%BC%9A%E7%94%9F%E6%88%90%E8%AE%A2%E5%8D%9530%E5%88%86%E9%92%9F%E6%9C%AA%E6%94%AF%E4%BB%98%EF%BC%8C%E5%88%99%E8%87%AA%E5%8A%A8%E5%8F%96%E6%B6%88%EF%BC%8C%E8%AF%A5%E6%80%8E%E4%B9%88%E5%AE%9E%E7%8E%B0%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          美团二面：生成订单30分钟未支付，则自动取消，该怎么实现？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-09-11 21:06:42 / 修改时间：21:08:06" itemprop="dateCreated datePublished" datetime="2021-09-11T21:06:42+08:00">2021-09-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E9%9D%A2%E8%AF%95/" itemprop="url" rel="index"><span itemprop="name">面试</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/09/11/%E7%BE%8E%E5%9B%A2%E4%BA%8C%E9%9D%A2%EF%BC%9A%E7%94%9F%E6%88%90%E8%AE%A2%E5%8D%9530%E5%88%86%E9%92%9F%E6%9C%AA%E6%94%AF%E4%BB%98%EF%BC%8C%E5%88%99%E8%87%AA%E5%8A%A8%E5%8F%96%E6%B6%88%EF%BC%8C%E8%AF%A5%E6%80%8E%E4%B9%88%E5%AE%9E%E7%8E%B0%EF%BC%9F/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/09/11/%E7%BE%8E%E5%9B%A2%E4%BA%8C%E9%9D%A2%EF%BC%9A%E7%94%9F%E6%88%90%E8%AE%A2%E5%8D%9530%E5%88%86%E9%92%9F%E6%9C%AA%E6%94%AF%E4%BB%98%EF%BC%8C%E5%88%99%E8%87%AA%E5%8A%A8%E5%8F%96%E6%B6%88%EF%BC%8C%E8%AF%A5%E6%80%8E%E4%B9%88%E5%AE%9E%E7%8E%B0%EF%BC%9F/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="1、前言"><a href="#1、前言" class="headerlink" title="1、前言"></a>1、前言</h2><p>在开发中，往往会遇到一些关于延时任务的需求。例如</p>
+<ul>
+<li>生成订单30分钟未支付，则自动取消</li>
+<li>生成订单60秒后,给用户发短信</li>
+</ul>
+<p>对上述的任务，我们给一个专业的名字来形容，那就是延时任务。那么这里就会产生一个问题，这个延时任务和定时任务的区别究竟在哪里呢？一共有如下几点区别</p>
+<ul>
+<li><p>定时任务有明确的触发时间，延时任务没有</p>
+</li>
+<li><p>定时任务有执行周期，而延时任务在某事件触发后一段时间内执行，没有执行周期</p>
+</li>
+<li><p>定时任务一般执行的是批处理操作是多个任务，而延时任务一般是单个任务</p>
+</li>
+</ul>
+<p>下面，我们以判断订单是否超时为例，进行方案分析。</p>
+<span id="more"></span>
+
+
+
+<h2 id="2、数据库轮询"><a href="#2、数据库轮询" class="headerlink" title="2、数据库轮询"></a>2、数据库轮询</h2><p>该方案通常是在小型项目中使用，即通过一个线程定时的去扫描数据库，通过订单时间来判断是否有超时的订单，然后进行update或delete等操作</p>
+<p>博主当年早期是用quartz来实现的(实习那会的事)，简单介绍一下</p>
+<p>maven项目引入一个依赖如下所示</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.quartz-scheduler<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>quartz<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.2.2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>调用Demo类MyJob如下所示</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.rjzheng.delay1;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.quartz.JobBuilder;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.quartz.JobDetail;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.quartz.Scheduler;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.quartz.SchedulerException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.quartz.SchedulerFactory;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.quartz.SimpleScheduleBuilder;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.quartz.Trigger;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.quartz.TriggerBuilder;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.quartz.impl.StdSchedulerFactory;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.quartz.Job;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.quartz.JobExecutionContext;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.quartz.JobExecutionException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyJob</span> <span class="keyword">implements</span> <span class="title">Job</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">execute</span><span class="params">(JobExecutionContext context)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">            <span class="keyword">throws</span> JobExecutionException </span>&#123;</span><br><span class="line"></span><br><span class="line">        System.out.println(<span class="string">&quot;要去数据库扫描啦。。。&quot;</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 创建任务</span></span><br><span class="line"></span><br><span class="line">        JobDetail jobDetail = JobBuilder.newJob(MyJob.class)</span><br><span class="line"></span><br><span class="line">                .withIdentity(<span class="string">&quot;job1&quot;</span>, <span class="string">&quot;group1&quot;</span>).build();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 创建触发器 每3秒钟执行一次</span></span><br><span class="line"></span><br><span class="line">        Trigger trigger = TriggerBuilder</span><br><span class="line"></span><br><span class="line">                .newTrigger()</span><br><span class="line"></span><br><span class="line">                .withIdentity(<span class="string">&quot;trigger1&quot;</span>, <span class="string">&quot;group3&quot;</span>)</span><br><span class="line"></span><br><span class="line">                .withSchedule(</span><br><span class="line"></span><br><span class="line">                        SimpleScheduleBuilder.simpleSchedule()</span><br><span class="line"></span><br><span class="line">                                .withIntervalInSeconds(<span class="number">3</span>).repeatForever())</span><br><span class="line"></span><br><span class="line">                .build();</span><br><span class="line"></span><br><span class="line">        Scheduler scheduler = <span class="keyword">new</span> StdSchedulerFactory().getScheduler();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 将任务及其触发器放入调度器</span></span><br><span class="line"></span><br><span class="line">        scheduler.scheduleJob(jobDetail, trigger);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 调度器开始调度任务</span></span><br><span class="line"></span><br><span class="line">        scheduler.start();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行代码，可发现每隔3秒，输出如下</p>
+<p>要去数据库扫描啦。。。</p>
+<p><strong>优点</strong>：简单易行，支持集群操作</p>
+<p><strong>缺点</strong>:</p>
+<ul>
+<li><p>(1)对服务器内存消耗大</p>
+</li>
+<li><p>(2)存在延迟，比如你每隔3分钟扫描一次，那最坏的延迟时间就是3分钟</p>
+</li>
+<li><p>(3)假设你的订单有几千万条，每隔几分钟这样扫描一次，数据库损耗极大</p>
+</li>
+</ul>
+<h2 id="3、JDK的延迟队列"><a href="#3、JDK的延迟队列" class="headerlink" title="3、JDK的延迟队列"></a>3、JDK的延迟队列</h2><p>该方案是利用JDK自带的DelayQueue来实现，这是一个无界阻塞队列，该队列只有在延迟期满的时候才能从中获取元素，放入DelayQueue中的对象，是必须实现Delayed接口的。</p>
+<p>DelayedQueue实现工作流程如下图所示</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/1.png"></p>
+<p>其中<strong>Poll()</strong>:获取并移除队列的超时元素，没有则返回空</p>
+<p><strong>take()</strong>:获取并移除队列的超时元素，如果没有则wait当前线程，直到有元素满足超时条件，返回结果。</p>
+<p>定义一个类OrderDelay实现Delayed，代码如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.rjzheng.delay2;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.Delayed;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeUnit;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderDelay</span> <span class="keyword">implements</span> <span class="title">Delayed</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String orderId;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">long</span> timeout;</span><br><span class="line"></span><br><span class="line">    OrderDelay(String orderId, <span class="keyword">long</span> timeout) &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">this</span>.orderId = orderId;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">this</span>.timeout = timeout + System.nanoTime();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(Delayed other)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (other == <span class="keyword">this</span>)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        OrderDelay t = (OrderDelay) other;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">long</span> d = (getDelay(TimeUnit.NANOSECONDS) - t</span><br><span class="line"></span><br><span class="line">                .getDelay(TimeUnit.NANOSECONDS));</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> (d == <span class="number">0</span>) ? <span class="number">0</span> : ((d &lt; <span class="number">0</span>) ? -<span class="number">1</span> : <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 返回距离你自定义的超时时间还有多少</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">long</span> <span class="title">getDelay</span><span class="params">(TimeUnit unit)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> unit.convert(timeout - System.nanoTime(),TimeUnit.NANOSECONDS);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">print</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        System.out.println(orderId+<span class="string">&quot;编号的订单要删除啦。。。。&quot;</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行的测试Demo为，我们设定延迟时间为3秒</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.rjzheng.delay2;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.DelayQueue;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeUnit;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DelayQueueDemo</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">     <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;  </span><br><span class="line"></span><br><span class="line">            <span class="comment">// TODO Auto-generated method stub  </span></span><br><span class="line"></span><br><span class="line">            List&lt;String&gt; list = <span class="keyword">new</span> ArrayList&lt;String&gt;();  </span><br><span class="line"></span><br><span class="line">            list.add(<span class="string">&quot;00000001&quot;</span>);  </span><br><span class="line"></span><br><span class="line">            list.add(<span class="string">&quot;00000002&quot;</span>);  </span><br><span class="line"></span><br><span class="line">            list.add(<span class="string">&quot;00000003&quot;</span>);  </span><br><span class="line"></span><br><span class="line">            list.add(<span class="string">&quot;00000004&quot;</span>);  </span><br><span class="line"></span><br><span class="line">            list.add(<span class="string">&quot;00000005&quot;</span>);  </span><br><span class="line"></span><br><span class="line">            DelayQueue&lt;OrderDelay&gt; queue = newDelayQueue&lt;OrderDelay&gt;();  </span><br><span class="line"></span><br><span class="line">            <span class="keyword">long</span> start = System.currentTimeMillis();  </span><br><span class="line"></span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>;i&lt;<span class="number">5</span>;i++)&#123;  </span><br><span class="line"></span><br><span class="line">                <span class="comment">//延迟三秒取出</span></span><br><span class="line"></span><br><span class="line">                queue.put(<span class="keyword">new</span> OrderDelay(list.get(i),  </span><br><span class="line"></span><br><span class="line">                        TimeUnit.NANOSECONDS.convert(<span class="number">3</span>,TimeUnit.SECONDS)));  </span><br><span class="line"></span><br><span class="line">                    <span class="keyword">try</span> &#123;  </span><br><span class="line"></span><br><span class="line">                         queue.take().print();  </span><br><span class="line"></span><br><span class="line">                         System.out.println(<span class="string">&quot;After &quot;</span> +  </span><br><span class="line"></span><br><span class="line">                                 (System.currentTimeMillis()-start) + <span class="string">&quot; MilliSeconds&quot;</span>);  </span><br><span class="line"></span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;  </span><br><span class="line"></span><br><span class="line">                    <span class="comment">// TODO Auto-generated catch block  </span></span><br><span class="line"></span><br><span class="line">                    e.printStackTrace();  </span><br><span class="line"></span><br><span class="line">                &#125;  </span><br><span class="line"></span><br><span class="line">            &#125;  </span><br><span class="line"></span><br><span class="line">        &#125;  </span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">00000001</span>编号的订单要删除啦。。。。</span><br><span class="line"></span><br><span class="line">After <span class="number">3003</span> MilliSeconds</span><br><span class="line"></span><br><span class="line"><span class="number">00000002</span>编号的订单要删除啦。。。。</span><br><span class="line"></span><br><span class="line">After <span class="number">6006</span> MilliSeconds</span><br><span class="line"></span><br><span class="line"><span class="number">00000003</span>编号的订单要删除啦。。。。</span><br><span class="line"></span><br><span class="line">After <span class="number">9006</span> MilliSeconds</span><br><span class="line"></span><br><span class="line"><span class="number">00000004</span>编号的订单要删除啦。。。。</span><br><span class="line"></span><br><span class="line">After <span class="number">12008</span> MilliSeconds</span><br><span class="line"></span><br><span class="line"><span class="number">00000005</span>编号的订单要删除啦。。。。</span><br><span class="line"></span><br><span class="line">After <span class="number">15009</span> MilliSeconds</span><br></pre></td></tr></table></figure>
+
+<p>可以看到都是延迟3秒，订单被删除</p>
+<p><strong>优点</strong>：效率高,任务触发时间延迟低。</p>
+<p><strong>缺点</strong>:</p>
+<ul>
+<li>(1)服务器重启后，数据全部消失，怕宕机</li>
+<li> (2)集群扩展相当麻烦 </li>
+<li>(3)因为内存条件限制的原因，比如下单未付款的订单数太多，那么很容易就出现OOM异常 </li>
+<li>(4)代码复杂度较高</li>
+</ul>
+<h2 id="4、时间轮算法"><a href="#4、时间轮算法" class="headerlink" title="4、时间轮算法"></a>4、时间轮算法</h2><p>先上一张时间轮的图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/2.png"></p>
+<p>时间轮算法可以类比于时钟，如上图箭头（指针）按某一个方向按固定频率轮动，每一次跳动称为一个 tick。这样可以看出定时轮由个3个重要的属性参数，<strong>ticksPerWheel</strong>（一轮的tick数），<strong>tickDuration</strong>（一个tick的持续时间）以及 <strong>timeUnit</strong>（时间单位），例如当ticksPerWheel=60，tickDuration=1，timeUnit=秒，这就和现实中的始终的秒针走动完全类似了。</p>
+<p>如果当前指针指在1上面，我有一个任务需要4秒以后执行，那么这个执行的线程回调或者消息将会被放在5上。那如果需要在20秒之后执行怎么办，由于这个环形结构槽数只到8，如果要20秒，指针需要多转2圈。位置是在2圈之后的5上面（20 % 8 + 1）</p>
+<p>我们用Netty的HashedWheelTimer来实现</p>
+<p>给Pom加上下面的依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>io.netty<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>netty-all<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.1.24.Final<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>测试代码HashedWheelTimerTest如下所示</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.rjzheng.delay3;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> io.netty.util.HashedWheelTimer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> io.netty.util.Timeout;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> io.netty.util.Timer;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> io.netty.util.TimerTask;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeUnit;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HashedWheelTimerTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyTimerTask</span> <span class="keyword">implements</span> <span class="title">TimerTask</span></span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">boolean</span> flag;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="title">MyTimerTask</span><span class="params">(<span class="keyword">boolean</span> flag)</span></span>&#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">this</span>.flag = flag;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">(Timeout timeout)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// TODO Auto-generated method stub</span></span><br><span class="line"></span><br><span class="line">             System.out.println(<span class="string">&quot;要去数据库删除订单了。。。。&quot;</span>);</span><br><span class="line"></span><br><span class="line">             <span class="keyword">this</span>.flag =<span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] argv)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        MyTimerTask timerTask = <span class="keyword">new</span> MyTimerTask(<span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">        Timer timer = <span class="keyword">new</span> HashedWheelTimer();</span><br><span class="line"></span><br><span class="line">        timer.newTimeout(timerTask, <span class="number">5</span>, TimeUnit.SECONDS);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">int</span> i = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span>(timerTask.flag)&#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line"></span><br><span class="line">                Thread.sleep(<span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line"></span><br><span class="line">                <span class="comment">// TODO Auto-generated catch block</span></span><br><span class="line"></span><br><span class="line">                e.printStackTrace();</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            System.out.println(i+<span class="string">&quot;秒过去了&quot;</span>);</span><br><span class="line"></span><br><span class="line">            i++;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>输出如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span>秒过去了</span><br><span class="line"></span><br><span class="line"><span class="number">2</span>秒过去了</span><br><span class="line"></span><br><span class="line"><span class="number">3</span>秒过去了</span><br><span class="line"></span><br><span class="line"><span class="number">4</span>秒过去了</span><br><span class="line"></span><br><span class="line"><span class="number">5</span>秒过去了</span><br><span class="line"></span><br><span class="line">要去数据库删除订单了。。。。</span><br><span class="line"></span><br><span class="line"><span class="number">6</span>秒过去了</span><br></pre></td></tr></table></figure>
+
+<p><strong>优点</strong>：效率高,任务触发时间延迟时间比delayQueue低，代码复杂度比delayQueue低。</p>
+<p><strong>缺点</strong>:</p>
+<ul>
+<li><p>(1)服务器重启后，数据全部消失，怕宕机</p>
+</li>
+<li><p>(2)集群扩展相当麻烦</p>
+</li>
+<li><p>(3)因为内存条件限制的原因，比如下单未付款的订单数太多，那么很容易就出现OOM异常</p>
+</li>
+</ul>
+<h2 id="5、redis缓存"><a href="#5、redis缓存" class="headerlink" title="5、redis缓存"></a>5、redis缓存</h2><h3 id="思路一"><a href="#思路一" class="headerlink" title="思路一"></a>思路一</h3><p>利用redis的zset,zset是一个有序集合，每一个元素(member)都关联了一个score,通过score排序来取集合中的值</p>
+<p>添加元素:ZADD key score member [[score member] [score member] …]</p>
+<p>按顺序查询元素:ZRANGE key start stop [WITHSCORES]</p>
+<p>查询元素score:ZSCORE key member</p>
+<p>移除元素:ZREM key member [member …]</p>
+<p>测试如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">添加单个元素</span><br><span class="line"></span><br><span class="line">redis&gt; ZADD page_rank <span class="number">10</span> google.com</span><br><span class="line"></span><br><span class="line">(integer) <span class="number">1</span></span><br><span class="line"></span><br><span class="line">添加多个元素</span><br><span class="line"></span><br><span class="line">redis&gt; ZADD page_rank <span class="number">9</span> baidu.com <span class="number">8</span> bing.com</span><br><span class="line"></span><br><span class="line">(integer) <span class="number">2</span></span><br><span class="line"></span><br><span class="line">redis&gt; ZRANGE page_rank <span class="number">0</span> -<span class="number">1</span> WITHSCORES</span><br><span class="line"></span><br><span class="line"><span class="number">1</span>) <span class="string">&quot;bing.com&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="number">2</span>) <span class="string">&quot;8&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="number">3</span>) <span class="string">&quot;baidu.com&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="number">4</span>) <span class="string">&quot;9&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="number">5</span>) <span class="string">&quot;google.com&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="number">6</span>) <span class="string">&quot;10&quot;</span></span><br><span class="line"></span><br><span class="line">查询元素的score值</span><br><span class="line"></span><br><span class="line">redis&gt; ZSCORE page_rank bing.com</span><br><span class="line"></span><br><span class="line"><span class="string">&quot;8&quot;</span></span><br><span class="line"></span><br><span class="line">移除单个元素</span><br><span class="line"></span><br><span class="line">redis&gt; ZREM page_rank google.com</span><br><span class="line"></span><br><span class="line">(integer) <span class="number">1</span></span><br><span class="line"></span><br><span class="line">redis&gt; ZRANGE page_rank <span class="number">0</span> -<span class="number">1</span> WITHSCORES</span><br><span class="line"></span><br><span class="line"><span class="number">1</span>) <span class="string">&quot;bing.com&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="number">2</span>) <span class="string">&quot;8&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="number">3</span>) <span class="string">&quot;baidu.com&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="number">4</span>) <span class="string">&quot;9&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>那么如何实现呢？我们将订单超时时间戳与订单号分别设置为score和member,系统扫描第一个元素判断是否超时，具体如下图所示</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/3.png"></p>
+<p><strong>实现一</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.rjzheng.delay4;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.Calendar;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.Set;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> redis.clients.jedis.Jedis;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> redis.clients.jedis.JedisPool;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> redis.clients.jedis.Tuple;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AppTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String ADDR = <span class="string">&quot;127.0.0.1&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> PORT = <span class="number">6379</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> JedisPool jedisPool = <span class="keyword">new</span> JedisPool(ADDR, PORT);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Jedis <span class="title">getJedis</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">       <span class="keyword">return</span> jedisPool.getResource();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//生产者,生成5个订单放进去</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">productionDelayMessage</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;<span class="number">5</span>;i++)&#123;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//延迟3秒</span></span><br><span class="line"></span><br><span class="line">            Calendar cal1 = Calendar.getInstance();</span><br><span class="line"></span><br><span class="line">            cal1.add(Calendar.SECOND, <span class="number">3</span>);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">int</span> second3later = (<span class="keyword">int</span>) (cal1.getTimeInMillis() / <span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line">            AppTest.getJedis().zadd(<span class="string">&quot;OrderId&quot;</span>,second3later,<span class="string">&quot;OID0000001&quot;</span>+i);</span><br><span class="line"></span><br><span class="line">            System.out.println(System.currentTimeMillis()+<span class="string">&quot;ms:redis生成了一个订单任务：订单ID为&quot;</span>+<span class="string">&quot;OID0000001&quot;</span>+i);</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//消费者，取订单</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">consumerDelayMessage</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">        Jedis jedis = AppTest.getJedis();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span>(<span class="keyword">true</span>)&#123;</span><br><span class="line"></span><br><span class="line">            Set&lt;Tuple&gt; items = jedis.zrangeWithScores(<span class="string">&quot;OrderId&quot;</span>, <span class="number">0</span>, <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span>(items == <span class="keyword">null</span> || items.isEmpty())&#123;</span><br><span class="line"></span><br><span class="line">                System.out.println(<span class="string">&quot;当前没有等待的任务&quot;</span>);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line"></span><br><span class="line">                    Thread.sleep(<span class="number">500</span>);</span><br><span class="line"></span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line"></span><br><span class="line">                    <span class="comment">// TODO Auto-generated catch block</span></span><br><span class="line"></span><br><span class="line">                    e.printStackTrace();</span><br><span class="line"></span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">int</span>  score = (<span class="keyword">int</span>) ((Tuple)items.toArray()[<span class="number">0</span>]).getScore();</span><br><span class="line"></span><br><span class="line">            Calendar cal = Calendar.getInstance();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">int</span> nowSecond = (<span class="keyword">int</span>) (cal.getTimeInMillis() / <span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span>(nowSecond &gt;= score)&#123;</span><br><span class="line"></span><br><span class="line">                String orderId = ((Tuple)items.toArray()[<span class="number">0</span>]).getElement();</span><br><span class="line"></span><br><span class="line">                jedis.zrem(<span class="string">&quot;OrderId&quot;</span>, orderId);</span><br><span class="line"></span><br><span class="line">                System.out.println(System.currentTimeMillis() +<span class="string">&quot;ms:redis消费了一个任务：消费的订单OrderId为&quot;</span>+orderId);</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        AppTest appTest =<span class="keyword">new</span> AppTest();</span><br><span class="line"></span><br><span class="line">        appTest.productionDelayMessage();</span><br><span class="line"></span><br><span class="line">        appTest.consumerDelayMessage();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此时对应输出如下</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/4.png"></p>
+<p>可以看到，几乎都是3秒之后，消费订单。</p>
+<p>然而，这一版存在一个致命的硬伤，在高并发条件下，多消费者会取到同一个订单号，我们上测试代码ThreadTest</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.rjzheng.delay4;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.CountDownLatch;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ThreadTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> threadNum = <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> CountDownLatch cdl = newCountDownLatch(threadNum);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">DelayMessage</span> <span class="keyword">implements</span> <span class="title">Runnable</span></span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line"></span><br><span class="line">                cdl.await();</span><br><span class="line"></span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line"></span><br><span class="line">                <span class="comment">// TODO Auto-generated catch block</span></span><br><span class="line"></span><br><span class="line">                e.printStackTrace();</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            AppTest appTest =<span class="keyword">new</span> AppTest();</span><br><span class="line"></span><br><span class="line">            appTest.consumerDelayMessage();</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        AppTest appTest =<span class="keyword">new</span> AppTest();</span><br><span class="line"></span><br><span class="line">        appTest.productionDelayMessage();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;threadNum;i++)&#123;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">new</span> Thread(<span class="keyword">new</span> DelayMessage()).start();</span><br><span class="line"></span><br><span class="line">            cdl.countDown();</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>输出如下所示：</strong></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/5.png"></p>
+<p>显然，出现了多个线程消费同一个资源的情况。</p>
+<p><strong>解决方案：</strong></p>
+<ul>
+<li><p>(1)用分布式锁，但是用分布式锁，性能下降了，该方案不细说。</p>
+</li>
+<li><p>(2)对ZREM的返回值进行判断，只有大于0的时候，才消费数据，于是将consumerDelayMessage()方法里的</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(nowSecond &gt;= score)&#123;</span><br><span class="line"></span><br><span class="line">    String orderId = ((Tuple)items.toArray()[<span class="number">0</span>]).getElement();</span><br><span class="line"></span><br><span class="line">    jedis.zrem(<span class="string">&quot;OrderId&quot;</span>, orderId);</span><br><span class="line"></span><br><span class="line">    System.out.println(System.currentTimeMillis()+<span class="string">&quot;ms:redis消费了一个任务：消费的订单OrderId为&quot;</span>+orderId);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>修改为</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(nowSecond &gt;= score)&#123;</span><br><span class="line"></span><br><span class="line">    String orderId = ((Tuple)items.toArray()[<span class="number">0</span>]).getElement();</span><br><span class="line"></span><br><span class="line">    Long num = jedis.zrem(<span class="string">&quot;OrderId&quot;</span>, orderId);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>( num != <span class="keyword">null</span> &amp;&amp; num&gt;<span class="number">0</span>)&#123;</span><br><span class="line"></span><br><span class="line">        System.out.println(System.currentTimeMillis()+<span class="string">&quot;ms:redis消费了一个任务：消费的订单OrderId为&quot;</span>+orderId);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在这种修改后，重新运行ThreadTest类，发现输出正常了</p>
+<h3 id="思路二"><a href="#思路二" class="headerlink" title="思路二"></a>思路二</h3><p>该方案使用redis的Keyspace Notifications，中文翻译就是键空间机制，就是利用该机制可以在key失效之后，提供一个回调，实际上是redis会给客户端发送一个消息。是需要redis版本2.8以上。</p>
+<p><strong>实现二：</strong></p>
+<p>在redis.conf中，加入一条配置<strong>notify-keyspace-events Ex</strong></p>
+<p>运行代码如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.rjzheng.delay5;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> redis.clients.jedis.Jedis;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> redis.clients.jedis.JedisPool;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> redis.clients.jedis.JedisPubSub;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisTest</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String ADDR = <span class="string">&quot;127.0.0.1&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> PORT = <span class="number">6379</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> JedisPool jedis = <span class="keyword">new</span> JedisPool(ADDR, PORT);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> RedisSub sub = <span class="keyword">new</span> RedisSub();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line"></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">                jedis.getResource().subscribe(sub, <span class="string">&quot;__keyevent@0__:expired&quot;</span>);</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">        &#125;).start();</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line"></span><br><span class="line">        init();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i =<span class="number">0</span>;i&lt;<span class="number">10</span>;i++)&#123;</span><br><span class="line"></span><br><span class="line">            String orderId = <span class="string">&quot;OID000000&quot;</span>+i;</span><br><span class="line"></span><br><span class="line">            jedis.getResource().setex(orderId, <span class="number">3</span>, orderId);</span><br><span class="line"></span><br><span class="line">            System.out.println(System.currentTimeMillis()+<span class="string">&quot;ms:&quot;</span>+orderId+<span class="string">&quot;订单生成&quot;</span>);</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">RedisSub</span> <span class="keyword">extends</span> <span class="title">JedisPubSub</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        &lt;ahref=<span class="string">&#x27;http://www.jobbole.com/members/wx610506454&#x27;</span>&gt;<span class="meta">@Override</span>&lt;/a&gt;</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onMessage</span><span class="params">(String channel, String message)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">            System.out.println(System.currentTimeMillis()+<span class="string">&quot;ms:&quot;</span>+message+<span class="string">&quot;订单取消&quot;</span>);</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>输出如下</strong></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/6.png"></p>
+<p>可以明显看到3秒过后，订单取消了</p>
+<p>ps:redis的<strong>pub/sub</strong>机制存在一个硬伤，官网内容如下</p>
+<blockquote>
+<p>原文：Because Redis Pub/Sub is fire and forget currently there is no way to use this feature if your application demands reliable notification of events, that is, if your Pub/Sub client disconnects, and reconnects later, all the events delivered during the time the client was disconnected are lost.</p>
+</blockquote>
+<blockquote>
+<p>翻译： Redis的发布/订阅目前是即发即弃(fire and forget)模式的，因此无法实现事件的可靠通知。也就是说，如果发布/订阅的客户端断链之后又重连，则在客户端断链期间的所有事件都丢失了。因此，方案二不是太推荐。当然，如果你对可靠性要求不高，可以使用。</p>
+</blockquote>
+<p><strong>优点</strong>:</p>
+<ul>
+<li>(1)由于使用Redis作为消息通道，消息都存储在Redis中。如果发送程序或者任务处理程序挂了，重启之后，还有重新处理数据的可能性。</li>
+<li>(2)做集群扩展相当方便</li>
+<li>(3)时间准确度高</li>
+</ul>
+<p><strong>缺点</strong>:</p>
+<ul>
+<li>(1)需要额外进行redis维护</li>
+</ul>
+<h2 id="6、使用消息队列"><a href="#6、使用消息队列" class="headerlink" title="6、使用消息队列"></a>6、使用消息队列</h2><p>我们可以采用rabbitMQ的延时队列。RabbitMQ具有以下两个特性，可以实现延迟队列</p>
+<p>RabbitMQ可以针对Queue和Message设置 x-message-tt，来控制消息的生存时间，如果超时，则消息变为dead letter</p>
+<p>lRabbitMQ的Queue可以配置x-dead-letter-exchange 和x-dead-letter-routing-key（可选）两个参数，用来控制队列内出现了deadletter，则按照这两个参数重新路由。结合以上两个特性，就可以模拟出延迟消息的功能。</p>
+<p><strong>优点</strong>： 高效,可以利用rabbitmq的分布式特性轻易的进行横向扩展,消息支持持久化增加了可靠性。</p>
+<p><strong>缺点</strong>：本身的易用度要依赖于rabbitMq的运维.因为要引用rabbitMq,所以复杂度和成本变高</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    不才陈某  |  微信公众号【码猿技术专栏】
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://chenjiabing666.github.io/2021/09/11/%E7%BE%8E%E5%9B%A2%E4%BA%8C%E9%9D%A2%EF%BC%9A%E7%94%9F%E6%88%90%E8%AE%A2%E5%8D%9530%E5%88%86%E9%92%9F%E6%9C%AA%E6%94%AF%E4%BB%98%EF%BC%8C%E5%88%99%E8%87%AA%E5%8A%A8%E5%8F%96%E6%B6%88%EF%BC%8C%E8%AF%A5%E6%80%8E%E4%B9%88%E5%AE%9E%E7%8E%B0%EF%BC%9F/" title="美团二面：生成订单30分钟未支付，则自动取消，该怎么实现？">https://chenjiabing666.github.io/2021/09/11/美团二面：生成订单30分钟未支付，则自动取消，该怎么实现？/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+  <li class="post-copyright-license">
+    并保留本声明和上方二维码。感谢您的阅读和支持！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">微信公众号</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E9%9D%A2%E8%AF%95/" rel="tag"># 面试</a>
+              <a href="/tags/%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97/" rel="tag"># 延迟队列</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/09/08/SpringBoot%E9%85%8D%E7%BD%AE%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E5%8A%A8%E6%80%81%E5%88%B7%E6%96%B0%EF%BC%9F/" rel="prev" title="Spring Boot 配置如何实现动态刷新？">
+      <i class="fa fa-chevron-left"></i> Spring Boot 配置如何实现动态刷新？
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+		  <script src="https://readmore.openwrite.cn/js/readmore.js" type="text/javascript"></script>
+<script>
+    const btw = new BTWPlugin();
+    btw.init({
+        id: 'container',
+        blogId: '27513-1629019452485-311',
+        name: '码猿技术专栏',
+        qrcode: 'https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg',
+        keyword: 'vip',
+    });
+</script>
+        </div>
+		</div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%E3%80%81%E5%89%8D%E8%A8%80"><span class="nav-text">1、前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%E3%80%81%E6%95%B0%E6%8D%AE%E5%BA%93%E8%BD%AE%E8%AF%A2"><span class="nav-text">2、数据库轮询</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%E3%80%81JDK%E7%9A%84%E5%BB%B6%E8%BF%9F%E9%98%9F%E5%88%97"><span class="nav-text">3、JDK的延迟队列</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4%E3%80%81%E6%97%B6%E9%97%B4%E8%BD%AE%E7%AE%97%E6%B3%95"><span class="nav-text">4、时间轮算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5%E3%80%81redis%E7%BC%93%E5%AD%98"><span class="nav-text">5、redis缓存</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%9D%E8%B7%AF%E4%B8%80"><span class="nav-text">思路一</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%9D%E8%B7%AF%E4%BA%8C"><span class="nav-text">思路二</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6%E3%80%81%E4%BD%BF%E7%94%A8%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97"><span class="nav-text">6、使用消息队列</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="不才陈某"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">108</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png" title="微信公众号 → https:&#x2F;&#x2F;gitee.com&#x2F;chenjiabing666&#x2F;BlogImage&#x2F;raw&#x2F;master&#x2F;myjszl_log.png" rel="noopener" target="_blank"><i class="fab fa-weixin fa-fw"></i>微信公众号</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.im/user/2506542244708072" title="掘金 → https:&#x2F;&#x2F;juejin.im&#x2F;user&#x2F;2506542244708072" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>掘金</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某|公众号：码猿技术专栏</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RtlQOgOT3M0hgyMeogykSQjT-gzGzoHsz',
+      appKey     : 'vSCxLU88wnXVf0Pa8mwJrCPm',
+      placeholder: "欢迎关注博主微信公众号【码猿技术专栏】",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
