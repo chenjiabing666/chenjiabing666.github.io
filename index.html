@@ -488,6 +488,105 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/09/21/40%E4%B8%AASpringBoot%E5%B8%B8%E7%94%A8%E6%B3%A8%E8%A7%A3%EF%BC%9A%E8%AE%A9%E7%94%9F%E4%BA%A7%E5%8A%9B%E7%88%86%E8%A1%A8%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/09/21/40%E4%B8%AASpringBoot%E5%B8%B8%E7%94%A8%E6%B3%A8%E8%A7%A3%EF%BC%9A%E8%AE%A9%E7%94%9F%E4%BA%A7%E5%8A%9B%E7%88%86%E8%A1%A8%EF%BC%81/" class="post-title-link" itemprop="url">40个SpringBoot常用注解：让生产力爆表！</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-09-21 22:17:13 / 修改时间：22:18:08" itemprop="dateCreated datePublished" datetime="2021-09-21T22:17:13+08:00">2021-09-21</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/09/21/40%E4%B8%AASpringBoot%E5%B8%B8%E7%94%A8%E6%B3%A8%E8%A7%A3%EF%BC%9A%E8%AE%A9%E7%94%9F%E4%BA%A7%E5%8A%9B%E7%88%86%E8%A1%A8%EF%BC%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/09/21/40%E4%B8%AASpringBoot%E5%B8%B8%E7%94%A8%E6%B3%A8%E8%A7%A3%EF%BC%9A%E8%AE%A9%E7%94%9F%E4%BA%A7%E5%8A%9B%E7%88%86%E8%A1%A8%EF%BC%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="一、Spring-Web-MVC-与-Spring-Bean-注解"><a href="#一、Spring-Web-MVC-与-Spring-Bean-注解" class="headerlink" title="一、Spring Web MVC 与 Spring Bean 注解"></a>一、Spring Web MVC 与 Spring Bean 注解</h2><h3 id="RequestMapping"><a href="#RequestMapping" class="headerlink" title="@RequestMapping"></a><strong>@RequestMapping</strong></h3><p>@RequestMapping注解的主要用途是将Web请求与请求处理类中的方法进行映射。Spring MVC和Spring WebFlux都通过<code>RquestMappingHandlerMapping</code>和<code>RequestMappingHndlerAdapter</code>两个类来提供对@RequestMapping注解的支持。</p>
+<p><code>@RequestMapping</code>注解对请求处理类中的请求处理方法进行标注；<code>@RequestMapping</code>注解拥有以下的六个配置属性：</p>
+<ul>
+<li><code>value</code>:映射的请求URL或者其别名</li>
+<li><code>method</code>:兼容HTTP的方法名</li>
+<li><code>params</code>:根据HTTP参数的存在、缺省或值对请求进行过滤</li>
+<li><code>header</code>:根据HTTP Header的存在、缺省或值对请求进行过滤</li>
+<li><code>consume</code>:设定在HTTP请求正文中允许使用的媒体类型</li>
+<li><code>product</code>:在HTTP响应体中允许使用的媒体类型</li>
+</ul>
+<p>提示：在使用@RequestMapping之前，请求处理类还需要使用@Controller或@RestController进行标记</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/09/21/40%E4%B8%AASpringBoot%E5%B8%B8%E7%94%A8%E6%B3%A8%E8%A7%A3%EF%BC%9A%E8%AE%A9%E7%94%9F%E4%BA%A7%E5%8A%9B%E7%88%86%E8%A1%A8%EF%BC%81/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/09/17/Nacos%E3%80%81Apollo%E3%80%81Config%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E5%A6%82%E4%BD%95%E9%80%89%E5%9E%8B%EF%BC%9F%E8%BF%9910%E4%B8%AA%E7%BB%B4%E5%BA%A6%E5%91%8A%E8%AF%89%E4%BD%A0%EF%BC%81/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1059,106 +1158,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/09/03/SpringBoot%E6%97%A5%E5%BF%97%E3%80%81%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E3%80%81%E6%8E%A5%E5%8F%A3%E6%95%B0%E6%8D%AE%E5%A6%82%E4%BD%95%E8%84%B1%E6%95%8F%EF%BC%9F%E8%80%81%E9%B8%9F%E4%BB%AC%E9%83%BD%E6%98%AF%E8%BF%99%E6%A0%B7%E7%8E%A9%E7%9A%84%EF%BC%81/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/09/03/SpringBoot%E6%97%A5%E5%BF%97%E3%80%81%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E3%80%81%E6%8E%A5%E5%8F%A3%E6%95%B0%E6%8D%AE%E5%A6%82%E4%BD%95%E8%84%B1%E6%95%8F%EF%BC%9F%E8%80%81%E9%B8%9F%E4%BB%AC%E9%83%BD%E6%98%AF%E8%BF%99%E6%A0%B7%E7%8E%A9%E7%9A%84%EF%BC%81/" class="post-title-link" itemprop="url">Springboot日志、配置文件、接口数据如何脱敏？老鸟们都是这样玩的！</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-09-03 08:53:25 / 修改时间：08:55:01" itemprop="dateCreated datePublished" datetime="2021-09-03T08:53:25+08:00">2021-09-03</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2021/09/03/SpringBoot%E6%97%A5%E5%BF%97%E3%80%81%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E3%80%81%E6%8E%A5%E5%8F%A3%E6%95%B0%E6%8D%AE%E5%A6%82%E4%BD%95%E8%84%B1%E6%95%8F%EF%BC%9F%E8%80%81%E9%B8%9F%E4%BB%AC%E9%83%BD%E6%98%AF%E8%BF%99%E6%A0%B7%E7%8E%A9%E7%9A%84%EF%BC%81/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2021/09/03/SpringBoot%E6%97%A5%E5%BF%97%E3%80%81%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E3%80%81%E6%8E%A5%E5%8F%A3%E6%95%B0%E6%8D%AE%E5%A6%82%E4%BD%95%E8%84%B1%E6%95%8F%EF%BC%9F%E8%80%81%E9%B8%9F%E4%BB%AC%E9%83%BD%E6%98%AF%E8%BF%99%E6%A0%B7%E7%8E%A9%E7%9A%84%EF%BC%81/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="一、前言"><a href="#一、前言" class="headerlink" title="一、前言"></a>一、前言</h2><p>核心隐私数据无论对于企业还是用户来说尤其重要，因此要想办法杜绝各种隐私数据的泄漏。下面陈某带大家从以下三个方面讲解一下隐私数据如何脱敏，也是日常开发中需要注意的：</p>
-<ol>
-<li>配置文件数据脱敏</li>
-<li>接口返回数据脱敏</li>
-<li>日志文件数据脱敏</li>
-</ol>
-<p>文章目录如下：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%95%B0%E6%8D%AE%E8%84%B1%E6%95%8F/6.png"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/09/03/SpringBoot%E6%97%A5%E5%BF%97%E3%80%81%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E3%80%81%E6%8E%A5%E5%8F%A3%E6%95%B0%E6%8D%AE%E5%A6%82%E4%BD%95%E8%84%B1%E6%95%8F%EF%BC%9F%E8%80%81%E9%B8%9F%E4%BB%AC%E9%83%BD%E6%98%AF%E8%BF%99%E6%A0%B7%E7%8E%A9%E7%9A%84%EF%BC%81/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1238,7 +1241,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">110</span>
+          <span class="site-state-item-count">111</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
