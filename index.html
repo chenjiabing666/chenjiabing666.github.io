@@ -488,6 +488,303 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/09/26/5%E7%A7%8D%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E5%A6%82%E4%BD%95%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B%EF%BC%9F%E8%BF%99%E5%87%A0%E4%B8%AA%E7%BB%B4%E5%BA%A6%E5%91%8A%E8%AF%89%E4%BD%A0%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/09/26/5%E7%A7%8D%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E5%A6%82%E4%BD%95%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B%EF%BC%9F%E8%BF%99%E5%87%A0%E4%B8%AA%E7%BB%B4%E5%BA%A6%E5%91%8A%E8%AF%89%E4%BD%A0%EF%BC%81/" class="post-title-link" itemprop="url">5种微服务注册中心如何技术选型？这几个维度告诉你！</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-09-26 11:54:11 / 修改时间：12:30:14" itemprop="dateCreated datePublished" datetime="2021-09-26T11:54:11+08:00">2021-09-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Cloud-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Cloud 进阶</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/09/26/5%E7%A7%8D%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E5%A6%82%E4%BD%95%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B%EF%BC%9F%E8%BF%99%E5%87%A0%E4%B8%AA%E7%BB%B4%E5%BA%A6%E5%91%8A%E8%AF%89%E4%BD%A0%EF%BC%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/09/26/5%E7%A7%8D%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E5%A6%82%E4%BD%95%E6%8A%80%E6%9C%AF%E9%80%89%E5%9E%8B%EF%BC%9F%E8%BF%99%E5%87%A0%E4%B8%AA%E7%BB%B4%E5%BA%A6%E5%91%8A%E8%AF%89%E4%BD%A0%EF%BC%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="1、前言"><a href="#1、前言" class="headerlink" title="1、前言"></a>1、前言</h2><p>微服务的注册中心目前主流的有以下四种：</p>
+<ul>
+<li>Zookeeper</li>
+<li>Eureka</li>
+<li>Consul</li>
+<li>Kubernetes</li>
+</ul>
+<p>那么实际开发中到底如何选择呢？这是一个值得深入研究的事情，别着急，今天陈某就带大家深入了解一下这四类注册中心以及如何选型的问题。</p>
+<p>这是《Spring Cloud 进阶》专栏第<strong>四</strong>篇文章，往期文章如下：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247493854&idx=1&sn=4b3fb7f7e17a76000733899f511ef915&scene=21#wechat_redirect">五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247496653&idx=1&sn=7185077b3bdc1d094aef645d677ec472&scene=21#wechat_redirect">openFeign夺命连环9问，这谁受得了？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/S_8HQYHOG624Vzeu94CFSA">阿里面试这样问：Nacos、Apollo、Config配置中心如何选型？这10个维度告诉你！</a></li>
+</ul>
+<h2 id="2、为什么需要注册中心？"><a href="#2、为什么需要注册中心？" class="headerlink" title="2、为什么需要注册中心？"></a>2、为什么需要注册中心？</h2><p>随着单体应用拆分，首当面临的第一份挑战就是服务实例的数量较多，并且服务自身对外暴露的访问地址也具有动态性。可能因为服务扩容、服务的失败和更新等因素，导致服务实例的运行时状态经常变化，如下图:</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/1.png"></p>
+<p>商品详情需要调用<strong>营销</strong>、<strong>订单</strong>、<strong>库存</strong>三个服务，存在问题有：</p>
+<ul>
+<li><p>营销、订单、库存这三个服务的地址都可能<strong>动态</strong>的发生改变，单纯只使用配置的形式需要频繁的变更，如果是写到配置文件里面还需要<strong>重启系统</strong>，这对生产来说太不友好了</p>
+</li>
+<li><p>服务是集群部署的形式调用方负载均衡如何去实现</p>
+</li>
+</ul>
+<p>解决第一个问题办法就是用我们用伟人说过一句话，<strong>没有什么是加一个中间层解决不了的</strong>，这个中间层就是我们的注册中心。</p>
+<p>解决第二问题就是关于负载均衡的实现，这个需要结合我们中间层老大哥来实现。</p>
+<h2 id="3、如何实现一个注册中心？"><a href="#3、如何实现一个注册中心？" class="headerlink" title="3、如何实现一个注册中心？"></a>3、如何实现一个注册中心？</h2><p>对于如何实现注册中心这个问题，首先将服务之间是如何交互的模型抽象出来，我们结合实际的案例来说明这个问题，以商品服务为例：</p>
+<ol>
+<li>当我们搜索商品的时候商品服务就是提供者；</li>
+<li>当我们查询商品详情的时候即服务的提供者又是服务的消费者，消费是订单、库存等服务；<br>由此我们需要引入的三个角色就是：中间层(注册中心)、生产者、消费者，如下图:</li>
+</ol>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/2.png"><br>整体的执行流程如下:</p>
+<ol>
+<li><p>在服务启动时，服务提供者通过内部的注册中心客户端应用自动将自身服务注册到注册中心，包含<strong>主机地址</strong>、<strong>服务名称</strong>等等信息；</p>
+</li>
+<li><p>在服务启动或者发生变更的时候，服务消费者的注册中心客户端程序则可以从注册中心中获取那些已经注册的服务实例信息或者移除已下线的服务；</p>
+</li>
+</ol>
+<p>上图还多一个设计缓存本地路由，缓存本地路由是为了提高服务路由的<strong>效率</strong>和<strong>容错性</strong>，服务消费者可以配备缓存机制以加速服务路由。更重要的是，当服务注册中心不可用时，服务消费者可以利用本地缓存路由实现对现有服务的可靠调用。</p>
+<p>在整个执行的过程中，其中有点有一点是比较难的，就是服务消费者如何及时知道服务的生产者如何及时变更的，这个问题也是经典的生产者消费者的问题，解决的方式有两种:</p>
+<ol>
+<li><p><strong>发布-订阅模式</strong>：服务消费者能够实时监控服务更新状态，通常采用监听器以及回调机制，经典的案例就是<strong>Zookeeper</strong>；<br>   <img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/3.png"></p>
+</li>
+<li><p><strong>主动拉取策略</strong>：服务的消费者定期调用注册中心提供的服务获取接口获取最新的服务列表并更新本地缓存,经典案例就是<strong>Eureka</strong>；<br>   <img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/4.png"></p>
+</li>
+</ol>
+<p>对于如何选择这两种方式，其实还有一个<strong>数据一致性</strong>问题可以聊聊，比如选择定时器肯定就抛弃了一致性，最求的是最终一致，这里就不深入展开了，另外你可能还会说服务的移除等等这些功能都没介绍，在我看来那只是一个附加功能，注册中心重点还是在于服务注册和发现，其他都是锦上添花罢了。<br>      <img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/5.png"></p>
+<h2 id="4、如何解决负载均衡的问题？"><a href="#4、如何解决负载均衡的问题？" class="headerlink" title="4、如何解决负载均衡的问题？"></a>4、如何解决负载均衡的问题？</h2><p>负载均衡的实现有两种方式:</p>
+<ol>
+<li><p>服务端的负载均衡；</p>
+</li>
+<li><p>客户端的负载均衡;<br>对于实现的方案来说本质上是差不多的，只是说承接的载体不一样，一个是服务端，一个客户端，如下图:</p>
+</li>
+</ol>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/6.png"></p>
+<p>服务端的负载均衡，给服务提供者更强的流量控制权，但是无法满足不同的消费者希望使用不同负载均衡策略的需求。</p>
+<p>客户端的负载均衡则提供了这种灵活性，并对用户扩展提供更加友好的支持。但是客户端负载均衡策略如果配置不当，可能会导致服务提供者出现热点，或者压根就拿不到任何服务提供者。</p>
+<p>服务端负载均衡典型的代表就是<strong>Nginx</strong>，客户端负载均衡典型代表是<strong>Ribbon</strong>，每种方式都有经典的代表，我们都是可以深入学习的。</p>
+<p>常见的负载均衡器的算法的实现，常见的算法有以下<strong>六种</strong>:</p>
+<p><strong>1、轮询法</strong></p>
+<p>将请求按顺序轮流地分配到后端服务器上，它均衡地对待后端的每一台服务器，而不关心服务器实际的连接数和当前的系统负载。</p>
+<p><strong>2、随机法</strong></p>
+<p>通过系统的随机算法，根据后端服务器的列表大小值来随机选取其中的一台服务器进行访问。由概率统计理论可以得知，随着客户端调用服务端的次数增多；其实际效果越来越接近于平均分配调用量到后端的每一台服务器，也就是轮询的结果。</p>
+<p><strong>3、哈希算法</strong></p>
+<p>哈希的思想是根据获取客户端的IP地址，通过哈希函数计算得到的一个数值，用该数值对服务器列表的大小进行取模运算，得到的结果便是客服端要访问服务器的序号。采用源地址哈希法进行负载均衡，同一IP地址的客户端，当后端服务器列表不变时，它每次都会映射到同一台后端服务器进行访问。</p>
+<p><strong>4、加权轮询法</strong></p>
+<p>不同的后端服务器可能机器的配置和当前系统的负载并不相同，因此它们的抗压能力也不相同。给配置高、负载低的机器配置更高的权重，让其处理更多的请；而配置低、负载高的机器，给其分配较低的权重，降低其系统负载，加权轮询能很好地处理这一问题，并将请求顺序且按照权重分配到后端。</p>
+<p><strong>5.加权随机法</strong></p>
+<p>与加权轮询法一样，加权随机法也根据后端机器的配置，系统的负载分配不同的权重。不同的是，它是按照权重随机请求后端服务器，而非顺序。</p>
+<p><strong>6.最小连接数法</strong></p>
+<p>最小连接数算法比较灵活和智能，由于后端服务器的配置不尽相同，对于请求的处理有快有慢，它是根据后端服务器当前的连接情况，动态地选取其中当前<br>积压连接数最少的一台服务器来处理当前的请求，尽可能地提高后端服务的利用效率，将负责合理地分流到每一台服务器。</p>
+<h2 id="5、注册中心如何选型？"><a href="#5、注册中心如何选型？" class="headerlink" title="5、注册中心如何选型？"></a>5、注册中心如何选型？</h2><p>现在注册中心的选择也是五花八门，现阶段比较流行有以下几种:</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/7.png"></p>
+<p>在介绍这个之前大家有些需要了解的知识有<strong>CAP</strong>、<strong>Paxos</strong>、Raft<strong>算法</strong>这里我就不进行过多介绍了。开始介绍以上5种实现注册中心的方式。</p>
+<h3 id="1、Zookeeper"><a href="#1、Zookeeper" class="headerlink" title="1、Zookeeper"></a>1、Zookeeper</h3><p>这个说起来有点意思的是官方并没有说他是一个注册中心，但是国内Dubbo场景下很多都是使用Zookeeper来完成了注册中心的功能。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/8.png"></p>
+<p>当然这有很多历史原因，这里我们就不追溯了，我还是来聊聊作为注册中心使用的情况下，Zookeeper有哪些表现吧。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/9.png"></p>
+<h4 id="Zookeeper基础概念"><a href="#Zookeeper基础概念" class="headerlink" title="Zookeeper基础概念"></a>Zookeeper基础概念</h4><p><strong>1、三种角色</strong></p>
+<p><strong>Leader 角色</strong>：一个Zookeeper集群同一时间只会有一个实际工作的Leader，它会发起并维护与各Follwer及Observer间的心跳。所有的写操作必须要通过Leader完成再由Leader将写操作广播给其它服务器。</p>
+<p><strong>Follower角色</strong>：一个Zookeeper集群可能同时存在多个Follower，它会响应Leader的心跳。Follower可直接处理并返回客户端的读请求，同时会将写请求转发给Leader处理，并且负责在Leader处理写请求时对请求进行投票。</p>
+<p><strong>Observer角色</strong>：与Follower类似，但是无投票权。</p>
+<p><strong>2、四种节点</strong></p>
+<p><strong>PERSISTENT-持久节点</strong>：除非手动删除，否则节点一直存在于Zookeeper上</p>
+<p><strong>EPHEMERAL-临时节点</strong>：临时节点的生命周期与客户端会话绑定，一旦客户端会话失效，那么这个客户端创建的所有临时节点都会被移除。</p>
+<p><strong>PERSISTENT_SEQUENTIAL-持久顺序节点</strong>：基本特性同持久节点，只是增加了顺序属性，节点名后边会追加一个由父节点维护的自增整型数字。</p>
+<p><strong>EPHEMERAL_SEQUENTIAL-临时顺序节点</strong>：基本特性同临时节点，增加了顺序属性，节点名后边会追加一个由父节点维护的自增整型数字。</p>
+<p><strong>3、一种机制</strong></p>
+<p><strong>Zookeeper的Watch机制</strong>，是一个轻量级的设计。因为它采用了一种推拉结合的模式。一旦服务端感知主题变了，那么只会发送一个事件类型和节点信息给关注的客户端，而不会包括具体的变更内容，所以事件本身是轻量级的，这就是推的部分。然后，收到变更通知的客户端需要自己去拉变更的数据，这就是拉的部分。</p>
+<h4 id="Zookeeper如何实现注册中心"><a href="#Zookeeper如何实现注册中心" class="headerlink" title="Zookeeper如何实现注册中心?"></a><strong>Zookeeper如何实现注册中心?</strong></h4><p>简单来讲，Zookeeper可以充当一个服务注册表（Service Registry），让多个服务提供者形成一个集群，让服务消费者通过服务注册表获取具体的服务访问地址（ip+端口）去访问具体的服务提供者。如下图所示：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/10.png"></p>
+<p>每当一个服务提供者部署后都要将自己的服务注册到zookeeper的某一路径上: <strong>/{service}/{version}/{ip:port}</strong> 。</p>
+<p>比如我们的<strong>HelloWorldService</strong>部署到两台机器，那么Zookeeper上就会创建两条目录：</p>
+<ul>
+<li><p>/HelloWorldService/1.0.0/100.19.20.01:16888 </p>
+</li>
+<li><p>HelloWorldService/1.0.0/100.19.20.02:16888。</p>
+</li>
+</ul>
+<p>这么描述有点不好理解，下图更直观，<br>  <img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/11.png"></p>
+<p>在Zookeeper中，进行服务注册，实际上就是在Zookeeper中创建了一个Znode节点，该节点存储了该服务的IP、端口、调用方式(协议、序列化方式)等。</p>
+<p>该节点承担着最重要的职责，它由服务提供者(发布服务时)创建，以供服务消费者获取节点中的信息，从而定位到服务提供者真正IP，发起调用。通过IP设置为临时节点，那么该节点数据不会一直存储在 ZooKeeper 服务器上。</p>
+<p>当创建该临时节点的客户端会话因超时或发生异常而关闭时，该节点也相应在 ZooKeeper 服务器上被删除，剔除或者上线的时候会触发Zookeeper的Watch机制，会发送消息给消费者，因此就做到消费者信息的及时更新。</p>
+<p>Zookeeper从设计上来说的话整体遵循的CP的原则，在任何时候对 Zookeeper 的访问请求能得到一致的数据结果，同时系统对网络分区具备容错性，在使用 Zookeeper 获取服务列表时，如果此时的 Zookeeper 集群中的 Leader 宕机了，该集群就要进行 Leader 的选举，又或者 Zookeeper 集群中半数以上服务器节点不可用（例如有三个节点，如果节点一检测到节点三挂了 ，节点二也检测到节点三挂了，那这个节点才算是真的挂了)，那么将无法处理该请求。</p>
+<p><strong>所以说，Zookeeper 不能保证服务可用性。</strong></p>
+<h3 id="2、Eureka"><a href="#2、Eureka" class="headerlink" title="2、Eureka"></a>2、Eureka</h3><p>Netflix我感觉应该是在酝酿更好的东西的，下面我们重点还是来介绍Ereka 1.x相关的设计。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/12.png"></p>
+<p>Eureka由两个组件组成：<strong>Eureka服务端</strong>和<strong>Eureka客户端</strong>。Eureka服务器用作服务注册服务器。Eureka客户端是一个java客户端，用来简化与服务器的交互、作为轮询负载均衡器，并提供服务的故障切换支持。</p>
+<p>Eureka的基本架构，由3个角色组成：<br><strong>1、Eureka Server</strong></p>
+<p>提供服务注册和发现功能；</p>
+<p><strong>2、Service Provider</strong><br>服务提供方，将自身服务注册到Eureka，从而使服务消费方能够找到；</p>
+<p><strong>3、Service Consumer</strong><br>服务消费方，从Eureka获取注册服务列表，从而能够消费服务</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/13.png"></p>
+<p>Eureka 在设计时就紧遵<strong>AP</strong>原则，Eureka Server 可以运行多个实例来构建集群，解决单点问题，实例之间通过彼此互相注册来提高可用性，是一种去中心化的架构，无 master/slave 之分，每一个实例 都是对等的，每个节点都可被视为其他节点的副本。</p>
+<p>在集群环境中如果某台 Eureka Server 宕机，Eureka Client 的请求会自动切换到新的 Eureka Server 节点上，当宕机的服务器重新恢复后，Eureka 会再次将其纳入到服务器集群管理之中。</p>
+<p>当节点开始接受客户端请求时，所有的操作都会在节点间进行复制操作，将请求复制到该 Eureka Server 当前所知的其它所有节点中。</p>
+<p>当一个新的 Eureka Server 节点启动后，会首先尝试从邻近节点获取所有注册列表信息，并完成初始化。Eureka Server 通过 getEurekaServiceUrls() 方法获取所有的节点，并且会通过心跳契约的方式定期更新。</p>
+<p>默认情况下，如果 Eureka Server 在一定时间内没有接收到某个服务实例的心跳（默认周期为30秒），Eureka Server 将会注销该实例（默认为90秒， eureka.instance.lease-expiration-duration-in-seconds 进行自定义配置）。</p>
+<p>当 Eureka Server 节点在短时间内丢失过多的心跳时，那么这个节点就会进入自我保护模式，这个测试环境的时候需要注意一下。</p>
+<p>Eureka的集群中，只要有一台Eureka还在，就能保证注册服务可用，只不过查到的信息可能不是最新的（不保证强一致性）。</p>
+<p>除此之外，Eureka还有一种自我保护机制，如果在<strong>15分钟</strong>内超过**85%**的节点都没有正常的心跳，那么Eureka就认为客户端与注册中心出现了网络故障，此时会出现以下几种情况：</p>
+<ul>
+<li>Eureka不再从注册表中移除因为长时间没有收到心跳而过期的服务；</li>
+<li>Eureka仍然能够接受新服务注册和查询请求，但是不会被同步到其它节点上（即保证当前节点依然可用）</li>
+<li>当网络稳定时，当前实例新注册的信息会被同步到其它节点中。</li>
+</ul>
+<h3 id="3、Nacos"><a href="#3、Nacos" class="headerlink" title="3、Nacos"></a>3、Nacos</h3><p>Nacos 无缝支持一些主流的开源生态,如下图:<br>  <img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/14.png"></p>
+<p>Nacos 致力于帮助您发现、配置和管理微服务。Nacos 提供了一组简单易用的特性集，帮助您快速实现动态服务发现、服务配置、服务元数据及流量管理。</p>
+<p>Nacos 帮助您更敏捷和容易地构建、交付和管理微服务平台。 Nacos 是构建以“服务”为中心的现代应用架构 (例如微服务范式、云原生范式) 的服务基础设施。</p>
+<p>Nacos除了服务的注册发现之外，还支持<strong>动态配置服务</strong>。动态配置服务可以让您以中心化、外部化和动态化的方式管理所有环境的应用配置和服务配置。动态配置消除了配置变更时重新部署应用和服务的需要，让配置管理变得更加高效和敏捷。配置中心化管理让实现无状态服务变得更简单，让服务按需弹性扩展变得更容易。<br>  <img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/15.png"></p>
+<h4 id="Nacos特点"><a href="#Nacos特点" class="headerlink" title="Nacos特点"></a>Nacos特点</h4><p><strong>服务发现和服务健康监测</strong></p>
+<p>Nacos 支持基于 DNS 和基于 RPC 的服务发现。服务提供者使用 原生SDK、OpenAPI、或一个独立的Agent TODO注册 Service 后，服务消费者可以使用DNS TODO 或HTTP&amp;API查找和发现服务。</p>
+<p>Nacos 提供对服务的实时的健康检查，阻止向不健康的主机或服务实例发送请求。Nacos 支持传输层 (PING 或 TCP)和应用层 (如 HTTP、MySQL、用户自定义）的健康检查。 对于复杂的云环境和网络拓扑环境中（如 VPC、边缘网络等）服务的健康检查，Nacos 提供了 agent 上报模式和服务端主动检测2种健康检查模式。Nacos 还提供了统一的健康检查仪表盘，帮助您根据健康状态管理服务的可用性及流量。</p>
+<p><strong>动态配置服务</strong></p>
+<p>动态配置服务可以让您以中心化、外部化和动态化的方式管理所有环境的应用配置和服务配置。</p>
+<p>动态配置消除了配置变更时重新部署应用和服务的需要，让配置管理变得更加高效和敏捷。</p>
+<p>配置中心化管理让实现无状态服务变得更简单，让服务按需弹性扩展变得更容易。</p>
+<p>Nacos 提供了一个简洁易用的UI (控制台样例 Demo) 帮助您管理所有的服务和应用的配置。Nacos 还提供包括配置版本跟踪、金丝雀发布、一键回滚配置以及客户端配置更新状态跟踪在内的一系列开箱即用的配置管理特性，帮助您更安全地在生产环境中管理配置变更和降低配置变更带来的风险。</p>
+<p><strong>动态 DNS 服务</strong></p>
+<p>动态 DNS 服务支持权重路由，让您更容易地实现中间层负载均衡、更灵活的路由策略、流量控制以及数据中心内网的简单DNS解析服务。动态DNS服务还能让您更容易地实现以 DNS 协议为基础的服务发现，以帮助您消除耦合到厂商私有服务发现 API 上的风险。</p>
+<p>Nacos 提供了一些简单的 DNS APIs TODO 帮助您管理服务的关联域名和可用的 IP:PORT 列表.</p>
+<p><strong>服务及其元数据管理</strong></p>
+<p>Nacos 能让您从微服务平台建设的视角管理数据中心的所有服务及元数据，包括管理服务的描述、生命周期、服务的静态依赖分析、服务的健康状态、服务的流量管理、路由及安全策略、服务的 SLA 以及最首要的 metrics 统计数据。</p>
+<p><strong>Nacos支持插件管理</strong><br>  <img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/16.png"><br>  关于Nacos数据的存储来说，支持临时也支持持久化。<br>  <img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/17.png"></p>
+<p>关于设计来说支持CP也支持AP，对他来说只是一个命令的切换，随你玩，还支持各种注册中心迁移到Nacos，反正一句话，只要你想要的他就有。</p>
+<h3 id="4、Consul"><a href="#4、Consul" class="headerlink" title="4、Consul"></a>4、Consul</h3><p>Consul是HashiCorp公司推出的开源工具，Consul由Go语言开发，部署起来非常容易，只需要极少的可执行程序和配置文件，具有绿色、轻量级的特点。Consul是分布式的、高可用的、 可横向扩展的用于实现分布式系统的服务发现与配置。</p>
+<h4 id="Consul的特点"><a href="#Consul的特点" class="headerlink" title="Consul的特点"></a><strong>Consul的特点</strong></h4><p><strong>服务发现（Service Discovery）</strong></p>
+<p>Consul提供了通过DNS或者HTTP接口的方式来注册服务和发现服务。一些外部的服务通过Consul很容易的找到它所依赖的服务。</p>
+<p><strong>健康检查（Health Checking）</strong></p>
+<p>Consul的Client可以提供任意数量的健康检查，既可以与给定的服务相关联(“webserver是否返回200 OK”)，也可以与本地节点相关联(“内存利用率是否低于90%”)。操作员可以使用这些信息来监视集群的健康状况，服务发现组件可以使用这些信息将流量从不健康的主机路由出去。</p>
+<p><strong>Key/Value存储</strong></p>
+<p>应用程序可以根据自己的需要使用Consul提供的Key/Value存储。 Consul提供了简单易用的HTTP接口，结合其他工具可以实现动态配置、功能标记、领袖选举等等功能。</p>
+<p><strong>安全服务通信</strong></p>
+<p>Consul可以为服务生成和分发TLS证书，以建立相互的TLS连接。意图可用于定义允许哪些服务通信。服务分割可以很容易地进行管理，其目的是可以实时更改的，而不是使用复杂的网络拓扑和静态防火墙规则。</p>
+<p><strong>多数据中心</strong></p>
+<p>Consul支持开箱即用的多数据中心. 这意味着用户不需要担心需要建立额外的抽象层让业务扩展到多个区域。<br>  <img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/18.png"></p>
+<p>Consul支持多数据中心，在上图中有两个DataCenter，他们通过Internet互联，同时请注意为了提高通信效率，只有Server节点才加入跨数据中心的通信。</p>
+<p>在单个数据中心中，Consul分为Client和Server两种节点（所有的节点也被称为Agent），Server节点保存数据，Client负责健康检查及转发数据请求到Server；Server节点有一个Leader和多个Follower，Leader节点会将数据同步到Follower，Server的数量推荐是3个或者5个，在Leader挂掉的时候会启动选举机制产生一个新的Leader。</p>
+<p>集群内的Consul节点通过gossip协议（流言协议）维护成员关系，也就是说某个节点了解集群内现在还有哪些节点，这些节点是Client还是Server。单个数据中心的流言协议同时使用TCP和UDP通信，并且都使用8301端口。跨数据中心的流言协议也同时使用TCP和UDP通信，端口使用8302。</p>
+<p>集群内数据的读写请求既可以直接发到Server，也可以通过Client使用RPC转发到Server，请求最终会到达Leader节点，在允许数据延时的情况下，读请求也可以在普通的Server节点完成，集群内数据的读写和复制都是通过TCP的8300端口完成。</p>
+<p>Consul其实也可以在应用内进行注册，后续采用Spring Cloud全家桶这套做负载</p>
+<p>我们这里聊聊关于Consul的应用外的注册：<br>  <img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/19.png"></p>
+<p>上图主要多出来两个组件，分别是Registrator和Consul Template，接下来我们介绍下这两个组件如何结合可以实现在应用发进行服务发现和注册。</p>
+<p><strong>Registrator</strong>：一个开源的第三方服务管理器项目，它通过监听服务部署的 Docker 实例是否存活，来负责服务提供者的注册和销毁。</p>
+<p><strong>Consul Template</strong>：定时从注册中心服务端获取最新的服务提供者节点列表并刷新 LB 配置（比如 Nginx 的 upstream），这样服务消费者就通过访问 Nginx 就可以获取最新的服务提供者信息,达到动态调节负载均衡的目的。</p>
+<p>整体架构图可能是这样:<br>  <img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/20.png"></p>
+<p>我们用Registrator来监控每个Server的状态。当有新的Server启动的时候，Registrator会把它注册到Consul这个注册中心上。</p>
+<p>由于Consul Template已经订阅了该注册中心上的服务消息，此时Consul注册中心会将新的Server信息推送给Consul Template，Consul Template则会去修改nginx.conf的配置文件，然后让Nginx重新载入配置以达到自动修改负载均衡的目的。</p>
+<h3 id="5、Kubernetes"><a href="#5、Kubernetes" class="headerlink" title="5、Kubernetes"></a>5、Kubernetes</h3><p>Kubernetes是一个轻便的和可扩展的开源平台，用于管理容器化应用和服务。通过Kubernetes能够进行应用的自动化部署和扩缩容。</p>
+<p>在Kubernetes中，会将组成应用的容器组合成一个逻辑单元以更易管理和发现。Kubernetes积累了作为Google生产环境运行工作负载15年的经验，并吸收了来自于社区的最佳想法和实践。</p>
+<p>Kubernetes经过这几年的快速发展，形成了一个大的生态环境，Google在2014年将Kubernetes作为开源项目。Kubernetes的关键特性包括：</p>
+<ul>
+<li><strong>自动化装箱</strong>：在不牺牲可用性的条件下，基于容器对资源的要求和约束自动部署容器。同时，为了提高利用率和节省更多资源，将关键和最佳工作量结合在一起。</li>
+<li><strong>自愈能力</strong>：当容器失败时，会对容器进行重启；当所部署的Node节点有问题时，会对容器进行重新部署和重新调度；当容器未通过监控检查时，会关闭此容器；直到容器正常运行时，才会对外提供服务。</li>
+<li><strong>水平扩容</strong>：通过简单的命令、用户界面或基于CPU的使用情况，能够对应用进行扩容和缩容。</li>
+<li>服务发现和负载均衡：开发者不需要使用额外的服务发现机制，就能够基于Kubernetes进行服务发现和负载均衡。</li>
+<li><strong>自动发布和回滚</strong>：Kubernetes能够程序化的发布应用和相关的配置。如果发布有问题，Kubernetes将能够回归发生的变更。</li>
+<li><strong>保密和配置管理</strong>：在不需要重新构建镜像的情况下，可以部署和更新保密和应用配置。</li>
+<li><strong>存储编排</strong>：自动挂接存储系统，这些存储系统可以来自于本地、公共云提供商（例如：GCP和AWS）、网络存储(例如：NFS、iSCSI、Gluster、Ceph、Cinder和Floker等)。</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/21.png"></p>
+<p>Kubernetes属于主从分布式架构，主要由Master Node和Worker Node组成，以及包括客户端命令行工具Kubectl和其它附加项。</p>
+<p><strong>Master Node</strong>：作为控制节点，对集群进行调度管理，Master主要由三部分构成:</p>
+<ol>
+<li><p><strong>Api Server</strong>相当于 K8S 的网关，所有的指令请求都必须经过 Api Server;</p>
+</li>
+<li><p><strong>Kubernetes调度器</strong>，使用调度算法，把请求资源调度到某个 Node 节点;</p>
+</li>
+<li><p><strong>Controller控制器</strong>，维护 K8S 资源对象（CRUD：添加、删除、更新、修改）;</p>
+</li>
+<li><p><strong>ETCD存储资源对象</strong>（可以服务注册、发现等等）;</p>
+</li>
+</ol>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83/22.png"></p>
+<p><strong>Worker Node</strong>：作为真正的工作节点，运行业务应用的容器；Worker Node主要包含五部分:</p>
+<ol>
+<li><p>Docker是运行容器的基础环境，容器引擎;       </p>
+</li>
+<li><p>Kuberlet 执行在 Node 节点上的资源操作，Scheduler 把请求交给Api ，然后 Api Sever 再把信息指令数据存储在 ETCD 里，于是 Kuberlet 会扫描 ETCD 并获取指令请求，然后去执行;</p>
+</li>
+<li><p>Kube-proxy是代理服务，起到负载均衡作用；</p>
+</li>
+<li><p>Fluentd采集日志;</p>
+</li>
+<li><p>Pod：Kubernetes 管理的基本单元（最小单元)，Pod 内部是容器。Kubernetes 不直接管理容器，而是管理 Pod;</p>
+</li>
+</ol>
+<h2 id="6、总结"><a href="#6、总结" class="headerlink" title="6、总结"></a>6、总结</h2><h3 id="1、高可用"><a href="#1、高可用" class="headerlink" title="1、高可用"></a>1、高可用</h3><p>这几款开源产品都已经考虑如何搭建高可用集群，有些差别而已；</p>
+<h3 id="2、关于CP还是AP的选择"><a href="#2、关于CP还是AP的选择" class="headerlink" title="2、关于CP还是AP的选择"></a>2、关于CP还是AP的选择</h3><p>对于服务发现来说，针对同一个服务，即使注册中心的不同节点保存的服务提供者信息不尽相同，也并不会造成灾难性的后果。</p>
+<p>但是对于服务消费者来说，如果因为注册中心的异常导致消费不能正常进行，对于系统来说是灾难性，因此我觉得对于注册中心选型应该关注可用性，而非一致性，所以我选择<strong>AP</strong>。</p>
+<h3 id="3、技术体系"><a href="#3、技术体系" class="headerlink" title="3、技术体系"></a>3、技术体系</h3><p>对于语言来说我们都是Java技术栈，从这点来说我们更倾向于Eureka、Nacos。</p>
+<p>如果公司内部有专门的中间件或者运维团队的可以Consul、Kubernetes，毕竟Kubernetes才是未来，我们追求的就是框架内解决这些问题，不要涉及到应用内的业务开发，我们其实后者是有的，只是可能不能达到能自主研发程度，这样只能要求自己走的远一些。</p>
+<p>应用内的解决方案一般适用于服务提供者和服务消费者同属于一个技术体系；应用外的解决方案一般适合服务提供者和服务消费者采用了不同技术体系的业务场景。</p>
+<p> 关于Eureka、Nacos如何选择，这个选择就比较容易做了，那个让我做的事少，我就选择那个，显然Nacos帮我们做了更多的事。</p>
+<h3 id="4、产品的活跃度"><a href="#4、产品的活跃度" class="headerlink" title="4、产品的活跃度"></a>4、产品的活跃度</h3><p>这几款开源产品整体上都比较活跃</p>
+<h2 id="7、最后说一句"><a href="#7、最后说一句" class="headerlink" title="7、最后说一句"></a>7、最后说一句</h2><p>陈某码字整理不易，觉得文章不错的朋友欢迎<strong>点赞</strong>、<strong>转发</strong>、<strong>在看</strong>，谢谢大家的支持！</p>
+<p>感兴趣的可以关注陈某公号：码猿技术专栏</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/09/21/40%E4%B8%AASpringBoot%E5%B8%B8%E7%94%A8%E6%B3%A8%E8%A7%A3%EF%BC%9A%E8%AE%A9%E7%94%9F%E4%BA%A7%E5%8A%9B%E7%88%86%E8%A1%A8%EF%BC%81/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1068,96 +1365,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/09/07/%E5%91%8A%E5%88%ABswagger-ui-%E6%88%91%E9%80%89%E6%8B%A9%E4%BA%86%E8%BF%99%E6%AC%BE%E7%A5%9E%E5%99%A8%EF%BC%81/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/09/07/%E5%91%8A%E5%88%ABswagger-ui-%E6%88%91%E9%80%89%E6%8B%A9%E4%BA%86%E8%BF%99%E6%AC%BE%E7%A5%9E%E5%99%A8%EF%BC%81/" class="post-title-link" itemprop="url">告别swagger-ui,我选择了knife4j这款神器！</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-09-07 13:42:24 / 修改时间：13:44:17" itemprop="dateCreated datePublished" datetime="2021-09-07T13:42:24+08:00">2021-09-07</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">开发工具</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2021/09/07/%E5%91%8A%E5%88%ABswagger-ui-%E6%88%91%E9%80%89%E6%8B%A9%E4%BA%86%E8%BF%99%E6%AC%BE%E7%A5%9E%E5%99%A8%EF%BC%81/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2021/09/07/%E5%91%8A%E5%88%ABswagger-ui-%E6%88%91%E9%80%89%E6%8B%A9%E4%BA%86%E8%BF%99%E6%AC%BE%E7%A5%9E%E5%99%A8%EF%BC%81/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="一、介绍"><a href="#一、介绍" class="headerlink" title="一、介绍"></a>一、介绍</h2><p>knife4j是为Java MVC框架集成Swagger生成Api文档的增强解决方案（在非Java项目中也提供了前端UI的增强解决方案），前身是swagger-bootstrap-ui,取名knife4j是希望她能像一把匕首一样小巧,轻量,并且功能强悍!</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%91%8A%E5%88%AB%20swagger-ui%20%EF%BC%8C%E6%88%91%E9%80%89%E6%8B%A9%E4%BA%86%E8%BF%99%E6%AC%BE%E7%A5%9E%E5%99%A8%EF%BC%81/1.png"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/09/07/%E5%91%8A%E5%88%ABswagger-ui-%E6%88%91%E9%80%89%E6%8B%A9%E4%BA%86%E8%BF%99%E6%AC%BE%E7%A5%9E%E5%99%A8%EF%BC%81/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1241,7 +1448,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">111</span>
+          <span class="site-state-item-count">112</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1254,7 +1461,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-count">35</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

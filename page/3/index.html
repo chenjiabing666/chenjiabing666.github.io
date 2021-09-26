@@ -188,6 +188,96 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/08/15/5%E7%A7%8D%E5%85%A8%E5%B1%80ID%E7%94%9F%E6%88%90%E6%96%B9%E5%BC%8F%E3%80%81%E4%BC%98%E7%BC%BA%E7%82%B9%E5%8F%8A%E6%94%B9%E8%BF%9B%E6%96%B9%E6%A1%88%EF%BC%8C%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E5%87%A0%E7%A7%8D%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/08/15/5%E7%A7%8D%E5%85%A8%E5%B1%80ID%E7%94%9F%E6%88%90%E6%96%B9%E5%BC%8F%E3%80%81%E4%BC%98%E7%BC%BA%E7%82%B9%E5%8F%8A%E6%94%B9%E8%BF%9B%E6%96%B9%E6%A1%88%EF%BC%8C%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E5%87%A0%E7%A7%8D%EF%BC%9F/" class="post-title-link" itemprop="url">5种全局ID生成方式、优缺点及改进方案，你知道哪几种？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-08-15 16:27:43 / 修改时间：16:29:12" itemprop="dateCreated datePublished" datetime="2021-08-15T16:27:43+08:00">2021-08-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/08/15/5%E7%A7%8D%E5%85%A8%E5%B1%80ID%E7%94%9F%E6%88%90%E6%96%B9%E5%BC%8F%E3%80%81%E4%BC%98%E7%BC%BA%E7%82%B9%E5%8F%8A%E6%94%B9%E8%BF%9B%E6%96%B9%E6%A1%88%EF%BC%8C%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E5%87%A0%E7%A7%8D%EF%BC%9F/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/08/15/5%E7%A7%8D%E5%85%A8%E5%B1%80ID%E7%94%9F%E6%88%90%E6%96%B9%E5%BC%8F%E3%80%81%E4%BC%98%E7%BC%BA%E7%82%B9%E5%8F%8A%E6%94%B9%E8%BF%9B%E6%96%B9%E6%A1%88%EF%BC%8C%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E5%87%A0%E7%A7%8D%EF%BC%9F/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="全局唯一id介绍"><a href="#全局唯一id介绍" class="headerlink" title="全局唯一id介绍"></a>全局唯一id介绍</h2><p>系统唯一id是我们在设计阶段常常遇到的问题。在复杂的分布式系统中，几乎都需要对大量的数据和消息进行唯一标识。在设计初期，我们需要考虑日后数据量的级别，如果可能会对数据进行分库分表，那么就需要有一个全局唯一id来标识一条数据或记录。生成唯一id的策略有多种，但是每种策略都有它的适用场景、优点以及局限性。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E4%B8%80%E5%8F%A3%E6%B0%94%E8%AF%B4%E5%87%BA5%E7%A7%8D%E5%85%A8%E5%B1%80ID%E7%94%9F%E6%88%90%E6%96%B9%E6%A1%88/1.png"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/08/15/5%E7%A7%8D%E5%85%A8%E5%B1%80ID%E7%94%9F%E6%88%90%E6%96%B9%E5%BC%8F%E3%80%81%E4%BC%98%E7%BC%BA%E7%82%B9%E5%8F%8A%E6%94%B9%E8%BF%9B%E6%96%B9%E6%A1%88%EF%BC%8C%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E5%87%A0%E7%A7%8D%EF%BC%9F/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/08/13/%E4%B8%A4%E4%B8%87%E5%AD%97%E9%95%BF%E6%96%87%EF%BC%8C%E5%BD%BB%E5%BA%95%E6%90%9E%E6%87%82Kafka/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1049,106 +1139,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/11/27/IDEA2020-2-4%E6%9C%80%E6%96%B0%E6%BF%80%E6%B4%BB%E6%95%99%E7%A8%8B%EF%BC%8C%E6%9C%89%E6%95%88%E6%9C%9F%E5%88%B02089/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/11/27/IDEA2020-2-4%E6%9C%80%E6%96%B0%E6%BF%80%E6%B4%BB%E6%95%99%E7%A8%8B%EF%BC%8C%E6%9C%89%E6%95%88%E6%9C%9F%E5%88%B02089/" class="post-title-link" itemprop="url">IDEA2020.2.4最新激活教程，有效期到2089~</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-11-27 12:14:23" itemprop="dateCreated datePublished" datetime="2020-11-27T12:14:23+08:00">2020-11-27</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-07-31 19:02:30" itemprop="dateModified" datetime="2021-07-31T19:02:30+08:00">2021-07-31</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">开发工具</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2020/11/27/IDEA2020-2-4%E6%9C%80%E6%96%B0%E6%BF%80%E6%B4%BB%E6%95%99%E7%A8%8B%EF%BC%8C%E6%9C%89%E6%95%88%E6%9C%9F%E5%88%B02089/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2020/11/27/IDEA2020-2-4%E6%9C%80%E6%96%B0%E6%BF%80%E6%B4%BB%E6%95%99%E7%A8%8B%EF%BC%8C%E6%9C%89%E6%95%88%E6%9C%9F%E5%88%B02089/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>昨天又有好多粉丝反馈Idea失效过期，也有群里的小伙伴私聊问我，最新的<code>Idea2020.2.4</code> 版本要如何激活？</p>
-<p>于是自己在网上搜罗了各种注册码、激活码，均以失败告终，有的虽然当时成功了，当时很快就失效了，也许是 IDEA 最近封杀的比较严吧~  但是，最终还是让我找到了破解方法，这里要感谢z大提供的破解补丁。无图无真相，下面就是激活成功的截图！</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/IDEA2.4%E7%A0%B4%E8%A7%A3/1.jpg"></p>
-<blockquote>
-<p><strong>申明</strong>：本教程 IntelliJ IDEA 破解补丁、激活码均收集于网络，请勿商用，仅供个人学习使用，如有侵权，请联系作者删除。</p>
-</blockquote>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/11/27/IDEA2020-2-4%E6%9C%80%E6%96%B0%E6%BF%80%E6%B4%BB%E6%95%99%E7%A8%8B%EF%BC%8C%E6%9C%89%E6%95%88%E6%9C%9F%E5%88%B02089/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1232,7 +1222,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">111</span>
+          <span class="site-state-item-count">112</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1245,7 +1235,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">30</span>
+        <span class="site-state-item-count">35</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
