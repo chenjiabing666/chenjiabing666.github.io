@@ -495,6 +495,653 @@
       </tags>
   </entry>
   <entry>
+    <title>对比7种分布式事务方案，还是偏爱阿里开源的Seata，真香！(原理+实战)</title>
+    <url>/2021/10/24/%E5%AF%B9%E6%AF%947%E7%A7%8D%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%96%B9%E6%A1%88%EF%BC%8C%E8%BF%98%E6%98%AF%E5%81%8F%E7%88%B1%E9%98%BF%E9%87%8C%E5%BC%80%E6%BA%90%E7%9A%84Seata%EF%BC%8C%E7%9C%9F%E9%A6%99%EF%BC%81-%E5%8E%9F%E7%90%86-%E5%AE%9E%E6%88%98/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>先和大家分享一个好消息：10月初陈某的粉丝数破<strong>一万</strong>了，非常感谢各位读者的支持！</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/54.png"></p>
+<p>这是《Spring Cloud 进阶》专栏的第六篇文章，往期文章如下：</p>
+<ul>
+<li><a href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247493854&idx=1&sn=4b3fb7f7e17a76000733899f511ef915&scene=21#wechat_redirect">五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？</a></li>
+<li><a href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247496653&idx=1&sn=7185077b3bdc1d094aef645d677ec472&scene=21#wechat_redirect">openFeign夺命连环9问，这谁受得了？</a></li>
+<li><a href="https://mp.weixin.qq.com/s/S_8HQYHOG624Vzeu94CFSA">阿里面试这样问：Nacos、Apollo、Config配置中心如何选型？这10个维度告诉你！</a></li>
+<li><a href="https://mp.weixin.qq.com/s/YKzYdMu-7nwszEf9-1M3Uw">阿里面试败北：5种微服务注册中心如何选型？这几个维度告诉你！</a></li>
+<li><a href="https://mp.weixin.qq.com/s/Q7Xv8cypQFrrOQhbd9BOXw">阿里限流神器Sentinel夺命连环 17 问？</a></li>
+</ul>
+<p>这篇文章主要介绍一些目前主流的几种分布式解决方案以及阿里开源的一站式分布式解决方案Seata。</p>
+<p>文章有点长，耐心看完，看完你还不懂分布式事务，欢迎来捶我……………</p>
+<p>文章目录如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/55.png"></p>
+<span id="more"></span>
+
+<h2 id="什么是分布式事务？"><a href="#什么是分布式事务？" class="headerlink" title="什么是分布式事务？"></a>什么是分布式事务？</h2><p>分布式对应的是单体架构，互联网早起单体架构是非常流行的，好像是一个家族企业，大家在一个家里劳作，单体架构如下图：</p>
+<img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/1.png" alt="单体架构" style="zoom:70%;" />
+
+<p>但是随着业务的复杂度提高，大家族人手不够，此时不得不招人，这样逐渐演变出了分布式服务，互相协作，每个服务负责不同的业务，架构如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/2.png" alt="分布式架构"></p>
+<p>因此需要服务与服务之间的远程协作才能完成事务，这种分布式系统环境下由不同的服务之间通过网络远程协作完成事务称之为分布式事务，例如用户注册送积分 事务、创建订单减库存事务，银行转账事务等都是分布式事务。</p>
+<p>典型的场景就是微服务架构 微服务之间通过远程调用完成事务操作。 比如：<strong>订单微服务</strong>和<strong>库存微服务</strong>，下单的同时订单微服务请求库存微服务减库存。 简言之：<strong>跨JVM进程产生分布式事务</strong>。</p>
+<h2 id="什么是CAP原则？"><a href="#什么是CAP原则？" class="headerlink" title="什么是CAP原则？"></a>什么是CAP原则？</h2><p>CAP原则又叫CAP定理，同时又被称作布鲁尔定理（Brewer’s theorem），指的是在一个分布式系统中，<strong>不可能同时满足以下三点</strong>。</p>
+<img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/3.jpg" style="zoom:70%;" />
+
+<h3 id="一致性（Consistency）"><a href="#一致性（Consistency）" class="headerlink" title="一致性（Consistency）"></a>一致性（Consistency）</h3><p>指强一致性，在写操作完成后开始的任何读操作都必须返回该值，或者后续写操作的结果。</p>
+<blockquote>
+<p>也就是说，在一致性系统中，一旦客户端将值写入任何一台服务器并获得响应，那么之后client从其他任何服务器读取的都是刚写入的数据</p>
+<p>一致性保证了不管向哪台服务器写入数据，其他的服务器能实时同步数据</p>
+</blockquote>
+<h3 id="可用性（Availability）"><a href="#可用性（Availability）" class="headerlink" title="可用性（Availability）"></a>可用性（Availability）</h3><p>可用性（高可用）是指：每次向未崩溃的节点发送请求，总能保证收到响应数据（允许不是最新数据）</p>
+<h3 id="分区容忍性（Partition-tolerance）"><a href="#分区容忍性（Partition-tolerance）" class="headerlink" title="分区容忍性（Partition tolerance）"></a>分区容忍性（Partition tolerance）</h3><p>分布式系统在遇到任何网络分区故障的时候，仍然能够对外提供满足一致性和可用性的服务，也就是说，服务器<strong>A</strong>和<strong>B</strong>发送给对方的任何消息都是可以放弃的，也就是说A和B可能因为各种意外情况，导致无法成功进行同步，分布式系统要能容忍这种情况。除非整个网络环境都发生了故障。</p>
+<h3 id="为什么只能在A和C之间做出取舍？"><a href="#为什么只能在A和C之间做出取舍？" class="headerlink" title="为什么只能在A和C之间做出取舍？"></a>为什么只能在A和C之间做出取舍？</h3><p>分布式系统中，必须满足 CAP 中的 P，此时只能在 C/A 之间作出取舍。</p>
+<p>如果选择了<strong>CA</strong>，舍弃了P，说白了就是一个单体架构。</p>
+<h2 id="一致性有几种分类？"><a href="#一致性有几种分类？" class="headerlink" title="一致性有几种分类？"></a>一致性有几种分类？</h2><p>CAP理论告诉我们只能在C、A之间选择，在分布式事务的最终解决方案中一般选择牺牲一致性来获取可用性和分区容错性。</p>
+<blockquote>
+<p>这里的 “牺牲一致性” 并不是完全放弃数据的一致性，而是放弃<strong>强一致性</strong>而换取<strong>弱一致性</strong>。</p>
+</blockquote>
+<p>一致性可以分为以下三种：</p>
+<ul>
+<li>强一致性</li>
+<li>弱一致性</li>
+<li>最终一致性</li>
+</ul>
+<h3 id="强一致性"><a href="#强一致性" class="headerlink" title="强一致性"></a>强一致性</h3><p>系统中的某个数据被成功更新后，后续任何对该数据的读取操作都将得到更新后的值。</p>
+<p>也称为：原子一致性（Atomic Consistency）、线性一致性（Linearizable Consistency）</p>
+<p>简言之，在任意时刻，所有节点中的数据是一样的。例如，对于关系型数据库，要求更新过的数据能被后续的访问都能看到，这是强一致性。</p>
+<p><strong>总结</strong>：</p>
+<ul>
+<li>一个集群需要对外部提供强一致性，所以只要集群内部某一台服务器的数据发生了改变，那么就需要等待集群内其他服务器的数据同步完成后，才能正常的对外提供服务。</li>
+<li>保证了强一致性，务必会损耗<strong>可用性</strong>。</li>
+</ul>
+<h3 id="弱一致性"><a href="#弱一致性" class="headerlink" title="弱一致性"></a>弱一致性</h3><p>系统中的某个数据被更新后，后续对该数据的读取操作<strong>可能</strong>得到更新后的值，也可能是更改前的值。</p>
+<p>但即使过了<strong>不一致时间窗口</strong>这段时间后，后续对该数据的读取也不一定是最新值。</p>
+<p>所以说，可以理解为数据更新后，如果能容忍后续的访问只能访问到部分或者全部访问不到，则是弱一致性。</p>
+<p>例如12306买火车票，虽然最后看到还剩下几张余票，但是只要选择购买就会提示没票了，这就是弱一致性。</p>
+<h3 id="最终一致性"><a href="#最终一致性" class="headerlink" title="最终一致性"></a>最终一致性</h3><p>是弱一致性的<strong>特殊</strong>形式，存储系统保证在没有新的更新的条件下，最终所有的访问都是最后更新的值。</p>
+<p>不保证在任意时刻任意节点上的同一份数据都是相同的，但是随着时间的迁移，不同节点上的同一份数据总是在向趋同的方向变化。</p>
+<p>简单说，就是在一段时间后，节点间的数据会最终达到一致状态。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>弱一致性即使过了不一致时间窗口，后续的读取也不一定能保证一致，而最终一致过了不一致窗口后，后续的读取一定一致。</p>
+<h2 id="什么是Base理论？"><a href="#什么是Base理论？" class="headerlink" title="什么是Base理论？"></a>什么是Base理论？</h2><p>BASE理论是对<strong>CAP</strong>中的一致性和可用性进行一个权衡的结果，理论的核心思想就是：我们无法做到强一致，但每个应用都可以根据自身的业务特点，采用适当的方式来使系统达到最终一致性。</p>
+<h3 id="BA-Basic-Available-基本可用"><a href="#BA-Basic-Available-基本可用" class="headerlink" title="BA(Basic Available)基本可用"></a>BA(Basic Available)基本可用</h3><p>整个系统在某些不可抗力的情况下，仍然能够保证“可用性”，即一定时间内仍然能够返回一个明确的结果。这里是属于基本可用。</p>
+<p>基本可用和高可用的区别：</p>
+<ul>
+<li>“一定时间”可以适当延长 当举行大促（比如秒杀）时，响应时间可以适当延长</li>
+<li>给部分用户返回一个降级页面 给部分用户直接返回一个<strong>降级页面</strong>，从而缓解服务器压力。但要注意，返回降级页面仍然是返回明确结果。</li>
+</ul>
+<h3 id="S-Soft-State-柔性状态"><a href="#S-Soft-State-柔性状态" class="headerlink" title="S(Soft State)柔性状态"></a>S(Soft State)柔性状态</h3><p>称为柔性状态，是指允许系统中的数据存在中间状态，并认为该中间状态的存在不会影响系统的整体可用性，即允许系统不同节点的数据副本之间进行数据同步的过程存在延时。</p>
+<h3 id="E-Eventual-Consisstency-最终一致性"><a href="#E-Eventual-Consisstency-最终一致性" class="headerlink" title="E(Eventual Consisstency)最终一致性"></a>E(Eventual Consisstency)最终一致性</h3><p>同一数据的不同副本的状态，可以不需要实时一致，但一定要保证经过一定时间后仍然是一致的。</p>
+<h2 id="分布式事务有哪几种解决方案？"><a href="#分布式事务有哪几种解决方案？" class="headerlink" title="分布式事务有哪几种解决方案？"></a>分布式事务有哪几种解决方案？</h2><p>在分布式架构下，每个节点只知晓自己操作的失败或者成功，无法得知其他节点的状态。当一个事务跨多个节点时，为了保持事务的原子性与一致性，而引入一个<strong>协调者</strong>来统一掌控所有<strong>参与者</strong>的操作结果，并指示它们是否要把操作结果进行真正的<strong>提交</strong>或者<strong>回滚</strong>（rollback）。</p>
+<h3 id="2阶段提交（2PC）"><a href="#2阶段提交（2PC）" class="headerlink" title="2阶段提交（2PC）"></a>2阶段提交（2PC）</h3><p>二阶段提交协议（Two-phase Commit，即 2PC）是常用的分布式事务解决方案，即将事务的提交过程分为两个阶段来进行处理。</p>
+<p>两个阶段分别为：</p>
+<ul>
+<li>准备阶段</li>
+<li>提交阶段</li>
+</ul>
+<p>参与的角色：</p>
+<ul>
+<li>事务协调者（事务管理器）：事务的发起者</li>
+<li>事务参与者（资源管理器）：事务的执行者</li>
+</ul>
+<h4 id="准备阶段（投票阶段）"><a href="#准备阶段（投票阶段）" class="headerlink" title="准备阶段（投票阶段）"></a>准备阶段（投票阶段）</h4><p>这是两阶段的第一段，这一阶段只是准备阶段，由事务的协调者发起询问参与者是否可以提交事务，但是这一阶段并未提交事务，流程图如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/4.png" alt="准备提交阶段"></p>
+<ol>
+<li>协调者向所有参与者发送事务内容，询问是否可以提交事务，并等待答复</li>
+<li>各参与者执行事务操作，将 undo 和 redo 信息记入事务日志中（但不提交事务）</li>
+<li>如参与者执行成功，给协调者反馈<strong>同意</strong>，否则反馈<strong>中止</strong></li>
+</ol>
+<h4 id="提交阶段"><a href="#提交阶段" class="headerlink" title="提交阶段"></a>提交阶段</h4><p>这一段阶段属于2PC的第二阶段（提交 执行阶段），协调者发起正式提交事务的请求，当所有参与者都回复同意时，则意味着完成事务，流程图如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/5.png" alt="提交事务阶段"></p>
+<ol>
+<li>协调者节点向所有参与者节点发出<strong>正式提交</strong>(<code>commit</code>)的请求。</li>
+<li>参与者节点正式完成操作，并释放在整个事务期间内占用的资源。</li>
+<li>参与者节点向协调者节点发送<strong>ack完成</strong>消息。</li>
+<li>协调者节点收到所有参与者节点反馈的<strong>ack完成</strong>消息后，完成事务。</li>
+</ol>
+<p>但是如果任意一个参与者节点在<strong>第一阶段</strong>返回的消息为<strong>终止</strong>，或者协调者节点在第一阶段的询问超时之前无法获取所有参与者节点的响应消息时，那么这个事务将会被回滚，回滚的流程图如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/6.png" alt="回滚"></p>
+<ol>
+<li>协调者节点向所有参与者节点发出<strong>回滚操作</strong>(<code>rollback</code>)的请求。</li>
+<li>参与者节点利用阶段1写入的undo信息执行回滚，并释放在整个事务期间内占用的资源。</li>
+<li>参与者节点向协调者节点发送<strong>ack回滚完成</strong>消息。</li>
+<li>协调者节点受到所有参与者节点反馈的<strong>ack回滚完成</strong>消息后，取消事务。</li>
+</ol>
+<p><strong>不管最后结果如何，第二阶段都会结束当前事务。</strong></p>
+<p>二阶段提交的<strong>事务正常提交</strong>的完整流程如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/7.png" alt="事务正常提交完整流程"></p>
+<p>二阶段提交事务<strong>回滚</strong>的完整流程如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/8.png" alt="事务回滚完整流程"></p>
+<p>举个<strong>百米赛跑</strong>的例子来具体描述下2PC的流程：学校运动会，有三个同学，分别是A，B，C，2PC流程如下：</p>
+<ul>
+<li>裁判：A同学准备好了吗？准备进入第一赛道….</li>
+<li>裁判：B同学准备好了吗？准备进入第一赛道….</li>
+<li>裁判：C同学准备好了吗？准备进入第一赛道….</li>
+<li>如果有任意一个同学没准备好，则裁判下达<strong>回滚</strong>指令</li>
+<li>如果裁判收到了所有同学的OK回复，则再次下令跑……</li>
+<li>裁判：1,2,3 跑…………</li>
+<li>A同学冲刺到终点，汇报给裁判</li>
+<li>B，C同学冲刺失败，汇报给裁判</li>
+</ul>
+<h4 id="2PC的缺点"><a href="#2PC的缺点" class="headerlink" title="2PC的缺点"></a>2PC的缺点</h4><p>二阶段提交看起来确实能够提供原子性的操作，但是不幸的是，二阶段提交还是有几个缺点的：</p>
+<ul>
+<li><strong>性能问题</strong>：执行过程中，所有参与节点都是事务阻塞型的。当参与者占有公共资源时，其他第三方节点访问公共资源不得不处于阻塞状态。</li>
+<li><strong>可靠性问题</strong>：参与者发生故障。协调者需要给每个参与者额外指定超时机制，超时后整个事务失败。协调者发生故障。参与者会一直阻塞下去。需要额外的备机进行容错。</li>
+<li><strong>数据一致性问题</strong>：二阶段无法解决的问题：协调者在发出<code>commit</code>消息之后宕机，而唯一接收到这条消息的参与者同时也宕机了。那么即使协调者通过选举协议产生了新的协调者，这条事务的状态也是不确定的，没人知道事务是否被已经提交。</li>
+<li><strong>实现复杂</strong>：牺牲了可用性，对性能影响较大，不适合高并发高性能场景。</li>
+</ul>
+<h4 id="2PC的优点"><a href="#2PC的优点" class="headerlink" title="2PC的优点"></a>2PC的优点</h4><ul>
+<li>尽量保证了数据的强一致，适合对数据强一致要求很高的关键领域。（其实也不能100%保证强一致）</li>
+</ul>
+<h3 id="3阶段提交（3PC）"><a href="#3阶段提交（3PC）" class="headerlink" title="3阶段提交（3PC）"></a>3阶段提交（3PC）</h3><p>三阶段提交协议，是二阶段提交协议的改进版本，三阶段提交有两个改动点。</p>
+<ul>
+<li>在协调者和参与者中都引入超时机制</li>
+<li>在第一阶段和第二阶段中插入一个准备阶段。保证了在最后提交阶段之前各参与节点的状态是一致的。</li>
+</ul>
+<p>也就是说，除了引入超时机制之外，3PC把2PC的准备阶段再次一分为二，这样三阶段提交就有<code>CanCommit</code>、<code>PreCommit</code>、<code>DoCommit</code>三个阶段。处理流程如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/9.png" alt="3PC时序图"></p>
+<h4 id="阶段一：CanCommit阶段"><a href="#阶段一：CanCommit阶段" class="headerlink" title="阶段一：CanCommit阶段"></a>阶段一：CanCommit阶段</h4><p>3PC的<code>CanCommit</code>阶段其实和2PC的准备阶段很像。协调者向参与者发送<code>commit</code>请求，参与者如果可以提交就返回Yes响应，否则返回No响应。</p>
+<ul>
+<li>事务询问：协调者向所有参与者发出包含事务内容的 <code>canCommit</code> 请求，询问是否可以提交事务，并等待所有参与者答复。</li>
+<li>响应反馈：参与者收到 <code>canCommit</code> 请求后，如果认为可以执行事务操作，则反馈 yes 并进入预备状态，否则反馈 no。</li>
+</ul>
+<p>CanCommit阶段流程如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/10.png" alt="CanCommit阶段"></p>
+<h4 id="阶段二：PreCommit阶段"><a href="#阶段二：PreCommit阶段" class="headerlink" title="阶段二：PreCommit阶段"></a>阶段二：PreCommit阶段</h4><p>协调者根据参与者的反应情况来决定是否可以进行事务的<code>PreCommit</code>操作。根据响应情况，有以下两种可能。</p>
+<ul>
+<li>假如所有参与者均反馈 <strong>yes</strong>，协调者预执行事务。<ol>
+<li>发送预提交请求 ：协调者向参与者发送<code>PreCommit</code>请求，并进入准备阶段</li>
+<li>事务预提交 ：参与者接收到<code>PreCommit</code>请求后，会执行事务操作，并将<code>undo</code>和<code>redo</code>信息记录到事务日志中（但不提交事务）</li>
+<li>响应反馈 ：如果参与者成功的执行了事务操作，则返回<strong>ACK</strong>响应，同时开始等待最终指令。</li>
+</ol>
+</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/11.png" alt="PreCommit"></p>
+<ul>
+<li>假如有任何一个参与者向协调者发送了No响应，或者等待超时之后，协调者都没有接到参与者的响应，那么就执行事务的中断。<ol>
+<li>发送中断请求 ：协调者向所有参与者发送<code>abort</code>请求。</li>
+<li>中断事务 ：参与者收到来自协调者的<code>abort</code>请求之后（或超时之后，仍未收到协调者的请求），执行事务的中断。</li>
+</ol>
+</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/12.png" alt="PreCommit"></p>
+<h4 id="阶段三：doCommit阶段"><a href="#阶段三：doCommit阶段" class="headerlink" title="阶段三：doCommit阶段"></a>阶段三：doCommit阶段</h4><p>该阶段进行真正的事务提交，也可以分为以下两种情况。</p>
+<blockquote>
+<p>进入阶段 3 后，无论协调者出现问题，或者协调者与参与者网络出现问题，都会导致参与者无法接收到协调者发出的 do Commit 请求或 abort 请求。此时，参与者都会在等待超时之后，继续执行事务提交。</p>
+</blockquote>
+<ul>
+<li><strong>执行提交</strong><ol>
+<li>发送提交请求 协调接收到参与者发送的ACK响应，那么他将从预提交状态进入到提交状态。并向所有参与者发送<code>doCommit</code>请求。</li>
+<li>事务提交 参与者接收到<code>doCommit</code>请求之后，执行正式的事务提交。并在完成事务提交之后释放所有事务资源。</li>
+<li>响应反馈 事务提交完之后，向协调者发送ack响应。</li>
+<li>完成事务 协调者接收到所有参与者的ack响应之后，完成事务。</li>
+</ol>
+</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/13.png" alt="docommit-提交事务"></p>
+<ul>
+<li><strong>中断事务</strong>：任何一个参与者反馈 no，或者等待超时后协调者尚无法收到所有参与者的反馈，即中断事务<ol>
+<li>发送中断请求 如果协调者处于工作状态，向所有参与者发出 abort 请求</li>
+<li>事务回滚 参与者接收到abort请求之后，利用其在阶段二记录的undo信息来执行事务的回滚操作，并在完成回滚之后释放所有的事务资源。</li>
+<li>反馈结果 参与者完成事务回滚之后，向协调者反馈ACK消息</li>
+<li>中断事务 协调者接收到参与者反馈的ACK消息之后，执行事务的中断。</li>
+</ol>
+</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/14.png" alt="docommit-中断事务"></p>
+<h4 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h4><p>相比二阶段提交，三阶段提交降低了阻塞范围，在等待超时后协调者或参与者会中断事务。避免了协调者单点问题，阶段 3 中协调者出现问题时，参与者会继续提交事务。</p>
+<h4 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h4><p>数据不一致问题依然存在，当在参与者收到 <code>preCommit</code> 请求后等待 <code>doCommit</code> 指令时，此时如果协调者请求中断事务，而协调者无法与参与者正常通信，会导致参与者继续提交事务，造成数据不一致。</p>
+<h3 id="TCC-事务补偿"><a href="#TCC-事务补偿" class="headerlink" title="TCC(事务补偿)"></a>TCC(事务补偿)</h3><p>TCC（Try Confirm Cancel）方案是一种应用层面侵入业务的两阶段提交。是目前最火的一种柔性事务方案，其核心思想是：<strong>针对每个操作，都要注册一个与其对应的确认和补偿（撤销）操作</strong>。</p>
+<p>TCC分为两个阶段，分别如下：</p>
+<ul>
+<li>第一阶段：Try（尝试），主要是对业务系统做检测及资源预留 <strong>(加锁，锁住资源)</strong></li>
+<li>第二阶段：本阶段根据第一阶段的结果，决定是执行confirm还是cancel<ol>
+<li>Confirm（确认）：执行真正的业务（执行业务，释放锁）</li>
+<li>Cancle（取消）：是预留资源的取消（出问题，释放锁）</li>
+</ol>
+</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/15.png" alt="TCC"></p>
+<p>为了方便理解，下面以电商下单为例进行方案解析，这里把整个过程简单分为扣减库存，订单创建 2 个步骤，库存服务和订单服务分别在不同的服务器节点上。</p>
+<p>假设商品库存为 100，购买数量为 2，这里检查和更新库存的同时，冻结用户购买数量的库存，同时创建订单，订单状态为待确认。</p>
+<h4 id="①Try-阶段"><a href="#①Try-阶段" class="headerlink" title="①Try 阶段"></a>①Try 阶段</h4><p>TCC 机制中的 Try 仅是一个初步操作，它和后续的确认一起才能真正构成一个完整的业务逻辑，这个阶段主要完成：</p>
+<ul>
+<li>完成所有业务检查( 一致性 ) 。</li>
+<li>预留必须业务资源( 准隔离性 ) 。</li>
+<li>Try 尝试执行业务。</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/16.png" alt="Try阶段"></p>
+<h4 id="②Confirm-Cancel-阶段"><a href="#②Confirm-Cancel-阶段" class="headerlink" title="②Confirm / Cancel 阶段"></a>②Confirm / Cancel 阶段</h4><p>根据 <strong>Try</strong> 阶段服务是否全部正常执行，继续执行确认操作（Confirm）或取消操作（Cancel）。</p>
+<p>Confirm 和 Cancel 操作满足幂等性，如果 Confirm 或 Cancel 操作执行失败，将会不断重试直到执行完成。</p>
+<p>Confirm：当 Try 阶段服务全部正常执行， 执行确认业务逻辑操作，业务如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/17.png" alt="Try-&gt;Confirm"></p>
+<p>这里使用的资源一定是 Try 阶段预留的业务资源。在 TCC 事务机制中认为，如果在 Try 阶段能正常的预留资源，那 Confirm 一定能完整正确的提交。</p>
+<p>Confirm 阶段也可以看成是对 Try 阶段的一个补充，Try+Confirm 一起组成了一个完整的业务逻辑。</p>
+<p>Cancel：当 Try 阶段存在服务执行失败， 进入 Cancel 阶段，业务如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/18.png" alt="Try-Cancel"></p>
+<p>Cancel 取消执行，释放 Try 阶段预留的业务资源，上面的例子中，Cancel 操作会把冻结的库存释放，并更新订单状态为取消。</p>
+<h4 id="最终一致性保证"><a href="#最终一致性保证" class="headerlink" title="最终一致性保证"></a>最终一致性保证</h4><ul>
+<li>TCC 事务机制以初步操作（Try）为中心的，确认操作（Confirm）和取消操作（Cancel）都是围绕初步操作（Try）而展开。因此，Try 阶段中的操作，其保障性是最好的，即使失败，仍然有取消操作（Cancel）可以将其执行结果撤销。</li>
+<li>Try阶段执行成功并开始执行 <code>Confirm</code>阶段时，默认 <code>Confirm</code>阶段是不会出错的。也就是说只要<code>Try</code>成功，<code>Confirm</code>一定成功（TCC设计之初的定义） 。</li>
+<li>Confirm与Cancel如果失败，由TCC框架进行==重试==补偿</li>
+<li>存在极低概率在CC环节彻底失败，则需要定时任务或人工介入</li>
+</ul>
+<h4 id="方案总结"><a href="#方案总结" class="headerlink" title="方案总结"></a>方案总结</h4><p>TCC 事务机制相对于传统事务机制（X/Open XA），TCC 事务机制相比于上面介绍的 XA 事务机制，有以下优点：</p>
+<ul>
+<li>性能提升：具体业务来实现控制资源锁的粒度变小，不会锁定整个资源。</li>
+<li>数据最终一致性：基于 Confirm 和 Cancel 的幂等性，保证事务最终完成确认或者取消，保证数据的一致性。</li>
+<li>可靠性：解决了 XA 协议的协调者单点故障问题，由主业务方发起并控制整个业务活动，业务活动管理器也变成多点，引入集群。</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>TCC 的 Try、Confirm 和 Cancel 操作功能要按具体业务来实现，业务耦合度较高，提高了开发成本。</li>
+</ul>
+<h3 id="本地消息表"><a href="#本地消息表" class="headerlink" title="本地消息表"></a>本地消息表</h3><p>本地消息表的方案最初是由 eBay 提出，核心思路是将分布式事务拆分成本地事务进行处理。</p>
+<p>角色：</p>
+<ul>
+<li>事务主动方</li>
+<li>事务被动方</li>
+</ul>
+<p>通过在事务主动发起方额外新建事务消息表，事务发起方处理业务和记录事务消息在本地事务中完成，轮询事务消息表的数据发送事务消息，事务被动方基于消息中间件消费事务消息表中的事务。</p>
+<p>这样可以避免以下两种情况导致的数据不一致性：</p>
+<ul>
+<li>业务处理成功、事务消息发送失败</li>
+<li>业务处理失败、事务消息发送成功</li>
+</ul>
+<p>整体的流程如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/19.png" alt="本地消息表"></p>
+<p>上图中整体的处理步骤如下：</p>
+<ul>
+<li>①：事务主动方在同一个本地事务中处理业务和写消息表操作</li>
+<li>②：事务主动方通过消息中间件，通知事务被动方处理事务通知事务待消息。消息中间件可以基于 Kafka、RocketMQ 消息队列，事务主动方主动写消息到消息队列，事务消费方消费并处理消息队列中的消息。</li>
+<li>③：事务被动方通过消息中间件，通知事务主动方事务已处理的消息。</li>
+<li>④：事务主动方接收中间件的消息，更新消息表的状态为已处理。</li>
+</ul>
+<p>一些必要的容错处理如下：</p>
+<ul>
+<li>当①处理出错，由于还在事务主动方的本地事务中，直接回滚即可</li>
+<li>当②、③处理出错，由于事务主动方本地保存了消息，只需要轮询消息重新通过消息中间件发送，事务被动方重新读取消息处理业务即可。</li>
+<li>如果是业务上处理失败，事务被动方可以发消息给事务主动方回滚事务</li>
+<li>如果事务被动方已经消费了消息，事务主动方需要回滚事务的话，需要发消息通知事务主动方进行回滚事务。</li>
+</ul>
+<h4 id="优点-1"><a href="#优点-1" class="headerlink" title="优点"></a>优点</h4><ul>
+<li>从应用设计开发的角度实现了消息数据的可靠性，消息数据的可靠性不依赖于消息中间件，弱化了对 MQ 中间件特性的依赖。</li>
+<li>方案轻量，容易实现。</li>
+</ul>
+<h4 id="缺点-1"><a href="#缺点-1" class="headerlink" title="缺点"></a>缺点</h4><ul>
+<li>与具体的业务场景绑定，耦合性强，不可公用。</li>
+<li>消息数据与业务数据同库，占用业务系统资源。</li>
+<li>业务系统在使用关系型数据库的情况下，消息服务性能会受到关系型数据库并发性能的局限。</li>
+</ul>
+<h3 id="MQ事务方案（可靠消息事务）"><a href="#MQ事务方案（可靠消息事务）" class="headerlink" title="MQ事务方案（可靠消息事务）"></a>MQ事务方案（可靠消息事务）</h3><p>基于 MQ 的分布式事务方案其实是对本地消息表的封装，将本地消息表基于 MQ 内部，其他方面的协议基本与本地消息表一致。</p>
+<p>MQ事务方案整体流程和本地消息表的流程很相似，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/20.png" alt="MQ事务方案"></p>
+<p>从上图可以看出和本地消息表方案唯一不同就是将本地消息表存在了MQ内部，而不是业务数据库中。</p>
+<p>那么MQ内部的处理尤为重要，下面主要基于 RocketMQ 4.3 之后的版本介绍 MQ 的分布式事务方案。</p>
+<p>在本地消息表方案中，保证事务主动方发写业务表数据和写消息表数据的一致性是基于数据库事务，RocketMQ 的事务消息相对于普通 MQ提供了 2PC 的提交接口，方案如下：</p>
+<p><strong>正常情况：事务主动方发消息</strong></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/21.png" alt="事务主动方发消息"></p>
+<p>这种情况下，事务主动方服务正常，没有发生故障，发消息流程如下：</p>
+<ul>
+<li>步骤①：发送方向 MQ 服务端(MQ Server)发送 half 消息。</li>
+<li>步骤②：MQ Server 将消息持久化成功之后，向发送方 ack 确认消息已经发送成功。</li>
+<li>步骤③：发送方开始执行本地事务逻辑。</li>
+<li>步骤④：发送方根据本地事务执行结果向 MQ Server 提交二次确认（commit 或是 rollback）。</li>
+<li>步骤⑤：MQ Server 收到 commit 状态则将半消息标记为可投递，订阅方最终将收到该消息；MQ Server 收到 rollback 状态则删除半消息，订阅方将不会接受该消息。</li>
+</ul>
+<p><strong>异常情况：事务主动方消息恢复</strong></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/22.png" alt="事务主动方消息恢复"></p>
+<p>在断网或者应用重启等异常情况下，图中 4 提交的二次确认超时未到达 MQ Server，此时处理逻辑如下：</p>
+<ul>
+<li>步骤⑤：MQ Server 对该消息发起消息回查。</li>
+<li>步骤⑥：发送方收到消息回查后，需要检查对应消息的本地事务执行的最终结果。</li>
+<li>步骤⑦：发送方根据检查得到的本地事务的最终状态再次提交二次确认。</li>
+<li>步骤⑧：MQ Server基于 commit/rollback 对消息进行投递或者删除。</li>
+</ul>
+<h4 id="优点-2"><a href="#优点-2" class="headerlink" title="优点"></a>优点</h4><p>相比本地消息表方案，MQ 事务方案优点是：</p>
+<ul>
+<li>消息数据独立存储 ，降低业务系统与消息系统之间的耦合。</li>
+<li>吞吐量大于使用本地消息表方案。</li>
+</ul>
+<h4 id="缺点-2"><a href="#缺点-2" class="headerlink" title="缺点"></a>缺点</h4><ul>
+<li>一次消息发送需要两次网络请求(half 消息 + commit/rollback 消息) 。</li>
+<li>业务处理服务需要实现消息状态回查接口。</li>
+</ul>
+<h3 id="最大努力通知"><a href="#最大努力通知" class="headerlink" title="最大努力通知"></a>最大努力通知</h3><p>最大努力通知也称为定期校对，是对MQ事务方案的进一步优化。它在事务主动方增加了消息校对的接口，如果事务被动方没有接收到消息，此时可以调用事务主动方提供的消息校对的接口主动获取。</p>
+<p>最大努力通知的整体流程如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/23.png" alt="最大努力通知"></p>
+<p>在可靠消息事务中，事务主动方需要将消息发送出去，并且消息接收方成功接收，这种可靠性发送是由事务主动方保证的；</p>
+<p>但是最大努力通知，事务主动方尽最大努力（重试，轮询….）将事务发送给事务接收方，但是仍然存在消息接收不到，此时需要事务被动方主动调用事务主动方的消息校对接口查询业务消息并消费，这种通知的可靠性是由事务被动方保证的。</p>
+<p>最大努力通知适用于业务通知类型，例如微信交易的结果，就是通过最大努力通知方式通知各个商户，既有回调通知，也有交易查询接口。</p>
+<h3 id="Saga-事务"><a href="#Saga-事务" class="headerlink" title="Saga 事务"></a>Saga 事务</h3><p>Saga 事务源于 1987 年普林斯顿大学的 Hecto 和 Kenneth 发表的如何处理 long lived transaction（长活事务）论文。</p>
+<p>Saga 事务核心思想是将长事务拆分为<strong>多个</strong>本地短事务，由 Saga 事务协调器协调，如果正常结束那就正常完成，如果某个步骤失败，则根据相反顺序一次调用补偿操作。</p>
+<p>Saga 事务基本协议如下：</p>
+<ul>
+<li>每个 Saga 事务由一系列幂等的有序子事务(sub-transaction) <strong>Ti</strong> 组成。</li>
+<li>每个 <strong>Ti</strong> 都有对应的幂等补偿动作 <strong>Ci</strong>，补偿动作用于撤销 <strong>Ti</strong> 造成的结果。</li>
+</ul>
+<p>TCC事务补偿机制有一个预留(Try)动作，相当于先报存一个草稿，然后才提交；Saga事务没有预留动作，直接提交。</p>
+<p>对于事务异常，Saga提供了两种恢复策略，分别如下：</p>
+<p><strong>向后恢复(backward recovery)</strong></p>
+<p>在执行事务失败时，补偿所有已完成的事务，是“一退到底”的方式。如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/24.png" alt="向后恢复"></p>
+<p>从上图可知事务执行到了支付事务T3，但是失败了，因此事务回滚需要从C3,C2,C1依次进行回滚补偿。</p>
+<p>对应的执行顺序为：T1,T2,T3,C3,C2,C1</p>
+<p>这种做法的效果是撤销掉之前所有成功的子事务，使得整个 Saga 的执行结果撤销。</p>
+<p><strong>向前恢复(forward recovery)</strong></p>
+<p>也称之为：勇往直前，对于执行不通过的事务，会尝试<strong>重试事务</strong>，这里有一个假设就是每个子事务最终都会成功。</p>
+<p>流程如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/25.png" alt="向前恢复"></p>
+<p>适用于必须要成功的场景，事务失败了重试，不需要补偿。</p>
+<p>Saga事务有两种不同的实现方式，分别如下：</p>
+<ul>
+<li>命令协调（Order Orchestrator）</li>
+<li>事件编排（Event Choreographyo）</li>
+</ul>
+<h4 id="命令协调"><a href="#命令协调" class="headerlink" title="命令协调"></a>命令协调</h4><p>中央协调器（Orchestrator，简称 OSO）以命令/回复的方式与每项服务进行通信，全权负责告诉每个参与者该做什么以及什么时候该做什么。整体流程如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/26.png" alt="命令协调"></p>
+<p>上图步骤如下：</p>
+<ul>
+<li>事务发起方的主业务逻辑请求 OSO 服务开启订单事务</li>
+<li>OSO 向库存服务请求扣减库存，库存服务回复处理结果。</li>
+<li>OSO 向订单服务请求创建订单，订单服务回复创建结果。</li>
+<li>OSO 向支付服务请求支付，支付服务回复处理结果。</li>
+<li>主业务逻辑接收并处理 OSO 事务处理结果回复。</li>
+</ul>
+<p>中央协调器必须事先知道执行整个订单事务所需的流程(例如通过读取配置)。如果有任何失败，它还负责通过向每个参与者发送命令来撤销之前的操作来协调分布式的回滚。</p>
+<p>基于中央协调器协调一切时，回滚要容易得多，因为协调器默认是执行正向流程，回滚时只要执行反向流程即可。</p>
+<h4 id="事件编排"><a href="#事件编排" class="headerlink" title="事件编排"></a>事件编排</h4><p>没有中央协调器（没有单点风险）时，每个服务产生并观察其他服务的事件，并决定是否应采取行动。</p>
+<p>在事件编排方法中，第一个服务执行一个事务，然后发布一个事件。该事件被一个或多个服务进行监听，这些服务再执行本地事务并发布（或不发布）新的事件。</p>
+<p>当最后一个服务执行本地事务并且不发布任何事件时，意味着分布式事务结束，或者它发布的事件没有被任何 Saga 参与者听到都意味着事务结束。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/27.png" alt="事件编排"></p>
+<p>上图步骤如下：</p>
+<ul>
+<li>事务发起方的主业务逻辑发布开始订单事件。</li>
+<li>库存服务监听开始订单事件，扣减库存，并发布库存已扣减事件。</li>
+<li>订单服务监听库存已扣减事件，创建订单，并发布订单已创建事件。</li>
+<li>支付服务监听订单已创建事件，进行支付，并发布订单已支付事件。</li>
+<li>主业务逻辑监听订单已支付事件并处理。</li>
+</ul>
+<p>事件/编排是实现 Saga 模式的自然方式，它很简单，容易理解，不需要太多的代码来构建。如果事务涉及 2 至 4 个步骤，则可能是非常合适的。</p>
+<h4 id="优点-3"><a href="#优点-3" class="headerlink" title="优点"></a>优点</h4><p>命令协调设计的优点如下：</p>
+<ul>
+<li>服务之间关系简单，避免服务之间的循环依赖关系，因为 Saga 协调器会调用 Saga 参与者，但参与者不会调用协调器。</li>
+<li>程序开发简单，只需要执行命令/回复(其实回复消息也是一种事件消息)，降低参与者的复杂性。</li>
+<li>易维护扩展，在添加新步骤时，事务复杂性保持线性，回滚更容易管理，更容易实施和测试。</li>
+</ul>
+<p>事件/编排设计优点如下：</p>
+<ul>
+<li>避免中央协调器单点故障风险。</li>
+<li>当涉及的步骤较少服务开发简单，容易实现。</li>
+</ul>
+<h4 id="缺点-3"><a href="#缺点-3" class="headerlink" title="缺点"></a>缺点</h4><p>命令协调设计缺点如下：</p>
+<ul>
+<li>中央协调器容易处理逻辑容易过于复杂，导致难以维护。</li>
+<li>存在协调器单点故障风险。</li>
+</ul>
+<p>事件/编排设计缺点如下：</p>
+<ul>
+<li>服务之间存在循环依赖的风险。</li>
+<li>当涉及的步骤较多，服务间关系混乱，难以追踪调测。</li>
+</ul>
+<blockquote>
+<p>由于 Saga 模型中没有 Prepare 阶段，因此事务间不能保证隔离性。</p>
+</blockquote>
+<p>当多个 Saga 事务操作同一资源时，就会产生更新丢失、脏数据读取等问题，这时需要在业务层控制并发，例如：在应用层面加锁，或者应用层面预先冻结资源。</p>
+<h3 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h3><p>总结一下各个方案的常见的使用场景：</p>
+<ul>
+<li><strong>2PC/3PC</strong>：依赖于数据库，能够很好的提供强一致性和强事务性，但相对来说延迟比较高，比较适合传统的单体应用，在同一个方法中存在跨库操作的情况，不适合高并发和高性能要求的场景。</li>
+<li><strong>TCC</strong>：适用于执行时间确定且较短，实时性要求高，对数据一致性要求高，比如互联网金融企业最核心的三个服务：交易、支付、账务。</li>
+<li><strong>本地消息表/MQ 事务</strong>：都适用于事务中参与方支持操作幂等，对一致性要求不高，业务上能容忍数据不一致到一个人工检查周期，事务涉及的参与方、参与环节较少，业务上有对账/校验系统兜底。</li>
+<li><strong>Saga 事务</strong>：由于 Saga 事务不能保证隔离性，需要在业务层控制并发，适合于业务场景事务并发操作同一资源较少的情况。 Saga 相比缺少预提交动作，导致补偿动作的实现比较麻烦，例如业务是发送短信，补偿动作则得再发送一次短信说明撤销，用户体验比较差。Saga 事务较适用于补偿动作容易处理的场景。</li>
+</ul>
+<h2 id="什么是Seata？"><a href="#什么是Seata？" class="headerlink" title="什么是Seata？"></a>什么是Seata？</h2><p>上面讲了这么多的分布式事务的理论知识，都没看到一个落地的实现，这不是吹牛逼吗？</p>
+<p>Seata 是一款开源的分布式事务解决方案，致力于提供高性能和简单易用的分布式事务服务。Seata 将为用户提供了 <strong>AT</strong>、<strong>TCC</strong>、<strong>SAGA</strong> 和 <strong>XA</strong> 事务模式，为用户打造一站式的分布式解决方案。</p>
+<ul>
+<li>对业务无侵入：即减少技术架构上的微服务化所带来的分布式事务问题对业务的侵入</li>
+<li>高性能：减少分布式事务解决方案所带来的性能消耗</li>
+</ul>
+<p>官方文档：<a href="https://seata.io/zh-cn/index.html">https://seata.io/zh-cn/index.html</a></p>
+<p>seata的几种术语：</p>
+<ul>
+<li><strong>TC（Transaction Coordinator）</strong>：事务协调者。管理全局的分支事务的状态，用于全局性事务的提交和回滚。</li>
+<li><strong>TM（Transaction Manager）</strong>：事务管理者。用于开启、提交或回滚事务。</li>
+<li><strong>RM（Resource Manager）</strong>：资源管理器。用于分支事务上的资源管理，向 <strong>TC</strong> 注册分支事务，上报分支事务的状态，接收 <strong>TC</strong> 的命令来提交或者回滚分支事务。</li>
+</ul>
+<h2 id="AT模式"><a href="#AT模式" class="headerlink" title="AT模式"></a>AT模式</h2><p>seata目前支持多种事务模式，分别有<strong>AT</strong>、<strong>TCC</strong>、<strong>SAGA</strong> 和 <strong>XA</strong> ，文章篇幅有限，今天只讲常用的AT模式。</p>
+<p>AT模式的特点就是对<strong>业务无入侵式</strong>，整体机制分<strong>二阶段提交</strong>（2PC）</p>
+<ul>
+<li>一阶段：业务数据和回滚日志记录在同一个本地事务中提交，释放本地锁和连接资源。</li>
+<li>二阶段：<ol>
+<li>提交异步化，非常快速地完成</li>
+<li>回滚通过一阶段的回滚日志进行反向补偿。</li>
+</ol>
+</li>
+</ul>
+<p>在 AT 模式下，用户只需关注自己的<strong>业务SQL</strong>，用户的<strong>业务SQL</strong> 作为一阶段，Seata 框架会自动生成事务的二阶段提交和回滚操作。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/28.png"></p>
+<p>一个典型的分布式事务过程：</p>
+<ul>
+<li>TM 向 TC 申请开启一个全局事务，全局事务创建成功并生成一个全局唯一的 XID；</li>
+<li>XID 在微服务调用链路的上下文中传播；</li>
+<li>RM 向 TC 注册分支事务，将其纳入 XID 对应全局事务的管辖；</li>
+<li>TM 向 TC 发起针对 XID 的全局提交或回滚决议；</li>
+<li>TC 调度 XID 下管辖的全部分支事务完成提交或回滚请求。</li>
+</ul>
+<h2 id="搭建Seata-TC协调者"><a href="#搭建Seata-TC协调者" class="headerlink" title="搭建Seata TC协调者"></a>搭建Seata TC协调者</h2><p>seata的协调者其实就是阿里开源的一个服务，我们只需要下载并且启动它。</p>
+<p>下载地址：<a href="http://seata.io/zh-cn/blog/download.html">http://seata.io/zh-cn/blog/download.html</a></p>
+<blockquote>
+<p>陈某下载的版本是<code>1.3.0 </code>，各位最好和我版本一致，这样不会出现莫名的BUG。</p>
+</blockquote>
+<p>下载完成后，直接解压即可。但是此时还不能直接运行，还需要做一些配置。</p>
+<h3 id="创建TC所需要的表"><a href="#创建TC所需要的表" class="headerlink" title="创建TC所需要的表"></a>创建TC所需要的表</h3><p>TC运行需要将事务的信息保存在数据库，因此需要创建一些表，找到seata-1.3.0源码的<code>script\server\db</code>这个目录，将会看到以下SQL文件：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/29.png"></p>
+<p>陈某使用的是Mysql数据库，因此直接运行mysql.sql这个文件中的sql语句，创建的三张表如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/30.png"></p>
+<h3 id="修改TC的注册中心"><a href="#修改TC的注册中心" class="headerlink" title="修改TC的注册中心"></a>修改TC的注册中心</h3><p>找到<code>seata-server-1.3.0\seata\conf</code>这个目录，其中有一个<code>registry.conf</code>文件，其中配置了TC的注册中心和配置中心。</p>
+<p>默认的注册中心是<code>file</code>形式，实际使用中肯定不能使用，需要改成Nacos形式，改动的地方如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/31.png"></p>
+<p>需要改动的地方如下：</p>
+<ul>
+<li>type：改成nacos，表示使用nacos作为注册中心</li>
+<li>application：服务的名称</li>
+<li>serverAddr：nacos的地址</li>
+<li>group：分组</li>
+<li>namespace：命名空间</li>
+<li>username：用户名</li>
+<li>password：密码</li>
+</ul>
+<blockquote>
+<p>最后这份文件都会放在项目源码的根目录下，源码下载方式见文末</p>
+</blockquote>
+<h3 id="修改TC的配置中心"><a href="#修改TC的配置中心" class="headerlink" title="修改TC的配置中心"></a>修改TC的配置中心</h3><p>TC的配置中心默认使用的也是<code>file</code>形式，当然要是用nacos作为配置中心了。</p>
+<p>直接修改<code>registry.conf</code>文件，需要改动的地方如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/32.png"></p>
+<p>需要改动的地方如下：</p>
+<ul>
+<li>type：改成nacos，表示使用nacos作为配置中心</li>
+<li>serverAddr：nacos的地址</li>
+<li>group：分组</li>
+<li>namespace：命名空间</li>
+<li>username：用户名</li>
+<li>password：密码</li>
+</ul>
+<p>上述配置修改好之后，在TC启动的时候将会自动读取nacos的配置。</p>
+<p>那么问题来了：<strong>TC需要存储到Nacos中的配置都哪些，如何推送过去？</strong></p>
+<p>在<code>seata-1.3.0\script\config-center</code>中有一个<code>config.txt</code>文件，其中就是TC所需要的全部配置。</p>
+<p>在<code>seata-1.3.0\script\config-center\nacos</code>中有一个脚本<code>nacos-config.sh</code>则是将config.txt中的全部配置自动推送到nacos中，运行下面命令（windows可以使用git bash运行）：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> -h 主机，你可以使用localhost，-p 端口号 你可以使用8848，-t 命名空间ID，-u 用户名，-p 密码</span></span><br><span class="line"><span class="meta">$</span><span class="bash"> sh nacos-config.sh -h 127.0.0.1 -p 8080 -g SEATA_GROUP -t 7a7581ef-433d-46f3-93f9-5fdc18239c65 -u nacos -w nacos</span></span><br></pre></td></tr></table></figure>
+
+<p>推送成功则可以在Nacos中查询到所有的配置，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/33.png"></p>
+<h3 id="修改TC的数据库连接信息"><a href="#修改TC的数据库连接信息" class="headerlink" title="修改TC的数据库连接信息"></a>修改TC的数据库连接信息</h3><p>TC是需要使用数据库存储事务信息的，那么如何修改相关配置呢？</p>
+<p>上一节的内容已经将所有的配置信息都推送到了Nacos中，TC启动时会从Nacos中读取，因此我们修改也需要在Nacos中修改。</p>
+<p>需要修改的配置如下：</p>
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="comment">## 采用db的存储形式</span></span><br><span class="line"><span class="meta">store.mode</span>=<span class="string">db</span></span><br><span class="line"><span class="comment">## druid数据源</span></span><br><span class="line"><span class="meta">store.db.datasource</span>=<span class="string">druid</span></span><br><span class="line"><span class="comment">## mysql数据库</span></span><br><span class="line"><span class="meta">store.db.dbType</span>=<span class="string">mysql</span></span><br><span class="line"><span class="comment">## mysql驱动</span></span><br><span class="line"><span class="meta">store.db.driverClassName</span>=<span class="string">com.mysql.jdbc.Driver</span></span><br><span class="line"><span class="comment">## TC的数据库url</span></span><br><span class="line"><span class="meta">store.db.url</span>=<span class="string">jdbc:mysql://127.0.0.1:3306/seata_server?useUnicode=true</span></span><br><span class="line"><span class="comment">## 用户名</span></span><br><span class="line"><span class="meta">store.db.user</span>=<span class="string">root</span></span><br><span class="line"><span class="comment">## 密码</span></span><br><span class="line"><span class="meta">store.db.password</span>=<span class="string">Nov2014</span></span><br></pre></td></tr></table></figure>
+
+<p>在nacos中搜索上述的配置，直接修改其中的值，比如修改<code>store.mode</code>，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/34.png"></p>
+<p>当然Seata还支持Redis作为TC的数据库，只需要改动以下配置即可：</p>
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="meta">store.mode</span>=<span class="string">redis</span></span><br><span class="line"><span class="meta">store.redis.host</span>=<span class="string">127.0.0.1</span></span><br><span class="line"><span class="meta">store.redis.port</span>=<span class="string">6379</span></span><br><span class="line"><span class="meta">store.redis.password</span>=<span class="string">123456</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="启动TC"><a href="#启动TC" class="headerlink" title="启动TC"></a>启动TC</h3><p>按照上述步骤全部配置成功后，则可以启动TC，在<code>seata-server-1.3.0\seata\bin</code>目录下直接点击<code>seata-server.bat</code>（windows）运行。</p>
+<p>启动成功后，在Nacos的服务列表中则可以看到TC已经注册进入，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/35.png"></p>
+<p>至此，Seata的TC就启动完成了…………</p>
+<h2 id="Seata客户端搭建（RM）"><a href="#Seata客户端搭建（RM）" class="headerlink" title="Seata客户端搭建（RM）"></a>Seata客户端搭建（RM）</h2><p>上述已经将Seata的服务端（TC）搭建完成了，下面就以电商系统为例介绍一下如何编码实现分布式事务。</p>
+<p>用户购买商品的业务逻辑。整个业务逻辑由3个微服务提供支持：</p>
+<ul>
+<li>仓储服务：对给定的商品扣除仓储数量。</li>
+<li>订单服务：根据采购需求创建订单。</li>
+<li>帐户服务：从用户帐户中扣除余额。</li>
+</ul>
+<p>需要了解的知识：Nacos和openFeign，有不清楚的可以看我的前两章教程，如下：</p>
+<ul>
+<li><a href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247493854&idx=1&sn=4b3fb7f7e17a76000733899f511ef915&scene=21#wechat_redirect">五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？</a></li>
+<li><a href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247496653&idx=1&sn=7185077b3bdc1d094aef645d677ec472&scene=21#wechat_redirect">openFeign夺命连环9问，这谁受得了？</a></li>
+</ul>
+<h3 id="仓储服务搭建"><a href="#仓储服务搭建" class="headerlink" title="仓储服务搭建"></a>仓储服务搭建</h3><p>陈某整个教程使用的都是同一个聚合项目，关于Spring Cloud版本有不清楚的可以看我第一篇文章的说明。</p>
+<h4 id="添加依赖"><a href="#添加依赖" class="headerlink" title="添加依赖"></a>添加依赖</h4><p>新建一个<code>seata-storage9020</code>项目，新增依赖如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/36.png"></p>
+<p>由于使用的<code>springCloud Alibaba</code>依赖版本是<code>2.2.1.RELEASE</code>，其中自带的seata版本是<code>1.1.0</code>，但是我们Seata服务端使用的版本是1.3.0，因此需要排除原有的依赖，重新添加1.3.0的依赖。</p>
+<blockquote>
+<p>注意：seata客户端的依赖版本必须要和服务端一致。</p>
+</blockquote>
+<h4 id="创建数据库"><a href="#创建数据库" class="headerlink" title="创建数据库"></a>创建数据库</h4><p>创建一个数据库<code>seata-storage</code>，其中新建两个表：</p>
+<ul>
+<li><code>storage</code>：库存的业务表，SQL如下：</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `storage`  (</span><br><span class="line">  `id` <span class="type">bigint</span>(<span class="number">11</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT,</span><br><span class="line">  `name` <span class="type">varchar</span>(<span class="number">100</span>) <span class="type">CHARACTER</span> <span class="keyword">SET</span> utf8mb4 <span class="keyword">COLLATE</span> utf8mb4_general_ci <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  `num` <span class="type">bigint</span>(<span class="number">11</span>) <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;数量&#x27;</span>,</span><br><span class="line">  `create_time` datetime(<span class="number">0</span>) <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  `price` <span class="type">bigint</span>(<span class="number">10</span>) <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;单价，单位分&#x27;</span>,</span><br><span class="line">  <span class="keyword">PRIMARY</span> KEY (`id`) <span class="keyword">USING</span> BTREE</span><br><span class="line">) ENGINE <span class="operator">=</span> InnoDB AUTO_INCREMENT <span class="operator">=</span> <span class="number">2</span> <span class="type">CHARACTER</span> <span class="keyword">SET</span> <span class="operator">=</span> utf8mb4 <span class="keyword">COLLATE</span> <span class="operator">=</span> utf8mb4_general_ci ROW_FORMAT <span class="operator">=</span> Compact;</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> `storage` <span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="string">&#x27;码猿技术专栏&#x27;</span>, <span class="number">1000</span>, <span class="string">&#x27;2021-10-15 22:32:40&#x27;</span>, <span class="number">100</span>);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>undo_log</strong>：回滚日志表，这是Seata要求必须有的，每个业务库都应该创建一个，SQL如下：</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `undo_log`  (</span><br><span class="line">  `branch_id` <span class="type">bigint</span>(<span class="number">20</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;branch transaction id&#x27;</span>,</span><br><span class="line">  `xid` <span class="type">varchar</span>(<span class="number">100</span>) <span class="type">CHARACTER</span> <span class="keyword">SET</span> utf8 <span class="keyword">COLLATE</span> utf8_general_ci <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;global transaction id&#x27;</span>,</span><br><span class="line">  `context` <span class="type">varchar</span>(<span class="number">128</span>) <span class="type">CHARACTER</span> <span class="keyword">SET</span> utf8 <span class="keyword">COLLATE</span> utf8_general_ci <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;undo_log context,such as serialization&#x27;</span>,</span><br><span class="line">  `rollback_info` longblob <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;rollback info&#x27;</span>,</span><br><span class="line">  `log_status` <span class="type">int</span>(<span class="number">11</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;0:normal status,1:defense status&#x27;</span>,</span><br><span class="line">  `log_created` datetime(<span class="number">6</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;create datetime&#x27;</span>,</span><br><span class="line">  `log_modified` datetime(<span class="number">6</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;modify datetime&#x27;</span>,</span><br><span class="line">  <span class="keyword">UNIQUE</span> INDEX `ux_undo_log`(`xid`, `branch_id`) <span class="keyword">USING</span> BTREE</span><br><span class="line">) ENGINE <span class="operator">=</span> InnoDB <span class="type">CHARACTER</span> <span class="keyword">SET</span> <span class="operator">=</span> utf8 <span class="keyword">COLLATE</span> <span class="operator">=</span> utf8_general_ci COMMENT <span class="operator">=</span> <span class="string">&#x27;AT transaction mode undo table&#x27;</span> ROW_FORMAT <span class="operator">=</span> Compact;</span><br></pre></td></tr></table></figure>
+
+<h4 id="配置seata相关配置"><a href="#配置seata相关配置" class="headerlink" title="配置seata相关配置"></a>配置seata相关配置</h4><p>对于Nacos、Mysql数据源等相关信息就省略了，项目源码中都有。主要讲一下seata如何配置，详细配置如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="comment">## 指定服务名称，在nacos中的名字</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">seata-storage</span></span><br><span class="line"><span class="comment">## 客户端seata的相关配置</span></span><br><span class="line"><span class="attr">seata:</span></span><br><span class="line">  <span class="comment">## 是否开启seata，默认true</span></span><br><span class="line">  <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">application-id:</span> <span class="string">$&#123;spring.application.name&#125;</span></span><br><span class="line">  <span class="comment">## seata事务组的名称，一定要和config.tx(nacos)中配置的相同</span></span><br><span class="line">  <span class="attr">tx-service-group:</span> <span class="string">$&#123;spring.application.name&#125;-tx-group</span></span><br><span class="line">  <span class="comment">## 配置中心的配置</span></span><br><span class="line">  <span class="attr">config:</span></span><br><span class="line">    <span class="comment">## 使用类型nacos</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">nacos</span></span><br><span class="line">    <span class="comment">## nacos作为配置中心的相关配置，需要和server在同一个注册中心下</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="comment">## 命名空间，需要server端(registry和config)、nacos配置client端(registry和config)保持一致</span></span><br><span class="line">      <span class="attr">namespace:</span> <span class="string">7a7581ef-433d-46f3-93f9-5fdc18239c65</span></span><br><span class="line">      <span class="comment">## 地址</span></span><br><span class="line">      <span class="attr">server-addr:</span> <span class="string">localhost:8848</span></span><br><span class="line">      <span class="comment">## 组， 需要server端(registry和config)、nacos配置client端(registry和config)保持一致</span></span><br><span class="line">      <span class="attr">group:</span> <span class="string">SEATA_GROUP</span></span><br><span class="line">      <span class="comment">## 用户名和密码</span></span><br><span class="line">      <span class="attr">username:</span> <span class="string">nacos</span></span><br><span class="line">      <span class="attr">password:</span> <span class="string">nacos</span></span><br><span class="line">  <span class="attr">registry:</span></span><br><span class="line">    <span class="attr">type:</span> <span class="string">nacos</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="comment">## 这里的名字一定要和seata服务端中的名称相同，默认是seata-server</span></span><br><span class="line">      <span class="attr">application:</span> <span class="string">seata-server</span></span><br><span class="line">      <span class="comment">## 需要server端(registry和config)、nacos配置client端(registry和config)保持一致</span></span><br><span class="line">      <span class="attr">group:</span> <span class="string">SEATA_GROUP</span></span><br><span class="line">      <span class="attr">namespace:</span> <span class="string">7a7581ef-433d-46f3-93f9-5fdc18239c65</span></span><br><span class="line">      <span class="attr">username:</span> <span class="string">nacos</span></span><br><span class="line">      <span class="attr">password:</span> <span class="string">nacos</span></span><br><span class="line">      <span class="attr">server-addr:</span> <span class="string">localhost:8848</span></span><br></pre></td></tr></table></figure>
+
+<p>以上配置注释已经很清楚，这里着重强调以下几点：</p>
+<ul>
+<li>客户端seata中的nacos相关配置要和服务端相同，比如地址、命名空间……….</li>
+<li>tx-service-group：这个属性一定要注意，这个一定要和服务端的配置一致，否则不生效；比如上述配置中的，就要在nacos中新增一个配置<code>service.vgroupMapping.seata-storage-tx-group=default</code>，如下图：</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/37.png"></p>
+<blockquote>
+<p>注意：<code>seata-storage-tx-group</code>仅仅是后缀，要记得添加配置的时候要加上前缀<code>service.vgroupMapping.</code></p>
+</blockquote>
+<h4 id="扣减库存的接口"><a href="#扣减库存的接口" class="headerlink" title="扣减库存的接口"></a>扣减库存的接口</h4><p>逻辑很简单，这里仅仅是做了减库存的操作，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/38.png"></p>
+<p>这里的接口并没有不同，还是使用<code>@Transactional</code>开启了本地事务，并没有涉及到分布式事务。</p>
+<p>到这里仓储服务搭建好了…………..</p>
+<h3 id="账户服务搭建"><a href="#账户服务搭建" class="headerlink" title="账户服务搭建"></a>账户服务搭建</h3><p>搭建完了仓储服务，账户服务搭建很类似了。</p>
+<h4 id="添加依赖-1"><a href="#添加依赖-1" class="headerlink" title="添加依赖"></a>添加依赖</h4><p>新建一个<code>seata-account9021</code>服务，这里的依赖和仓储服务的依赖相同，直接复制</p>
+<h4 id="创建数据库-1"><a href="#创建数据库-1" class="headerlink" title="创建数据库"></a>创建数据库</h4><p>创建一个<code>seata-account</code>数据库，其中新建了两个表：</p>
+<ul>
+<li><code>account</code>：账户业务表，SQL如下：</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `account`  (</span><br><span class="line">  `id` <span class="type">bigint</span>(<span class="number">11</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  `user_id` <span class="type">varchar</span>(<span class="number">32</span>) <span class="type">CHARACTER</span> <span class="keyword">SET</span> utf8mb4 <span class="keyword">COLLATE</span> utf8mb4_general_ci <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;用户userId&#x27;</span>,</span><br><span class="line">  `money` <span class="type">bigint</span>(<span class="number">11</span>) <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;余额，单位分&#x27;</span>,</span><br><span class="line">  `create_time` datetime(<span class="number">0</span>) <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  <span class="keyword">PRIMARY</span> KEY (`id`) <span class="keyword">USING</span> BTREE</span><br><span class="line">) ENGINE <span class="operator">=</span> InnoDB <span class="type">CHARACTER</span> <span class="keyword">SET</span> <span class="operator">=</span> utf8mb4 <span class="keyword">COLLATE</span> <span class="operator">=</span> utf8mb4_general_ci ROW_FORMAT <span class="operator">=</span> Compact;</span><br><span class="line"></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> `account` <span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="string">&#x27;abc123&#x27;</span>, <span class="number">1000</span>, <span class="string">&#x27;2021-10-19 17:49:53&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>undo_log</strong>：回滚日志表，同仓储服务</li>
+</ul>
+<h4 id="配置seata相关配置-1"><a href="#配置seata相关配置-1" class="headerlink" title="配置seata相关配置"></a>配置seata相关配置</h4><p>Seata相关配置和仓储服务相同，只不过需要在nacos中添加一个<code>service.vgroupMapping.seata-account-tx-group=default</code>，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/39.png"></p>
+<h4 id="扣减余额的接口"><a href="#扣减余额的接口" class="headerlink" title="扣减余额的接口"></a>扣减余额的接口</h4><p>具体逻辑自己完善，这里我直接扣减余额，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/40.png"></p>
+<p>依然没有涉及到分布式事务，还是使用<code>@Transactional</code>开启了本地事务，是不是很爽…………</p>
+<h3 id="订单服务搭建（TM）"><a href="#订单服务搭建（TM）" class="headerlink" title="订单服务搭建（TM）"></a>订单服务搭建（TM）</h3><p>这里为了节省篇幅，陈某直接使用订单服务作为TM，下单、减库存、扣款整个流程都在订单服务中实现。</p>
+<h4 id="添加依赖-2"><a href="#添加依赖-2" class="headerlink" title="添加依赖"></a>添加依赖</h4><p>新建一个<code>seata-order9022</code>服务，这里需要添加的依赖如下：</p>
+<ul>
+<li>Nacos服务发现的依赖</li>
+<li>seata的依赖</li>
+<li>openFeign的依赖，由于要调用账户、仓储的微服务，因此需要额外添加一个openFeign的依赖</li>
+</ul>
+<h4 id="创建数据库-2"><a href="#创建数据库-2" class="headerlink" title="创建数据库"></a>创建数据库</h4><p>新建一个<code>seata_order</code>数据库，其中新建两个表，如下：</p>
+<ul>
+<li><code>t_order</code>：订单的业务表</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `t_order`  (</span><br><span class="line">  `id` <span class="type">bigint</span>(<span class="number">11</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT,</span><br><span class="line">  `product_id` <span class="type">bigint</span>(<span class="number">11</span>) <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;商品Id&#x27;</span>,</span><br><span class="line">  `num` <span class="type">bigint</span>(<span class="number">11</span>) <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;数量&#x27;</span>,</span><br><span class="line">  `user_id` <span class="type">varchar</span>(<span class="number">32</span>) <span class="type">CHARACTER</span> <span class="keyword">SET</span> utf8mb4 <span class="keyword">COLLATE</span> utf8mb4_general_ci <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;用户唯一Id&#x27;</span>,</span><br><span class="line">  `create_time` datetime(<span class="number">0</span>) <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  `status` <span class="type">int</span>(<span class="number">1</span>) <span class="keyword">NULL</span> <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;订单状态 1 未付款 2 已付款 3 已完成&#x27;</span>,</span><br><span class="line">  <span class="keyword">PRIMARY</span> KEY (`id`) <span class="keyword">USING</span> BTREE</span><br><span class="line">) ENGINE <span class="operator">=</span> InnoDB AUTO_INCREMENT <span class="operator">=</span> <span class="number">7</span> <span class="type">CHARACTER</span> <span class="keyword">SET</span> <span class="operator">=</span> utf8mb4 <span class="keyword">COLLATE</span> <span class="operator">=</span> utf8mb4_general_ci ROW_FORMAT <span class="operator">=</span> Compact;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>undo_log</strong>：回滚日志表，同仓储服务</li>
+</ul>
+<h4 id="配置和seata相关配置"><a href="#配置和seata相关配置" class="headerlink" title="配置和seata相关配置"></a>配置和seata相关配置</h4><p>Seata相关配置和仓储服务相同，只不过需要在nacos中添加一个<code>service.vgroupMapping.seata-order-tx-group=default</code>，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/42.png"></p>
+<h4 id="扣减库存的接口-1"><a href="#扣减库存的接口-1" class="headerlink" title="扣减库存的接口"></a>扣减库存的接口</h4><p>这里需要通过openFeign调用仓储服务的接口进行扣减库存，接口如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/44.png"></p>
+<p>以上只是简单的通过openFeign调用，更细致的配置，比如降级，自己完善………</p>
+<h4 id="扣减余额的接口-1"><a href="#扣减余额的接口-1" class="headerlink" title="扣减余额的接口"></a>扣减余额的接口</h4><p>这里仍然是通过openFeign调用账户服务的接口进行扣减余额，接口如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/43.png"></p>
+<h4 id="创建订单的接口"><a href="#创建订单的接口" class="headerlink" title="创建订单的接口"></a>创建订单的接口</h4><p>下订单的接口就是一个事务发起方，作为TM，需要发起一个全局事务，详细代码如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/45.png"></p>
+<p>有什么不同？不同之处就是使用了<code>@GlobalTransactional</code>而不是<code>@Transactional</code>。</p>
+<p><code>@GlobalTransactional</code>是Seata提供的，用于开启才能全局事务，只在TM中标注即可生效。</p>
+<h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><p>分别启动<code>seata-account9021</code>、<code>seata-storage9020</code>、<code>seata-order9022</code>，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/46.png"></p>
+<p>下面调用下单接口，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/47.png"></p>
+<p>从控制台输出的日志可以看出，流程未出现任何异常，事务已经提交，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/48.png"></p>
+<p>果然，查看订单、余额、库存表，数据也都是正确的。</p>
+<p>但是，这仅仅是流程没问题，并不能说明分布式事务已经配置成功了，因此需要手动造个异常。</p>
+<p>在扣减余额的接口睡眠2秒钟，因为openFeign的超时时间默认是1秒，这样肯定是超时异常了，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/49.png"></p>
+<p>此时，调用创建订单的接口，控制台日志输出如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/50.png"></p>
+<p>发现在扣减余额处理中超时了，导致了异常…….</p>
+<p>此时，看下库存的数据有没有扣减，很高兴，库存没有扣减成功，说明事务已经回滚了，分布式事务成功了。</p>
+<h3 id="总结-2"><a href="#总结-2" class="headerlink" title="总结"></a>总结</h3><p>Seata客户端创建很简单，需要注意以下几点内容：</p>
+<ul>
+<li>seata客户端的版本需要和服务端保持一致</li>
+<li>每个服务的数据库都要创建一个<code>undo_log</code>回滚日志表</li>
+<li>客户端指定的事务分组名称要和Nacos相同，比如<code>service.vgroupMapping.seata-account-tx-group=default</code><ul>
+<li>前缀：<code>service.vgroupMapping.</code></li>
+<li>后缀：<code>&#123;自定义&#125;</code></li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>项目源码已经上传，关注公众号<code>码猿技术专栏</code>回复关键词<code>9528</code>获取！</p>
+</blockquote>
+<h2 id="AT模式原理分析"><a href="#AT模式原理分析" class="headerlink" title="AT模式原理分析"></a>AT模式原理分析</h2><p>AT模式最大的优点就是对业务代码无侵入，一切都像在写单体业务逻辑一样。</p>
+<p>TC相关的三张表：</p>
+<ul>
+<li><code>global_table</code>：全局事务表，每当有一个全局事务发起后，就会在该表中记录全局事务的ID</li>
+<li><code>branch_table</code>：分支事务表，记录每一个分支事务的ID，分支事务操作的哪个数据库等信息</li>
+<li><code>lock_table</code>：全局锁</li>
+</ul>
+<h3 id="一阶段步骤"><a href="#一阶段步骤" class="headerlink" title="一阶段步骤"></a>一阶段步骤</h3><ol>
+<li><code>TM：seata-order.create()</code>方法执行时，由于该方法具有<code>@GlobalTranscational</code>标志，该TM会向TC发起全局事务，生成XID（全局锁）</li>
+<li><code>RM：StorageService.deduct()</code>：写表，UNDO_LOG记录回滚日志（Branch ID），通知TC操作结果</li>
+<li><code>RM：AccountService.deduct()</code>：写表，UNDO_LOG记录回滚日志（Branch ID），通知TC操作结果</li>
+<li><code>RM：OrderService.create()</code>：写表，UNDO_LOG记录回滚日志（Branch ID），通知TC操作结果</li>
+</ol>
+<p>RM写表的过程，Seata 会拦截<strong>业务SQL</strong>，首先解析 SQL 语义，在业务数据被更新前，将其保存成<strong>before image</strong>（前置镜像），然后执行<strong>业务SQL</strong>，在业务数据更新之后，再将其保存成<strong>after image</strong>（后置镜像），最后生成行锁。以上操作全部在一个数据库事务内完成，这样保证了一阶段操作的原子性。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/51.png"></p>
+<h3 id="二阶段步骤"><a href="#二阶段步骤" class="headerlink" title="二阶段步骤"></a>二阶段步骤</h3><p>因为“业务 SQL”在一阶段已经提交至数据库， 所以 Seata 框架只需将一阶段保存的快照数据和行锁删掉，完成数据清理即可。</p>
+<p><strong>正常</strong>：TM执行成功，通知TC全局提交，TC此时通知所有的RM提交成功，删除UNDO_LOG回滚日志</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/52.png"></p>
+<p><strong>异常</strong>：TM执行失败，通知TC全局回滚，TC此时通知所有的RM进行回滚，根据UNDO_LOG反向操作，使用<strong>before image</strong>还原业务数据，删除UNDO_LOG，但在还原前要首先要校验脏写，对比“数据库当前业务数据”和 “after image”，如果两份数据完全一致就说明没有脏写，可以还原业务数据，如果不一致就说明有脏写，出现脏写就需要转人工处理。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/53.png"></p>
+<blockquote>
+<p>AT 模式的一阶段、二阶段提交和回滚均由 Seata 框架自动生成，用户只需编写<strong>业务 SQL</strong>，便能轻松接入分布式事务，AT 模式是一种对业务无任何侵入的分布式事务解决方案。</p>
+</blockquote>
+<h2 id="总结-3"><a href="#总结-3" class="headerlink" title="总结"></a>总结</h2><p>本文介绍了七种分布式事务解决方案，以及阿里开源的Seata，从入门到实现，文中如有错误之处，欢迎留言指正。</p>
+<p>本文只介绍了Seata的AT模式，其实Seata还支持TCC、Saga事务模式，关于这一部分内容和Seata源码分析会在下期文章中介绍。</p>
+<p>作者码字不易，<strong>在看</strong>、<strong>收藏</strong>、<strong>转发</strong>一波，谢谢支持！</p>
+<p>另外有想和我<strong>吹牛逼</strong>，<strong>谈人生</strong>的，欢迎添加陈某微信。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/vx.jpg" alt="扫一扫"></p>
+<blockquote>
+<p>案例源码已经上传，关注公众号【码猿技术专栏】，回复关键词【9528】获取！</p>
+</blockquote>
+]]></content>
+      <categories>
+        <category>Spring Cloud 进阶</category>
+      </categories>
+      <tags>
+        <tag>Spring Cloud</tag>
+        <tag>微服务</tag>
+        <tag>分布式事务</tag>
+        <tag>seata</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>阿里限流神器Sentinel入门大全！</title>
     <url>/2021/10/08/%E9%98%BF%E9%87%8C%E9%99%90%E6%B5%81%E7%A5%9E%E5%99%A8Sentinel%E5%85%A5%E9%97%A8%E5%A4%A7%E5%85%A8/</url>
     <content><![CDATA[<h2 id="1、前言"><a href="#1、前言" class="headerlink" title="1、前言"></a>1、前言</h2><p>这是《spring Cloud 进阶》专栏的第五篇文章，这篇文章介绍一下阿里开源的流量防卫兵Sentinel，一款非常优秀的开源项目，经过近10年的双十一的考验，非常成熟的一款产品。往期文章如下：</p>
