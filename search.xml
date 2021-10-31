@@ -518,6 +518,217 @@
       </tags>
   </entry>
   <entry>
+    <title>Spring Cloud Gateway夺命连环10问？</title>
+    <url>/2021/10/31/SpringcloudGateway%E5%A4%BA%E5%91%BD%E8%BF%9E%E7%8E%AF10%E9%97%AE%EF%BC%9F/</url>
+    <content><![CDATA[<p><strong>大家好，我是不才陈某~</strong></p>
+<p>最近有很多小伙伴私信我催更 <a href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=2042874937312346114&scene=126#wechat_redirect">《Spring Cloud 进阶》</a>，陈某也总结了一下，最终原因就是陈某之前力求一篇文章将一个组件重要知识点讲透，这样导致了文章篇幅很长，写的时间很长，小伙伴看的也累。</p>
+<p>因此陈某决定后续的文章将每个组件<strong>拆分</strong>成不同的部分，每篇文章介绍一两个知识点，这样既能提高出文效率，小伙伴们也能更上进度及时的学习。</p>
+<p>这是<a href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=2042874937312346114&scene=126#wechat_redirect">《Spring Cloud 进阶》</a>第<strong>七</strong>篇文章，往期文章如下：</p>
+<ul>
+<li><a href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247493854&idx=1&sn=4b3fb7f7e17a76000733899f511ef915&scene=21#wechat_redirect">五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？</a></li>
+<li><a href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247496653&idx=1&sn=7185077b3bdc1d094aef645d677ec472&scene=21#wechat_redirect">openFeign夺命连环9问，这谁受得了？</a></li>
+<li><a href="https://mp.weixin.qq.com/s/S_8HQYHOG624Vzeu94CFSA">阿里面试这样问：Nacos、Apollo、Config配置中心如何选型？这10个维度告诉你！</a></li>
+<li><a href="https://mp.weixin.qq.com/s/YKzYdMu-7nwszEf9-1M3Uw">阿里面试败北：5种微服务注册中心如何选型？这几个维度告诉你！</a></li>
+<li><a href="https://mp.weixin.qq.com/s/Q7Xv8cypQFrrOQhbd9BOXw">阿里限流神器Sentinel夺命连环 17 问？</a></li>
+<li><a href="https://mp.weixin.qq.com/s/sXVSFqq2UZ6Pwwt7vx7vIA">对比7种分布式事务方案，还是偏爱阿里开源的Seata，真香！(原理+实战)</a></li>
+</ul>
+<p>这篇文章介绍下微服务中的一个重要角色：网关，对于网关如何选择，由于阿里系暂时未出网关，当然是选择了Spring cloud Gateway，毕竟是亲儿子。</p>
+<p>文章目录如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/16.png"></p>
+<span id="more"></span>
+
+<h2 id="为什么需要网关？"><a href="#为什么需要网关？" class="headerlink" title="为什么需要网关？"></a>为什么需要网关？</h2><p>传统的单体架构中只有一个服务开放给客户端调用，但是微服务架构中是将一个系统拆分成多个微服务，那么作为客户端如何去调用这些微服务呢？如果没有网关的存在，只能在本地记录每个微服务的调用地址。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/1.png"></p>
+<p>无网关的微服务架构往往存在以下问题：</p>
+<ul>
+<li>客户端多次请求不同的微服务，增加客户端代码或配置编写的复杂性。</li>
+<li>认证复杂，每个服务都需要独立认证。</li>
+<li>存在跨域请求，在一定场景下处理相对复杂。</li>
+</ul>
+<h2 id="网关的基本功能？"><a href="#网关的基本功能？" class="headerlink" title="网关的基本功能？"></a>网关的基本功能？</h2><p>网关是所有微服务的门户，路由转发仅仅是最基本的功能，除此之外还有其他的一些功能，比如：<strong>认证</strong>、<strong>鉴权</strong>、<strong>熔断</strong>、<strong>限流</strong>、<strong>日志监控</strong>等等………</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/2.png"></p>
+<blockquote>
+<p>以上这些应用场景会在后续的文章详细介绍，不是今天的重点。</p>
+</blockquote>
+<h2 id="为什么选择Spring-cloud-Gateway？"><a href="#为什么选择Spring-cloud-Gateway？" class="headerlink" title="为什么选择Spring cloud Gateway？"></a>为什么选择Spring cloud Gateway？</h2><p>在1.x版本中都是采用的Zuul网关；但在2.x版本中，zuul的升级一直跳票，Spring Cloud最后自己研发了一个网关替代Zuul，那就是Spring Cloud Gateway。</p>
+<p>肯定选择亲儿子Spring Cloud Gateway，它的很多思想都是借鉴zuul，所谓青出于蓝而胜于蓝，功能和性能肯定是优于zuul，不然Spring Cloud 为嘛要发布它？</p>
+<p>重要的一点原因：</p>
+<blockquote>
+<p>Spring Cloud Gateway 基于Spring Boot 2.x、Spring WebFlux和[Project Reactor构建。</p>
+</blockquote>
+<p>对于Spring Boot 的整合方便兼容性以及性能方面不必担心。</p>
+<h2 id="Spring-Cloud-Gateway几个必知的术语？"><a href="#Spring-Cloud-Gateway几个必知的术语？" class="headerlink" title="Spring Cloud Gateway几个必知的术语？"></a>Spring Cloud Gateway几个必知的术语？</h2><ol>
+<li><strong>路由（route）</strong>：gateway的基本构建模块。它由ID、目标URI、断言集合和过滤器集合组成。如果聚合断言结果为真，则匹配到该路由。</li>
+<li><strong>断言（Predicate ）</strong>：参照Java8的新特性Predicate，允许开发人员匹配HTTP请求中的任何内容，比如头或参数。</li>
+<li><strong>过滤器（filter）</strong>：可以在返回请求之前或之后修改请求和响应的内容。</li>
+</ol>
+<h2 id="网关如何搭建？"><a href="#网关如何搭建？" class="headerlink" title="网关如何搭建？"></a>网关如何搭建？</h2><p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/2.png"></p>
+<p><strong>为什么要放这张图？</strong></p>
+<blockquote>
+<p>一定要按照上图中的版本进行适配，否则会出现意想不到的BUG，陈某遇到过，都是泪…………</p>
+</blockquote>
+<p>新建<code>cloud-gateway9023</code>，添加如下依赖：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!--gateway--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-gateway<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注意</strong>：一定要去掉<code>spring-boot-starter-web</code>依赖，否则启动报错</p>
+</blockquote>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/3.png"></p>
+<p>好了，项目搭建完成，其实就添加这么一个依赖，关于详细的配置下文介绍。</p>
+<h2 id="什么是Predict（断言）？"><a href="#什么是Predict（断言）？" class="headerlink" title="什么是Predict（断言）？"></a>什么是Predict（断言）？</h2><p>Predicate来自于java8的接口。Predicate接受一个输入参数，返回一个布尔值结果。该接口包含多种默认方法来将Predicate组合成其他复杂的逻辑（比如：与，或，非）。</p>
+<p>可以用于接口请求参数校验、判断新老数据是否有变化需要进行更新操作。</p>
+<p>Spring Cloud Gateway内置了许多Predict，这些Predict的源码在<code>org.springframework.cloud.gateway.handler.predicate</code>包中，有兴趣可以阅读一下。内置的一些断言如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/4.png" alt="内置的断言"></p>
+<p>以上11种断言陈某这里就不再介绍如何配置了，官方文档写的很清楚。</p>
+<blockquote>
+<p>官方文档：<a href="https://docs.spring.io/spring-cloud-gateway/docs/2.2.9.RELEASE/reference/html/">https://docs.spring.io/spring-cloud-gateway/docs/2.2.9.RELEASE/reference/html/</a></p>
+</blockquote>
+<p>下面就以最后一种权重断言为例介绍一下如何配置。配置如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">gateway:</span></span><br><span class="line">      <span class="comment">## 路由</span></span><br><span class="line">      <span class="attr">routes:</span></span><br><span class="line">        <span class="comment">## id只要唯一即可，名称任意</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">id:</span> <span class="string">gateway-provider_1</span></span><br><span class="line">          <span class="attr">uri:</span> <span class="string">http://localhost:9024</span></span><br><span class="line">          <span class="comment">## 配置断言</span></span><br><span class="line">          <span class="attr">predicates:</span></span><br><span class="line">            <span class="comment">## Path Route Predicate Factory断言，满足/gateway/provider/**这个请求路径的都会被路由到http://localhost:9024这个uri中</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">Path=/gateway/provider/**</span></span><br><span class="line">            <span class="comment">## Weight Route Predicate Factory，同一分组按照权重进行分配流量，这里分配了80%</span></span><br><span class="line">            <span class="comment">## 第一个group1是分组名，第二个参数是权重</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">Weight=group1,</span> <span class="number">8</span></span><br><span class="line">            </span><br><span class="line">        <span class="comment">## id必须唯一</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">id:</span> <span class="string">gateway-provider_2</span></span><br><span class="line">          <span class="comment">## 路由转发的uri</span></span><br><span class="line">          <span class="attr">uri:</span> <span class="string">http://localhost:9025</span></span><br><span class="line">          <span class="comment">## 配置断言</span></span><br><span class="line">          <span class="attr">predicates:</span></span><br><span class="line">            <span class="comment">## Path Route Predicate Factory断言，满足/gateway/provider/**这个请求路径的都会被路由到http://localhost:9024这个uri中</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">Path=/gateway/provider/**</span></span><br><span class="line">            <span class="comment">## Weight Route Predicate Factory，同一分组按照权重进行分配流量，这里分配了20%</span></span><br><span class="line">            <span class="comment">## 第一个group1是分组名，第二个参数是权重</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">Weight=group1,</span> <span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<p><code>routes</code>下就是配置的路由策略，各个组件如下：</p>
+<ul>
+<li><code>id</code>：路由的唯一id，名称任意</li>
+<li><code>uri</code>：路由转发的uri</li>
+<li><code>predicates</code>：断言配置，可以配置多个</li>
+</ul>
+<p>Spring Cloud Gateway中的断言命名都是有规范的，格式：<code>xxxRoutePredicateFactory</code>。</p>
+<p>比如权重的断言：<code>WeightRoutePredicateFactory</code>，那么配置时直接取前面的<code>Weight</code>。</p>
+<p>默认的路由转发如果路由到了两个，则是的按照配置先后顺序转发，上面都配置了路径：<code>Path=/gateway/provider/**</code>，如果没有配置权重，则肯定是转发到<code>http://localhost:9024</code>。</p>
+<p>但是既然配置配置了权重并且相同的分组，则按照权重比例进行分配流量。</p>
+<h2 id="什么是过滤器？"><a href="#什么是过滤器？" class="headerlink" title="什么是过滤器？"></a>什么是过滤器？</h2><p>过滤器这个概念很熟悉，在Spring mvc 就接触过，Gateway的过滤器的作用以及生命周期都是类似的。</p>
+<p>Gateway的生命周期：</p>
+<ul>
+<li><strong>PRE</strong>：这种过滤器在请求被路由之前调用。我们可利用这种过滤器实现身份验证、在集群中选择 请求的微服务、记录调试信息等。</li>
+<li><strong>POST</strong>：这种过滤器在路由到微服务以后执行。这种过滤器可用来为响应添加标准的HTTP Header、收集统计信息和指标、将响应从微服务发送给客户端等。</li>
+</ul>
+<p>Gateway 的Filter从作用范围可分为两种: </p>
+<ul>
+<li><strong>GatewayFilter</strong>：应用到单个路由或者一个分组的路由上（需要在配置文件中配置）。</li>
+<li><strong>GlobalFilter</strong>：应用到所有的路由上（无需配置，全局生效）</li>
+</ul>
+<h3 id="GatewayFilter（局部过滤器）"><a href="#GatewayFilter（局部过滤器）" class="headerlink" title="GatewayFilter（局部过滤器）"></a>GatewayFilter（局部过滤器）</h3><p>Spring Cloud Gateway中内置了许多的局部过滤器，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/5.png"></p>
+<p>局部过滤器需要在指定路由配置才能生效，默认是不生效的。</p>
+<p>以<code>AddResponseHeaderGatewayFilterFactory</code>这个过滤器为例，为原始响应添加Header，配置如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">gateway:</span></span><br><span class="line">      <span class="comment">## 路由</span></span><br><span class="line">      <span class="attr">routes:</span></span><br><span class="line">        <span class="comment">## id只要唯一即可，名称任意</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">id:</span> <span class="string">gateway-provider_1</span></span><br><span class="line">          <span class="attr">uri:</span> <span class="string">http://localhost:9024</span></span><br><span class="line">          <span class="comment">## 配置断言</span></span><br><span class="line">          <span class="attr">predicates:</span></span><br><span class="line">            <span class="comment">## Path Route Predicate Factory断言，满足/gateway/provider/**这个请求路径的都会被路由到http://localhost:9024这个uri中</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">Path=/gateway/provider/**</span></span><br><span class="line">          <span class="comment">## 配置过滤器（局部）</span></span><br><span class="line">          <span class="attr">filters:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">AddResponseHeader=X-Response-Foo,</span> <span class="string">Bar</span></span><br></pre></td></tr></table></figure>
+
+<p>浏览器请求，发现响应头中已经有了<code>X-Response-Foo=Bar</code>这个键值对，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/6.png"></p>
+<p><strong>注意</strong>：过滤器的名称只需要写前缀，过滤器命名必须是<code>xxxGatewayFilterFactory</code>（包括自定义）。</p>
+<blockquote>
+<p>更多过滤器的配置可以看官方文档：<a href="https://docs.spring.io/spring-cloud-gateway/docs/2.2.9.RELEASE/reference/html/#gatewayfilter-factories">https://docs.spring.io/spring-cloud-gateway/docs/2.2.9.RELEASE/reference/html/#gatewayfilter-factories</a></p>
+</blockquote>
+<p>虽说内置的过滤器能够解决很多场景，但是难免还是有些特殊需求需要定制一个过滤器，下面就来介绍一下如何自定义局部过滤器。</p>
+<p><strong>场景</strong>：模拟一个授权验证的过程，如果请求头或者请求参数中携带<code>token</code>则放行，否则直接拦截返回<strong>401</strong>，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 名称必须是xxxGatewayFilterFactory形式</span></span><br><span class="line"><span class="comment"> * todo：模拟授权的验证，具体逻辑根据业务完善</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AuthorizeGatewayFilterFactory</span> <span class="keyword">extends</span> <span class="title">AbstractGatewayFilterFactory</span>&lt;<span class="title">AuthorizeGatewayFilterFactory</span>.<span class="title">Config</span>&gt; </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String AUTHORIZE_TOKEN = <span class="string">&quot;token&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//构造函数，加载Config</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">AuthorizeGatewayFilterFactory</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//固定写法</span></span><br><span class="line">        <span class="keyword">super</span>(AuthorizeGatewayFilterFactory.Config.class);</span><br><span class="line">        log.info(<span class="string">&quot;Loaded GatewayFilterFactory [Authorize]&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//读取配置文件中的参数 赋值到 配置类中</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;String&gt; <span class="title">shortcutFieldOrder</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//Config.enabled</span></span><br><span class="line">        <span class="keyword">return</span> Arrays.asList(<span class="string">&quot;enabled&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> GatewayFilter <span class="title">apply</span><span class="params">(AuthorizeGatewayFilterFactory.Config config)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> (exchange, chain) -&gt; &#123;</span><br><span class="line">            <span class="comment">//判断是否开启授权验证</span></span><br><span class="line">            <span class="keyword">if</span> (!config.isEnabled()) &#123;</span><br><span class="line">                <span class="keyword">return</span> chain.filter(exchange);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            ServerHttpRequest request = exchange.getRequest();</span><br><span class="line">            HttpHeaders headers = request.getHeaders();</span><br><span class="line">            <span class="comment">//从请求头中获取token</span></span><br><span class="line">            String token = headers.getFirst(AUTHORIZE_TOKEN);</span><br><span class="line">            <span class="keyword">if</span> (token == <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="comment">//从请求头参数中获取token</span></span><br><span class="line">                token = request.getQueryParams().getFirst(AUTHORIZE_TOKEN);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            ServerHttpResponse response = exchange.getResponse();</span><br><span class="line">            <span class="comment">//如果token为空，直接返回401，未授权</span></span><br><span class="line">            <span class="keyword">if</span> (StringUtils.isEmpty(token)) &#123;</span><br><span class="line">                response.setStatusCode(HttpStatus.UNAUTHORIZED);</span><br><span class="line">                <span class="comment">//处理完成，直接拦截，不再进行下去</span></span><br><span class="line">                <span class="keyword">return</span> response.setComplete();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">/**</span></span><br><span class="line"><span class="comment">             * todo chain.filter(exchange) 之前的都是过滤器的前置处理</span></span><br><span class="line"><span class="comment">             *</span></span><br><span class="line"><span class="comment">             * chain.filter().then(</span></span><br><span class="line"><span class="comment">             *  过滤器的后置处理...........</span></span><br><span class="line"><span class="comment">             * )</span></span><br><span class="line"><span class="comment">             */</span></span><br><span class="line">            <span class="comment">//授权正常，继续下一个过滤器链的调用</span></span><br><span class="line">            <span class="keyword">return</span> chain.filter(exchange);</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Data</span></span><br><span class="line">    <span class="meta">@AllArgsConstructor</span></span><br><span class="line">    <span class="meta">@NoArgsConstructor</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Config</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 控制是否开启认证</span></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">boolean</span> enabled;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>局部过滤器需要在路由中配置才能生效，配置如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">gateway:</span></span><br><span class="line">      <span class="comment">## 路由</span></span><br><span class="line">      <span class="attr">routes:</span></span><br><span class="line">        <span class="comment">## id只要唯一即可，名称任意</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">id:</span> <span class="string">gateway-provider_1</span></span><br><span class="line">          <span class="attr">uri:</span> <span class="string">http://localhost:9024</span></span><br><span class="line">          <span class="comment">## 配置断言</span></span><br><span class="line">          <span class="attr">predicates:</span></span><br><span class="line">            <span class="comment">## Path Route Predicate Factory断言，满足/gateway/provider/**这个请求路径的都会被路由到http://localhost:9024这个uri中</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">Path=/gateway/provider/**</span></span><br><span class="line">          <span class="comment">## 配置过滤器（局部）</span></span><br><span class="line">          <span class="attr">filters:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">AddResponseHeader=X-Response-Foo,</span> <span class="string">Bar</span></span><br><span class="line">            <span class="comment">## AuthorizeGatewayFilterFactory自定义过滤器配置，值为true需要验证授权，false不需要</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">Authorize=true</span></span><br></pre></td></tr></table></figure>
+
+<p>此时直接访问：<a href="http://localhost:9023/gateway/provider/port%EF%BC%8C%E4%B8%8D%E6%90%BA%E5%B8%A6token%EF%BC%8C%E8%BF%94%E5%9B%9E%E5%A6%82%E4%B8%8B%E5%9B%BE%EF%BC%9A">http://localhost:9023/gateway/provider/port，不携带token，返回如下图：</a></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/7.png"></p>
+<p>请求参数带上token：<a href="http://localhost:9023/gateway/provider/port?token=abcdcdecd-ddcdeicd12%EF%BC%8C%E6%88%90%E5%8A%9F%E8%BF%94%E5%9B%9E%EF%BC%8C%E5%A6%82%E4%B8%8B%E5%9B%BE%EF%BC%9A">http://localhost:9023/gateway/provider/port?token=abcdcdecd-ddcdeicd12，成功返回，如下图：</a></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/8.png"></p>
+<p>上述的<code>AuthorizeGatewayFilterFactory</code>只是涉及到了过滤器的前置处理，后置处理是在<code>chain.filter().then()</code>中的<code>then()</code>方法中完成的，具体可以看下项目源码中的<code>TimeGatewayFilterFactory</code>，代码就不再贴出来了，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/9.png"></p>
+<h3 id="GlobalFilter（全局过滤器）"><a href="#GlobalFilter（全局过滤器）" class="headerlink" title="GlobalFilter（全局过滤器）"></a>GlobalFilter（全局过滤器）</h3><p>全局过滤器应用到全部路由上，无需开发者配置，Spring Cloud Gateway也内置了一些全局过滤器，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/10.png"></p>
+<p><code>GlobalFilter</code>的功能其实和<code>GatewayFilter</code>是相同的，只是<code>GlobalFilter</code>的作用域是所有的路由配置，而不是绑定在指定的路由配置上。多个<code>GlobalFilter</code>可以通过<code>@Order</code>或者<code>getOrder()</code>方法指定每个<code>GlobalFilter</code>的执行顺序，order值越小，<code>GlobalFilter</code>执行的优先级越高。</p>
+<p>注意，由于过滤器有pre和post两种类型，pre类型过滤器如果order值越小，那么它就应该在pre过滤器链的顶层，post类型过滤器如果order值越小，那么它就应该在pre过滤器链的底层。示意图如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/11.png"></p>
+<p>当然除了内置的全局过滤器，实际工作中还需要定制过滤器，下面来介绍一下如何自定义。</p>
+<p>场景：模拟Nginx的Access Log 功能，记录每次请求的相关信息。代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 实现GlobalFilter</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@Order(value = Integer.MIN_VALUE)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AccessLogGlobalFilter</span> <span class="keyword">implements</span> <span class="title">GlobalFilter</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Mono&lt;Void&gt; <span class="title">filter</span><span class="params">(ServerWebExchange exchange, GatewayFilterChain chain)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//filter的前置处理</span></span><br><span class="line">        ServerHttpRequest request = exchange.getRequest();</span><br><span class="line">        String path = request.getPath().pathWithinApplication().value();</span><br><span class="line">        InetSocketAddress remoteAddress = request.getRemoteAddress();</span><br><span class="line">        <span class="keyword">return</span> chain</span><br><span class="line">                <span class="comment">//继续调用filter</span></span><br><span class="line">                .filter(exchange)</span><br><span class="line">                <span class="comment">//filter的后置处理</span></span><br><span class="line">                .then(Mono.fromRunnable(() -&gt; &#123;</span><br><span class="line">            ServerHttpResponse response = exchange.getResponse();</span><br><span class="line">            HttpStatus statusCode = response.getStatusCode();</span><br><span class="line">            log.info(<span class="string">&quot;请求路径:&#123;&#125;,远程IP地址:&#123;&#125;,响应码:&#123;&#125;&quot;</span>, path, remoteAddress, statusCode);</span><br><span class="line">        &#125;));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>好了，全局过滤器不必在路由上配置，注入到IOC容器中即可全局生效。</p>
+<p>此时发出一个请求，控制台打印信息如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">请求路径:/gateway/provider/port,远程IP地址:/<span class="number">0</span>:<span class="number">0</span>:<span class="number">0</span>:<span class="number">0</span>:<span class="number">0</span>:<span class="number">0</span>:<span class="number">0</span>:<span class="number">1</span>:<span class="number">64114</span>,响应码:<span class="number">200</span> OK</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="如何集成注册中心？"><a href="#如何集成注册中心？" class="headerlink" title="如何集成注册中心？"></a>如何集成注册中心？</h2><p>上述demo中并没有集成注册中心，每次路由配置都是指定固定的服务uri，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/12.png"></p>
+<p>这样做有什么坏处呢？</p>
+<ul>
+<li>服务的IP的地址一旦修改了，路由配置中的uri必须修改</li>
+<li>服务集群中无法实现负载均衡</li>
+</ul>
+<p>此时就需要集成的注册中心，使得网关能够从注册中心自动获取uri（负载均衡）。</p>
+<p>这里的注册中心当然选择Nacos，又不熟悉的小伙伴请看陈某《Spring Cloud 进阶》专栏的第一篇文章：<a href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247493854&idx=1&sn=4b3fb7f7e17a76000733899f511ef915&scene=21#wechat_redirect">五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？</a></p>
+<p>pom文件中新增Nacos依赖，如下：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!--nacos注册中心--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.alibaba.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-alibaba-nacos-discovery<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>启动类上开启注册中心功能，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/13.png"></p>
+<p>配置文件中指定nacos注册中心的地址：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="comment">## 指定服务名称，在nacos中的名字</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">cloud-gateway</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">discovery:</span></span><br><span class="line">        <span class="comment"># nacos的服务地址，nacos-server中IP地址:端口号</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8848</span></span><br></pre></td></tr></table></figure>
+
+<p>路由配置中唯一不同的就是路由的<code>uri</code>，格式：<code>lb://service-name</code>，这是固定写法：</p>
+<ul>
+<li><code>lb</code>：固定格式，指的是从nacos中按照名称获取微服务,并遵循负载均衡策略</li>
+<li><code>service-name</code>：nacos注册中心的服务名称，这里并不是IP地址形式的</li>
+</ul>
+<p>集成Nacos注册中心完整的配置demo如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="comment">## 指定服务名称，在nacos中的名字</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">cloud-gateway</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">discovery:</span></span><br><span class="line">        <span class="comment"># nacos的服务地址，nacos-server中IP地址:端口号</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8848</span></span><br><span class="line">    <span class="attr">gateway:</span></span><br><span class="line">      <span class="comment">## 路由</span></span><br><span class="line">      <span class="attr">routes:</span></span><br><span class="line">        <span class="comment">## id只要唯一即可，名称任意</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">id:</span> <span class="string">gateway-provider_1</span></span><br><span class="line">        <span class="comment">## 使用了lb形式，从注册中心负载均衡的获取uri</span></span><br><span class="line">          <span class="attr">uri:</span> <span class="string">lb://gateway-provider</span></span><br><span class="line">          <span class="comment">## 配置断言</span></span><br><span class="line">          <span class="attr">predicates:</span></span><br><span class="line">            <span class="comment">## Path Route Predicate Factory断言，满足/gateway/provider/**这个请求路径的都会被路由到http://localhost:9024这个uri中</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">Path=/gateway/provider/**</span></span><br><span class="line">          <span class="comment">## 配置过滤器（局部）</span></span><br><span class="line">          <span class="attr">filters:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">AddResponseHeader=X-Response-Foo,</span> <span class="string">Bar</span></span><br></pre></td></tr></table></figure>
+
+<p>为什么指定了<code>lb</code>就可以开启负载均衡，前面说过全局过滤器<code>LoadBalancerClientFilter</code>就是负责路由寻址和负载均衡的，可以看到如下源码：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/14.png"></p>
+<h2 id="如何实现动态路由？"><a href="#如何实现动态路由？" class="headerlink" title="如何实现动态路由？"></a>如何实现动态路由？</h2><p>上述例子都是将网关的一系列配置写到项目的配置文件中，一旦路由发生改变必须要重新项目，这样维护成本很高。</p>
+<p>其实我们可以将网关的配置存放到配置中心中，这样由配置中心统一管理，一旦路由发生改变，只需要在配置中心修改，这样便能达到<strong>一处修改，多出生效</strong>的目的。</p>
+<p>这里当然要使用Nacos作为配置中心了，添加依赖如下：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!--    nacos配置中心的依赖--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.alibaba.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-alibaba-nacos-config<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>在<code>bootstrap.yml</code>文件中指定Nacos作为配置中心的一些相关配置：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">application:</span></span><br><span class="line">    <span class="comment">## 指定服务名称，在nacos中的名字</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">cloud-gateway</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="comment">## todo 此处作为演示，仅仅配置了后缀，其他分组，命名空间根据需要自己配置</span></span><br><span class="line">      <span class="attr">config:</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8848</span></span><br><span class="line">        <span class="comment">## 指定文件后缀未yaml</span></span><br><span class="line">        <span class="attr">file-extension:</span> <span class="string">yaml</span></span><br></pre></td></tr></table></figure>
+
+<p>在nacos中的public命名空间中创建<code>dataId</code>为<code>cloud-gateway.yaml</code>的配置（未指定环境），配置内容如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/15.png"></p>
+<p>到这里已经配置完成了。至于效果自己动动小手试试吧……………</p>
+<h2 id="如何自定义全局异常处理？"><a href="#如何自定义全局异常处理？" class="headerlink" title="如何自定义全局异常处理？"></a>如何自定义全局异常处理？</h2><p>通过前面的测试可以看到一个现象：一旦路由的微服务下线或者失联了，Spring Cloud Gateway直接返回了一个错误页面，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/23.png"></p>
+<p>显然这种异常信息不友好，前后端分离架构中必须定制返回的异常信息。</p>
+<p>传统的Spring Boot 服务中都是使用<code>@ControllerAdvice </code>来包装全局异常处理的，但是由于服务下线，请求并没有到达。</p>
+<p>因此必须在网关中也要定制一层全局异常处理，这样才能更加友好的和客户端交互。</p>
+<p>Spring Cloud Gateway提供了多种全局处理的方式，今天陈某只介绍其中一种方式，实现还算比较优雅。</p>
+<p>直接创建一个类<code>GlobalErrorExceptionHandler</code>，实现<code>ErrorWebExceptionHandler</code>，重写其中的<code>handle</code>方法，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 用于网关的全局异常处理</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Order</span>(-1)：优先级一定要比ResponseStatusExceptionHandler低</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="meta">@Order(-1)</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@RequiredArgsConstructor</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GlobalErrorExceptionHandler</span> <span class="keyword">implements</span> <span class="title">ErrorWebExceptionHandler</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> ObjectMapper objectMapper;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@SuppressWarnings(&#123;&quot;rawtypes&quot;, &quot;unchecked&quot;, &quot;NullableProblems&quot;&#125;)</span></span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> Mono&lt;Void&gt; <span class="title">handle</span><span class="params">(ServerWebExchange exchange, Throwable ex)</span> </span>&#123;</span><br><span class="line">		ServerHttpResponse response = exchange.getResponse();</span><br><span class="line">		<span class="keyword">if</span> (response.isCommitted()) &#123;</span><br><span class="line">			<span class="keyword">return</span> Mono.error(ex);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// JOSN格式返回</span></span><br><span class="line">		response.getHeaders().setContentType(MediaType.APPLICATION_JSON);</span><br><span class="line">		<span class="keyword">if</span> (ex <span class="keyword">instanceof</span> ResponseStatusException) &#123;</span><br><span class="line">			response.setStatusCode(((ResponseStatusException) ex).getStatus());</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">return</span> response.writeWith(Mono.fromSupplier(() -&gt; &#123;</span><br><span class="line">			DataBufferFactory bufferFactory = response.bufferFactory();</span><br><span class="line">			<span class="keyword">try</span> &#123;</span><br><span class="line">				<span class="comment">//todo 返回响应结果，根据业务需求，自己定制</span></span><br><span class="line">				CommonResponse resultMsg = <span class="keyword">new</span> CommonResponse(<span class="string">&quot;500&quot;</span>,ex.getMessage(),<span class="keyword">null</span>);</span><br><span class="line">				<span class="keyword">return</span> bufferFactory.wrap(objectMapper.writeValueAsBytes(resultMsg));</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">catch</span> (JsonProcessingException e) &#123;</span><br><span class="line">				log.error(<span class="string">&quot;Error writing response&quot;</span>, ex);</span><br><span class="line">				<span class="keyword">return</span> bufferFactory.wrap(<span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">0</span>]);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>好了，全局异常处理已经定制完成了，在测试一下，此时正常返回JSON数据了，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/24.png"></p>
+<blockquote>
+<p>JSON的样式根据架构需要自己定制。</p>
+</blockquote>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>Spring Cloud Gateway今天就分享到这里，主要介绍了以下几个知识点：</p>
+<ul>
+<li>为什么需要网关？网关的基本功能</li>
+<li>如何从零搭建一个微服务网关</li>
+<li>Predict（断言）的概念</li>
+<li>过滤器的概念、Spring Cloud Gateway内置的过滤器以及如何自定义</li>
+<li>如何集成Nacos注册中心并且实现负载均衡</li>
+<li>如何集成Nacos实现动态路由，达到一处修改，多出生效的作用</li>
+<li>全局异常的处理</li>
+</ul>
+<p>你认为Spring Cloud Gateway就介绍完了？不可能，后续还有更深入以及实战的介绍，下篇文章介绍…..</p>
+<blockquote>
+<p>项目源码已经上传Github，公众号【码猿技术专栏】回复关键词：<strong>9528</strong>获取！</p>
+</blockquote>
+<h2 id="最后说一句（求关注，别白嫖我）"><a href="#最后说一句（求关注，别白嫖我）" class="headerlink" title="最后说一句（求关注，别白嫖我）"></a>最后说一句（求关注，别白嫖我）</h2><p>陈某每一篇原创文章都是精心输出，尤其是《Spring Cloud 进阶》专栏的文章，知识点太多，要想讲的细，必须要花很多时间准备，从知识点到源码demo。</p>
+<p>如果这篇文章对你有所帮助，或者有所启发的话，帮忙<strong>点赞</strong>、<strong>在看</strong>、<strong>转发</strong>、<strong>收藏</strong>，你的支持就是我坚持下去的最大动力！</p>
+<p>关注公众号：【码猿技术专栏】，公众号内有超赞的粉丝福利，回复：加群，可以加入技术讨论群，和大家一起讨论技术，吹牛逼！</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg"></p>
+]]></content>
+      <categories>
+        <category>Spring Cloud 进阶</category>
+      </categories>
+      <tags>
+        <tag>Spring Cloud</tag>
+        <tag>微服务</tag>
+        <tag>网关</tag>
+        <tag>Spring Cloud Gateway</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>对比7种分布式事务方案，还是偏爱阿里开源的Seata，真香！(原理+实战)</title>
     <url>/2021/10/24/%E5%AF%B9%E6%AF%947%E7%A7%8D%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%96%B9%E6%A1%88%EF%BC%8C%E8%BF%98%E6%98%AF%E5%81%8F%E7%88%B1%E9%98%BF%E9%87%8C%E5%BC%80%E6%BA%90%E7%9A%84Seata%EF%BC%8C%E7%9C%9F%E9%A6%99%EF%BC%81-%E5%8E%9F%E7%90%86-%E5%AE%9E%E6%88%98/</url>
     <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>先和大家分享一个好消息：10月初陈某的粉丝数破<strong>一万</strong>了，非常感谢各位读者的支持！</p>
