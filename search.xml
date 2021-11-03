@@ -518,6 +518,114 @@
       </tags>
   </entry>
   <entry>
+    <title>Spring Cloud Gateway 整合阿里 Sentinel网关限流实战！</title>
+    <url>/2021/11/03/SpringcloudGateway%E6%95%B4%E5%90%88sentinel%E9%99%90%E6%B5%81/</url>
+    <content><![CDATA[<p><strong>大家好，我是不才陈某~</strong></p>
+<p>这是<a href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=2042874937312346114&scene=126#wechat_redirect">《Spring Cloud 进阶》</a>第<strong>八</strong>篇文章，往期文章如下：</p>
+<ul>
+<li><a href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247493854&idx=1&sn=4b3fb7f7e17a76000733899f511ef915&scene=21#wechat_redirect">五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？</a></li>
+<li><a href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247496653&idx=1&sn=7185077b3bdc1d094aef645d677ec472&scene=21#wechat_redirect">openFeign夺命连环9问，这谁受得了？</a></li>
+<li><a href="https://mp.weixin.qq.com/s/S_8HQYHOG624Vzeu94CFSA">阿里面试这样问：Nacos、Apollo、Config配置中心如何选型？这10个维度告诉你！</a></li>
+<li><a href="https://mp.weixin.qq.com/s/YKzYdMu-7nwszEf9-1M3Uw">阿里面试败北：5种微服务注册中心如何选型？这几个维度告诉你！</a></li>
+<li><a href="https://mp.weixin.qq.com/s/Q7Xv8cypQFrrOQhbd9BOXw">阿里限流神器Sentinel夺命连环 17 问？</a></li>
+<li><a href="https://mp.weixin.qq.com/s/sXVSFqq2UZ6Pwwt7vx7vIA">对比7种分布式事务方案，还是偏爱阿里开源的Seata，真香！(原理+实战)</a></li>
+<li><a href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247499894&idx=1&sn=f1606e4c00fd15292269afe052f5bca2&chksm=fcf71fbbcb8096ad349e6da50b0b9141964c2084d0a38eba977fe8baa3fbe8af3b20c7591110&token=1887105114&lang=zh_CN#rd">Spring Cloud Gateway夺命连环10问？</a></li>
+</ul>
+<p>前一篇文章介绍了<a href="(https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247499894&idx=1&sn=f1606e4c00fd15292269afe052f5bca2&chksm=fcf71fbbcb8096ad349e6da50b0b9141964c2084d0a38eba977fe8baa3fbe8af3b20c7591110&token=1887105114&lang=zh_CN#rd)">Spring Cloud Gateway</a>的一些基础知识点，今天陈某就来唠一唠网关层面如何做限流？</p>
+<p>文章目录如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/25.png"></p>
+<span id="more"></span>
+
+<h2 id="网关如何限流？"><a href="#网关如何限流？" class="headerlink" title="网关如何限流？"></a>网关如何限流？</h2><p>Spring Cloud Gateway本身自带的限流实现，过滤器是<code>RequestRateLimiterGatewayFilterFactory</code>，不过这种上不了台面的就不再介绍了，有兴趣的可以实现下。</p>
+<p>今天的重点是集成阿里的<strong>Sentinel</strong>实现网关限流，sentinel有不懂的可以看陈某的文章：<a href="https://mp.weixin.qq.com/s/Q7Xv8cypQFrrOQhbd9BOXw">阿里限流神器Sentinel夺命连环 17 问？</a></p>
+<p>  从1.6.0版本开始，Sentinel提供了SpringCloud Gateway的适配模块，可以提供两种资源维度的限流：</p>
+<ul>
+<li><strong>route维度</strong>：即在配置文件中配置的路由条目，资源名为对应的<code>routeId</code>，这种属于粗粒度的限流，一般是对某个微服务进行限流。</li>
+<li><strong>自定义API维度</strong>：用户可以利用Sentinel提供的API来自定义一些API分组，这种属于细粒度的限流，针对某一类的uri进行匹配限流，可以跨多个微服务。</li>
+</ul>
+<blockquote>
+<p>sentinel官方文档：<a href="https://github.com/alibaba/Sentinel/wiki/%E7%BD%91%E5%85%B3%E9%99%90%E6%B5%81">https://github.com/alibaba/Sentinel/wiki/%E7%BD%91%E5%85%B3%E9%99%90%E6%B5%81</a></p>
+</blockquote>
+<p>Spring Cloud Gateway集成Sentinel实现很简单，这就是阿里的魅力，提供简单、易操作的工具，让程序员专注于业务。</p>
+<h3 id="新建项目"><a href="#新建项目" class="headerlink" title="新建项目"></a>新建项目</h3><p>新建一个<code>gateway-sentinel9026</code>模块，添加如下依赖：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="comment">&lt;!--nacos注册中心--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.alibaba.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-alibaba-nacos-discovery<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!--spring cloud gateway--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-gateway<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!--    spring cloud gateway整合sentinel的依赖--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.alibaba.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-alibaba-sentinel-gateway<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!--    sentinel的依赖--&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.alibaba.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-alibaba-sentinel<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注意</strong>：这依然是一个网关服务，不要添加WEB的依赖</p>
+</blockquote>
+<h3 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h3><p>配置文件中主要指定以下三种配置：</p>
+<ul>
+<li>nacos的地址</li>
+<li>sentinel控制台的地址</li>
+<li>网关路由的配置</li>
+</ul>
+<p>配置如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="comment">## 整合sentinel，配置sentinel控制台的地址</span></span><br><span class="line">    <span class="attr">sentinel:</span></span><br><span class="line">      <span class="attr">transport:</span></span><br><span class="line">        <span class="comment">## 指定控制台的地址，默认端口8080</span></span><br><span class="line">        <span class="attr">dashboard:</span> <span class="string">localhost:8080</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="comment">## 注册中心配置</span></span><br><span class="line">      <span class="attr">discovery:</span></span><br><span class="line">        <span class="comment"># nacos的服务地址，nacos-server中IP地址:端口号</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8848</span></span><br><span class="line">    <span class="attr">gateway:</span></span><br><span class="line">      <span class="comment">## 路由</span></span><br><span class="line">      <span class="attr">routes:</span></span><br><span class="line">        <span class="comment">## id只要唯一即可，名称任意</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">id:</span> <span class="string">gateway-provider</span></span><br><span class="line">          <span class="attr">uri:</span> <span class="string">lb://gateway-provider</span></span><br><span class="line">          <span class="comment">## 配置断言</span></span><br><span class="line">          <span class="attr">predicates:</span></span><br><span class="line">            <span class="comment">## Path Route Predicate Factory断言，满足/gateway/provider/**这个请求路径的都会被路由到http://localhost:9024这个uri中</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">Path=/gateway/provider/**</span></span><br></pre></td></tr></table></figure>
+
+<p>上述配置中设置了一个路由<code>gateway-provider</code>，只要请求路径满足<code>/gateway/provider/**</code>都会被路由到<code>gateway-provider</code>这个服务中。</p>
+<h3 id="限流配置"><a href="#限流配置" class="headerlink" title="限流配置"></a>限流配置</h3><p>经过上述两个步骤其实已经整合好了Sentinel，此时访问一下接口：<a href="http://localhost:9026/gateway/provider/port">http://localhost:9026/gateway/provider/port</a></p>
+<p>然后在sentinel控制台可以看到已经被监控了，监控的路由是<code>gateway-provider</code>，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/17.png"></p>
+<p>此时我们可以为其新增一个route维度的限流，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/18.png"></p>
+<p>上图中对<code>gateway-provider</code>这个路由做出了限流，QPS阈值为1。</p>
+<p>此时快速访问：<a href="http://localhost:9026/gateway/provider/port%EF%BC%8C%E7%9C%8B%E5%88%B0%E5%B7%B2%E7%BB%8F%E8%A2%AB%E9%99%90%E6%B5%81%E4%BA%86%EF%BC%8C%E5%A6%82%E4%B8%8B%E5%9B%BE%EF%BC%9A">http://localhost:9026/gateway/provider/port，看到已经被限流了，如下图：</a></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/19.png"></p>
+<p>以上route维度的限流已经配置成功，小伙伴可以自己照着上述步骤尝试一下。</p>
+<p>API分组限流也很简单，首先需要定义一个分组，<strong>API管理-&gt; 新增API分组</strong>，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/20.png"></p>
+<p>匹配模式选择了精确匹配（还有前缀匹配，正则匹配），因此只有这个uri：<code>http://xxxx/gateway/provider/port</code>会被限流。</p>
+<p>第二步需要对这个分组添加流控规则，<strong>流控规则-&gt;新增网关流控</strong>，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/21.png"></p>
+<p>API名称那里选择对应的分组即可，新增之后，限流规则就生效了。</p>
+<p>陈某不再测试了，小伙伴自己动手测试一下吧……………</p>
+<blockquote>
+<p>陈某这里只是简单的配置一下，至于限流规则持久化一些内容请看陈某的Sentinel文章，这里就不再过多的介绍了。</p>
+</blockquote>
+<h2 id="如何自定义限流异常信息？"><a href="#如何自定义限流异常信息？" class="headerlink" title="如何自定义限流异常信息？"></a>如何自定义限流异常信息？</h2><p>从上面的演示中可以看到默认的异常返回信息是：”Block………”，这种肯定是客户端不能接受的，因此需要定制自己的异常返回信息。</p>
+<p>下面介绍两种不同的方式定制异常返回信息，开发中自己选择其中一种。</p>
+<h3 id="直接配置文件中定制"><a href="#直接配置文件中定制" class="headerlink" title="直接配置文件中定制"></a>直接配置文件中定制</h3><p>开发者可以直接在配置文件中直接修改返回信息，配置如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="comment">## 整合sentinel，配置sentinel控制台的地址</span></span><br><span class="line">    <span class="attr">sentinel:</span></span><br><span class="line">      <span class="comment">#配置限流之后，响应内容</span></span><br><span class="line">      <span class="attr">scg:</span></span><br><span class="line">        <span class="attr">fallback:</span></span><br><span class="line">          <span class="comment">## 两种模式，一种是response返回文字提示信息，</span></span><br><span class="line">          <span class="comment">## 一种是redirect，重定向跳转，需要同时配置redirect(跳转的uri)</span></span><br><span class="line">          <span class="attr">mode:</span> <span class="string">response</span></span><br><span class="line">          <span class="comment">## 响应的状态</span></span><br><span class="line">          <span class="attr">response-status:</span> <span class="number">200</span></span><br><span class="line">          <span class="comment">## 响应体</span></span><br><span class="line">          <span class="attr">response-body:</span> <span class="string">&#x27;&#123;&quot;code&quot;: 200,&quot;message&quot;: &quot;请求失败，稍后重试！&quot;&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>上述配置中<code>mode</code>配置的是<code>response</code>，一旦被限流了，将会返回<code>JSON</code>串。</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;code&quot;</span>: <span class="number">200</span>,</span><br><span class="line">    <span class="attr">&quot;message&quot;</span>: <span class="string">&quot;请求失败，稍后重试！&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>重定向</strong>的配置如下：</p>
+<figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="comment">## 整合sentinel，配置sentinel控制台的地址</span></span><br><span class="line">    <span class="attr">sentinel:</span></span><br><span class="line">      <span class="comment">#配置限流之后，响应内容</span></span><br><span class="line">      <span class="attr">scg:</span></span><br><span class="line">        <span class="attr">fallback:</span></span><br><span class="line">          <span class="comment">## 两种模式，一种是response返回文字提示信息，一种是redirect，重定向跳转，需要同时配置redirect(跳转的uri)</span></span><br><span class="line">          <span class="attr">mode:</span> <span class="string">redirect</span></span><br><span class="line">          <span class="comment">## 跳转的URL</span></span><br><span class="line">          <span class="attr">redirect:</span> <span class="string">http://www.baidu.com</span></span><br></pre></td></tr></table></figure>
+
+<p>一旦被限流，将会直接跳转到：<a href="http://www.baidu.com/">http://www.baidu.com</a></p>
+<h3 id="编码定制"><a href="#编码定制" class="headerlink" title="编码定制"></a>编码定制</h3><p>这种就不太灵活了，通过硬编码的方式，完整代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GatewayConfig</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 自定义限流处理器</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@PostConstruct</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">initBlockHandlers</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        BlockRequestHandler blockHandler = (serverWebExchange, throwable) -&gt; &#123;</span><br><span class="line">            Map map = <span class="keyword">new</span> HashMap();</span><br><span class="line">            map.put(<span class="string">&quot;code&quot;</span>,<span class="number">200</span>);</span><br><span class="line">            map.put(<span class="string">&quot;message&quot;</span>,<span class="string">&quot;请求失败，稍后重试！&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> ServerResponse.status(HttpStatus.OK)</span><br><span class="line">                    .contentType(MediaType.APPLICATION_JSON_UTF8)</span><br><span class="line">                    .body(BodyInserters.fromObject(map));</span><br><span class="line">        &#125;;</span><br><span class="line">        GatewayCallbackManager.setBlockHandler(blockHandler);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>两种方式介绍完了，根据业务需求自己选择适合的方式，当然陈某更喜欢第一种，理由：<strong>约定&gt;配置&gt;编码</strong>。</p>
+<h2 id="网关限流了，服务就安全了吗？"><a href="#网关限流了，服务就安全了吗？" class="headerlink" title="网关限流了，服务就安全了吗？"></a>网关限流了，服务就安全了吗？</h2><p>很多人认为只要网关层面做了限流，躲在身后的服务就可以高枕无忧了，你是不是也有这种想法？</p>
+<p>很显然这种想法是错误的，复杂的微服务架构一个独立服务不仅仅被一方调用，往往是多方调用，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/22.png"></p>
+<p>商品服务不仅仅被网关层调用，还被内部订单服务调用，这时候仅仅在网关层限流，那么商品服务还安全吗？</p>
+<p>一旦大量的请求订单服务，比如大促秒杀，商品服务不做限流会被瞬间击垮。</p>
+<p>因此需要根据公司业务场景对自己负责的服务也要进行限流兜底，最常见的方案：<strong>网关层集群限流+内部服务的单机限流兜底</strong>，这样才能保证不被流量冲垮。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>文章介绍了Spring Cloud Gateway整合Sentinel对网关层进行限流，以及关于限流的一些思考。如有错误之处，欢迎留言指正。</p>
+<blockquote>
+<p>项目源码已经上传Github，公众号【码猿技术专栏】回复关键词：<strong>9528</strong>获取！</p>
+</blockquote>
+<h2 id="最后说一句（求关注，别白嫖我）"><a href="#最后说一句（求关注，别白嫖我）" class="headerlink" title="最后说一句（求关注，别白嫖我）"></a>最后说一句（求关注，别白嫖我）</h2><p>陈某每一篇原创文章都是精心输出，尤其是《Spring Cloud 进阶》专栏的文章，知识点太多，要想讲的细，必须要花很多时间准备，从知识点到源码demo。</p>
+<p>如果这篇文章对你有所帮助，或者有所启发的话，帮忙<strong>点赞</strong>、<strong>在看</strong>、<strong>转发</strong>、<strong>收藏</strong>，你的支持就是我坚持下去的最大动力！</p>
+<p>关注公众号：【码猿技术专栏】，公众号内有超赞的粉丝福利，回复：加群，可以加入技术讨论群，和大家一起讨论技术，吹牛逼！</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg"></p>
+]]></content>
+      <categories>
+        <category>Spring Cloud 进阶</category>
+      </categories>
+      <tags>
+        <tag>Spring Cloud</tag>
+        <tag>微服务</tag>
+        <tag>网关</tag>
+        <tag>Spring Cloud Gateway</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Spring Cloud Gateway夺命连环10问？</title>
     <url>/2021/10/31/SpringcloudGateway%E5%A4%BA%E5%91%BD%E8%BF%9E%E7%8E%AF10%E9%97%AE%EF%BC%9F/</url>
     <content><![CDATA[<p><strong>大家好，我是不才陈某~</strong></p>
