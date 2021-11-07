@@ -188,6 +188,97 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/08/27/SpringBoot%E9%9B%86%E6%88%90prometheus%E7%9B%91%E6%8E%A7%EF%BC%8C%E4%B8%80%E7%9B%AE%E4%BA%86%E7%84%B6%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/08/27/SpringBoot%E9%9B%86%E6%88%90prometheus%E7%9B%91%E6%8E%A7%EF%BC%8C%E4%B8%80%E7%9B%AE%E4%BA%86%E7%84%B6%EF%BC%81/" class="post-title-link" itemprop="url">SpringBoot集成prometheus监控，一目了然！</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-08-27 10:29:17 / 修改时间：10:30:27" itemprop="dateCreated datePublished" datetime="2021-08-27T10:29:17+08:00">2021-08-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/08/27/SpringBoot%E9%9B%86%E6%88%90prometheus%E7%9B%91%E6%8E%A7%EF%BC%8C%E4%B8%80%E7%9B%AE%E4%BA%86%E7%84%B6%EF%BC%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/08/27/SpringBoot%E9%9B%86%E6%88%90prometheus%E7%9B%91%E6%8E%A7%EF%BC%8C%E4%B8%80%E7%9B%AE%E4%BA%86%E7%84%B6%EF%BC%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在本文中， 我们来学习使用Spring Actuator，Micrometer，Prometheus和Grafana监控Spring Boot应用程序。你可能觉得这需要大量工作，但是其实很容易！</p>
+<h2 id="1、简介"><a href="#1、简介" class="headerlink" title="1、简介"></a>1、简介</h2><p>当某个应用程序在生产环境中运行时，监控其运行状况是必要的。通过实时了解应用程序的运行状况，你能在问题出现之前得到警告，也可以在客户注意到问题之前解决问题。在本文中，我们将创建一个Spring Boot应用程序，在Spring Actuator，Micrometer，Prometheus和Grafana的帮助下来监控系统。其中，Spring Actuator和Micrometer是Spring Boot App的一部分。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/1.png"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/08/27/SpringBoot%E9%9B%86%E6%88%90prometheus%E7%9B%91%E6%8E%A7%EF%BC%8C%E4%B8%80%E7%9B%AE%E4%BA%86%E7%84%B6%EF%BC%81/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/08/22/%E5%85%AD%E7%A7%8D%E6%96%B9%E5%BC%8F%EF%BC%8C%E6%95%99%E4%BD%A0%E5%9C%A8SpringBoot%E5%88%9D%E5%A7%8B%E5%8C%96%E6%97%B6%E6%90%9E%E7%82%B9%E4%BA%8B%E6%83%85%EF%BC%81/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1023,103 +1114,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/08/05/%E4%B8%80%E5%8F%A3%E6%B0%94%E8%AF%B4%E5%87%BA%E5%8D%81%E5%85%AD%E4%B8%ADRedis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/08/05/%E4%B8%80%E5%8F%A3%E6%B0%94%E8%AF%B4%E5%87%BA%E5%8D%81%E5%85%AD%E4%B8%ADRedis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/" class="post-title-link" itemprop="url">一口气说出 Redis 16 个常见使用场景</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-08-05 16:51:03" itemprop="dateCreated datePublished" datetime="2021-08-05T16:51:03+08:00">2021-08-05</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-08-07 21:02:35" itemprop="dateModified" datetime="2021-08-07T21:02:35+08:00">2021-08-07</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Redis-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Redis 进阶</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2021/08/05/%E4%B8%80%E5%8F%A3%E6%B0%94%E8%AF%B4%E5%87%BA%E5%8D%81%E5%85%AD%E4%B8%ADRedis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2021/08/05/%E4%B8%80%E5%8F%A3%E6%B0%94%E8%AF%B4%E5%87%BA%E5%8D%81%E5%85%AD%E4%B8%ADRedis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="1、缓存"><a href="#1、缓存" class="headerlink" title="1、缓存"></a>1、缓存</h2><p>String类型</p>
-<p>例如：热点数据缓存（例如报表、明星出轨），对象缓存、全页缓存、可以提升热点数据的访问数据。</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/12.png"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/05/%E4%B8%80%E5%8F%A3%E6%B0%94%E8%AF%B4%E5%87%BA%E5%8D%81%E5%85%AD%E4%B8%ADRedis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1203,7 +1197,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">117</span>
+          <span class="site-state-item-count">118</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1216,7 +1210,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">43</span>
+        <span class="site-state-item-count">46</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
