@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"chenjiabing666.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="大家好，我是不才陈某~ Java8的新特性主要是Lambda表达式和流，当流和Lambda表达式结合起来一起使用时，因为流申明式处理数据集合的特点，可以让代码变得简洁易读">
+<meta property="og:type" content="article">
+<meta property="og:title" content="巧用 Java 8 的 Stream 来优化代码，太清爽了！">
+<meta property="og:url" content="https://chenjiabing666.github.io/2021/11/09/%E5%B7%A7%E7%94%A8Java8%E7%9A%84Stream%E6%9D%A5%E4%BC%98%E5%8C%96%E4%BB%A3%E7%A0%81-%E5%A4%AA%E6%B8%85%E7%88%BD%E4%BA%86%EF%BC%81/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="大家好，我是不才陈某~ Java8的新特性主要是Lambda表达式和流，当流和Lambda表达式结合起来一起使用时，因为流申明式处理数据集合的特点，可以让代码变得简洁易读">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/stream/5.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/stream/1.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/stream/2.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/stream/3.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/stream/4.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg">
+<meta property="article:published_time" content="2021-11-09T10:46:17.000Z">
+<meta property="article:modified_time" content="2021-11-09T10:50:51.348Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="JDK8">
+<meta property="article:tag" content="stream">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/stream/5.png">
+
+<link rel="canonical" href="https://chenjiabing666.github.io/2021/11/09/%E5%B7%A7%E7%94%A8Java8%E7%9A%84Stream%E6%9D%A5%E4%BC%98%E5%8C%96%E4%BB%A3%E7%A0%81-%E5%A4%AA%E6%B8%85%E7%88%BD%E4%BA%86%EF%BC%81/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>巧用 Java 8 的 Stream 来优化代码，太清爽了！ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+		<div id="container">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/11/09/%E5%B7%A7%E7%94%A8Java8%E7%9A%84Stream%E6%9D%A5%E4%BC%98%E5%8C%96%E4%BB%A3%E7%A0%81-%E5%A4%AA%E6%B8%85%E7%88%BD%E4%BA%86%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          巧用 Java 8 的 Stream 来优化代码，太清爽了！
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-11-09 18:46:17 / 修改时间：18:50:51" itemprop="dateCreated datePublished" datetime="2021-11-09T18:46:17+08:00">2021-11-09</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Java 进阶</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/11/09/%E5%B7%A7%E7%94%A8Java8%E7%9A%84Stream%E6%9D%A5%E4%BC%98%E5%8C%96%E4%BB%A3%E7%A0%81-%E5%A4%AA%E6%B8%85%E7%88%BD%E4%BA%86%EF%BC%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/11/09/%E5%B7%A7%E7%94%A8Java8%E7%9A%84Stream%E6%9D%A5%E4%BC%98%E5%8C%96%E4%BB%A3%E7%A0%81-%E5%A4%AA%E6%B8%85%E7%88%BD%E4%BA%86%EF%BC%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><strong>大家好，我是不才陈某~</strong></p>
+<p>Java8的新特性主要是Lambda表达式和流，当流和Lambda表达式结合起来一起使用时，因为流申明式处理数据集合的特点，可以让代码变得简洁易读</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/stream/5.png"></p>
+<span id="more"></span>
+
+<h2 id="放大招，流如何简化代码"><a href="#放大招，流如何简化代码" class="headerlink" title="放大招，流如何简化代码"></a>放大招，流如何简化代码</h2><p>如果有一个需求，需要对数据库查询到的菜肴进行一个处理：</p>
+<ul>
+<li>筛选出卡路里小于400的菜肴</li>
+<li>对筛选出的菜肴进行一个排序</li>
+<li>获取排序后菜肴的名字</li>
+</ul>
+<p><strong>菜肴：Dish.java</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Dish</span> </span>&#123;  </span><br><span class="line">    <span class="keyword">private</span> String name;  </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> vegetarian;  </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> calories;  </span><br><span class="line">    <span class="keyword">private</span> Type type;  </span><br><span class="line">  </span><br><span class="line">    <span class="comment">// getter and setter  </span></span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+
+<p><strong>Java8以前的实现方式</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> List&lt;String&gt; <span class="title">beforeJava7</span><span class="params">(List&lt;Dish&gt; dishList)</span> </span>&#123;  </span><br><span class="line">        List&lt;Dish&gt; lowCaloricDishes = <span class="keyword">new</span> ArrayList&lt;&gt;();  </span><br><span class="line">  </span><br><span class="line">        <span class="comment">//1.筛选出卡路里小于400的菜肴  </span></span><br><span class="line">        <span class="keyword">for</span> (Dish dish : dishList) &#123;  </span><br><span class="line">            <span class="keyword">if</span> (dish.getCalories() &lt; <span class="number">400</span>) &#123;  </span><br><span class="line">                lowCaloricDishes.add(dish);  </span><br><span class="line">            &#125;  </span><br><span class="line">        &#125;  </span><br><span class="line">  </span><br><span class="line">        <span class="comment">//2.对筛选出的菜肴进行排序  </span></span><br><span class="line">        Collections.sort(lowCaloricDishes, <span class="keyword">new</span> Comparator&lt;Dish&gt;() &#123;  </span><br><span class="line">            <span class="meta">@Override</span>  </span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Dish o1, Dish o2)</span> </span>&#123;  </span><br><span class="line">                <span class="keyword">return</span> Integer.compare(o1.getCalories(), o2.getCalories());  </span><br><span class="line">            &#125;  </span><br><span class="line">        &#125;);  </span><br><span class="line">  </span><br><span class="line">        <span class="comment">//3.获取排序后菜肴的名字  </span></span><br><span class="line">        List&lt;String&gt; lowCaloricDishesName = <span class="keyword">new</span> ArrayList&lt;&gt;();  </span><br><span class="line">        <span class="keyword">for</span> (Dish d : lowCaloricDishes) &#123;  </span><br><span class="line">            lowCaloricDishesName.add(d.getName());  </span><br><span class="line">        &#125;  </span><br><span class="line">  </span><br><span class="line">        <span class="keyword">return</span> lowCaloricDishesName;  </span><br><span class="line">    &#125;  </span><br></pre></td></tr></table></figure>
+
+<p><strong>Java8之后的实现方式</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> List&lt;String&gt; <span class="title">afterJava8</span><span class="params">(List&lt;Dish&gt; dishList)</span> </span>&#123;  </span><br><span class="line">       <span class="keyword">return</span> dishList.stream()  </span><br><span class="line">               .filter(d -&gt; d.getCalories() &lt; <span class="number">400</span>)  <span class="comment">//筛选出卡路里小于400的菜肴  </span></span><br><span class="line">               .sorted(comparing(Dish::getCalories))  <span class="comment">//根据卡路里进行排序  </span></span><br><span class="line">               .map(Dish::getName)  <span class="comment">//提取菜肴名称  </span></span><br><span class="line">               .collect(Collectors.toList()); <span class="comment">//转换为List  </span></span><br><span class="line">   &#125;  </span><br></pre></td></tr></table></figure>
+
+<p>不拖泥带水，一气呵成，原来需要写24代码实现的功能现在只需5行就可以完成了</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/stream/1.png"></p>
+<p>高高兴兴写完需求这时候又有新需求了，新需求如下：</p>
+<blockquote>
+<p>对数据库查询到的菜肴根据菜肴种类进行分类，返回一个<code>Map&lt;Type, List&lt;Dish&gt;&gt;</code>的结果</p>
+</blockquote>
+<p>这要是放在jdk8之前肯定会头皮发麻</p>
+<p><strong>Java8以前的实现方式</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> Map&lt;Type, List&lt;Dish&gt;&gt; beforeJdk8(List&lt;Dish&gt; dishList) &#123;  </span><br><span class="line">    Map&lt;Type, List&lt;Dish&gt;&gt; result = <span class="keyword">new</span> HashMap&lt;&gt;();  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">for</span> (Dish dish : dishList) &#123;  </span><br><span class="line">        <span class="comment">//不存在则初始化  </span></span><br><span class="line">        <span class="keyword">if</span> (result.get(dish.getType())==<span class="keyword">null</span>) &#123;  </span><br><span class="line">            List&lt;Dish&gt; dishes = <span class="keyword">new</span> ArrayList&lt;&gt;();  </span><br><span class="line">            dishes.add(dish);  </span><br><span class="line">            result.put(dish.getType(), dishes);  </span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;  </span><br><span class="line">            <span class="comment">//存在则追加  </span></span><br><span class="line">            result.get(dish.getType()).add(dish);  </span><br><span class="line">        &#125;  </span><br><span class="line">    &#125;  </span><br><span class="line">  </span><br><span class="line">    <span class="keyword">return</span> result;  </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+
+<p>还好jdk8有Stream，再也不用担心复杂集合处理需求</p>
+<p><strong>Java8以后的实现方式</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> Map&lt;Type, List&lt;Dish&gt;&gt; afterJdk8(List&lt;Dish&gt; dishList) &#123;  </span><br><span class="line">    <span class="keyword">return</span> dishList.stream().collect(groupingBy(Dish::getType));  </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+
+<p>又是一行代码解决了需求，忍不住大喊Stream API牛批 看到流的强大功能了吧，接下来将详细介绍流</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/stream/2.png"></p>
+<h2 id="什么是流"><a href="#什么是流" class="headerlink" title="什么是流"></a>什么是流</h2><p>流是从支持数据处理操作的源生成的元素序列，源可以是数组、文件、集合、函数。流不是集合元素，它不是数据结构并不保存数据，它的主要目的在于计算</p>
+<h2 id="如何生成流"><a href="#如何生成流" class="headerlink" title="如何生成流"></a>如何生成流</h2><p>生成流的方式主要有五种</p>
+<p><strong>1.通过集合生成，应用中最常用的一种</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; integerList = Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);  </span><br><span class="line">Stream&lt;Integer&gt; stream = integerList.stream();  </span><br></pre></td></tr></table></figure>
+
+<p>通过集合的stream方法生成流</p>
+<p><strong>2.通过数组生成</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span>[] intArr = <span class="keyword">new</span> <span class="keyword">int</span>[]&#123;<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>&#125;;  </span><br><span class="line">IntStream stream = Arrays.stream(intArr);  </span><br></pre></td></tr></table></figure>
+
+<p>通过Arrays.stream方法生成流，并且该方法生成的流是数值流【即IntStream】而不是<code>Stream&lt;Integer&gt;</code>。补充一点使用数值流可以避免计算过程中拆箱装箱，提高性能。</p>
+<p>Stream API提供了mapToInt、mapToDouble、mapToLong三种方式将对象流【即Stream】转换成对应的数值流，同时提供了boxed方法将数值流转换为对象流</p>
+<p><strong>3.通过值生成</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Integer&gt; stream = Stream.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);  </span><br></pre></td></tr></table></figure>
+
+<p>通过Stream的of方法生成流，通过Stream的empty方法可以生成一个空流</p>
+<p><strong>4.通过文件生成</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;String&gt; lines = Files.lines(Paths.get(<span class="string">&quot;data.txt&quot;</span>), Charset.defaultCharset())  </span><br></pre></td></tr></table></figure>
+
+<p>通过Files.line方法得到一个流，并且得到的每个流是给定文件中的一行</p>
+<p><strong>5.通过函数生成 提供了iterate和generate两个静态方法从函数中生成流</strong></p>
+<p>iterator</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Integer&gt; stream = Stream.iterate(<span class="number">0</span>, n -&gt; n + <span class="number">2</span>).limit(<span class="number">5</span>);  </span><br></pre></td></tr></table></figure>
+
+<p>iterate方法接受两个参数，第一个为初始化值，第二个为进行的函数操作，因为iterator生成的流为无限流，通过limit方法对流进行了截断，只生成5个偶数</p>
+<p>generator</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;Double&gt; stream = Stream.generate(Math::random).limit(<span class="number">5</span>);  </span><br></pre></td></tr></table></figure>
+
+<p>generate方法接受一个参数，方法参数类型为Supplier，由它为流提供值。generate生成的流也是无限流，因此通过limit对流进行了截断</p>
+<h2 id="流的操作类型"><a href="#流的操作类型" class="headerlink" title="流的操作类型"></a>流的操作类型</h2><p>流的操作类型主要分为两种</p>
+<p><strong>1.中间操作</strong></p>
+<p>一个流可以后面跟随零个或多个中间操作。其目的主要是打开流，做出某种程度的数据映射/过滤，然后返回一个新的流，交给下一个操作使用。这类操作都是惰性化的，仅仅调用到这类方法，并没有真正开始流的遍历，真正的遍历需等到终端操作时，常见的中间操作有下面即将介绍的filter、map等</p>
+<p><strong>2.终端操作</strong></p>
+<p>一个流有且只能有一个终端操作，当这个操作执行后，流就被关闭了，无法再被操作，因此一个流只能被遍历一次，若想在遍历需要通过源数据在生成流。终端操作的执行，才会真正开始流的遍历。如下面即将介绍的count、collect等</p>
+<h2 id="流使用"><a href="#流使用" class="headerlink" title="流使用"></a>流使用</h2><p>流的使用将分为终端操作和中间操作进行介绍</p>
+<h3 id="中间操作"><a href="#中间操作" class="headerlink" title="中间操作"></a>中间操作</h3><p><strong>filter筛选</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; integerList = Arrays.asList(<span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);  </span><br><span class="line">Stream&lt;Integer&gt; stream = integerList.stream().filter(i -&gt; i &gt; <span class="number">3</span>);  </span><br></pre></td></tr></table></figure>
+
+<p>通过使用filter方法进行条件筛选，filter的方法参数为一个条件</p>
+<p><strong>distinct去除重复元素</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; integerList = Arrays.asList(<span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);  </span><br><span class="line">Stream&lt;Integer&gt; stream = integerList.stream().distinct();  </span><br></pre></td></tr></table></figure>
+
+<p>通过distinct方法快速去除重复的元素</p>
+<p><strong>limit返回指定流个数</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; integerList = Arrays.asList(<span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);  </span><br><span class="line">Stream&lt;Integer&gt; stream = integerList.stream().limit(<span class="number">3</span>);  </span><br></pre></td></tr></table></figure>
+
+<p>通过limit方法指定返回流的个数，limit的参数值必须&gt;=0，否则将会抛出异常</p>
+<p><strong>skip跳过流中的元素</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; integerList = Arrays.asList(<span class="number">1</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);  </span><br><span class="line">Stream&lt;Integer&gt; stream = integerList.stream().skip(<span class="number">2</span>);  </span><br></pre></td></tr></table></figure>
+
+<p>通过skip方法跳过流中的元素，上述例子跳过前两个元素，所以打印结果为2,3,4,5，skip的参数值必须&gt;=0，否则将会抛出异常</p>
+<p><strong>map流映射</strong></p>
+<p>所谓流映射就是将接受的元素映射成另外一个元素</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; stringList = Arrays.asList(<span class="string">&quot;Java 8&quot;</span>, <span class="string">&quot;Lambdas&quot;</span>,  <span class="string">&quot;In&quot;</span>, <span class="string">&quot;Action&quot;</span>);  </span><br><span class="line">Stream&lt;Integer&gt; stream = stringList.stream().map(String::length);  </span><br></pre></td></tr></table></figure>
+
+<p>通过map方法可以完成映射，该例子完成中String -&gt; Integer的映射，之前上面的例子通过map方法完成了Dish-&gt;String的映射</p>
+<p><strong>flatMap流转换</strong></p>
+<p>将一个流中的每个值都转换为另一个流</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; wordList = Arrays.asList(<span class="string">&quot;Hello&quot;</span>, <span class="string">&quot;World&quot;</span>);  </span><br><span class="line">List&lt;String&gt; strList = wordList.stream()  </span><br><span class="line">        .map(w -&gt; w.split(<span class="string">&quot; &quot;</span>))  </span><br><span class="line">        .flatMap(Arrays::stream)  </span><br><span class="line">        .distinct()  </span><br><span class="line">        .collect(Collectors.toList());  </span><br></pre></td></tr></table></figure>
+
+<p><code>map(w -&gt; w.split(&quot; &quot;))</code>的返回值为<code>Stream&lt;String[]&gt;</code>，我们想获取<code>Stream&lt;String&gt;</code>，可以通过flatMap方法完成Stream -&gt;Stream的转换</p>
+<p><strong>元素匹配</strong></p>
+<p>提供了三种匹配方式</p>
+<p><strong>1.allMatch匹配所有</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; integerList = Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);  </span><br><span class="line"><span class="keyword">if</span> (integerList.stream().allMatch(i -&gt; i &gt; <span class="number">3</span>)) &#123;  </span><br><span class="line">    System.out.println(<span class="string">&quot;值都大于3&quot;</span>);  </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+
+<p>通过allMatch方法实现</p>
+<p><strong>2.anyMatch匹配其中一个</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; integerList = Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);  </span><br><span class="line"><span class="keyword">if</span> (integerList.stream().anyMatch(i -&gt; i &gt; <span class="number">3</span>)) &#123;  </span><br><span class="line">    System.out.println(<span class="string">&quot;存在大于3的值&quot;</span>);  </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+
+<p>等同于</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (Integer i : integerList) &#123;  </span><br><span class="line">    <span class="keyword">if</span> (i &gt; <span class="number">3</span>) &#123;  </span><br><span class="line">        System.out.println(<span class="string">&quot;存在大于3的值&quot;</span>);  </span><br><span class="line">        <span class="keyword">break</span>;  </span><br><span class="line">    &#125;  </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+
+<p>存在大于3的值则打印，java8中通过anyMatch方法实现这个功能</p>
+<p><strong>3.noneMatch全部不匹配</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; integerList = Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);  </span><br><span class="line"><span class="keyword">if</span> (integerList.stream().noneMatch(i -&gt; i &gt; <span class="number">3</span>)) &#123;  </span><br><span class="line">    System.out.println(<span class="string">&quot;值都小于3&quot;</span>);  </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+
+<p>通过noneMatch方法实现</p>
+<h2 id="终端操作"><a href="#终端操作" class="headerlink" title="终端操作"></a>终端操作</h2><p><strong>统计流中元素个数</strong></p>
+<p><strong>1.通过count</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; integerList = Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);  </span><br><span class="line">Long result = integerList.stream().count();  </span><br></pre></td></tr></table></figure>
+
+<p>通过使用count方法统计出流中元素个数</p>
+<p><strong>2.通过counting</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; integerList = Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);  </span><br><span class="line">Long result = integerList.stream().collect(counting());  </span><br></pre></td></tr></table></figure>
+
+<p>最后一种统计元素个数的方法在与collect联合使用的时候特别有用</p>
+<p><strong>查找</strong></p>
+<p>提供了两种查找方式</p>
+<p><strong>1.findFirst查找第一个</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; integerList = Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);  </span><br><span class="line">Optional&lt;Integer&gt; result = integerList.stream().filter(i -&gt; i &gt; <span class="number">3</span>).findFirst();  </span><br></pre></td></tr></table></figure>
+
+<p>通过findFirst方法查找到第一个大于三的元素并打印</p>
+<p><strong>2.findAny随机查找一个</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; integerList = Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);  </span><br><span class="line">Optional&lt;Integer&gt; result = integerList.stream().filter(i -&gt; i &gt; <span class="number">3</span>).findAny();  </span><br></pre></td></tr></table></figure>
+
+<p>通过findAny方法查找到其中一个大于三的元素并打印，因为内部进行优化的原因，当找到第一个满足大于三的元素时就结束，该方法结果和findFirst方法结果一样。提供findAny方法是为了更好的利用并行流，findFirst方法在并行上限制更多【本篇文章将不介绍并行流】</p>
+<p><strong>reduce将流中的元素组合起来</strong></p>
+<p>假设我们对一个集合中的值进行求和</p>
+<p>jdk8之前</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> sum = <span class="number">0</span>;  </span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i : integerList) &#123;  </span><br><span class="line">sum += i;  </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+
+<p>jdk8之后通过reduce进行处理</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> sum = integerList.stream().reduce(<span class="number">0</span>, (a, b) -&gt; (a + b));  </span><br></pre></td></tr></table></figure>
+
+<p>一行就可以完成，还可以使用方法引用简写成：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> sum = integerList.stream().reduce(<span class="number">0</span>, Integer::sum);  </span><br></pre></td></tr></table></figure>
+
+<p>reduce接受两个参数，一个初始值这里是0，一个<code>BinaryOperator&lt;T&gt; accumulator</code><br>来将两个元素结合起来产生一个新值，</p>
+<p>另外reduce方法还有一个没有初始化值的重载方法</p>
+<p><strong>获取流中最小最大值</strong></p>
+<p><strong>通过min/max获取最小最大值</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Optional&lt;Integer&gt; min = menu.stream().map(Dish::getCalories).min(Integer::compareTo);  </span><br><span class="line">Optional&lt;Integer&gt; max = menu.stream().map(Dish::getCalories).max(Integer::compareTo);  </span><br></pre></td></tr></table></figure>
+
+<p>也可以写成：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">OptionalInt min = menu.stream().mapToInt(Dish::getCalories).min();  </span><br><span class="line">OptionalInt max = menu.stream().mapToInt(Dish::getCalories).max();  </span><br></pre></td></tr></table></figure>
+
+<p>min获取流中最小值，max获取流中最大值，方法参数为<code>Comparator&lt;? super T&gt; comparator</code></p>
+<p><strong>通过minBy/maxBy获取最小最大值</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Optional&lt;Integer&gt; min = menu.stream().map(Dish::getCalories).collect(minBy(Integer::compareTo));  </span><br><span class="line">Optional&lt;Integer&gt; max = menu.stream().map(Dish::getCalories).collect(maxBy(Integer::compareTo));  </span><br></pre></td></tr></table></figure>
+
+<p>minBy获取流中最小值，maxBy获取流中最大值，方法参数为<code>Comparator&lt;? super T&gt; comparator</code></p>
+<p><strong>通过reduce获取最小最大值</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Optional&lt;Integer&gt; min = menu.stream().map(Dish::getCalories).reduce(Integer::min);  </span><br><span class="line">Optional&lt;Integer&gt; max = menu.stream().map(Dish::getCalories).reduce(Integer::max);  </span><br></pre></td></tr></table></figure>
+
+<p><strong>求和</strong></p>
+<p><strong>通过summingInt</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> sum = menu.stream().collect(summingInt(Dish::getCalories));  </span><br></pre></td></tr></table></figure>
+
+<p>如果数据类型为double、long，则通过summingDouble、summingLong方法进行求和</p>
+<p><strong>通过reduce</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> sum = menu.stream().map(Dish::getCalories).reduce(<span class="number">0</span>, Integer::sum);  </span><br></pre></td></tr></table></figure>
+
+<p><strong>通过sum</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> sum = menu.stream().mapToInt(Dish::getCalories).sum();  </span><br></pre></td></tr></table></figure>
+
+<p>在上面求和、求最大值、最小值的时候，对于相同操作有不同的方法可以选择执行。可以选择collect、reduce、min/max/sum方法，推荐使用min、max、sum方法。因为它最简洁易读，同时通过mapToInt将对象流转换为数值流，避免了装箱和拆箱操作</p>
+<p><strong>通过averagingInt求平均值</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">double</span> average = menu.stream().collect(averagingInt(Dish::getCalories));  </span><br></pre></td></tr></table></figure>
+
+<p>如果数据类型为double、long，则通过averagingDouble、averagingLong方法进行求平均</p>
+<p><strong>通过summarizingInt同时求总和、平均值、最大值、最小值</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">IntSummaryStatistics intSummaryStatistics = menu.stream().collect(summarizingInt(Dish::getCalories));  </span><br><span class="line"><span class="keyword">double</span> average = intSummaryStatistics.getAverage();  <span class="comment">//获取平均值  </span></span><br><span class="line"><span class="keyword">int</span> min = intSummaryStatistics.getMin();  <span class="comment">//获取最小值  </span></span><br><span class="line"><span class="keyword">int</span> max = intSummaryStatistics.getMax();  <span class="comment">//获取最大值  </span></span><br><span class="line"><span class="keyword">long</span> sum = intSummaryStatistics.getSum();  <span class="comment">//获取总和  </span></span><br></pre></td></tr></table></figure>
+
+<p>如果数据类型为double、long，则通过summarizingDouble、summarizingLong方法</p>
+<p><strong>通过foreach进行元素遍历</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; integerList = Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);  </span><br><span class="line">integerList.stream().forEach(System.out::println);  </span><br></pre></td></tr></table></figure>
+
+<p>而在jdk8之前实现遍历：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i : integerList) &#123;  </span><br><span class="line">    System.out.println(i);  </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+
+<p>jdk8之后遍历元素来的更为方便，原来的for-each直接通过foreach方法就能实现了</p>
+<p><strong>返回集合</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; strings = menu.stream().map(Dish::getName).collect(toList());  </span><br><span class="line">Set&lt;String&gt; sets = menu.stream().map(Dish::getName).collect(toSet());  </span><br></pre></td></tr></table></figure>
+
+<p>只举例了一部分，还有很多其他方法 jdk8之前</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"> List&lt;String&gt; stringList = <span class="keyword">new</span> ArrayList&lt;&gt;();  </span><br><span class="line">    Set&lt;String&gt; stringSet = <span class="keyword">new</span> HashSet&lt;&gt;();  </span><br><span class="line">    <span class="keyword">for</span> (Dish dish : menu) &#123;  </span><br><span class="line">        stringList.add(dish.getName());  </span><br><span class="line">        stringSet.add(dish.getName());  </span><br><span class="line">&#125;  </span><br></pre></td></tr></table></figure>
+
+<p>通过遍历和返回集合的使用发现流只是把原来的外部迭代放到了内部进行，这也是流的主要特点之一。内部迭代可以减少好多代码量</p>
+<p><strong>通过joining拼接流中的元素</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">String result = menu.stream().map(Dish::getName).collect(Collectors.joining(<span class="string">&quot;, &quot;</span>));  </span><br></pre></td></tr></table></figure>
+
+<p>默认如果不通过map方法进行映射处理拼接的toString方法返回的字符串，joining的方法参数为元素的分界符，如果不指定生成的字符串将是一串的，可读性不强</p>
+<p><strong>进阶通过groupingBy进行分组</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;Type, List&lt;Dish&gt;&gt; result = dishList.stream().collect(groupingBy(Dish::getType));  </span><br></pre></td></tr></table></figure>
+
+<p>在collect方法中传入groupingBy进行分组，其中groupingBy的方法参数为分类函数。还可以通过嵌套使用groupingBy进行多级分类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;Type, List&lt;Dish&gt;&gt; result = menu.stream().collect(groupingBy(Dish::getType,  </span><br><span class="line">        groupingBy(dish -&gt; &#123;  </span><br><span class="line">            <span class="keyword">if</span> (dish.getCalories() &lt;= <span class="number">400</span>) <span class="keyword">return</span> CaloricLevel.DIET;  </span><br><span class="line">                <span class="keyword">else</span> <span class="keyword">if</span> (dish.getCalories() &lt;= <span class="number">700</span>) <span class="keyword">return</span> CaloricLevel.NORMAL;  </span><br><span class="line">                <span class="keyword">else</span> <span class="keyword">return</span> CaloricLevel.FAT;  </span><br><span class="line">        &#125;)));  </span><br></pre></td></tr></table></figure>
+
+<p><strong>进阶通过partitioningBy进行分区</strong></p>
+<p>分区是特殊的分组，它分类依据是true和false，所以返回的结果最多可以分为两组</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;Boolean, List&lt;Dish&gt;&gt; result = menu.stream().collect(partitioningBy(Dish :: isVegetarian)) </span><br></pre></td></tr></table></figure>
+
+<p>等同于</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;Boolean, List&lt;Dish&gt;&gt; result = menu.stream().collect(groupingBy(Dish :: isVegetarian))  </span><br></pre></td></tr></table></figure>
+
+<p>这个例子可能并不能看出分区和分类的区别，甚至觉得分区根本没有必要，换个明显一点的例子：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; integerList = Arrays.asList(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);  </span><br><span class="line">Map&lt;Boolean, List&lt;Integer&gt;&gt; result = integerList.stream().collect(partitioningBy(i -&gt; i &lt; <span class="number">3</span>)); </span><br></pre></td></tr></table></figure>
+
+<p>返回值的键仍然是布尔类型，但是它的分类是根据范围进行分类的，分区比较适合处理根据范围进行分类</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过使用Stream API可以简化代码，同时提高了代码可读性，赶紧在项目里用起来。讲道理在没学Stream API之前，谁要是给我在应用里写很多Lambda，Stream API，飞起就想给他一脚。</p>
+<p>我想，我现在可能爱上他了【嘻嘻】。同时使用的时候注意不要将声明式和命令式编程混合使用，前几天刷segment刷到一条：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/stream/3.png"></p>
+<p>imango老哥说的很对，别用声明式编程的语法干命令式编程的勾当</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/stream/4.png"></p>
+<h2 id="最后说一句（别白嫖，求关注）"><a href="#最后说一句（别白嫖，求关注）" class="headerlink" title="最后说一句（别白嫖，求关注）"></a>最后说一句（别白嫖，求关注）</h2><p>下面是陈某新的公众号，主要用于每天分享一篇经典面试题和大厂的内推信息，有需要的可以关注一下！</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg"></p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    不才陈某  |  微信公众号【码猿技术专栏】
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://chenjiabing666.github.io/2021/11/09/%E5%B7%A7%E7%94%A8Java8%E7%9A%84Stream%E6%9D%A5%E4%BC%98%E5%8C%96%E4%BB%A3%E7%A0%81-%E5%A4%AA%E6%B8%85%E7%88%BD%E4%BA%86%EF%BC%81/" title="巧用 Java 8 的 Stream 来优化代码，太清爽了！">https://chenjiabing666.github.io/2021/11/09/巧用Java8的Stream来优化代码-太清爽了！/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+  <li class="post-copyright-license">
+    并保留本声明和上方二维码。感谢您的阅读和支持！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">微信公众号</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/JDK8/" rel="tag"># JDK8</a>
+              <a href="/tags/stream/" rel="tag"># stream</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/11/07/%E5%88%86%E5%B8%83%E5%BC%8F%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA%E4%B9%8BSpringCloudSleuth%E5%A4%BA%E5%91%BD%E8%BF%9E%E7%8E%AF9%E9%97%AE%EF%BC%9F/" rel="prev" title="分布式链路追踪之Spring Cloud Sleuth夺命连环9问？">
+      <i class="fa fa-chevron-left"></i> 分布式链路追踪之Spring Cloud Sleuth夺命连环9问？
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+		  <script src="https://readmore.openwrite.cn/js/readmore.js" type="text/javascript"></script>
+<script>
+    const btw = new BTWPlugin();
+    btw.init({
+        id: 'container',
+        blogId: '27513-1629019452485-311',
+        name: '码猿技术专栏',
+        qrcode: 'https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg',
+        keyword: 'vip',
+    });
+</script>
+        </div>
+		</div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%94%BE%E5%A4%A7%E6%8B%9B%EF%BC%8C%E6%B5%81%E5%A6%82%E4%BD%95%E7%AE%80%E5%8C%96%E4%BB%A3%E7%A0%81"><span class="nav-text">放大招，流如何简化代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%B5%81"><span class="nav-text">什么是流</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E7%94%9F%E6%88%90%E6%B5%81"><span class="nav-text">如何生成流</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%81%E7%9A%84%E6%93%8D%E4%BD%9C%E7%B1%BB%E5%9E%8B"><span class="nav-text">流的操作类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%81%E4%BD%BF%E7%94%A8"><span class="nav-text">流使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%AD%E9%97%B4%E6%93%8D%E4%BD%9C"><span class="nav-text">中间操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%88%E7%AB%AF%E6%93%8D%E4%BD%9C"><span class="nav-text">终端操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%90%8E%E8%AF%B4%E4%B8%80%E5%8F%A5%EF%BC%88%E5%88%AB%E7%99%BD%E5%AB%96%EF%BC%8C%E6%B1%82%E5%85%B3%E6%B3%A8%EF%BC%89"><span class="nav-text">最后说一句（别白嫖，求关注）</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="不才陈某"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">119</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">48</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png" title="微信公众号 → https:&#x2F;&#x2F;gitee.com&#x2F;chenjiabing666&#x2F;BlogImage&#x2F;raw&#x2F;master&#x2F;myjszl_log.png" rel="noopener" target="_blank"><i class="fab fa-weixin fa-fw"></i>微信公众号</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.im/user/2506542244708072" title="掘金 → https:&#x2F;&#x2F;juejin.im&#x2F;user&#x2F;2506542244708072" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>掘金</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某|公众号：码猿技术专栏</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RtlQOgOT3M0hgyMeogykSQjT-gzGzoHsz',
+      appKey     : 'vSCxLU88wnXVf0Pa8mwJrCPm',
+      placeholder: "欢迎关注博主微信公众号【码猿技术专栏】",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
