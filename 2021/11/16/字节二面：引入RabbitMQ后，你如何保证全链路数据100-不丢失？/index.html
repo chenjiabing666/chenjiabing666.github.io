@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"chenjiabing666.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="大家好，我是不才陈某~ 我们都知道，消息从生产端到消费端消费要经过3个步骤：  生产端发送消息到RabbitMQ； RabbitMQ发送消息到消费端； 消费端消费这条消息；   这3个步骤中的每一步都有可能导致消息丢失，消息丢失不可怕，可怕的是丢失了我们还不知道，所以要有一些措施来保证系统的可靠性。 这里的可靠并不是一定就100%不丢失了，磁盘损坏，机房爆炸等等都能导致数据丢失，当然这种都是极小概">
+<meta property="og:type" content="article">
+<meta property="og:title" content="字节二面：引入RabbitMQ后，你如何保证全链路数据百分百不丢失？">
+<meta property="og:url" content="https://chenjiabing666.github.io/2021/11/16/%E5%AD%97%E8%8A%82%E4%BA%8C%E9%9D%A2%EF%BC%9A%E5%BC%95%E5%85%A5RabbitMQ%E5%90%8E%EF%BC%8C%E4%BD%A0%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E5%85%A8%E9%93%BE%E8%B7%AF%E6%95%B0%E6%8D%AE100-%E4%B8%8D%E4%B8%A2%E5%A4%B1%EF%BC%9F/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="大家好，我是不才陈某~ 我们都知道，消息从生产端到消费端消费要经过3个步骤：  生产端发送消息到RabbitMQ； RabbitMQ发送消息到消费端； 消费端消费这条消息；   这3个步骤中的每一步都有可能导致消息丢失，消息丢失不可怕，可怕的是丢失了我们还不知道，所以要有一些措施来保证系统的可靠性。 这里的可靠并不是一定就100%不丢失了，磁盘损坏，机房爆炸等等都能导致数据丢失，当然这种都是极小概">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/rabbitmq/1.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/rabbitmq/2.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/rabbitmq/3.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/rabbitmq/4.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/rabbitmq/5.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/rabbitmq/6.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/rabbitmq/7.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/skywalking/1.jpg">
+<meta property="article:published_time" content="2021-11-16T13:17:49.000Z">
+<meta property="article:modified_time" content="2021-11-16T13:26:31.550Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="消息队列">
+<meta property="article:tag" content="RabbitMQ">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/rabbitmq/1.png">
+
+<link rel="canonical" href="https://chenjiabing666.github.io/2021/11/16/%E5%AD%97%E8%8A%82%E4%BA%8C%E9%9D%A2%EF%BC%9A%E5%BC%95%E5%85%A5RabbitMQ%E5%90%8E%EF%BC%8C%E4%BD%A0%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E5%85%A8%E9%93%BE%E8%B7%AF%E6%95%B0%E6%8D%AE100-%E4%B8%8D%E4%B8%A2%E5%A4%B1%EF%BC%9F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>字节二面：引入RabbitMQ后，你如何保证全链路数据百分百不丢失？ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+		<div id="container">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/11/16/%E5%AD%97%E8%8A%82%E4%BA%8C%E9%9D%A2%EF%BC%9A%E5%BC%95%E5%85%A5RabbitMQ%E5%90%8E%EF%BC%8C%E4%BD%A0%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E5%85%A8%E9%93%BE%E8%B7%AF%E6%95%B0%E6%8D%AE100-%E4%B8%8D%E4%B8%A2%E5%A4%B1%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          字节二面：引入RabbitMQ后，你如何保证全链路数据百分百不丢失？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-11-16 21:17:49 / 修改时间：21:26:31" itemprop="dateCreated datePublished" datetime="2021-11-16T21:17:49+08:00">2021-11-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" itemprop="url" rel="index"><span itemprop="name">消息队列</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/11/16/%E5%AD%97%E8%8A%82%E4%BA%8C%E9%9D%A2%EF%BC%9A%E5%BC%95%E5%85%A5RabbitMQ%E5%90%8E%EF%BC%8C%E4%BD%A0%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E5%85%A8%E9%93%BE%E8%B7%AF%E6%95%B0%E6%8D%AE100-%E4%B8%8D%E4%B8%A2%E5%A4%B1%EF%BC%9F/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/11/16/%E5%AD%97%E8%8A%82%E4%BA%8C%E9%9D%A2%EF%BC%9A%E5%BC%95%E5%85%A5RabbitMQ%E5%90%8E%EF%BC%8C%E4%BD%A0%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E5%85%A8%E9%93%BE%E8%B7%AF%E6%95%B0%E6%8D%AE100-%E4%B8%8D%E4%B8%A2%E5%A4%B1%EF%BC%9F/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><strong>大家好，我是不才陈某~</strong></p>
+<p>我们都知道，消息从生产端到消费端消费要经过3个步骤：</p>
+<ol>
+<li>生产端发送消息到RabbitMQ；</li>
+<li>RabbitMQ发送消息到消费端；</li>
+<li>消费端消费这条消息；</li>
+</ol>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/rabbitmq/1.png"></p>
+<p>这3个步骤中的每一步都有可能导致消息丢失，消息丢失不可怕，可怕的是丢失了我们还不知道，所以要有一些措施来保证系统的可靠性。</p>
+<p>这里的可靠并不是一定就100%不丢失了，磁盘损坏，机房爆炸等等都能导致数据丢失，当然这种都是极小概率发生，能做到99.999999%消息不丢失，就是可靠的了。下面来具体分析一下问题以及解决方案。</p>
+<span id="more"></span>
+
+<h2 id="生产端可靠性投递"><a href="#生产端可靠性投递" class="headerlink" title="生产端可靠性投递"></a>生产端可靠性投递</h2><p>生产端可靠性投递，即生产端要确保将消息正确投递到RabbitMQ中。</p>
+<p>生产端投递的消息丢失的原因有很多，比如消息在网络传输的过程中发生网络故障消息丢失，或者消息投递到RabbitMQ时RabbitMQ挂了，那消息也可能丢失，而我们根本不知道发生了什么。</p>
+<p>针对以上情况，RabbitMQ本身提供了一些机制。</p>
+<h2 id="事务消息机制"><a href="#事务消息机制" class="headerlink" title="事务消息机制"></a>事务消息机制</h2><p>事务消息机制由于会严重降低性能，所以一般不采用这种方法，我就不介绍了，而采用另一种轻量级的解决方案：confirm消息确认机制。</p>
+<h2 id="confirm消息确认机制"><a href="#confirm消息确认机制" class="headerlink" title="confirm消息确认机制"></a>confirm消息确认机制</h2><p>什么是confirm消息确认机制？顾名思义，就是生产端投递的消息一旦投递到RabbitMQ后，RabbitMQ就会发送一个确认消息给生产端，让生产端知道我已经收到消息了，否则这条消息就可能已经丢失了，需要生产端重新发送消息了。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/rabbitmq/2.png"></p>
+<p>通过下面这句代码来开启确认模式：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">channel.confirmSelect();<span class="comment">// 开启发送方确认模式</span></span><br></pre></td></tr></table></figure>
+
+<p>然后异步监听确认和未确认的消息：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">channel.addConfirmListener(<span class="keyword">new</span> ConfirmListener() &#123;</span><br><span class="line">    <span class="comment">//消息正确到达broker</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleAck</span><span class="params">(<span class="keyword">long</span> deliveryTag, <span class="keyword">boolean</span> multiple)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;已收到消息&quot;</span>);</span><br><span class="line">        <span class="comment">//做一些其他处理</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//RabbitMQ因为自身内部错误导致消息丢失，就会发送一条nack消息</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleNack</span><span class="params">(<span class="keyword">long</span> deliveryTag, <span class="keyword">boolean</span> multiple)</span> <span class="keyword">throws</span> IOException </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;未确认消息，标识：&quot;</span> + deliveryTag);</span><br><span class="line">        <span class="comment">//做一些其他处理，比如消息重发等</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>这样就可以让生产端感知到消息是否投递到RabbitMQ中了，当然这样还不够，稍后我会说一下极端情况。</p>
+<h2 id="消息持久化"><a href="#消息持久化" class="headerlink" title="消息持久化"></a>消息持久化</h2><p>那消息持久化呢？我们知道，RabbitMQ收到消息后将这个消息暂时存在了内存中，那这就会有个问题，如果RabbitMQ挂了，那重启后数据就丢失了，所以相关的数据应该持久化到硬盘中，这样就算RabbitMQ重启后也可以到硬盘中取数据恢复。那如何持久化呢？</p>
+<p>message消息到达RabbitMQ后先是到exchange交换机中，然后路由给queue队列，最后发送给消费端。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/rabbitmq/3.png"></p>
+<p>所有需要给exchange、queue和message都进行持久化：</p>
+<p>exchange持久化：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第三个参数true表示这个exchange持久化</span></span><br><span class="line">channel.exchangeDeclare(EXCHANGE_NAME, <span class="string">&quot;direct&quot;</span>, <span class="keyword">true</span>);</span><br></pre></td></tr></table></figure>
+
+<p>queue持久化：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第二个参数true表示这个queue持久化</span></span><br><span class="line">channel.queueDeclare(QUEUE_NAME, <span class="keyword">true</span>, <span class="keyword">false</span>, <span class="keyword">false</span>, <span class="keyword">null</span>);</span><br></pre></td></tr></table></figure>
+
+<p>message持久化：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第三个参数MessageProperties.PERSISTENT_TEXT_PLAIN表示这条消息持久化</span></span><br><span class="line">channel.basicPublish(EXCHANGE_NAME, ROUTING_KEY, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes(StandardCharsets.UTF_8));</span><br></pre></td></tr></table></figure>
+
+<p>这样，如果RabbitMQ收到消息后挂了，重启后会自行恢复消息。</p>
+<p>到此，RabbitMQ提供的几种机制都介绍完了，但这样还不足以保证消息可靠性投递RabbitMQ中，上面我也提到了会有极端情况，比如RabbitMQ收到消息还没来得及将消息持久化到硬盘时，RabbitMQ挂了，这样消息还是丢失了，或者RabbitMQ在发送确认消息给生产端的过程中，由于网络故障而导致生产端没有收到确认消息，这样生产端就不知道RabbitMQ到底有没有收到消息，就不好做接下来的处理。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/rabbitmq/4.png"></p>
+<p>所以除了RabbitMQ提供的一些机制外，我们自己也要做一些消息补偿机制，以应对一些极端情况。接下来我就介绍其中的一种解决方案——消息入库。</p>
+<h2 id="消息入库"><a href="#消息入库" class="headerlink" title="消息入库"></a>消息入库</h2><p>消息入库，顾名思义就是将要发送的消息保存到数据库中。</p>
+<p>首先发送消息前先将消息保存到数据库中，有一个状态字段<code>status=0</code>，表示生产端将消息发送给了RabbitMQ但还没收到确认。在生产端收到确认后将status设为1，表示RabbitMQ已收到消息。</p>
+<p>这里有可能会出现上面说的两种情况，所以生产端这边开一个定时器，定时检索消息表，将status=0并且超过固定时间后（可能消息刚发出去还没来得及确认这边定时器刚好检索到这条status=0的消息，所以给个时间）还没收到确认的消息取出重发（第二种情况下这里会造成消息重复，消费者端要做幂等性），可能重发还会失败，所以可以做一个最大重发次数，超过就做另外的处理。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/rabbitmq/5.png"></p>
+<p>这样消息就可以可靠性投递到RabbitMQ中了，而生产端也可以感知到了。</p>
+<h2 id="消费端消息不丢失"><a href="#消费端消息不丢失" class="headerlink" title="消费端消息不丢失"></a>消费端消息不丢失</h2><p>既然已经可以让生产端100%可靠性投递到RabbitMQ了，那接下来就改看看消费端的了，如何让消费端不丢失消息。</p>
+<p>默认情况下，以下3种情况会导致消息丢失：</p>
+<ul>
+<li>在RabbitMQ将消息发出后，消费端还没接收到消息之前，发生网络故障，消费端与RabbitMQ断开连接，此时消息会丢失；</li>
+<li>在RabbitMQ将消息发出后，消费端还没接收到消息之前，消费端挂了，此时消息会丢失；</li>
+<li>消费端正确接收到消息，但在处理消息的过程中发生异常或宕机了，消息也会丢失。</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/rabbitmq/6.png"></p>
+<p>其实，上述3中情况导致消息丢失归根结底是因为RabbitMQ的自动ack机制，即默认RabbitMQ在消息发出后就立即将这条消息删除，而不管消费端是否接收到，是否处理完，导致消费端消息丢失时RabbitMQ自己又没有这条消息了。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/rabbitmq/7.png"></p>
+<p>所以就需要将自动ack机制改为手动ack机制。</p>
+<p>消费端手动确认消息：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">DeliverCallback deliverCallback = (consumerTag, delivery) -&gt; &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">//接收到消息，做处理</span></span><br><span class="line">        <span class="comment">//手动确认</span></span><br><span class="line">        channel.basicAck(delivery.getEnvelope().getDeliveryTag(), <span class="keyword">false</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        <span class="comment">//出错处理，这里可以让消息重回队列重新发送或直接丢弃消息</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">//第二个参数autoAck设为false表示关闭自动确认机制，需手动确认</span></span><br><span class="line">channel.basicConsume(QUEUE_NAME, <span class="keyword">false</span>, deliverCallback, consumerTag -&gt; &#123;&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>这样，当autoAck参数置为false，对于RabbitMQ服务端而言，队列中的消息分成了两个部分：</p>
+<ul>
+<li>一部分是等待投递给消费端的消息；</li>
+<li>一部分是已经投递给消费端，但是还没有收到消费端确认信号的消息。</li>
+</ul>
+<p>如果RabbitMQ一直没有收到消费端的确认信号，并且消费此消息的消费端已经断开连接或宕机（RabbitMQ会自己感知到），则RabbitMQ会安排该消息重新进入队列（放在队列头部），等待投递给下一个消费者，当然也有能还是原来的那个消费端，当然消费端也需要确保幂等性。</p>
+<p>好了，到此从生产端到RabbitMQ再到消费端的全链路，就可以保证数据的不丢失。</p>
+<h2 id="最后说一句（别白嫖，求关注）"><a href="#最后说一句（别白嫖，求关注）" class="headerlink" title="最后说一句（别白嫖，求关注）"></a>最后说一句（别白嫖，求关注）</h2><p>下面是陈某新的公众号，主要用于每天分享一篇经典面试题和大厂的内推信息，有需要的可以关注一下！</p>
+<img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/skywalking/1.jpg" style="zoom:33%;" />
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    不才陈某  |  微信公众号【码猿技术专栏】
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://chenjiabing666.github.io/2021/11/16/%E5%AD%97%E8%8A%82%E4%BA%8C%E9%9D%A2%EF%BC%9A%E5%BC%95%E5%85%A5RabbitMQ%E5%90%8E%EF%BC%8C%E4%BD%A0%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E5%85%A8%E9%93%BE%E8%B7%AF%E6%95%B0%E6%8D%AE100-%E4%B8%8D%E4%B8%A2%E5%A4%B1%EF%BC%9F/" title="字节二面：引入RabbitMQ后，你如何保证全链路数据百分百不丢失？">https://chenjiabing666.github.io/2021/11/16/字节二面：引入RabbitMQ后，你如何保证全链路数据100-不丢失？/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+  <li class="post-copyright-license">
+    并保留本声明和上方二维码。感谢您的阅读和支持！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">微信公众号</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" rel="tag"># 消息队列</a>
+              <a href="/tags/RabbitMQ/" rel="tag"># RabbitMQ</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/11/14/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA%E8%87%AA%E4%BB%8E%E7%94%A8%E4%BA%86SkyWalking%EF%BC%8C%E7%9D%A1%E7%9A%84%E7%9C%9F%E9%A6%99%EF%BC%81/" rel="prev" title="链路追踪自从用了SkyWalking，睡的真香！">
+      <i class="fa fa-chevron-left"></i> 链路追踪自从用了SkyWalking，睡的真香！
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+		  <script src="https://readmore.openwrite.cn/js/readmore.js" type="text/javascript"></script>
+<script>
+    const btw = new BTWPlugin();
+    btw.init({
+        id: 'container',
+        blogId: '27513-1629019452485-311',
+        name: '码猿技术专栏',
+        qrcode: 'https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg',
+        keyword: 'vip',
+    });
+</script>
+        </div>
+		</div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%9F%E4%BA%A7%E7%AB%AF%E5%8F%AF%E9%9D%A0%E6%80%A7%E6%8A%95%E9%80%92"><span class="nav-text">生产端可靠性投递</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E6%B6%88%E6%81%AF%E6%9C%BA%E5%88%B6"><span class="nav-text">事务消息机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#confirm%E6%B6%88%E6%81%AF%E7%A1%AE%E8%AE%A4%E6%9C%BA%E5%88%B6"><span class="nav-text">confirm消息确认机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E6%8C%81%E4%B9%85%E5%8C%96"><span class="nav-text">消息持久化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B6%88%E6%81%AF%E5%85%A5%E5%BA%93"><span class="nav-text">消息入库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B6%88%E8%B4%B9%E7%AB%AF%E6%B6%88%E6%81%AF%E4%B8%8D%E4%B8%A2%E5%A4%B1"><span class="nav-text">消费端消息不丢失</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%90%8E%E8%AF%B4%E4%B8%80%E5%8F%A5%EF%BC%88%E5%88%AB%E7%99%BD%E5%AB%96%EF%BC%8C%E6%B1%82%E5%85%B3%E6%B3%A8%EF%BC%89"><span class="nav-text">最后说一句（别白嫖，求关注）</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="不才陈某"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">121</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">51</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png" title="微信公众号 → https:&#x2F;&#x2F;gitee.com&#x2F;chenjiabing666&#x2F;BlogImage&#x2F;raw&#x2F;master&#x2F;myjszl_log.png" rel="noopener" target="_blank"><i class="fab fa-weixin fa-fw"></i>微信公众号</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.im/user/2506542244708072" title="掘金 → https:&#x2F;&#x2F;juejin.im&#x2F;user&#x2F;2506542244708072" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>掘金</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某|公众号：码猿技术专栏</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RtlQOgOT3M0hgyMeogykSQjT-gzGzoHsz',
+      appKey     : 'vSCxLU88wnXVf0Pa8mwJrCPm',
+      placeholder: "欢迎关注博主微信公众号【码猿技术专栏】",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
