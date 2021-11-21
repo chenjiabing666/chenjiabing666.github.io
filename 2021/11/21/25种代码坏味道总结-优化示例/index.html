@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"chenjiabing666.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="大家好，我是不才陈某~  前言什么样的代码是好代码呢？好的代码应该命名规范、可读性强、扩展性强、健壮性……而不好的代码又有哪些典型特征呢？这25种代码坏味道大家要注意啦 1. Duplicated Code （重复代码）重复代码就是不同地点，有着相同的程序结构。一般是因为需求迭代比较快，开发小伙伴担心影响已有功能，就复制粘贴造成的。重复代码很难维护的，如果你要修改其中一段的代码逻辑，就需要修改多次">
+<meta property="og:type" content="article">
+<meta property="og:title" content="25种代码坏味道总结+优化示例">
+<meta property="og:url" content="https://chenjiabing666.github.io/2021/11/21/25%E7%A7%8D%E4%BB%A3%E7%A0%81%E5%9D%8F%E5%91%B3%E9%81%93%E6%80%BB%E7%BB%93-%E4%BC%98%E5%8C%96%E7%A4%BA%E4%BE%8B/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="大家好，我是不才陈某~  前言什么样的代码是好代码呢？好的代码应该命名规范、可读性强、扩展性强、健壮性……而不好的代码又有哪些典型特征呢？这25种代码坏味道大家要注意啦 1. Duplicated Code （重复代码）重复代码就是不同地点，有着相同的程序结构。一般是因为需求迭代比较快，开发小伙伴担心影响已有功能，就复制粘贴造成的。重复代码很难维护的，如果你要修改其中一段的代码逻辑，就需要修改多次">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/3.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/4.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/5.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/6.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/7.png">
+<meta property="article:published_time" content="2021-11-21T09:07:30.000Z">
+<meta property="article:modified_time" content="2021-11-21T09:10:01.409Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="代码优化">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/3.png">
+
+<link rel="canonical" href="https://chenjiabing666.github.io/2021/11/21/25%E7%A7%8D%E4%BB%A3%E7%A0%81%E5%9D%8F%E5%91%B3%E9%81%93%E6%80%BB%E7%BB%93-%E4%BC%98%E5%8C%96%E7%A4%BA%E4%BE%8B/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>25种代码坏味道总结+优化示例 | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+		<div id="container">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/11/21/25%E7%A7%8D%E4%BB%A3%E7%A0%81%E5%9D%8F%E5%91%B3%E9%81%93%E6%80%BB%E7%BB%93-%E4%BC%98%E5%8C%96%E7%A4%BA%E4%BE%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          25种代码坏味道总结+优化示例
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-11-21 17:07:30 / 修改时间：17:10:01" itemprop="dateCreated datePublished" datetime="2021-11-21T17:07:30+08:00">2021-11-21</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9D%82%E8%B0%88/" itemprop="url" rel="index"><span itemprop="name">杂谈</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/11/21/25%E7%A7%8D%E4%BB%A3%E7%A0%81%E5%9D%8F%E5%91%B3%E9%81%93%E6%80%BB%E7%BB%93-%E4%BC%98%E5%8C%96%E7%A4%BA%E4%BE%8B/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/11/21/25%E7%A7%8D%E4%BB%A3%E7%A0%81%E5%9D%8F%E5%91%B3%E9%81%93%E6%80%BB%E7%BB%93-%E4%BC%98%E5%8C%96%E7%A4%BA%E4%BE%8B/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><strong>大家好，我是不才陈某~</strong> </p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>什么样的代码是好代码呢？好的代码应该命名规范、可读性强、扩展性强、健壮性……而不好的代码又有哪些典型特征呢？这25种代码坏味道大家要注意啦</p>
+<h2 id="1-Duplicated-Code-（重复代码）"><a href="#1-Duplicated-Code-（重复代码）" class="headerlink" title="1. Duplicated Code （重复代码）"></a>1. Duplicated Code （重复代码）</h2><p>重复代码就是<strong>不同地点，有着相同的程序结构</strong>。一般是因为需求迭代比较快，开发小伙伴担心影响已有功能，就复制粘贴造成的。重复代码<strong>很难维护</strong>的，如果你要修改其中一段的代码逻辑，就需要修改多次，很可能出现遗漏的情况。</p>
+<p>如何优化重复代码呢？分<strong>三种</strong>情况讨论：</p>
+<ol>
+<li>同一个类的两个函数含有相同的表达式</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        doSomething1</span><br><span class="line">        doSomething2</span><br><span class="line">        doSomething3</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        doSomething1</span><br><span class="line">        doSomething2</span><br><span class="line">        doSomething4</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<p>优化手段：可以使用<strong>Extract Method(提取公共函数)</strong> 抽出重复的代码逻辑，组成一个公用的方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        commonMethod();</span><br><span class="line">        doSomething3</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method2</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        commonMethod();</span><br><span class="line">        doSomething4</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">commonMethod</span><span class="params">()</span></span>&#123;</span><br><span class="line">       doSomething1</span><br><span class="line">       doSomething2</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>两个互为兄弟的子类内含相同的表达式</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> <span class="title">extend</span> <span class="title">C</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        doSomething1</span><br><span class="line">        doSomething2</span><br><span class="line">        doSomething3</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> <span class="title">extend</span> <span class="title">C</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        doSomething1</span><br><span class="line">        doSomething2</span><br><span class="line">        doSomething4</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>优化手段：对两个类都使用<strong>Extract Method(提取公共函数)<strong>，然后把</strong>抽取出来的函数放到父类</strong>中。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">C</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">commonMethod</span><span class="params">()</span></span>&#123;</span><br><span class="line">     doSomething1</span><br><span class="line">     doSomething2</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span> <span class="title">extend</span> <span class="title">C</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        commonMethod();</span><br><span class="line">        doSomething3</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span> <span class="title">extend</span> <span class="title">C</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method1</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        commonMethod();</span><br><span class="line">        doSomething4</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>两个毫不相关的类出现重复代码</li>
+</ol>
+<p>如果是两个毫不相关的类出现重复代码，可以使用<strong>Extract Class</strong>将重复代码提炼到一个类中。这个新类可以是一个普通类，也可以是一个工具类，看具体业务怎么划分吧。</p>
+<h2 id="2-Long-Method-长函数"><a href="#2-Long-Method-长函数" class="headerlink" title="2 .Long Method (长函数)"></a>2 .Long Method (长函数)</h2><p>长函数是指一个函数方法几百行甚至上千行，可读性大大降低，不便于理解。<strong>反例如下：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> Vector&lt;Order&gt; orders = <span class="keyword">new</span> Vector&lt;Order&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">printOwing</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//print banner</span></span><br><span class="line">        System.out.println(<span class="string">&quot;****************&quot;</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;*****customer Owes *****&quot;</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;****************&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//calculate totalAmount</span></span><br><span class="line">        Enumeration env = orders.elements();</span><br><span class="line">        <span class="keyword">double</span> totalAmount = <span class="number">0.0</span>;</span><br><span class="line">        <span class="keyword">while</span> (env.hasMoreElements()) &#123;</span><br><span class="line">            Order order = (Order) env.nextElement();</span><br><span class="line">            totalAmount += order.getAmout();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//print details</span></span><br><span class="line">        System.out.println(<span class="string">&quot;name:&quot;</span> + name);</span><br><span class="line">        System.out.println(<span class="string">&quot;amount:&quot;</span> + totalAmount);</span><br><span class="line">        ......</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以使用<code>Extract Method</code>，抽取功能单一的代码段，组成命名清晰的小函数，去解决长函数问题，<strong>正例如下</strong>:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> Vector&lt;Order&gt; orders = <span class="keyword">new</span> Vector&lt;Order&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">printOwing</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//print banner</span></span><br><span class="line">        printBanner();</span><br><span class="line">        <span class="comment">//calculate totalAmount</span></span><br><span class="line">        <span class="keyword">double</span> totalAmount = getTotalAmount();</span><br><span class="line">        <span class="comment">//print details</span></span><br><span class="line">        printDetail(totalAmount);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">printBanner</span><span class="params">()</span></span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;****************&quot;</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;*****customer Owes *****&quot;</span>);</span><br><span class="line">        System.out.println(<span class="string">&quot;****************&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">double</span> <span class="title">getTotalAmount</span><span class="params">()</span></span>&#123;</span><br><span class="line">        Enumeration env = orders.elements();</span><br><span class="line">        <span class="keyword">double</span> totalAmount = <span class="number">0.0</span>;</span><br><span class="line">        <span class="keyword">while</span> (env.hasMoreElements()) &#123;</span><br><span class="line">            Order order = (Order) env.nextElement();</span><br><span class="line">            totalAmount += order.getAmout();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> totalAmount;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">printDetail</span><span class="params">(<span class="keyword">double</span> totalAmount)</span></span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;name:&quot;</span> + name);</span><br><span class="line">        System.out.println(<span class="string">&quot;amount:&quot;</span> + totalAmount);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-Large-Class-过大的类"><a href="#3-Large-Class-过大的类" class="headerlink" title="3.  Large Class (过大的类)"></a>3.  Large Class (过大的类)</h2><p>一个类做太多事情，维护了太多功能，可读性变差，性能也会下降。举个例子，订单相关的功能你放到一个类A里面，商品库存相关的也放在类A里面，积分相关的还放在类A里面..<strong>.反例</strong>如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Class A&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">printOrder</span><span class="params">()</span></span>&#123;</span><br><span class="line">   System.out.println(<span class="string">&quot;订单&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">printGoods</span><span class="params">()</span></span>&#123;</span><br><span class="line">   System.out.println(<span class="string">&quot;商品&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">printPoints</span><span class="params">()</span></span>&#123;</span><br><span class="line">   System.out.println(<span class="string">&quot;积分&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>试想一下，乱七八糟的代码块都往一个类里面塞，还谈啥可读性。应该按单一职责，使用<code>Extract Class</code>把代码划分开，正例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Class Order&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">printOrder</span><span class="params">()</span></span>&#123;</span><br><span class="line">   System.out.println(<span class="string">&quot;订单&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Class Goods&#123;</span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">printGoods</span><span class="params">()</span></span>&#123;</span><br><span class="line">   System.out.println(<span class="string">&quot;商品&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">Class Points&#123;   </span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">printPoints</span><span class="params">()</span></span>&#123;</span><br><span class="line">   System.out.println(<span class="string">&quot;积分&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-Long-Parameter-List-过长参数列"><a href="#4-Long-Parameter-List-过长参数列" class="headerlink" title="4. Long Parameter List (过长参数列)"></a>4. Long Parameter List (过长参数列)</h2><p>方法参数数量过多的话，可读性很差。如果有多个重载方法，参数很多的话，有时候你都不知道调哪个呢。并且，如果参数很多，做新老接口兼容处理也比较麻烦。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> getUserInfo（String name,String age,String sex,String mobile)&#123;</span><br><span class="line">  <span class="comment">// do something ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如何解决过长参数列问题呢？将参数封装成结构或者类，比如我们将参数封装成一个DTO类，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> getUserInfo（UserInfoParamDTO userInfoParamDTO)&#123;</span><br><span class="line">  <span class="comment">// do something ...</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UserInfoParamDTO</span></span>&#123;</span><br><span class="line">  <span class="keyword">private</span> String name;</span><br><span class="line">  <span class="keyword">private</span> String age; </span><br><span class="line">  <span class="keyword">private</span> String sex;</span><br><span class="line">  <span class="keyword">private</span> String mobile;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-Divergent-Change-（发散式变化）"><a href="#5-Divergent-Change-（发散式变化）" class="headerlink" title="5. Divergent Change （发散式变化）"></a>5. Divergent Change （发散式变化）</h2><p>对程序进行维护时, <strong>如果添加修改组件, 要同时修改一个类中的多个方法</strong>, 那么这就是 Divergent Change。举个汽车的例子，某个汽车厂商生产三种品牌的汽车：BMW、Benz和LaoSiLaiSi，每种品牌又可以选择燃油、纯电和混合动力。<strong>反例如下</strong>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Car</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">start</span><span class="params">(Engine engine)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="string">&quot;HybridEngine&quot;</span>.equals(engine.getName())) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;Start Hybrid Engine...&quot;</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">&quot;GasolineEngine&quot;</span>.equals(engine.getName())) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;Start Gasoline Engine...&quot;</span>);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">&quot;ElectricEngine&quot;</span>.equals(engine.getName())) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;Start Electric Engine&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">drive</span><span class="params">(Engine engine,Car car)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.start(engine);</span><br><span class="line">        System.out.println(<span class="string">&quot;Drive &quot;</span> + getBrand(car) + <span class="string">&quot; car...&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function">String <span class="title">getBrand</span><span class="params">(Car car)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="string">&quot;Baoma&quot;</span>.equals(car.getName())) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;BMW&quot;</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">&quot;BenChi&quot;</span>.equals(car.getName())) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;Benz&quot;</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">&quot;LaoSiLaiSi&quot;</span>.equals(car.getName())) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;LaoSiLaiSi&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果新增一种品牌新能源电车，然后它的启动引擎是核动力呢，那么就需要修改Car类的<code>start</code>和<code>getBrand</code>方法啦，这就是代码坏味道：<strong>Divergent Change （发散式变化）</strong>。</p>
+<p>如何优化呢？一句话总结：<strong>拆分类，将总是一起变化的东西放到一块</strong>。</p>
+<blockquote>
+<p>★</p>
+<ul>
+<li>运用提炼类(Extract Class) 拆分类的行为。</li>
+<li>如果不同的类有相同的行为，提炼超类(Extract Superclass) 和 提炼子类(Extract Subclass)。</li>
+</ul>
+<p>”</p>
+</blockquote>
+<p><strong>正例如下：</strong></p>
+<p>因为Engine是独立变化的，所以提取一个Engine接口，如果新加一个启动引擎，多一个实现类即可。如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//IEngine</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IEngine</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">start</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HybridEngineImpl</span> <span class="keyword">implements</span> <span class="title">IEngine</span> </span>&#123; </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;Start Hybrid Engine...&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>因为<code>drive</code>方法依赖于<code>Car，IEngine，getBand</code>方法;<code>getBand</code>方法是变化的，也跟Car是有关联的，所以可以搞个抽象Car的类，每个品牌汽车继承于它即可，如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbstractCar</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">protected</span> IEngine engine;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">AbstractCar</span><span class="params">(IEngine engine)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.engine = engine;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">drive</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//奔驰汽车</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BenzCar</span> <span class="keyword">extends</span> <span class="title">AbstractCar</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BenzCar</span><span class="params">(IEngine engine)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(engine);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">drive</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="keyword">this</span>.engine.start();</span><br><span class="line">      System.out.println(<span class="string">&quot;Drive &quot;</span> + getBrand() + <span class="string">&quot; car...&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> String <span class="title">getBrand</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;Benz&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//宝马汽车</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BaoMaCar</span> <span class="keyword">extends</span> <span class="title">AbstractCar</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BaoMaCar</span><span class="params">(IEngine engine)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(engine);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">drive</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.engine.start();</span><br><span class="line">        System.out.println(<span class="string">&quot;Drive &quot;</span> + getBrand() + <span class="string">&quot; car...&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> String <span class="title">getBrand</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;BMW&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>细心的小伙伴，可以发现不同子类BaoMaCar和BenzCar的<code>drive</code>方法，还是有相同代码，所以我们可以再扩展一个抽象子类，把<code>drive</code>方法推进去，如下:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbstractRefinedCar</span> <span class="keyword">extends</span> <span class="title">AbstractCar</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">AbstractRefinedCar</span><span class="params">(IEngine engine)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(engine);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">drive</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.engine.start();</span><br><span class="line">        System.out.println(<span class="string">&quot;Drive &quot;</span> + getBrand() + <span class="string">&quot; car...&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">abstract</span> String <span class="title">getBrand</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//宝马</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BaoMaRefinedCar</span> <span class="keyword">extends</span> <span class="title">AbstractRefinedCar</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">BaoMaRefinedCar</span><span class="params">(IEngine engine)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(engine);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function">String <span class="title">getBrand</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span>  <span class="string">&quot;BMW&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果再添加一个新品牌，搞个子类，继承<code>AbstractRefinedCar</code>即可，如果新增一种启动引擎，也是搞个类实现<code>IEngine</code>接口即可</p>
+<h2 id="6-Shotgun-Surgery（散弹式修改）"><a href="#6-Shotgun-Surgery（散弹式修改）" class="headerlink" title="6. Shotgun Surgery（散弹式修改）"></a>6. Shotgun Surgery（散弹式修改）</h2><p>当你实现某个小功能时，你需要在很多不同的类做出小修改。这就是<strong>Shotgun Surgery（散弹式修改）</strong>。它跟<strong>发散式变化(Divergent Change)</strong> 的区别就是，它指的是同时对多个类进行单一的修改，发散式变化指在一个类中修改多处。<strong>反例如下</strong>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DbAUtils</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;db.mysql.url&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String mysqlDbUrl;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DbBUtils</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;db.mysql.url&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String mysqlDbUrl;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>多个类使用了<code>db.mysql.url</code>这个变量，如果将来需要切换<code>mysql</code>到别的数据库，如<code>Oracle</code>，那就需要修改多个类的这个变量！</p>
+<p>如何优化呢？将各个修改点，集中到一起，抽象成一个新类。</p>
+<blockquote>
+<p>★</p>
+<p>可以使用 Move Method （搬移函数）和 Move Field （搬移字段）把所有需要修改的代码放进同一个类，如果没有合适的类，就去new一个。</p>
+<p>”</p>
+</blockquote>
+<p><strong>正例如下：</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DbUtils</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;db.mysql.url&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String mysqlDbUrl;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="7-Feature-Envy-依恋情节"><a href="#7-Feature-Envy-依恋情节" class="headerlink" title="7. Feature Envy (依恋情节)"></a>7. Feature Envy (依恋情节)</h2><p>某个函数为了计算某个值，从另一个对象那里调用几乎半打的取值函数。通俗点讲，就是一个函数使用了大量其他类的成员，有人称之为<strong>红杏出墙的函数</strong>。反例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span></span>&#123;</span><br><span class="line"> <span class="keyword">private</span> Phone phone;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="title">User</span><span class="params">(Phone phone)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.phone = phone;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">getFullPhoneNumber</span><span class="params">(Phone phone)</span></span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;areaCode:&quot;</span> + phone.getAreaCode());</span><br><span class="line">        System.out.println(<span class="string">&quot;prefix：&quot;</span> + phone.getPrefix());</span><br><span class="line">        System.out.println(<span class="string">&quot;number：&quot;</span> + phone.getNumber());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如何解决呢？在这种情况下，你可以考虑将这个方法移动到它使用的那个类中。例如，要将 <code>getFullPhoneNumber()</code>从 <code>User</code> 类移动到<code>Phone</code>类中，因为它调用了<code>Phone</code>类的很多方法。</p>
+<h2 id="8-Data-Clumps（数据泥团）"><a href="#8-Data-Clumps（数据泥团）" class="headerlink" title="8. Data Clumps（数据泥团）"></a>8. Data Clumps（数据泥团）</h2><p>数据项就像小孩子，喜欢成群结队地呆在一块。如果一些数据项总是一起出现的，并且一起出现更有意义的，就可以考虑，按数据的业务含义来封装成数据对象。反例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String firstName;</span><br><span class="line">    <span class="keyword">private</span> String lastName;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String province;</span><br><span class="line">    <span class="keyword">private</span> String city;</span><br><span class="line">    <span class="keyword">private</span> String area;</span><br><span class="line">    <span class="keyword">private</span> String street;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>正例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> UserName username;</span><br><span class="line">    <span class="keyword">private</span> Adress adress;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">UserName</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String firstName;</span><br><span class="line">    <span class="keyword">private</span> String lastName;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Address</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String province;</span><br><span class="line">    <span class="keyword">private</span> String city;</span><br><span class="line">    <span class="keyword">private</span> String area;</span><br><span class="line">    <span class="keyword">private</span> String street;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="9-Primitive-Obsession-（基本类型偏执"><a href="#9-Primitive-Obsession-（基本类型偏执" class="headerlink" title="9. Primitive Obsession （基本类型偏执)"></a>9. Primitive Obsession （基本类型偏执)</h2><p>多数编程环境都有两种数据类型，<strong>结构类型和基本类型</strong>。这里的基本类型，如果指Java语言的话，不仅仅包括那八大基本类型哈，也包括String等。如果是经常一起出现的基本类型，可以考虑把它们封装成对象。我个人觉得它有点像<strong>Data Clumps（数据泥团）</strong> 举个反例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 订单</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Order</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String customName;</span><br><span class="line">    <span class="keyword">private</span> String address;</span><br><span class="line">    <span class="keyword">private</span> Integer orderId;</span><br><span class="line">    <span class="keyword">private</span> Integer price;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>正例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 订单类</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Order</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Custom custom;</span><br><span class="line">    <span class="keyword">private</span> Integer orderId;</span><br><span class="line">    <span class="keyword">private</span> Integer price;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 把custom相关字段封装起来，在Order中引用Custom对象</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Custom</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> String address;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当然，这里不是所有的基本类型，都建议封装成对象，有关联或者一起出现的，才这么建议哈。</p>
+<h2 id="10-Switch-Statements-（Switch-语句）"><a href="#10-Switch-Statements-（Switch-语句）" class="headerlink" title="10. Switch Statements （Switch 语句）"></a>10. Switch Statements （Switch 语句）</h2><p>这里的Switch语句，不仅包括<code>Switch</code>相关的语句，也包括多层<code>if...else</code>的语句哈。很多时候，switch语句的问题就在于重复，如果你为它添加一个新的case语句，就必须找到所有的switch语句并且修改它们。</p>
+<p>示例代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">String medalType = <span class="string">&quot;guest&quot;</span>;</span><br><span class="line"><span class="keyword">if</span> (<span class="string">&quot;guest&quot;</span>.equals(medalType)) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;嘉宾勋章&quot;</span>);</span><br><span class="line"> &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">&quot;vip&quot;</span>.equals(medalType)) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;会员勋章&quot;</span>);</span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="string">&quot;guard&quot;</span>.equals(medalType)) &#123;</span><br><span class="line">    System.out.println(<span class="string">&quot;守护勋章&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>这种场景可以考虑使用多态优化：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//勋章接口</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IMedalService</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">showMedal</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//守护勋章策略实现类</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GuardMedalServiceImpl</span> <span class="keyword">implements</span> <span class="title">IMedalService</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">showMedal</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;展示守护勋章&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//嘉宾勋章策略实现类</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GuestMedalServiceImpl</span> <span class="keyword">implements</span> <span class="title">IMedalService</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">showMedal</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;嘉宾勋章&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//勋章服务工厂类</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MedalServicesFactory</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Map&lt;String, IMedalService&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        map.put(<span class="string">&quot;guard&quot;</span>, <span class="keyword">new</span> GuardMedalServiceImpl());</span><br><span class="line">        map.put(<span class="string">&quot;vip&quot;</span>, <span class="keyword">new</span> VipMedalServiceImpl());</span><br><span class="line">        map.put(<span class="string">&quot;guest&quot;</span>, <span class="keyword">new</span> GuestMedalServiceImpl());</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> IMedalService <span class="title">getMedalService</span><span class="params">(String medalType)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> map.get(medalType);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当然，多态只是优化的一个方案，一个方向。如果只是单一函数有些简单选择示例，并不建议动不动就使用动态，因为显得有点杀鸡使用牛刀了。</p>
+<h2 id="11-Parallel-Inheritance-Hierarchies（-平行继承体系）"><a href="#11-Parallel-Inheritance-Hierarchies（-平行继承体系）" class="headerlink" title="11.Parallel Inheritance Hierarchies（ 平行继承体系）"></a>11.Parallel Inheritance Hierarchies（ 平行继承体系）</h2><p>平行继承体系 其实算是<code>Shotgun Surgery</code>的特殊情况啦。当你为A类的一个子类Ax，也必须为另一个类B相应的增加一个子类Bx。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/3.png"></p>
+<p><strong>解决方法</strong>：遇到这种情况，就要消除两个继承体系之间的引用，有一个类是可以去掉继承关系的。</p>
+<h2 id="12-Lazy-Class-冗赘类"><a href="#12-Lazy-Class-冗赘类" class="headerlink" title="12. Lazy Class (冗赘类)"></a>12. Lazy Class (冗赘类)</h2><p>把这些不再重要的类里面的逻辑，合并到相关类，删掉旧的。一个比较常见的场景就是，假设系统已经有日期工具类<code>DateUtils</code>，有些小伙伴在开发中，需要用到日期转化等，不管三七二十一，又自己实现一个新的日期工具类。</p>
+<h2 id="13-Speculative-Generality-夸夸其谈未来性"><a href="#13-Speculative-Generality-夸夸其谈未来性" class="headerlink" title="13. Speculative Generality(夸夸其谈未来性)"></a>13. Speculative Generality(夸夸其谈未来性)</h2><p>尽量避免过度设计的代码。例如：</p>
+<ul>
+<li>只有一个if else，那就不需要班门弄斧使用多态;</li>
+<li>如果某个抽象类没有什么太大的作用，就运用<code>Collapse Hierarchy</code>（折叠继承体系）</li>
+<li>如果函数的某些参数没用上，就移除。</li>
+</ul>
+<h2 id="14-Temporary-Field-令人迷惑的临时字段"><a href="#14-Temporary-Field-令人迷惑的临时字段" class="headerlink" title="14. Temporary Field(令人迷惑的临时字段)"></a>14. Temporary Field(令人迷惑的临时字段)</h2><p>某个实例变量仅为某种特定情况而定而设，这样的代码就让人不易理解，我们称之为 <code>Temporary Field(令人迷惑的临时字段)</code>。反例如下:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PhoneAccount</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">double</span> excessMinutesCharge;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">double</span> RATE = <span class="number">8.0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">double</span> <span class="title">computeBill</span><span class="params">(<span class="keyword">int</span> minutesUsed, <span class="keyword">int</span> includedMinutes)</span> </span>&#123;</span><br><span class="line">        excessMinutesCharge = <span class="number">0.0</span>;</span><br><span class="line">        <span class="keyword">int</span> excessMinutes = minutesUsed - includedMinutes;</span><br><span class="line">        <span class="keyword">if</span> (excessMinutes &gt;= <span class="number">1</span>) &#123;</span><br><span class="line">            excessMinutesCharge = excessMinutes * RATE;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> excessMinutesCharge;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">double</span> <span class="title">chargeForExcessMinutes</span><span class="params">(<span class="keyword">int</span> minutesUsed, <span class="keyword">int</span> includedMinutes)</span> </span>&#123;</span><br><span class="line">        computeBill(minutesUsed, includedMinutes);</span><br><span class="line">        <span class="keyword">return</span> excessMinutesCharge;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>思考一下，临时字段<code>excessMinutesCharge</code>是否多余呢？</p>
+<h2 id="15-Message-Chains-过度耦合的消息链"><a href="#15-Message-Chains-过度耦合的消息链" class="headerlink" title="15. Message Chains (过度耦合的消息链)"></a>15. Message Chains (过度耦合的消息链)</h2><p>当你看到用户向一个对象请求另一个对象，然后再向后者请求另一个对象，然后再请求另一个对象…这就是消息链。实际代码中，你看到的可能是一长串<code>getThis（）</code>或一长串临时变量。反例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">A.getB().getC().getD().getTianLuoBoy().getData();</span><br></pre></td></tr></table></figure>
+
+<p>A想要获取需要的数据时，必须要知道B，又必须知道C,又必须知道D…其实A需要知道得太多啦，回头想下<strong>封装性</strong>，嘻嘻。其实可以通过拆函数或者移动函数解决，比如由B作为代理，搞个函数直接返回A需要数据。</p>
+<h2 id="16-Middle-Man-（中间人）"><a href="#16-Middle-Man-（中间人）" class="headerlink" title="16. Middle Man （中间人）"></a>16. Middle Man （中间人）</h2><p>对象的基本特征之一就是封装，即对外部世界隐藏其内部细节。封装往往伴随委托，过度运用委托就不好：某个类接口有一半的函数都委托给其他类。可以使用<code>Remove Middle Man</code>优化。反例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">A.B.getC()&#123;</span><br><span class="line">   <span class="keyword">return</span> C.getC();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其实，A可以直接通过C去获取C，而不需要通过B去获取。</p>
+<h2 id="17-Inappropriate-Intimacy（狎昵关系）"><a href="#17-Inappropriate-Intimacy（狎昵关系）" class="headerlink" title="17. Inappropriate Intimacy（狎昵关系）"></a>17. Inappropriate Intimacy（狎昵关系）</h2><p>如果两个类过于亲密，过分狎昵，你中有我，我中有你，两个类彼此使用对方的私有的东西，就是一种坏代码味道。我们称之为<code>Inappropriate Intimacy（狎昵关系）</code></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/4.png"></p>
+<p>建议尽量把有关联的方法或属性抽离出来，放到公共类，以减少关联。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/5.png"></p>
+<h2 id="18-Alternative-Classes-with-Different-Interfaces-（异曲同工的类）"><a href="#18-Alternative-Classes-with-Different-Interfaces-（异曲同工的类）" class="headerlink" title="18. Alternative Classes with Different Interfaces （异曲同工的类）"></a>18. Alternative Classes with Different Interfaces （异曲同工的类）</h2><p>A类的接口a，和B类的接口b，做的的是相同一件事，或者类似的事情。我们就把A和B叫做异曲同工的类。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/6.png"></p>
+<p>可以通过<strong>重命名，移动函数，或抽象子类</strong>等方式优化</p>
+<h2 id="19-Incomplete-Library-Class-不完美的类库"><a href="#19-Incomplete-Library-Class-不完美的类库" class="headerlink" title="19. Incomplete Library Class (不完美的类库)"></a>19. Incomplete Library Class (不完美的类库)</h2><p>大多数对象只要够用就好，如果类库构造得不够好，我们不可能修改其中的类使它完成我们希望完成的工作。可以酱紫：<strong>包一层函数或包成新的类</strong>。</p>
+<h2 id="20-Data-Class-（纯数据类）"><a href="#20-Data-Class-（纯数据类）" class="headerlink" title="20. Data Class （纯数据类）"></a>20. Data Class （纯数据类）</h2><p>什么是Data Class? 它们拥有一些字段，以及用于访问(读写)这些字段的函数。这些类很简单，仅有公共成员变量，或简单操作的函数。</p>
+<p>如何优化呢？将<strong>相关操作封装进去，减少public成员变量</strong>。比如：</p>
+<ul>
+<li>如果拥有public字段-&gt; <code>Encapsulate Field</code></li>
+<li>如果这些类内含容器类的字段，应该检查它们是不是得到了恰当地封装-&gt; <code>Encapsulate Collection</code>封装起来</li>
+<li>对于不该被其他类修改的字段-&gt; <code>Remove Setting Method</code>-&gt;找出取值/设置函数被其他类运用的地点-&gt; <code>Move Method</code> 把这些调用行为搬移到<code>Data Class</code>来。如果无法搬移整个函数，就运用<code>Extract Method</code>产生一个可被搬移的函数-&gt;<code>Hide Method</code>把这些取值/设置函数隐藏起来。</li>
+</ul>
+<h2 id="21-Refused-Bequest-（被拒绝的馈赠）"><a href="#21-Refused-Bequest-（被拒绝的馈赠）" class="headerlink" title="21. Refused Bequest （被拒绝的馈赠）"></a>21. Refused Bequest （被拒绝的馈赠）</h2><p>子类应该继承父类的数据和函数。子类继承得到所有函数和数据，却只使用了几个，那就是<strong>继承体系设计错误</strong>，需要优化。</p>
+<ul>
+<li>需要为这个子类新建一个兄弟类-&gt;<code>Push Down Method</code>和<code>Push Down Field</code>把所有用不到的函数下推给兄弟类，这样一来，超类就只持有所有子类共享的东西。所有超类都应该是抽象的。</li>
+<li>如果子类复用了超类的实现，又不愿意支持超类的接口，可以不以为然。但是不能胡乱修改继承体系-&gt;<code>Replace Inheritance with Delegation</code>(用委派替换继承).</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/7.png"></p>
+<h2 id="22-Comments-过多的注释"><a href="#22-Comments-过多的注释" class="headerlink" title="22. Comments (过多的注释)"></a>22. Comments (过多的注释)</h2><p>这个点不是说代码不建议写注释哦，而是，建议大家<strong>避免用注释解释代码，避免过多的注释</strong>。这些都是常见注释的坏味道：</p>
+<ul>
+<li>多余的解释</li>
+<li>日志式注释</li>
+<li>用注释解释变量等</li>
+<li>…</li>
+</ul>
+<p>如何优化呢？</p>
+<ul>
+<li>方法函数、变量的<strong>命名要规范、浅显易懂</strong>、避免用注释解释代码。</li>
+<li><strong>关键、复杂的业务</strong>，使用<strong>清晰、简明</strong>的注释</li>
+</ul>
+<h2 id="23-神奇命名"><a href="#23-神奇命名" class="headerlink" title="23. 神奇命名"></a>23. 神奇命名</h2><p>方法函数、变量、类名、模块等，都需要简单明了，浅显易懂。避免靠自己主观意识瞎起名字。</p>
+<p>反例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">boolean</span> test = chenkParamResult(req);</span><br></pre></td></tr></table></figure>
+
+<p>正例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">boolean</span> isParamPass = chenkParamResult(req);</span><br></pre></td></tr></table></figure>
+
+<h2 id="24-神奇魔法数"><a href="#24-神奇魔法数" class="headerlink" title="24. 神奇魔法数"></a>24. 神奇魔法数</h2><p>日常开发中，经常会遇到这种代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(userType==<span class="number">1</span>)&#123;</span><br><span class="line">   <span class="comment">//doSth1</span></span><br><span class="line">&#125;<span class="keyword">else</span> If( userType ==<span class="number">2</span>)&#123;</span><br><span class="line">   <span class="comment">//doSth2</span></span><br><span class="line">&#125;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>代码中的这个<code>1和2</code>都表示什么意思呢？再比如<code>setStatus(1)</code>中的<code>1</code>又表示什么意思呢？看到类似坏代码，可以这两种方式优化：</p>
+<ul>
+<li><strong>新建个常量类</strong>，把一些常量放进去，统一管理，并且写好注释；</li>
+<li><strong>建一个枚举类</strong>，把相关的魔法数字放到一起管理。</li>
+</ul>
+<h2 id="25-混乱的代码层次调用"><a href="#25-混乱的代码层次调用" class="headerlink" title="25. 混乱的代码层次调用"></a>25. 混乱的代码层次调用</h2><p>我们代码一般会分<code>dao层</code>、<code>service层</code>和<code>controller层</code>。</p>
+<ul>
+<li>dao层主要做数据持久层的工作，与数据库打交道。</li>
+<li>service层主要负责业务逻辑处理。</li>
+<li>controller层负责具体的业务模块流程的控制。</li>
+</ul>
+<p>所以一般就是<code>controller</code>调用<code>service</code>，<code>service</code>调<code>dao</code>。如果你在代码看到<code>controller</code>直接调用<code>dao</code>，那可以考虑是否优化啦。<strong>反例如下</strong>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController(&quot;user&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    Autowired</span><br><span class="line">    <span class="keyword">private</span> UserDao userDao;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RequestMapping(&quot;/queryUserInfo&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">queryUserInfo</span><span class="params">(String userName)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> userDao.selectByUserName(userName);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考与感谢"><a href="#参考与感谢" class="headerlink" title="参考与感谢"></a>参考与感谢</h2><ul>
+<li><strong>软工实验：常见的代码坏味道以及重构举例</strong>[2]</li>
+<li><strong>22种代码的坏味道，一句话概括</strong>[3]</li>
+<li><strong>【重构】 代码的坏味道总结 Bad Smell</strong>[4]</li>
+<li><strong>Code Smell</strong>[5]</li>
+<li>《重构改善既有代码的设计》</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    不才陈某  |  微信公众号【码猿技术专栏】
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://chenjiabing666.github.io/2021/11/21/25%E7%A7%8D%E4%BB%A3%E7%A0%81%E5%9D%8F%E5%91%B3%E9%81%93%E6%80%BB%E7%BB%93-%E4%BC%98%E5%8C%96%E7%A4%BA%E4%BE%8B/" title="25种代码坏味道总结+优化示例">https://chenjiabing666.github.io/2021/11/21/25种代码坏味道总结-优化示例/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+  <li class="post-copyright-license">
+    并保留本声明和上方二维码。感谢您的阅读和支持！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">微信公众号</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%BB%A3%E7%A0%81%E4%BC%98%E5%8C%96/" rel="tag"># 代码优化</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/11/18/%E7%94%A9%E9%94%85%E7%A5%9E%E5%99%A8%EF%BC%9A%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E8%BF%87%E6%BB%A4%E5%87%BA%E4%B8%80%E6%AC%A1%E8%AF%B7%E6%B1%82%E7%9A%84%E6%89%80%E6%9C%89%E6%97%A5%E5%BF%97%EF%BC%9F/" rel="prev" title="甩锅神器：如何快速过滤出一次请求的所有日志？">
+      <i class="fa fa-chevron-left"></i> 甩锅神器：如何快速过滤出一次请求的所有日志？
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+		  <script src="https://readmore.openwrite.cn/js/readmore.js" type="text/javascript"></script>
+<script>
+    const btw = new BTWPlugin();
+    btw.init({
+        id: 'container',
+        blogId: '27513-1629019452485-311',
+        name: '码猿技术专栏',
+        qrcode: 'https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg',
+        keyword: 'vip',
+    });
+</script>
+        </div>
+		</div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Duplicated-Code-%EF%BC%88%E9%87%8D%E5%A4%8D%E4%BB%A3%E7%A0%81%EF%BC%89"><span class="nav-text">1. Duplicated Code （重复代码）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Long-Method-%E9%95%BF%E5%87%BD%E6%95%B0"><span class="nav-text">2 .Long Method (长函数)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Large-Class-%E8%BF%87%E5%A4%A7%E7%9A%84%E7%B1%BB"><span class="nav-text">3.  Large Class (过大的类)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-Long-Parameter-List-%E8%BF%87%E9%95%BF%E5%8F%82%E6%95%B0%E5%88%97"><span class="nav-text">4. Long Parameter List (过长参数列)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-Divergent-Change-%EF%BC%88%E5%8F%91%E6%95%A3%E5%BC%8F%E5%8F%98%E5%8C%96%EF%BC%89"><span class="nav-text">5. Divergent Change （发散式变化）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-Shotgun-Surgery%EF%BC%88%E6%95%A3%E5%BC%B9%E5%BC%8F%E4%BF%AE%E6%94%B9%EF%BC%89"><span class="nav-text">6. Shotgun Surgery（散弹式修改）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-Feature-Envy-%E4%BE%9D%E6%81%8B%E6%83%85%E8%8A%82"><span class="nav-text">7. Feature Envy (依恋情节)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-Data-Clumps%EF%BC%88%E6%95%B0%E6%8D%AE%E6%B3%A5%E5%9B%A2%EF%BC%89"><span class="nav-text">8. Data Clumps（数据泥团）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-Primitive-Obsession-%EF%BC%88%E5%9F%BA%E6%9C%AC%E7%B1%BB%E5%9E%8B%E5%81%8F%E6%89%A7"><span class="nav-text">9. Primitive Obsession （基本类型偏执)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-Switch-Statements-%EF%BC%88Switch-%E8%AF%AD%E5%8F%A5%EF%BC%89"><span class="nav-text">10. Switch Statements （Switch 语句）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-Parallel-Inheritance-Hierarchies%EF%BC%88-%E5%B9%B3%E8%A1%8C%E7%BB%A7%E6%89%BF%E4%BD%93%E7%B3%BB%EF%BC%89"><span class="nav-text">11.Parallel Inheritance Hierarchies（ 平行继承体系）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-Lazy-Class-%E5%86%97%E8%B5%98%E7%B1%BB"><span class="nav-text">12. Lazy Class (冗赘类)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#13-Speculative-Generality-%E5%A4%B8%E5%A4%B8%E5%85%B6%E8%B0%88%E6%9C%AA%E6%9D%A5%E6%80%A7"><span class="nav-text">13. Speculative Generality(夸夸其谈未来性)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#14-Temporary-Field-%E4%BB%A4%E4%BA%BA%E8%BF%B7%E6%83%91%E7%9A%84%E4%B8%B4%E6%97%B6%E5%AD%97%E6%AE%B5"><span class="nav-text">14. Temporary Field(令人迷惑的临时字段)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#15-Message-Chains-%E8%BF%87%E5%BA%A6%E8%80%A6%E5%90%88%E7%9A%84%E6%B6%88%E6%81%AF%E9%93%BE"><span class="nav-text">15. Message Chains (过度耦合的消息链)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#16-Middle-Man-%EF%BC%88%E4%B8%AD%E9%97%B4%E4%BA%BA%EF%BC%89"><span class="nav-text">16. Middle Man （中间人）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#17-Inappropriate-Intimacy%EF%BC%88%E7%8B%8E%E6%98%B5%E5%85%B3%E7%B3%BB%EF%BC%89"><span class="nav-text">17. Inappropriate Intimacy（狎昵关系）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#18-Alternative-Classes-with-Different-Interfaces-%EF%BC%88%E5%BC%82%E6%9B%B2%E5%90%8C%E5%B7%A5%E7%9A%84%E7%B1%BB%EF%BC%89"><span class="nav-text">18. Alternative Classes with Different Interfaces （异曲同工的类）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#19-Incomplete-Library-Class-%E4%B8%8D%E5%AE%8C%E7%BE%8E%E7%9A%84%E7%B1%BB%E5%BA%93"><span class="nav-text">19. Incomplete Library Class (不完美的类库)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#20-Data-Class-%EF%BC%88%E7%BA%AF%E6%95%B0%E6%8D%AE%E7%B1%BB%EF%BC%89"><span class="nav-text">20. Data Class （纯数据类）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#21-Refused-Bequest-%EF%BC%88%E8%A2%AB%E6%8B%92%E7%BB%9D%E7%9A%84%E9%A6%88%E8%B5%A0%EF%BC%89"><span class="nav-text">21. Refused Bequest （被拒绝的馈赠）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#22-Comments-%E8%BF%87%E5%A4%9A%E7%9A%84%E6%B3%A8%E9%87%8A"><span class="nav-text">22. Comments (过多的注释)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#23-%E7%A5%9E%E5%A5%87%E5%91%BD%E5%90%8D"><span class="nav-text">23. 神奇命名</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#24-%E7%A5%9E%E5%A5%87%E9%AD%94%E6%B3%95%E6%95%B0"><span class="nav-text">24. 神奇魔法数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#25-%E6%B7%B7%E4%B9%B1%E7%9A%84%E4%BB%A3%E7%A0%81%E5%B1%82%E6%AC%A1%E8%B0%83%E7%94%A8"><span class="nav-text">25. 混乱的代码层次调用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E4%B8%8E%E6%84%9F%E8%B0%A2"><span class="nav-text">参考与感谢</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="不才陈某"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">123</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">54</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png" title="微信公众号 → https:&#x2F;&#x2F;gitee.com&#x2F;chenjiabing666&#x2F;BlogImage&#x2F;raw&#x2F;master&#x2F;myjszl_log.png" rel="noopener" target="_blank"><i class="fab fa-weixin fa-fw"></i>微信公众号</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.im/user/2506542244708072" title="掘金 → https:&#x2F;&#x2F;juejin.im&#x2F;user&#x2F;2506542244708072" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>掘金</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某|公众号：码猿技术专栏</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RtlQOgOT3M0hgyMeogykSQjT-gzGzoHsz',
+      appKey     : 'vSCxLU88wnXVf0Pa8mwJrCPm',
+      placeholder: "欢迎关注博主微信公众号【码猿技术专栏】",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
