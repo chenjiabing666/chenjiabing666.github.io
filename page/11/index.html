@@ -188,6 +188,216 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/19/Zookeeper%E5%AE%9E%E7%8E%B0%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/04/19/Zookeeper%E5%AE%9E%E7%8E%B0%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/" class="post-title-link" itemprop="url">Zookeeper实现分布式锁</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-04-19 15:48:54 / 修改时间：15:49:18" itemprop="dateCreated datePublished" datetime="2020-04-19T15:48:54+08:00">2020-04-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9D%82%E8%B0%88/" itemprop="url" rel="index"><span itemprop="name">杂谈</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/04/19/Zookeeper%E5%AE%9E%E7%8E%B0%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/04/19/Zookeeper%E5%AE%9E%E7%8E%B0%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="导读"><a href="#导读" class="headerlink" title="导读"></a>导读</h2><ul>
+<li>真是有人(<code>锁</code>)的地方就有江湖(<code>事务</code>)，今天不谈江湖，来撩撩人。</li>
+<li>分布式锁的概念、为什么使用分布式锁，想必大家已经很清楚了。前段时间作者写过Redis是如何实现分布式锁，今天这篇文章来谈谈Zookeeper是如何实现分布式锁的。</li>
+<li>陈某今天分别从如下几个方面来详细讲讲ZK如何实现分布式锁：<ol>
+<li><strong>ZK的四种节点</strong></li>
+<li><strong>排它锁的实现</strong></li>
+<li><strong>读写锁的实现</strong></li>
+<li><strong>Curator实现分步式锁</strong></li>
+</ol>
+</li>
+</ul>
+<h2 id="ZK的四种节点"><a href="#ZK的四种节点" class="headerlink" title="ZK的四种节点"></a>ZK的四种节点</h2><ul>
+<li>持久性节点：节点创建后将会一直存在</li>
+<li>临时节点：临时节点的生命周期和当前会话绑定，一旦当前会话断开临时节点也会删除，当然可以主动删除。</li>
+<li>持久有序节点：节点创建一直存在，并且zk会自动为节点加上一个自增的后缀作为新的节点名称。</li>
+<li>临时有序节点：保留临时节点的特性，并且zk会自动为节点加上一个自增的后缀作为新的节点名称。</li>
+</ul>
+<h2 id="排它锁的实现"><a href="#排它锁的实现" class="headerlink" title="排它锁的实现"></a>排它锁的实现</h2><ul>
+<li>排他锁的实现相对简单一点，利用了<strong>zk的创建节点不能重名的特性</strong>。如下图：</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/ZK%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/zk%E6%8E%92%E4%BB%96%E9%94%81.png"></p>
+<ul>
+<li>根据上图分析大致分为如下步骤：<ol>
+<li>尝试获取锁：创建<code>临时节点</code>，zk会保证只有一个客户端创建成功。</li>
+<li>创建临时节点成功，获取锁成功，执行业务逻辑，业务执行完成后删除锁。</li>
+<li>创建临时节点失败，阻塞等待。</li>
+<li>监听删除事件，一旦临时节点删除了，表示互斥操作完成了，可以再次尝试获取锁。</li>
+<li>递归：获取锁的过程是一个递归的操作，<code>获取锁-&gt;监听-&gt;获取锁</code>。</li>
+</ol>
+</li>
+<li><strong>如何避免死锁</strong>：创建的是临时节点，当服务宕机会话关闭后临时节点将会被删除，锁自动释放。</li>
+</ul>
+<h3 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h3><ul>
+<li>作者参照JDK锁的实现方式加上模板方法模式的封装，封装接口如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Description</span> ZK分布式锁的接口</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Author</span> 陈某</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Date</span> 2020/4/7 22:52</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ZKLock</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取锁</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 解锁</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">unlock</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>模板抽象类如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Description</span> 排他锁，模板类</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Author</span> 陈某</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Date</span> 2020/4/7 22:55</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbstractZKLockMutex</span> <span class="keyword">implements</span> <span class="title">ZKLock</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 节点路径</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">protected</span> String lockPath;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * zk客户端</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">protected</span> CuratorFramework zkClient;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="title">AbstractZKLockMutex</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">AbstractZKLockMutex</span><span class="params">(String lockPath,CuratorFramework client)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.lockPath=lockPath;</span><br><span class="line">        <span class="keyword">this</span>.zkClient=client;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 模板方法，搭建的获取锁的框架，具体逻辑交于子类实现</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> Exception</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">//获取锁成功</span></span><br><span class="line">        <span class="keyword">if</span> (tryLock())&#123;</span><br><span class="line">            System.out.println(Thread.currentThread().getName()+<span class="string">&quot;获取锁成功&quot;</span>);</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;  <span class="comment">//获取锁失败</span></span><br><span class="line">            <span class="comment">//阻塞一直等待</span></span><br><span class="line">            waitLock();</span><br><span class="line">            <span class="comment">//递归，再次获取锁</span></span><br><span class="line">            lock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 尝试获取锁，子类实现</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="keyword">boolean</span> <span class="title">tryLock</span><span class="params">()</span> </span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 等待获取锁，子类实现</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">waitLock</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 解锁：删除节点或者直接断开连接</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span>  <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">unlock</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>排他锁的具体实现类如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Description</span> 排他锁的实现类，继承模板类 AbstractZKLockMutex</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Author</span> 陈某</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Date</span> 2020/4/7 23:23</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ZKLockMutex</span> <span class="keyword">extends</span> <span class="title">AbstractZKLockMutex</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 用于实现线程阻塞</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> CountDownLatch countDownLatch;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ZKLockMutex</span><span class="params">(String lockPath,CuratorFramework zkClient)</span></span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(lockPath,zkClient);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 尝试获取锁：直接创建一个临时节点，如果这个节点存在创建失败抛出异常，表示已经互斥了，</span></span><br><span class="line"><span class="comment">     * 反之创建成功</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> Exception</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">boolean</span> <span class="title">tryLock</span><span class="params">()</span>  </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            zkClient.create()</span><br><span class="line">                    <span class="comment">//临时节点</span></span><br><span class="line">                    .withMode(CreateMode.EPHEMERAL)</span><br><span class="line">                    <span class="comment">//权限列表 world:anyone:crdwa</span></span><br><span class="line">                    .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)</span><br><span class="line">                    .forPath(lockPath,<span class="string">&quot;lock&quot;</span>.getBytes());</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;<span class="keyword">catch</span> (Exception ex)&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 等待锁，一直阻塞监听</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span>  成功获取锁返回true，反之返回false</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">waitLock</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">//监听节点的新增、更新、删除</span></span><br><span class="line">        <span class="keyword">final</span> NodeCache nodeCache = <span class="keyword">new</span> NodeCache(zkClient, lockPath);</span><br><span class="line">        <span class="comment">//启动监听</span></span><br><span class="line">        nodeCache.start();</span><br><span class="line">        ListenerContainer&lt;NodeCacheListener&gt; listenable = nodeCache.getListenable();</span><br><span class="line"></span><br><span class="line">        <span class="comment">//监听器</span></span><br><span class="line">        NodeCacheListener listener=()-&gt; &#123;</span><br><span class="line">            <span class="comment">//节点被删除，此时获取锁</span></span><br><span class="line">            <span class="keyword">if</span> (nodeCache.getCurrentData() == <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="comment">//countDownLatch不为null，表示节点存在，此时监听到节点删除了，因此-1</span></span><br><span class="line">                <span class="keyword">if</span> (countDownLatch != <span class="keyword">null</span>)</span><br><span class="line">                    countDownLatch.countDown();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="comment">//添加监听器</span></span><br><span class="line">        listenable.addListener(listener);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//判断节点是否存在</span></span><br><span class="line">        Stat stat = zkClient.checkExists().forPath(lockPath);</span><br><span class="line">        <span class="comment">//节点存在</span></span><br><span class="line">        <span class="keyword">if</span> (stat!=<span class="keyword">null</span>)&#123;</span><br><span class="line">            countDownLatch=<span class="keyword">new</span> CountDownLatch(<span class="number">1</span>);</span><br><span class="line">            <span class="comment">//阻塞主线程，监听</span></span><br><span class="line">            countDownLatch.await();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//移除监听器</span></span><br><span class="line">        listenable.removeListener(listener);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 解锁，直接删除节点</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> Exception</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">unlock</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        zkClient.delete().forPath(lockPath);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="可重入性排他锁如何设计"><a href="#可重入性排他锁如何设计" class="headerlink" title="可重入性排他锁如何设计"></a>可重入性排他锁如何设计</h3><ul>
+<li>可重入的逻辑很简单，在本地保存一个<code>ConcurrentMap</code>，<code>key</code>是当前线程，<code>value</code>是定义的数据，结构如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> ConcurrentMap&lt;Thread, LockData&gt; threadData = Maps.newConcurrentMap();</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>重入的伪代码如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">tryLock</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">//判断当前线程是否在threadData保存过</span></span><br><span class="line">    <span class="comment">//存在，直接return true</span></span><br><span class="line">    <span class="comment">//不存在执行获取锁的逻辑</span></span><br><span class="line">    <span class="comment">//获取成功保存在threadData中</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="读写锁的实现"><a href="#读写锁的实现" class="headerlink" title="读写锁的实现"></a>读写锁的实现</h2><ul>
+<li>读写锁分为读锁和写锁，区别如下：<ul>
+<li>读锁允许多个线程同时读数据，但是在读的同时不允许写线程修改。</li>
+<li>写锁在获取后，不允许多个线程同时写或者读。</li>
+</ul>
+</li>
+<li>如何实现读写锁？ZK中有一类节点叫临时有序节点，上文有介绍。下面我们来利用临时有序节点来实现读写锁的功能。</li>
+</ul>
+<h3 id="读锁的设计"><a href="#读锁的设计" class="headerlink" title="读锁的设计"></a>读锁的设计</h3><ul>
+<li>读锁允许多个线程同时进行读，并且在读的同时不允许线程进行写操作，实现原理如下图：</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/ZK%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/%E8%AF%BB%E9%94%81.png"></p>
+<ul>
+<li>根据上图，获取一个读锁分为以下步骤：<ol>
+<li>创建临时有序节点（当前线程拥有的<code>读锁</code>或称作<code>读节点</code>）。</li>
+<li>获取路径下所有的子节点，并进行<code>从小到大</code>排序</li>
+<li>获取当前节点前的临近写节点(写锁)。</li>
+<li>如果不存在的临近写节点，则成功获取读锁。</li>
+<li>如果存在临近写节点，对其监听删除事件。</li>
+<li>一旦监听到删除事件，**重复2,3,4,5的步骤(递归)**。</li>
+</ol>
+</li>
+</ul>
+<h3 id="写锁的设计"><a href="#写锁的设计" class="headerlink" title="写锁的设计"></a>写锁的设计</h3><ul>
+<li>线程一旦获取了写锁，不允许其他线程读和写。实现原理如下：</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/ZK%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/%E5%86%99%E9%94%81.png"></p>
+<ul>
+<li>从上图可以看出唯一和写锁不同的就是监听的节点，这里是监听临近节点(读节点或者写节点)，读锁只需要监听写节点，步骤如下：<ol>
+<li>创建临时有序节点（当前线程拥有的<code>写锁</code>或称作<code>写节点</code>）。</li>
+<li>获取路径下的所有子节点，并进行<code>从小到大</code>排序。</li>
+<li>获取当前节点的临近节点(读节点和写节点)。</li>
+<li>如果不存在临近节点，则成功获取锁。</li>
+<li>如果存在临近节点，对其进行监听删除事件。</li>
+<li>一旦监听到删除事件，**重复2,3,4,5的步骤(递归)**。</li>
+</ol>
+</li>
+</ul>
+<h3 id="如何监听"><a href="#如何监听" class="headerlink" title="如何监听"></a>如何监听</h3><ul>
+<li>无论是写锁还是读锁都需要监听前面的节点，不同的是读锁只监听临近的写节点，写锁是监听临近的所有节点，抽象出来看其实是一种链式的监听，如下图：</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/ZK%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/%E9%93%BE%E5%BC%8F.png"></p>
+<ul>
+<li>每一个节点都在监听前面的临近节点，一旦前面一个节点删除了，再从新排序后监听前面的节点，这样递归下去。</li>
+</ul>
+<h3 id="代码实现-1"><a href="#代码实现-1" class="headerlink" title="代码实现"></a>代码实现</h3><ul>
+<li>作者简单的写了读写锁的实现，先造出来再优化，不建议用在生产环境。代码如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ZKLockRW</span>  </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 节点路径</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">protected</span> String lockPath;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * zk客户端</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">protected</span> CuratorFramework zkClient;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 用于阻塞线程</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> CountDownLatch countDownLatch=<span class="keyword">new</span> CountDownLatch(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> String WRITE_NAME=<span class="string">&quot;_W_LOCK&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> String READ_NAME=<span class="string">&quot;_R_LOCK&quot;</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ZKLockRW</span><span class="params">(String lockPath, CuratorFramework client)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.lockPath=lockPath;</span><br><span class="line">        <span class="keyword">this</span>.zkClient=client;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取锁，如果获取失败一直阻塞</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> Exception</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">lock</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">//创建节点</span></span><br><span class="line">        String node = createNode();</span><br><span class="line">        <span class="comment">//阻塞等待获取锁</span></span><br><span class="line">        tryLock(node);</span><br><span class="line">        countDownLatch.await();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 创建临时有序节点</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> Exception</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> String <span class="title">createNode</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">//创建临时有序节点</span></span><br><span class="line">       <span class="keyword">return</span> zkClient.create()</span><br><span class="line">                .withMode(CreateMode.EPHEMERAL_SEQUENTIAL)</span><br><span class="line">                .withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)</span><br><span class="line">                .forPath(lockPath);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取写锁</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span>  ZKLockRW <span class="title">writeLock</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ZKLockRW(lockPath+WRITE_NAME,zkClient);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 获取读锁</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span>  ZKLockRW <span class="title">readLock</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ZKLockRW(lockPath+READ_NAME,zkClient);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">tryLock</span><span class="params">(String nodePath)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">//获取所有的子节点</span></span><br><span class="line">        List&lt;String&gt; childPaths = zkClient.getChildren()</span><br><span class="line">                .forPath(<span class="string">&quot;/&quot;</span>)</span><br><span class="line">                .stream().sorted().map(o-&gt;<span class="string">&quot;/&quot;</span>+o).collect(Collectors.toList());</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="comment">//第一个节点就是当前的锁，直接获取锁。递归结束的条件</span></span><br><span class="line">        <span class="keyword">if</span> (nodePath.equals(childPaths.get(<span class="number">0</span>)))&#123;</span><br><span class="line">            countDownLatch.countDown();</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//1. 读锁：监听最前面的写锁，写锁释放了，自然能够读了</span></span><br><span class="line">        <span class="keyword">if</span> (nodePath.contains(READ_NAME))&#123;</span><br><span class="line">            <span class="comment">//查找临近的写锁</span></span><br><span class="line">            String preNode = getNearWriteNode(childPaths, childPaths.indexOf(nodePath));</span><br><span class="line">            <span class="keyword">if</span> (preNode==<span class="keyword">null</span>)&#123;</span><br><span class="line">                countDownLatch.countDown();</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            NodeCache nodeCache=<span class="keyword">new</span> NodeCache(zkClient,preNode);</span><br><span class="line">            nodeCache.start();</span><br><span class="line">            ListenerContainer&lt;NodeCacheListener&gt; listenable = nodeCache.getListenable();</span><br><span class="line">            listenable.addListener(() -&gt; &#123;</span><br><span class="line">                <span class="comment">//节点删除事件</span></span><br><span class="line">                <span class="keyword">if</span> (nodeCache.getCurrentData()==<span class="keyword">null</span>)&#123;</span><br><span class="line">                    <span class="comment">//继续监听前一个节点</span></span><br><span class="line">                    String nearWriteNode = getNearWriteNode(childPaths, childPaths.indexOf(preNode));</span><br><span class="line">                    <span class="keyword">if</span> (nearWriteNode==<span class="keyword">null</span>)&#123;</span><br><span class="line">                        countDownLatch.countDown();</span><br><span class="line">                        <span class="keyword">return</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    tryLock(nearWriteNode);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//如果是写锁，前面无论是什么锁都不能读，直接循环监听上一个节点即可，直到前面无锁</span></span><br><span class="line">        <span class="keyword">if</span> (nodePath.contains(WRITE_NAME))&#123;</span><br><span class="line">            String preNode = childPaths.get(childPaths.indexOf(nodePath) - <span class="number">1</span>);</span><br><span class="line">            NodeCache nodeCache=<span class="keyword">new</span> NodeCache(zkClient,preNode);</span><br><span class="line">            nodeCache.start();</span><br><span class="line">            ListenerContainer&lt;NodeCacheListener&gt; listenable = nodeCache.getListenable();</span><br><span class="line">            listenable.addListener(() -&gt; &#123;</span><br><span class="line">                <span class="comment">//节点删除事件</span></span><br><span class="line">                <span class="keyword">if</span> (nodeCache.getCurrentData()==<span class="keyword">null</span>)&#123;</span><br><span class="line">                    <span class="comment">//继续监听前一个节点</span></span><br><span class="line">                    tryLock(childPaths.get(childPaths.indexOf(preNode) - <span class="number">1</span>&lt;<span class="number">0</span>?<span class="number">0</span>:childPaths.indexOf(preNode) - <span class="number">1</span>));</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 查找临近的写节点</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> childPath 全部的子节点</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> index 右边界</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> String  <span class="title">getNearWriteNode</span><span class="params">(List&lt;String&gt; childPath,Integer index)</span></span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; index; i++) &#123;</span><br><span class="line">            String node = childPath.get(i);</span><br><span class="line">            <span class="keyword">if</span> (node.contains(WRITE_NAME))</span><br><span class="line">                <span class="keyword">return</span> node;</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="Curator实现分步式锁"><a href="#Curator实现分步式锁" class="headerlink" title="Curator实现分步式锁"></a>Curator实现分步式锁</h2><ul>
+<li>Curator是Netflix公司开源的一个Zookeeper客户端，与Zookeeper提供的原生客户端相比，Curator的抽象层次更高，简化了Zookeeper客户端的开发量。 </li>
+<li>Curator在分布式锁方面已经为我们封装好了，大致实现的思路就是按照作者上述的思路实现的。中小型互联网公司还是建议直接使用框架封装好的，毕竟稳定，有些大型的互联公司都是手写的，牛逼啊。</li>
+<li>创建一个排他锁很简单，如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//arg1：CuratorFramework连接对象，arg2：节点路径</span></span><br><span class="line">lock=<span class="keyword">new</span> InterProcessMutex(client,path);</span><br><span class="line"><span class="comment">//获取锁</span></span><br><span class="line">lock.acquire();</span><br><span class="line"><span class="comment">//释放锁</span></span><br><span class="line">lock.release();</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>更多的API请参照官方文档，不是此篇文章重点。</p>
+</li>
+<li><p><strong>至此ZK实现分布式锁就介绍完了，如有想要源码的朋友，老规矩，回复关键词<code>分布式锁</code>获取。</strong></p>
+</li>
+</ul>
+<h2 id="一点小福利"><a href="#一点小福利" class="headerlink" title="一点小福利"></a>一点小福利</h2><ul>
+<li>对于Zookeeper不太熟悉的朋友，陈某特地花费两天时间总结了ZK的常用知识点，包括ZK常用shell命令、ZK权限控制、Curator的基本操作API。目录如下：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/ZK%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/5.png"></li>
+<li><strong>需要上面PDF文件的朋友，老规矩，回复关键词<code>ZK总结</code>。</strong></li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/19/Zookeeper%E5%85%A5%E9%97%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1872,105 +2082,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/01/%E4%B8%80%E6%9D%A1%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5%E5%88%B0%E5%BA%95%E6%98%AF%E5%A6%82%E4%BD%95%E6%89%A7%E8%A1%8C%E7%9A%84/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/04/01/%E4%B8%80%E6%9D%A1%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5%E5%88%B0%E5%BA%95%E6%98%AF%E5%A6%82%E4%BD%95%E6%89%A7%E8%A1%8C%E7%9A%84/" class="post-title-link" itemprop="url">一条查询语句到底是如何执行的?</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-04-01 10:35:30" itemprop="dateCreated datePublished" datetime="2020-04-01T10:35:30+08:00">2020-04-01</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-10-23 21:57:19" itemprop="dateModified" datetime="2020-10-23T21:57:19+08:00">2020-10-23</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%B9%B2%E8%B4%A7%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">数据库干货篇</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2020/04/01/%E4%B8%80%E6%9D%A1%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5%E5%88%B0%E5%BA%95%E6%98%AF%E5%A6%82%E4%BD%95%E6%89%A7%E8%A1%8C%E7%9A%84/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2020/04/01/%E4%B8%80%E6%9D%A1%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5%E5%88%B0%E5%BA%95%E6%98%AF%E5%A6%82%E4%BD%95%E6%89%A7%E8%A1%8C%E7%9A%84/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="导读"><a href="#导读" class="headerlink" title="导读"></a>导读</h2><ul>
-<li><p>Mysql在中小型企业中是个香饽饽，目前主流的数据库之一，几乎没有一个后端开发者不会使用的，但是作为一个老司机，仅仅会用真的不够。</p>
-</li>
-<li><p>今天陈某透过一个简单的查询语句来讲述在Mysql内部的执行过程。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select * from table where id=10;</span><br></pre></td></tr></table></figure>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/04/01/%E4%B8%80%E6%9D%A1%E6%9F%A5%E8%AF%A2%E8%AF%AD%E5%8F%A5%E5%88%B0%E5%BA%95%E6%98%AF%E5%A6%82%E4%BD%95%E6%89%A7%E8%A1%8C%E7%9A%84/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2054,7 +2165,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">123</span>
+          <span class="site-state-item-count">124</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -2067,7 +2178,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">54</span>
+        <span class="site-state-item-count">56</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
