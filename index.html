@@ -488,6 +488,99 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/11/28/%E5%AE%9E%E6%88%98%EF%BC%81SpringBootSecurity-JWT%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB%E6%9E%B6%E6%9E%84%E8%AE%A4%E8%AF%81%E7%99%BB%E5%BD%95%EF%BC%8C%E5%B1%85%E7%84%B6%E8%BF%98%E6%9C%89%E4%BA%BA%E4%B8%8D%E4%BC%9A%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/11/28/%E5%AE%9E%E6%88%98%EF%BC%81SpringBootSecurity-JWT%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB%E6%9E%B6%E6%9E%84%E8%AE%A4%E8%AF%81%E7%99%BB%E5%BD%95%EF%BC%8C%E5%B1%85%E7%84%B6%E8%BF%98%E6%9C%89%E4%BA%BA%E4%B8%8D%E4%BC%9A%EF%BC%9F/" class="post-title-link" itemprop="url">实战！Spring Boot Security+JWT前后端分离架构认证登录，居然还有人不会？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-11-28 15:32:33 / 修改时间：15:33:53" itemprop="dateCreated datePublished" datetime="2021-11-28T15:32:33+08:00">2021-11-28</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Security-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Security 进阶</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/11/28/%E5%AE%9E%E6%88%98%EF%BC%81SpringBootSecurity-JWT%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB%E6%9E%B6%E6%9E%84%E8%AE%A4%E8%AF%81%E7%99%BB%E5%BD%95%EF%BC%8C%E5%B1%85%E7%84%B6%E8%BF%98%E6%9C%89%E4%BA%BA%E4%B8%8D%E4%BC%9A%EF%BC%9F/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/11/28/%E5%AE%9E%E6%88%98%EF%BC%81SpringBootSecurity-JWT%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB%E6%9E%B6%E6%9E%84%E8%AE%A4%E8%AF%81%E7%99%BB%E5%BD%95%EF%BC%8C%E5%B1%85%E7%84%B6%E8%BF%98%E6%9C%89%E4%BA%BA%E4%B8%8D%E4%BC%9A%EF%BC%9F/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><strong>大家好，我是不才陈某~</strong></p>
+<p>认证、授权是实战项目中必不可少的部分，而Spring Security则将作为首选安全组件，因此陈某新开了 <a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=2151150065472569352#wechat_redirect">《Spring Security 进阶》</a> 这个专栏，写一写从单体架构到<strong>OAuth2</strong>分布式架构的认证授权。</p>
+<p>Spring security这里就不再过多介绍了，相信大家都用过，也都恐惧过，相比Shiro而言，Spring Security更加重量级，之前的SSM项目更多企业都是用的Shiro，但是Spring Boot出来之后，整合Spring Security更加方便了，用的企业也就多了。</p>
+<p>今天陈某就来介绍一下在前后端分离的项目中如何使用Spring Security进行登录认证。文章的目录如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/19.png"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/11/28/%E5%AE%9E%E6%88%98%EF%BC%81SpringBootSecurity-JWT%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB%E6%9E%B6%E6%9E%84%E8%AE%A4%E8%AF%81%E7%99%BB%E5%BD%95%EF%BC%8C%E5%B1%85%E7%84%B6%E8%BF%98%E6%9C%89%E4%BA%BA%E4%B8%8D%E4%BC%9A%EF%BC%9F/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/11/26/%E5%B7%A7%E7%94%A8java8%E7%9A%84Function%E6%B6%88%E7%81%ADif-else/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -513,7 +606,7 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2021-11-26 16:38:25 / 修改时间：16:40:42" itemprop="dateCreated datePublished" datetime="2021-11-26T16:38:25+08:00">2021-11-26</time>
+              <time title="创建时间：2021-11-26 16:38:25 / 修改时间：16:45:37" itemprop="dateCreated datePublished" datetime="2021-11-26T16:38:25+08:00">2021-11-26</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -1078,97 +1171,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/11/09/%E5%B7%A7%E7%94%A8Java8%E7%9A%84Stream%E6%9D%A5%E4%BC%98%E5%8C%96%E4%BB%A3%E7%A0%81-%E5%A4%AA%E6%B8%85%E7%88%BD%E4%BA%86%EF%BC%81/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/11/09/%E5%B7%A7%E7%94%A8Java8%E7%9A%84Stream%E6%9D%A5%E4%BC%98%E5%8C%96%E4%BB%A3%E7%A0%81-%E5%A4%AA%E6%B8%85%E7%88%BD%E4%BA%86%EF%BC%81/" class="post-title-link" itemprop="url">巧用 Java 8 的 Stream 来优化代码，太清爽了！</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-11-09 18:46:17 / 修改时间：18:50:51" itemprop="dateCreated datePublished" datetime="2021-11-09T18:46:17+08:00">2021-11-09</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Java 进阶</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2021/11/09/%E5%B7%A7%E7%94%A8Java8%E7%9A%84Stream%E6%9D%A5%E4%BC%98%E5%8C%96%E4%BB%A3%E7%A0%81-%E5%A4%AA%E6%B8%85%E7%88%BD%E4%BA%86%EF%BC%81/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2021/11/09/%E5%B7%A7%E7%94%A8Java8%E7%9A%84Stream%E6%9D%A5%E4%BC%98%E5%8C%96%E4%BB%A3%E7%A0%81-%E5%A4%AA%E6%B8%85%E7%88%BD%E4%BA%86%EF%BC%81/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><strong>大家好，我是不才陈某~</strong></p>
-<p>Java8的新特性主要是Lambda表达式和流，当流和Lambda表达式结合起来一起使用时，因为流申明式处理数据集合的特点，可以让代码变得简洁易读</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/stream/5.png"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/11/09/%E5%B7%A7%E7%94%A8Java8%E7%9A%84Stream%E6%9D%A5%E4%BC%98%E5%8C%96%E4%BB%A3%E7%A0%81-%E5%A4%AA%E6%B8%85%E7%88%BD%E4%BA%86%EF%BC%81/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1252,20 +1254,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">125</span>
+          <span class="site-state-item-count">126</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-count">14</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">57</span>
+        <span class="site-state-item-count">61</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
