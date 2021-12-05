@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"chenjiabing666.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="大家好，我是不才陈某~ 这是《Spring Security 进阶》的第3篇文章，往期文章如下：  实战！Spring Boot Security+JWT前后端分离架构登录认证！ 妹子始终没搞懂OAuth2.0，今天整合Spring Cloud Security 一次说明白！  文章都是成体系的，陈某默认看到这篇文章的读者都已经看了前期的文章，之前的知识点就不再详细介绍了。 今天这篇文章介绍一下O">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OAuth2.0实战！使用JWT令牌认证！">
+<meta property="og:url" content="https://chenjiabing666.github.io/2021/12/05/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E4%BD%BF%E7%94%A8JWT%E4%BB%A4%E7%89%8C%E8%AE%A4%E8%AF%81%EF%BC%81/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="大家好，我是不才陈某~ 这是《Spring Security 进阶》的第3篇文章，往期文章如下：  实战！Spring Boot Security+JWT前后端分离架构登录认证！ 妹子始终没搞懂OAuth2.0，今天整合Spring Cloud Security 一次说明白！  文章都是成体系的，陈某默认看到这篇文章的读者都已经看了前期的文章，之前的知识点就不再详细介绍了。 今天这篇文章介绍一下O">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/105.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/89.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/90.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/91.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/92.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/93.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/94.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/91.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/95.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/96.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/97.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/98.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/99.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/100.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/101.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/102.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/103.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/104.png">
+<meta property="article:published_time" content="2021-12-05T14:04:13.000Z">
+<meta property="article:modified_time" content="2021-12-05T14:05:25.062Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="JWT">
+<meta property="article:tag" content="Spring Security">
+<meta property="article:tag" content="OAuth2.0">
+<meta property="article:tag" content="认证授权">
+<meta property="article:tag" content="实战">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/105.png">
+
+<link rel="canonical" href="https://chenjiabing666.github.io/2021/12/05/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E4%BD%BF%E7%94%A8JWT%E4%BB%A4%E7%89%8C%E8%AE%A4%E8%AF%81%EF%BC%81/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>OAuth2.0实战！使用JWT令牌认证！ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+		<div id="container">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/12/05/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E4%BD%BF%E7%94%A8JWT%E4%BB%A4%E7%89%8C%E8%AE%A4%E8%AF%81%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OAuth2.0实战！使用JWT令牌认证！
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-12-05 22:04:13 / 修改时间：22:05:25" itemprop="dateCreated datePublished" datetime="2021-12-05T22:04:13+08:00">2021-12-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Security-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Security 进阶</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/12/05/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E4%BD%BF%E7%94%A8JWT%E4%BB%A4%E7%89%8C%E8%AE%A4%E8%AF%81%EF%BC%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/12/05/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E4%BD%BF%E7%94%A8JWT%E4%BB%A4%E7%89%8C%E8%AE%A4%E8%AF%81%EF%BC%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><strong>大家好，我是不才陈某~</strong></p>
+<p>这是<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=2151150065472569352#wechat_redirect">《Spring Security 进阶》</a>的第<strong>3</strong>篇文章，往期文章如下：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502546&idx=1&sn=bfb6fd9d96d8c5bf107a4981ba5e1547&chksm=fcf7151fcb809c09b7ae29de8c0af0d00976539a46ee5f9bf583a6a7b196ea82f26ce98fd982&token=1622810645&lang=zh_CN#rd">实战！Spring Boot Security+JWT前后端分离架构登录认证！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502682&idx=1&sn=52a15b623ab6135c134b8262bd605946&chksm=fcf71497cb809d81f1d2dbce76b3e00170f085306b2a2a67a807a6d9e2cf03bf1de3b8f203a2&token=404376711&lang=zh_CN#rd">妹子始终没搞懂OAuth2.0，今天整合Spring Cloud Security 一次说明白！</a></li>
+</ul>
+<p>文章都是成体系的，陈某默认看到这篇文章的读者都已经看了前期的文章，之前的知识点就不再详细介绍了。</p>
+<p>今天这篇文章介绍一下<strong>OAuth2.0</strong>如何集成<strong>JWT</strong>颁发令牌，这也是目前企业中主流的令牌形式。</p>
+<p>文章目录如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/105.png"></p>
+<span id="more"></span>
+
+<h2 id="什么是JWT？"><a href="#什么是JWT？" class="headerlink" title="什么是JWT？"></a>什么是JWT？</h2><p>OAuth2.0体系中令牌分为两类，分别是<strong>透明令牌</strong>、<strong>不透明令牌</strong>。</p>
+<p>不透明令牌则是令牌本身不存储任何信息，比如一串<strong>UUID</strong>，上篇文章中使用的<strong>InMemoryTokenStore</strong>就类似这种。</p>
+<p>因此资源服务拿到这个令牌必须调调用<strong>认证授权服务</strong>的接口进行令牌的<strong>校验</strong>，高并发的情况下<strong>延迟很高，性能很低</strong>，正如上篇文章中资源服务器中配置的校验，如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/89.png"></p>
+<p>透明令牌本身就存储这部分用户信息，比如<strong>JWT</strong>，资源服务可以<strong>调用自身的服务对该令牌进行校验解析</strong>，不必调用认证服务的接口去校验令牌。</p>
+<p>JWT相信大家都有了解，分为三部分，分别是<strong>头部</strong>、<strong>载荷</strong>、<strong>签名</strong>，如下：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.</span><br><span class="line">eyJhdWQiOlsicmVzMSJdLCJ1c2VyX25hbWUiOiJ1c2VyIiwic2NvcGUiOlsiYWxsIl0sImV4cCI6MTYzODYwNTcxOCwiYXV0aG9yaXRpZXMiOlsiUk9MRV91c2VyIl0sImp0aSI6ImRkNTVkMjEzLThkMDYtNGY4MC1iMGRmLTdkN2E0YWE2MmZlOSIsImNsaWVudF9pZCI6Im15anN6bCJ9.</span><br><span class="line">koup5-wzGfcSVnaaNfILwAgw2VaTLvRgq2JVnIHYe_Q</span><br></pre></td></tr></table></figure>
+
+<p><strong>头部</strong>定义了JWT基本信息，如类型和签名算法。</p>
+<p><strong>载荷</strong>包含了一些基本信息（签发时间、过期时间…..），另外还可以添加一些自定义的信息，比如用户的部分信息。</p>
+<p><strong>签名</strong>部分将前两个字符串用 . 连接后，使用头部定义的加密算法，利用密钥进行签名，并将签名信息附在最后。</p>
+<h2 id="OAuth2-0认证授权服务搭建"><a href="#OAuth2-0认证授权服务搭建" class="headerlink" title="OAuth2.0认证授权服务搭建"></a>OAuth2.0认证授权服务搭建</h2><p>OAuth2.0分为认证授权中心、资源服务，认证中心用于颁发令牌，资源服务解析令牌并且提供资源。</p>
+<h3 id="1、案例架构"><a href="#1、案例架构" class="headerlink" title="1、案例架构"></a>1、案例架构</h3><p>新建<strong>oauth2-auth-server-jwt</strong>模块，沿用上篇文章<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502682&idx=1&sn=52a15b623ab6135c134b8262bd605946&chksm=fcf71497cb809d81f1d2dbce76b3e00170f085306b2a2a67a807a6d9e2cf03bf1de3b8f203a2&token=404376711&lang=zh_CN#rd">妹子始终没搞懂OAuth2.0，今天整合Spring Cloud Security 一次说明白！</a>的代码，在其之上做些修改，目录如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/90.png"></p>
+<h3 id="2、令牌配置"><a href="#2、令牌配置" class="headerlink" title="2、令牌配置"></a>2、令牌配置</h3><p>令牌相关的配置都放在了<strong>AccessTokenConfig</strong>这个配置类中，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/91.png"></p>
+<p><strong>1、 JwtAccessTokenConverter</strong></p>
+<p>令牌增强类，用于JWT令牌和OAuth身份进行转换</p>
+<p><strong>2、TokenStore</strong></p>
+<p>令牌的存储策略，这里使用的是<strong>JwtTokenStore</strong>，使用JWT的令牌生成方式，其实还有以下两个比较常用的方式：</p>
+<ul>
+<li><strong>RedisTokenStore</strong>：将令牌存储到Redis中，此种方式相对于内存方式来说性能更好</li>
+<li><strong>JdbcTokenStore</strong>：将令牌存储到数据库中，需要新建从对应的表，有兴趣的可以尝试</li>
+</ul>
+<p><strong>3、SIGN_KEY</strong></p>
+<p>JWT签名的秘钥，这里使用的是对称加密，<strong>资源服务中也要使用相同的秘钥进行校验和解析JWT令牌</strong>。</p>
+<blockquote>
+<p><strong>注意</strong>：实际工作中还是要使用非对称加密的方式，比较安全，这种方式后续文章介绍。</p>
+</blockquote>
+<h3 id="3、令牌管理服务的配置"><a href="#3、令牌管理服务的配置" class="headerlink" title="3、令牌管理服务的配置"></a>3、令牌管理服务的配置</h3><p>这个放在了<strong>AuthorizationServerConfig</strong>这个配置类中，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/92.png"></p>
+<p>使用的是DefaultTokenServices这个实现类，其中可以配置令牌相关的内容，比如<strong>access_token</strong>、<strong>refresh_token</strong>的过期时间，默认时间分别为12小时、30天。</p>
+<p>最重要的一行代码当然是设置令牌增强，使用JWT方式生产令牌，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">services.setTokenEnhancer(jwtAccessTokenConverter);</span><br></pre></td></tr></table></figure>
+
+<h3 id="4、令牌访问端点添加tokenServices"><a href="#4、令牌访问端点添加tokenServices" class="headerlink" title="4、令牌访问端点添加tokenServices"></a>4、令牌访问端点添加tokenServices</h3><p>在<strong>AuthorizationServerEndpointsConfigurer</strong>中添加这个令牌服务，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/93.png"></p>
+<p>好了，至此认证中心的JWT令牌生成方式配置完成了………</p>
+<blockquote>
+<p>案例源码已经上传GitHub，关注公众号：码猿技术专栏，回复关键词 <strong>9529</strong> 获取！</p>
+</blockquote>
+<h2 id="OAuth2-0资源服务搭建"><a href="#OAuth2-0资源服务搭建" class="headerlink" title="OAuth2.0资源服务搭建"></a>OAuth2.0资源服务搭建</h2><p>资源服务搭建非常简单了，配置一个JWT令牌校验服务即可。</p>
+<h3 id="1、案例架构-1"><a href="#1、案例架构-1" class="headerlink" title="1、案例架构"></a>1、案例架构</h3><p>新建一个<strong>oauth2-auth-resource-jwt</strong>模块，目录如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/94.png"></p>
+<h3 id="2、令牌配置-1"><a href="#2、令牌配置-1" class="headerlink" title="2、令牌配置"></a>2、令牌配置</h3><p>直接复用授权服务的<strong>AccessTokenConfig</strong>，由于资源服务需要校验解析JWT令牌，因此直接复用即可，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/91.png"></p>
+<blockquote>
+<p><strong>注意</strong>：这里的JWT加密的秘钥一定要和认证中心的一样。</p>
+</blockquote>
+<h3 id="3、配置令牌服务"><a href="#3、配置令牌服务" class="headerlink" title="3、配置令牌服务"></a>3、配置令牌服务</h3><p>生成的<strong>ResourceServerTokenServices</strong>对象，其中使用JWT令牌增强，如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/95.png"></p>
+<h3 id="4、资源ID和令牌校验服务配置"><a href="#4、资源ID和令牌校验服务配置" class="headerlink" title="4、资源ID和令牌校验服务配置"></a>4、资源ID和令牌校验服务配置</h3><p>将<strong>资源id</strong>和<strong>令牌服务</strong>配置到<strong>ResourceServerSecurityConfigurer</strong>中，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/96.png"></p>
+<p>由于使用了JWT这种透明令牌，令牌本身携带着部分用户信息，因此不需要通过远程调用认证中心的接口校验令牌。</p>
+<blockquote>
+<p>案例源码已经上传GitHub，关注公众号：码猿技术专栏，回复关键词 <strong>9529</strong> 获取！</p>
+</blockquote>
+<h2 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h2><p>下面通过获取令牌、调用资源进行测试逻辑是否走通。</p>
+<p><strong>1、使用密码模式获取令牌</strong></p>
+<p>POSTMAN请求如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/97.png"></p>
+<p>可以看到已经成功返回了JWT令牌。</p>
+<p><strong>2、携带令牌调用资源服务</strong></p>
+<p>直接拿着获取的<strong>access_token</strong>调用资源服务的接口，请求如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/98.png"></p>
+<p>好了，JWT令牌测试成功…………</p>
+<h2 id="源码追踪"><a href="#源码追踪" class="headerlink" title="源码追踪"></a>源码追踪</h2><p>源码中最重要的部分当然是获取令牌、校验令牌这两个流程了，小陈某下面详细说说。</p>
+<h3 id="1、获取令牌"><a href="#1、获取令牌" class="headerlink" title="1、获取令牌"></a>1、获取令牌</h3><p>获取令牌就比较简简单了，当然从接口 <strong>/oauth/token</strong>入手了，这个接口在<code>TokenEndpoint#postAccessToken()</code>方法中，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/99.png"></p>
+<p>这个方法中有两个关键步骤，如下：</p>
+<p><strong>1、根据clientId加载客户端信息</strong></p>
+<p>这一步是从根据客户端传入的clientId获取客户端的详细信息，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ClientDetails authenticatedClient = getClientDetailsService().loadClientByClientId(clientId);</span><br></pre></td></tr></table></figure>
+
+<p>这里的<strong>ClientDetailsService</strong>有两类，如下：</p>
+<ul>
+<li><strong>InMemoryClientDetailsService</strong>：客户端配置存储在内存中，本篇文章所使用的便是这个</li>
+<li><strong>JdbcClientDetailsService</strong>：客户端配置存储在数据库中，<strong>后续文章介绍</strong>。</li>
+</ul>
+<p><strong>2、生成OAuth2AccessToken返回客户端</strong></p>
+<p><strong>OAuth2AccessToken</strong>是封装的返回对象，**/oauth/token**这个接口的作用就是将令牌封装到OAuth2AccessToken返回，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">OAuth2AccessToken token = getTokenGranter().grant(tokenRequest.getGrantType(), tokenRequest);</span><br></pre></td></tr></table></figure>
+
+<p>**getTokenGranter()**：获取授权类型，比如密码类型、授权码类型</p>
+<p><strong>grant()<strong>：这个方法则是真正的业务方法，其中调用</strong>DefaultTokenServices#createAccessToken()</strong> 方法生成令牌。</p>
+<p><strong>DefaultTokenServices</strong>这个还记得吗，令牌服务，在<strong>AuthorizationServerConfig</strong>配置文件配置的，如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/100.png"></p>
+<p><strong>createAccessToken()<strong>方法内部真正的业务方法其实是</strong>JwtAccessTokenConverter#enhance()<strong>，内部生成JWT令牌，封装进入</strong>OAuth2AccessToken</strong>对象返回，方法如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/101.png"></p>
+<p><strong>JwtAccessTokenConverter</strong>这个还记得吗？令牌增强类，在<strong>AccessTokenConfig</strong>这个配置文件中配置的，如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/102.png"></p>
+<p>主流程图如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/103.png"></p>
+<h3 id="2、校验令牌"><a href="#2、校验令牌" class="headerlink" title="2、校验令牌"></a>2、校验令牌</h3><p>校验令牌的更加简单了，入口就在<strong>OAuth2AuthenticationProcessingFilter</strong>这个过滤器，内部会调用<strong>OAuth2AuthenticationManager</strong>中的**authenticate()**方法进行验证令牌。</p>
+<p>校验主流程如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/104.png"></p>
+<p>自己debug跟着源码试试吧…………</p>
+<blockquote>
+<p>案例源码已经上传GitHub，关注公众号：码猿技术专栏，回复关键词 <strong>9529</strong> 获取！</p>
+</blockquote>
+<h2 id="最后说一句（别白嫖，求关注）"><a href="#最后说一句（别白嫖，求关注）" class="headerlink" title="最后说一句（别白嫖，求关注）"></a>最后说一句（别白嫖，求关注）</h2><p>陈某每一篇文章都是精心输出，已经写了<strong>3个专栏</strong>，整理成<strong>PDF</strong>，获取方式如下：</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=2042874937312346114#wechat_redirect">《Spring Cloud 进阶》</a>PDF：关注公众号：【<strong>码猿技术专栏</strong>】回复关键词 <strong>Spring Cloud 进阶</strong> 获取！</li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=1532834475389288449#wechat_redirect">《Spring Boot 进阶》</a>PDF：关注公众号：【<strong>码猿技术专栏</strong>】回复关键词 <strong>Spring Boot进阶</strong> 获取！</li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=1500819225232343046#wechat_redirect">《Mybatis 进阶》</a>PDF：关注公众号：【<strong>码猿技术专栏</strong>】回复关键词 <strong>Mybatis 进阶</strong> 获取！</li>
+</ol>
+<p>如果这篇文章对你有所帮助，或者有所启发的话，帮忙<strong>点赞</strong>、<strong>在看</strong>、<strong>转发</strong>、<strong>收藏</strong>，你的支持就是我坚持下去的最大动力！</p>
+<p>关注公众号：<strong>【码猿技术专栏】</strong>，公众号内有超赞的粉丝福利，回复：<strong>加群</strong>，可以加入技术讨论群，和大家一起讨论技术，吹牛逼！</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    不才陈某  |  微信公众号【码猿技术专栏】
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://chenjiabing666.github.io/2021/12/05/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E4%BD%BF%E7%94%A8JWT%E4%BB%A4%E7%89%8C%E8%AE%A4%E8%AF%81%EF%BC%81/" title="OAuth2.0实战！使用JWT令牌认证！">https://chenjiabing666.github.io/2021/12/05/OAuth2-0实战！使用JWT令牌认证！/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+  <li class="post-copyright-license">
+    并保留本声明和上方二维码。感谢您的阅读和支持！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">微信公众号</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/JWT/" rel="tag"># JWT</a>
+              <a href="/tags/Spring-Security/" rel="tag"># Spring Security</a>
+              <a href="/tags/OAuth2-0/" rel="tag"># OAuth2.0</a>
+              <a href="/tags/%E8%AE%A4%E8%AF%81%E6%8E%88%E6%9D%83/" rel="tag"># 认证授权</a>
+              <a href="/tags/%E5%AE%9E%E6%88%98/" rel="tag"># 实战</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/12/01/OAuth2-0%E5%8E%9F%E7%90%86-%E5%AE%9E%E6%88%98/" rel="prev" title="整合Spring Cloud Security 一次说明白OAuth2.0！">
+      <i class="fa fa-chevron-left"></i> 整合Spring Cloud Security 一次说明白OAuth2.0！
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+		  <script src="https://readmore.openwrite.cn/js/readmore.js" type="text/javascript"></script>
+<script>
+    const btw = new BTWPlugin();
+    btw.init({
+        id: 'container',
+        blogId: '27513-1629019452485-311',
+        name: '码猿技术专栏',
+        qrcode: 'https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg',
+        keyword: 'vip',
+    });
+</script>
+        </div>
+		</div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFJWT%EF%BC%9F"><span class="nav-text">什么是JWT？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OAuth2-0%E8%AE%A4%E8%AF%81%E6%8E%88%E6%9D%83%E6%9C%8D%E5%8A%A1%E6%90%AD%E5%BB%BA"><span class="nav-text">OAuth2.0认证授权服务搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E6%A1%88%E4%BE%8B%E6%9E%B6%E6%9E%84"><span class="nav-text">1、案例架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E4%BB%A4%E7%89%8C%E9%85%8D%E7%BD%AE"><span class="nav-text">2、令牌配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E4%BB%A4%E7%89%8C%E7%AE%A1%E7%90%86%E6%9C%8D%E5%8A%A1%E7%9A%84%E9%85%8D%E7%BD%AE"><span class="nav-text">3、令牌管理服务的配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4%E3%80%81%E4%BB%A4%E7%89%8C%E8%AE%BF%E9%97%AE%E7%AB%AF%E7%82%B9%E6%B7%BB%E5%8A%A0tokenServices"><span class="nav-text">4、令牌访问端点添加tokenServices</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#OAuth2-0%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E6%90%AD%E5%BB%BA"><span class="nav-text">OAuth2.0资源服务搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E6%A1%88%E4%BE%8B%E6%9E%B6%E6%9E%84-1"><span class="nav-text">1、案例架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E4%BB%A4%E7%89%8C%E9%85%8D%E7%BD%AE-1"><span class="nav-text">2、令牌配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E9%85%8D%E7%BD%AE%E4%BB%A4%E7%89%8C%E6%9C%8D%E5%8A%A1"><span class="nav-text">3、配置令牌服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4%E3%80%81%E8%B5%84%E6%BA%90ID%E5%92%8C%E4%BB%A4%E7%89%8C%E6%A0%A1%E9%AA%8C%E6%9C%8D%E5%8A%A1%E9%85%8D%E7%BD%AE"><span class="nav-text">4、资源ID和令牌校验服务配置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-text">测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BA%90%E7%A0%81%E8%BF%BD%E8%B8%AA"><span class="nav-text">源码追踪</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E8%8E%B7%E5%8F%96%E4%BB%A4%E7%89%8C"><span class="nav-text">1、获取令牌</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E6%A0%A1%E9%AA%8C%E4%BB%A4%E7%89%8C"><span class="nav-text">2、校验令牌</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%90%8E%E8%AF%B4%E4%B8%80%E5%8F%A5%EF%BC%88%E5%88%AB%E7%99%BD%E5%AB%96%EF%BC%8C%E6%B1%82%E5%85%B3%E6%B3%A8%EF%BC%89"><span class="nav-text">最后说一句（别白嫖，求关注）</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="不才陈某"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">128</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">64</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png" title="微信公众号 → https:&#x2F;&#x2F;gitee.com&#x2F;chenjiabing666&#x2F;BlogImage&#x2F;raw&#x2F;master&#x2F;myjszl_log.png" rel="noopener" target="_blank"><i class="fab fa-weixin fa-fw"></i>微信公众号</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.im/user/2506542244708072" title="掘金 → https:&#x2F;&#x2F;juejin.im&#x2F;user&#x2F;2506542244708072" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>掘金</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某|公众号：码猿技术专栏</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RtlQOgOT3M0hgyMeogykSQjT-gzGzoHsz',
+      appKey     : 'vSCxLU88wnXVf0Pa8mwJrCPm',
+      placeholder: "欢迎关注博主微信公众号【码猿技术专栏】",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
