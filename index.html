@@ -488,6 +488,105 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/12/08/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E7%8E%A9%E8%BD%AC%E8%AE%A4%E8%AF%81%E3%80%81%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BF%99%E4%BA%9B%E9%AA%9A%E6%93%8D%E4%BD%9C%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/12/08/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E7%8E%A9%E8%BD%AC%E8%AE%A4%E8%AF%81%E3%80%81%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BF%99%E4%BA%9B%E9%AA%9A%E6%93%8D%E4%BD%9C%EF%BC%81/" class="post-title-link" itemprop="url">OAuth2.0实战！玩转认证、资源服务异常自定义这些骚操作！</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-12-08 21:10:00 / 修改时间：21:11:00" itemprop="dateCreated datePublished" datetime="2021-12-08T21:10:00+08:00">2021-12-08</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Security-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Security 进阶</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/12/08/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E7%8E%A9%E8%BD%AC%E8%AE%A4%E8%AF%81%E3%80%81%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BF%99%E4%BA%9B%E9%AA%9A%E6%93%8D%E4%BD%9C%EF%BC%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/12/08/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E7%8E%A9%E8%BD%AC%E8%AE%A4%E8%AF%81%E3%80%81%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BF%99%E4%BA%9B%E9%AA%9A%E6%93%8D%E4%BD%9C%EF%BC%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><strong>大家好，我是不才陈某~</strong></p>
+<p>这是<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=2151150065472569352#wechat_redirect">《Spring Security 进阶》</a>的第<strong>4</strong>篇文章，往期文章如下：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502546&idx=1&sn=bfb6fd9d96d8c5bf107a4981ba5e1547&chksm=fcf7151fcb809c09b7ae29de8c0af0d00976539a46ee5f9bf583a6a7b196ea82f26ce98fd982&token=1622810645&lang=zh_CN#rd">实战！Spring Boot Security+JWT前后端分离架构登录认证！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502682&idx=1&sn=52a15b623ab6135c134b8262bd605946&chksm=fcf71497cb809d81f1d2dbce76b3e00170f085306b2a2a67a807a6d9e2cf03bf1de3b8f203a2&token=404376711&lang=zh_CN#rd">妹子始终没搞懂OAuth2.0，今天整合Spring Cloud Security 一次说明白！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502801&idx=1&sn=56b1af09bfa25d5e44193a7d75dfa623&chksm=fcf7141ccb809d0a1b0b2d7f6d9893c7d3e560dd8996296276f0274d2578236ee87e9124810d&token=867552718&lang=zh_CN#rd">OAuth2.0实战！使用JWT令牌认证！</a></li>
+</ul>
+<p>文章都是成体系的，陈某默认看到这篇文章的读者都已经看了前期的文章，之前的知识点就不再详细介绍了。</p>
+<p>今天这篇文章主要介绍一下实际工作中使用Spring Security需要定制的一些异常信息。</p>
+<p>文章目录如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/141.png"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/12/08/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E7%8E%A9%E8%BD%AC%E8%AE%A4%E8%AF%81%E3%80%81%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BF%99%E4%BA%9B%E9%AA%9A%E6%93%8D%E4%BD%9C%EF%BC%81/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/12/05/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E4%BD%BF%E7%94%A8JWT%E4%BB%A4%E7%89%8C%E8%AE%A4%E8%AF%81%EF%BC%81/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1087,98 +1186,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/11/18/%E7%94%A9%E9%94%85%E7%A5%9E%E5%99%A8%EF%BC%9A%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E8%BF%87%E6%BB%A4%E5%87%BA%E4%B8%80%E6%AC%A1%E8%AF%B7%E6%B1%82%E7%9A%84%E6%89%80%E6%9C%89%E6%97%A5%E5%BF%97%EF%BC%9F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/11/18/%E7%94%A9%E9%94%85%E7%A5%9E%E5%99%A8%EF%BC%9A%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E8%BF%87%E6%BB%A4%E5%87%BA%E4%B8%80%E6%AC%A1%E8%AF%B7%E6%B1%82%E7%9A%84%E6%89%80%E6%9C%89%E6%97%A5%E5%BF%97%EF%BC%9F/" class="post-title-link" itemprop="url">甩锅神器：如何快速过滤出一次请求的所有日志？</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-11-18 12:52:23 / 修改时间：12:54:35" itemprop="dateCreated datePublished" datetime="2021-11-18T12:52:23+08:00">2021-11-18</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2021/11/18/%E7%94%A9%E9%94%85%E7%A5%9E%E5%99%A8%EF%BC%9A%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E8%BF%87%E6%BB%A4%E5%87%BA%E4%B8%80%E6%AC%A1%E8%AF%B7%E6%B1%82%E7%9A%84%E6%89%80%E6%9C%89%E6%97%A5%E5%BF%97%EF%BC%9F/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2021/11/18/%E7%94%A9%E9%94%85%E7%A5%9E%E5%99%A8%EF%BC%9A%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E8%BF%87%E6%BB%A4%E5%87%BA%E4%B8%80%E6%AC%A1%E8%AF%B7%E6%B1%82%E7%9A%84%E6%89%80%E6%9C%89%E6%97%A5%E5%BF%97%EF%BC%9F/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><strong>大家好，我是不才陈某~</strong></p>
-<p>出现故障时，我们经常需要获取一次请求流程里的所有日志进行<strong>定位</strong>。</p>
-<p>如果请求只在一个线程里处理，则我们可以通过线程ID来<strong>过滤日志</strong>，但如果请求包含异步线程的处理，那么光靠线程ID就显得捉襟见肘了。</p>
-<p>华为IoT平台，提供了接收设备上报数据的能力， 当数据到达平台后，平台会进行一些复杂的业务逻辑处理，如数据存储，规则引擎，数据推送，命令下发等等。由于这个逻辑之间没有强耦合的关系，所以通常是异步处理。如何将一次数据上报请求中包含的所有业务日志快速过滤出来，就是本文要介绍的。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/11/18/%E7%94%A9%E9%94%85%E7%A5%9E%E5%99%A8%EF%BC%9A%E5%A6%82%E4%BD%95%E5%BF%AB%E9%80%9F%E8%BF%87%E6%BB%A4%E5%87%BA%E4%B8%80%E6%AC%A1%E8%AF%B7%E6%B1%82%E7%9A%84%E6%89%80%E6%9C%89%E6%97%A5%E5%BF%97%EF%BC%9F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1262,7 +1269,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">128</span>
+          <span class="site-state-item-count">129</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1275,7 +1282,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">64</span>
+        <span class="site-state-item-count">65</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

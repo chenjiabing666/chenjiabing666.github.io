@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"chenjiabing666.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="大家好，我是不才陈某~ 这是《Spring Security 进阶》的第4篇文章，往期文章如下：  实战！Spring Boot Security+JWT前后端分离架构登录认证！ 妹子始终没搞懂OAuth2.0，今天整合Spring Cloud Security 一次说明白！ OAuth2.0实战！使用JWT令牌认证！  文章都是成体系的，陈某默认看到这篇文章的读者都已经看了前期的文章，之前的知识">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OAuth2.0实战！玩转认证、资源服务异常自定义这些骚操作！">
+<meta property="og:url" content="https://chenjiabing666.github.io/2021/12/08/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E7%8E%A9%E8%BD%AC%E8%AE%A4%E8%AF%81%E3%80%81%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BF%99%E4%BA%9B%E9%AA%9A%E6%93%8D%E4%BD%9C%EF%BC%81/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="大家好，我是不才陈某~ 这是《Spring Security 进阶》的第4篇文章，往期文章如下：  实战！Spring Boot Security+JWT前后端分离架构登录认证！ 妹子始终没搞懂OAuth2.0，今天整合Spring Cloud Security 一次说明白！ OAuth2.0实战！使用JWT令牌认证！  文章都是成体系的，陈某默认看到这篇文章的读者都已经看了前期的文章，之前的知识">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/141.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/142.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/143.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/106.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/107.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/108.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/109.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/110.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/111.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/112.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/113.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/114.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/115.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/116.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/117.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/118.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/119.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/120.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/121.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/122.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/110.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/126.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/125.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/127.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/128.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/129.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/130.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/132.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/133.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/134.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/135.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/136.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/137.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/138.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/139.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/140.png">
+<meta property="article:published_time" content="2021-12-08T13:10:00.000Z">
+<meta property="article:modified_time" content="2021-12-08T13:11:00.131Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="Spring Security">
+<meta property="article:tag" content="OAuth2.0">
+<meta property="article:tag" content="实战">
+<meta property="article:tag" content="自定义异常">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/141.png">
+
+<link rel="canonical" href="https://chenjiabing666.github.io/2021/12/08/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E7%8E%A9%E8%BD%AC%E8%AE%A4%E8%AF%81%E3%80%81%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BF%99%E4%BA%9B%E9%AA%9A%E6%93%8D%E4%BD%9C%EF%BC%81/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>OAuth2.0实战！玩转认证、资源服务异常自定义这些骚操作！ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+		<div id="container">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/12/08/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E7%8E%A9%E8%BD%AC%E8%AE%A4%E8%AF%81%E3%80%81%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BF%99%E4%BA%9B%E9%AA%9A%E6%93%8D%E4%BD%9C%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OAuth2.0实战！玩转认证、资源服务异常自定义这些骚操作！
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-12-08 21:10:00 / 修改时间：21:11:00" itemprop="dateCreated datePublished" datetime="2021-12-08T21:10:00+08:00">2021-12-08</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Security-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Security 进阶</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/12/08/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E7%8E%A9%E8%BD%AC%E8%AE%A4%E8%AF%81%E3%80%81%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BF%99%E4%BA%9B%E9%AA%9A%E6%93%8D%E4%BD%9C%EF%BC%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/12/08/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E7%8E%A9%E8%BD%AC%E8%AE%A4%E8%AF%81%E3%80%81%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BF%99%E4%BA%9B%E9%AA%9A%E6%93%8D%E4%BD%9C%EF%BC%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><strong>大家好，我是不才陈某~</strong></p>
+<p>这是<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=2151150065472569352#wechat_redirect">《Spring Security 进阶》</a>的第<strong>4</strong>篇文章，往期文章如下：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502546&idx=1&sn=bfb6fd9d96d8c5bf107a4981ba5e1547&chksm=fcf7151fcb809c09b7ae29de8c0af0d00976539a46ee5f9bf583a6a7b196ea82f26ce98fd982&token=1622810645&lang=zh_CN#rd">实战！Spring Boot Security+JWT前后端分离架构登录认证！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502682&idx=1&sn=52a15b623ab6135c134b8262bd605946&chksm=fcf71497cb809d81f1d2dbce76b3e00170f085306b2a2a67a807a6d9e2cf03bf1de3b8f203a2&token=404376711&lang=zh_CN#rd">妹子始终没搞懂OAuth2.0，今天整合Spring Cloud Security 一次说明白！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502801&idx=1&sn=56b1af09bfa25d5e44193a7d75dfa623&chksm=fcf7141ccb809d0a1b0b2d7f6d9893c7d3e560dd8996296276f0274d2578236ee87e9124810d&token=867552718&lang=zh_CN#rd">OAuth2.0实战！使用JWT令牌认证！</a></li>
+</ul>
+<p>文章都是成体系的，陈某默认看到这篇文章的读者都已经看了前期的文章，之前的知识点就不再详细介绍了。</p>
+<p>今天这篇文章主要介绍一下实际工作中使用Spring Security需要定制的一些异常信息。</p>
+<p>文章目录如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/141.png"></p>
+<span id="more"></span>
+
+<h2 id="案例服务搭建"><a href="#案例服务搭建" class="headerlink" title="案例服务搭建"></a>案例服务搭建</h2><p>此篇文章沿用上篇文章的认证、资源服务，如下：</p>
+<p><strong>1、认证服务oauth2-auth-server-jwt</strong></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/142.png"></p>
+<p><strong>2、资源服务oauth2-auth-resource-jwt</strong></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/143.png"></p>
+<blockquote>
+<p>案例源码已经上传GitHub，关注公众号：<strong>码猿技术专栏</strong>，回复关键词：<strong>9529</strong> 获取！</p>
+</blockquote>
+<h2 id="认证服务的异常"><a href="#认证服务的异常" class="headerlink" title="认证服务的异常"></a>认证服务的异常</h2><p>先来看一下正确的获取令牌的请求，以<strong>密码模式</strong>为例，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/106.png"></p>
+<p>密码模式需要传递<strong>5</strong>个参数，分别是<strong>用户名</strong>、<strong>密码</strong>、<strong>客户端id</strong>，<strong>客户端秘钥</strong>、<strong>授权类型</strong>。</p>
+<p><strong>那么问题来了：如果任意一个参数传错了，返回什么？</strong></p>
+<h3 id="1、用户名、密码错误"><a href="#1、用户名、密码错误" class="headerlink" title="1、用户名、密码错误"></a><strong>1、用户名、密码错误</strong></h3><p>故意输错用户名或者密码，返回信息如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/107.png"></p>
+<h3 id="2、授权类型错误"><a href="#2、授权类型错误" class="headerlink" title="2、授权类型错误"></a><strong>2、授权类型错误</strong></h3><p>输入一个不存在的授权类型，返回信息如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/108.png"></p>
+<h3 id="3、客户端ID，秘钥错误"><a href="#3、客户端ID，秘钥错误" class="headerlink" title="3、客户端ID，秘钥错误"></a><strong>3、客户端ID，秘钥错误</strong></h3><p>输入错误的客户端id或者秘钥，返回信息如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/109.png"></p>
+<p><strong>感觉如何？是不是很酸爽？很显然这返回的信息不适合前后端交互，别着急，下面介绍解决方案</strong></p>
+<h2 id="认证服务自定义异常信息"><a href="#认证服务自定义异常信息" class="headerlink" title="认证服务自定义异常信息"></a>认证服务自定义异常信息</h2><p>上面列举了三种常见的异常，解决方案实际可以分为两种：</p>
+<ul>
+<li>用户名，密码错误异常、授权类型异常</li>
+<li>客户端ID、秘钥异常</li>
+</ul>
+<p><strong>陈某这里针对这两种异常先上解决方案，后面再从源码解释为什么这么做？</strong></p>
+<h3 id="1、用户名，密码错误异常、授权类型异常"><a href="#1、用户名，密码错误异常、授权类型异常" class="headerlink" title="1、用户名，密码错误异常、授权类型异常"></a><strong>1、用户名，密码错误异常、授权类型异常</strong></h3><p>针对用户名、密码、授权类型错误的异常解决方式比较复杂，需要定制的比较多。</p>
+<p><strong>1、定制提示信息、响应码</strong></p>
+<p>这部分根据自己业务需要定制，陈某这里只是给出个例子，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/110.png"></p>
+<p><strong>2、自定义WebResponseExceptionTranslator</strong></p>
+<p>需要自定义一个异常翻译器，默认的是<strong>DefaultWebResponseExceptionTranslator</strong>，此处必须重写，其中有一个需要实现的方法，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">ResponseEntity&lt;T&gt; <span class="title">translate</span><span class="params">(Exception e)</span> <span class="keyword">throws</span> Exception</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这个方法就是根据传递过来的<strong>Exception</strong>判断不同的异常返回特定的信息，这里需要判断的异常的如下：</p>
+<ul>
+<li><strong>UnsupportedGrantTypeException</strong>：不支持的授权类型异常</li>
+<li><strong>InvalidGrantException</strong>：用户名或者密码错误的异常</li>
+</ul>
+<p>创建一个<strong>OAuthServerWebResponseExceptionTranslator</strong>实现<strong>WebResponseExceptionTranslator</strong>，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/111.png"></p>
+<p><strong>3、认证服务配置文件中配置</strong></p>
+<p>需要将自定义的异常翻译器<strong>OAuthServerWebResponseExceptionTranslator</strong>在配置文件中配置，很简单，一行代码的事。</p>
+<p>在<strong>AuthorizationServerConfig</strong>配置文件指定，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/112.png"></p>
+<blockquote>
+<p>案例源码已经上传GitHub，关注公众号：<strong>码猿技术专栏</strong>，回复关键词：<strong>9529</strong> 获取！</p>
+</blockquote>
+<p><strong>4、测试</strong></p>
+<p>按照上述的配置完成后，测试下用户名、密码错误、授权类型错误是否能够正确返回定制的提示信息，如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/113.png" alt="用户名、密码错误"></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/114.png" alt="授权类型不支持"></p>
+<p><strong>5、源码追踪</strong></p>
+<p>实践有了，总该理解一下为什么这么做吧？下面从源码的角度告诉你为什么要这么做？</p>
+<p>我们知道获取令牌的接口为**/oauth/token<strong>，这个接口定义在</strong>TokenEndpoint#postAccessToken()**（POST请求）方法中，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/115.png"></p>
+<p><strong>我们先不看其中的逻辑，平时我们写接口的异常怎么处理？</strong></p>
+<p>一般都是通过**@ExceptionHandler**特定的异常，然后统一的进行异常处理，是不是这样？</p>
+<p>然后看一下上述的两种异常属于什么类型的，如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/116.png" alt="UnsupportedGrantTypeException"></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/117.png" alt="InvalidGrantException"></p>
+<p>是不是都继承了<strong>OAuth2Exception</strong>，那么尝试在<strong>TokenEndpoint</strong>这个类中找找有没有处理<strong>OAuth2Exception</strong>这个异常的处理器，果然找到了一个**handleException()**方法，如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/118.png"></p>
+<p>可以看到，这里的异常翻译器已经使用了我们自定义的<strong>OAuthServerWebResponseExceptionTranslator</strong>。可以看下默认的异常翻译器是啥，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/119.png"></p>
+<p>看到没，就是这个<strong>DefaultWebResponseExceptionTranslator</strong></p>
+<p>问题又来了：<strong>为什么在配置文件中设置了OAuthServerWebResponseExceptionTranslator就会生效呢？</strong></p>
+<p>这个不得不看下**@EnableAuthorizationServer**这个注解了，源码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/120.png"></p>
+<p>注入了这个<strong>AuthorizationServerEndpointsConfiguration</strong>配置类，其中注入了<strong>AuthorizationEndpoint</strong>这个bean，如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/121.png"></p>
+<p>将自定义的异常翻译器设置进入了<strong>AbstractEndpoint</strong>这个抽象类中，而<strong>TokenEndpoint</strong>正是继承了这个抽象类，复用了其中的异常翻译器，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/122.png">\</p>
+<p>哦了，问题解决了，学东西一定要知其所以然……………</p>
+<h3 id="2、客户端ID、秘钥异常"><a href="#2、客户端ID、秘钥异常" class="headerlink" title="2、客户端ID、秘钥异常"></a><strong>2、客户端ID、秘钥异常</strong></h3><p>这部分比较复杂，想要理解还是需要些基础的，解决这个异常的方案很多，陈某只是介绍其中一种，下面详细介绍。</p>
+<p><strong>1、定制提示信息、响应码</strong></p>
+<p>这部分根据自己业务需要定制，陈某这里只是给出个例子，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/110.png"></p>
+<p><strong>2、自定义AuthenticationEntryPoint</strong></p>
+<p>这个<strong>AuthenticationEntryPoint</strong>是不是很熟悉，前面的文章已经介绍过了，此处需要自定义来返回定制的提示信息。</p>
+<p>创建<strong>OAuthServerAuthenticationEntryPoint</strong>，实现AuthenticationEntryPoint，重写其中的方法，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/126.png"></p>
+<p><strong>3、改造ClientCredentialsTokenEndpointFilter</strong></p>
+<p><strong>ClientCredentialsTokenEndpointFilter</strong>这个过滤器的主要作用就是校验客户端的ID、秘钥，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/125.png"></p>
+<p>有几个重要的部分需要讲一下，如下：</p>
+<ul>
+<li>构造方法中需要传入第2步自定义的<strong>OAuthServerAuthenticationEntryPoint</strong></li>
+<li>重写**getAuthenticationManager()**方法返回IOC中的AuthenticationManager</li>
+<li>重写<strong>afterPropertiesSet()<strong>方法，用于自定义认证失败、成功处理器，失败处理器中调用</strong>OAuthServerAuthenticationEntryPoint</strong>进行异常提示信息返回</li>
+</ul>
+<p><strong>4、OAuth配置文件中指定过滤器</strong></p>
+<p>只需要将自定义的过滤器添加到<strong>AuthorizationServerSecurityConfigurer</strong>中，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/127.png"></p>
+<p>第<strong>①</strong>部分是添加过滤器，其中<strong>authenticationEntryPoint</strong>使用的是第2步自定义的<strong>OAuthServerAuthenticationEntryPoint</strong></p>
+<p>第<strong>②</strong>部分一定要注意：一定要去掉这行代码，具体原因源码解释。</p>
+<blockquote>
+<p>案例源码已经上传GitHub，关注公众号：<strong>码猿技术专栏</strong>，回复关键词：<strong>9529</strong> 获取！</p>
+</blockquote>
+<p><strong>5、测试</strong></p>
+<p>直接输入错误的秘钥，结果如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/128.png"></p>
+<p><strong>6、源码追踪</strong></p>
+<p><strong>1、OAuthServerAuthenticationEntryPoint在何时调用？</strong></p>
+<p>OAuthServerAuthenticationEntryPoint这个过滤器继承了<strong>AbstractAuthenticationProcessingFilter</strong>这个抽象类，一切的逻辑都在**doFilter()**中，陈某简化了其中的关键代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doFilter</span><span class="params">(ServletRequest req, ServletResponse res, FilterChain chain)</span></span></span><br><span class="line"><span class="function">			<span class="keyword">throws</span> IOException, ServletException </span>&#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        	<span class="comment">//调用子类的attemptAuthentication方法，获取参数并且认证</span></span><br><span class="line">			authResult = attemptAuthentication(request, response);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">catch</span> (InternalAuthenticationServiceException failed) &#123;</span><br><span class="line">            <span class="comment">//一旦认证异常，则调用unsuccessfulAuthentication方法，通过failureHandler处理</span></span><br><span class="line">			unsuccessfulAuthentication(request, response, failed);</span><br><span class="line">			<span class="keyword">return</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">catch</span> (AuthenticationException failed) &#123;</span><br><span class="line">            <span class="comment">//一旦认证异常，则调用unsuccessfulAuthentication方法，通过failureHandler处理</span></span><br><span class="line">			unsuccessfulAuthentication(request, response, failed);</span><br><span class="line">			<span class="keyword">return</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//认证成功，则调用successHandler处理</span></span><br><span class="line">		successfulAuthentication(request, response, chain, authResult);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>关键代码在**unsuccessfulAuthentication()**这个方法中，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/129.png"></p>
+<p><strong>2、自定义的过滤器如何生效的？</strong></p>
+<p>这个就要看**AuthorizationServerSecurityConfigurer#configure()**这个方法了，其中有一段代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/130.png"></p>
+<p>这段代码就是遍历添加的过滤器将其添加到<strong>过滤器链</strong>中，在<strong>BasicAuthenticationFilter</strong>这个过滤器之前。</p>
+<p>添加到security的过滤器链中，这个过滤器自然会生效了。</p>
+<p><strong>3、为什么不能加.allowFormAuthenticationForClients()？</strong></p>
+<p>还是在<strong>AuthorizationServerSecurityConfigurer#configure()<strong>这个方法中，一旦设置了</strong>allowFormAuthenticationForClients</strong>为true，则会创建<strong>ClientCredentialsTokenEndpointFilter</strong>，此时自定义的自然失效了。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/132.png"></p>
+<h2 id="资源服务器的异常"><a href="#资源服务器的异常" class="headerlink" title="资源服务器的异常"></a>资源服务器的异常</h2><p>从认证服务获取到令牌之后去请求资源服务的资源，这里涉及到的异常主要有两个，如下：</p>
+<h3 id="1、令牌失效"><a href="#1、令牌失效" class="headerlink" title="1、令牌失效"></a><strong>1、令牌失效</strong></h3><p>比如令牌不正确、过期，此时返回的异常提示如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/133.png"></p>
+<h3 id="2、权限不足"><a href="#2、权限不足" class="headerlink" title="2、权限不足"></a><strong>2、权限不足</strong></h3><p>令牌的权限不足，比如**/admin<strong>接口只允许</strong>admin**角色访问，此时返回的异常信息如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/134.png"></p>
+<h2 id="资源服务自定义异常信息"><a href="#资源服务自定义异常信息" class="headerlink" title="资源服务自定义异常信息"></a>资源服务自定义异常信息</h2><p>下面针对上述两种异常分别定制异常提示信息，这个比认证服务定制简单。</p>
+<h3 id="1、令牌失效-1"><a href="#1、令牌失效-1" class="headerlink" title="1、令牌失效"></a>1、令牌失效</h3><p>这个比较简单，也是需要自定义<strong>AuthenticationEntryPoint</strong>。步骤如下：</p>
+<p><strong>1、自定义AuthenticationEntryPoint</strong></p>
+<p>这个和认证服务的客户端异常类似，这里不再详细说了，直接贴代码，如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/135.png"></p>
+<p><strong>2、OAuth配置文件中配置</strong></p>
+<p>这个比较简单，直接在配置文件中配置即可，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/136.png"></p>
+<p><strong>3、测试</strong></p>
+<p>此时拿着失效的令牌访问资源服务，可以看到已经正常返回定制的提示信息了，如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/137.png"></p>
+<p>源码和认证服务的类似，自己断点试试，还是很简单的。</p>
+<blockquote>
+<p>案例源码已经上传GitHub，关注公众号：<strong>码猿技术专栏</strong>，回复关键词：<strong>9529</strong> 获取！</p>
+</blockquote>
+<h3 id="2、权限不足-1"><a href="#2、权限不足-1" class="headerlink" title="2、权限不足"></a>2、权限不足</h3><p>这个异常定制就更简单了，陈某在第一篇文章：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502546&idx=1&sn=bfb6fd9d96d8c5bf107a4981ba5e1547&chksm=fcf7151fcb809c09b7ae29de8c0af0d00976539a46ee5f9bf583a6a7b196ea82f26ce98fd982&token=1622810645&lang=zh_CN#rd">实战！Spring Boot Security+JWT前后端分离架构登录认证！</a>介绍过，下面简单的贴下代码。</p>
+<p><strong>1、自定义AccessDeniedHandler</strong></p>
+<p>代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/138.png"></p>
+<p><strong>2、OAuth配置文件中配置</strong></p>
+<p>和令牌失效的异常配置在同一个方法中，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/139.png"></p>
+<p><strong>3、测试</strong></p>
+<p>访问**/admin**接口，此时的提示信息如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/140.png"></p>
+<blockquote>
+<p>案例源码已经上传GitHub，关注公众号：<strong>码猿技术专栏</strong>，回复关键词：<strong>9529</strong> 获取！</p>
+</blockquote>
+<h2 id="最后说一句（别白嫖，求关注）"><a href="#最后说一句（别白嫖，求关注）" class="headerlink" title="最后说一句（别白嫖，求关注）"></a>最后说一句（别白嫖，求关注）</h2><p>陈某每一篇文章都是精心输出，已经写了<strong>3个专栏</strong>，整理成<strong>PDF</strong>，获取方式如下：</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=2042874937312346114#wechat_redirect">《Spring Cloud 进阶》</a>PDF：关注公众号：【<strong>码猿技术专栏</strong>】回复关键词 <strong>Spring Cloud 进阶</strong> 获取！</li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=1532834475389288449#wechat_redirect">《Spring Boot 进阶》</a>PDF：关注公众号：【<strong>码猿技术专栏</strong>】回复关键词 <strong>Spring Boot进阶</strong> 获取！</li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=1500819225232343046#wechat_redirect">《Mybatis 进阶》</a>PDF：关注公众号：【<strong>码猿技术专栏</strong>】回复关键词 <strong>Mybatis 进阶</strong> 获取！</li>
+</ol>
+<p>如果这篇文章对你有所帮助，或者有所启发的话，帮忙<strong>点赞</strong>、<strong>在看</strong>、<strong>转发</strong>、<strong>收藏</strong>，你的支持就是我坚持下去的最大动力！</p>
+<p>关注公众号：<strong>【码猿技术专栏】</strong>，公众号内有超赞的粉丝福利，回复：<strong>加群</strong>，可以加入技术讨论群，和大家一起讨论技术，吹牛逼！</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    不才陈某  |  微信公众号【码猿技术专栏】
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://chenjiabing666.github.io/2021/12/08/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E7%8E%A9%E8%BD%AC%E8%AE%A4%E8%AF%81%E3%80%81%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BF%99%E4%BA%9B%E9%AA%9A%E6%93%8D%E4%BD%9C%EF%BC%81/" title="OAuth2.0实战！玩转认证、资源服务异常自定义这些骚操作！">https://chenjiabing666.github.io/2021/12/08/OAuth2-0实战！玩转认证、资源服务异常自定义这些骚操作！/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+  <li class="post-copyright-license">
+    并保留本声明和上方二维码。感谢您的阅读和支持！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">微信公众号</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Spring-Security/" rel="tag"># Spring Security</a>
+              <a href="/tags/OAuth2-0/" rel="tag"># OAuth2.0</a>
+              <a href="/tags/%E5%AE%9E%E6%88%98/" rel="tag"># 实战</a>
+              <a href="/tags/%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BC%82%E5%B8%B8/" rel="tag"># 自定义异常</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/12/05/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E4%BD%BF%E7%94%A8JWT%E4%BB%A4%E7%89%8C%E8%AE%A4%E8%AF%81%EF%BC%81/" rel="prev" title="OAuth2.0实战！使用JWT令牌认证！">
+      <i class="fa fa-chevron-left"></i> OAuth2.0实战！使用JWT令牌认证！
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+		  <script src="https://readmore.openwrite.cn/js/readmore.js" type="text/javascript"></script>
+<script>
+    const btw = new BTWPlugin();
+    btw.init({
+        id: 'container',
+        blogId: '27513-1629019452485-311',
+        name: '码猿技术专栏',
+        qrcode: 'https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg',
+        keyword: 'vip',
+    });
+</script>
+        </div>
+		</div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B%E6%9C%8D%E5%8A%A1%E6%90%AD%E5%BB%BA"><span class="nav-text">案例服务搭建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%A4%E8%AF%81%E6%9C%8D%E5%8A%A1%E7%9A%84%E5%BC%82%E5%B8%B8"><span class="nav-text">认证服务的异常</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E7%94%A8%E6%88%B7%E5%90%8D%E3%80%81%E5%AF%86%E7%A0%81%E9%94%99%E8%AF%AF"><span class="nav-text">1、用户名、密码错误</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E6%8E%88%E6%9D%83%E7%B1%BB%E5%9E%8B%E9%94%99%E8%AF%AF"><span class="nav-text">2、授权类型错误</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E5%AE%A2%E6%88%B7%E7%AB%AFID%EF%BC%8C%E7%A7%98%E9%92%A5%E9%94%99%E8%AF%AF"><span class="nav-text">3、客户端ID，秘钥错误</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%A4%E8%AF%81%E6%9C%8D%E5%8A%A1%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BC%82%E5%B8%B8%E4%BF%A1%E6%81%AF"><span class="nav-text">认证服务自定义异常信息</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E7%94%A8%E6%88%B7%E5%90%8D%EF%BC%8C%E5%AF%86%E7%A0%81%E9%94%99%E8%AF%AF%E5%BC%82%E5%B8%B8%E3%80%81%E6%8E%88%E6%9D%83%E7%B1%BB%E5%9E%8B%E5%BC%82%E5%B8%B8"><span class="nav-text">1、用户名，密码错误异常、授权类型异常</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E5%AE%A2%E6%88%B7%E7%AB%AFID%E3%80%81%E7%A7%98%E9%92%A5%E5%BC%82%E5%B8%B8"><span class="nav-text">2、客户端ID、秘钥异常</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%BC%82%E5%B8%B8"><span class="nav-text">资源服务器的异常</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E4%BB%A4%E7%89%8C%E5%A4%B1%E6%95%88"><span class="nav-text">1、令牌失效</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E6%9D%83%E9%99%90%E4%B8%8D%E8%B6%B3"><span class="nav-text">2、权限不足</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BC%82%E5%B8%B8%E4%BF%A1%E6%81%AF"><span class="nav-text">资源服务自定义异常信息</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E4%BB%A4%E7%89%8C%E5%A4%B1%E6%95%88-1"><span class="nav-text">1、令牌失效</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E6%9D%83%E9%99%90%E4%B8%8D%E8%B6%B3-1"><span class="nav-text">2、权限不足</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%90%8E%E8%AF%B4%E4%B8%80%E5%8F%A5%EF%BC%88%E5%88%AB%E7%99%BD%E5%AB%96%EF%BC%8C%E6%B1%82%E5%85%B3%E6%B3%A8%EF%BC%89"><span class="nav-text">最后说一句（别白嫖，求关注）</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="不才陈某"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">129</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">65</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png" title="微信公众号 → https:&#x2F;&#x2F;gitee.com&#x2F;chenjiabing666&#x2F;BlogImage&#x2F;raw&#x2F;master&#x2F;myjszl_log.png" rel="noopener" target="_blank"><i class="fab fa-weixin fa-fw"></i>微信公众号</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.im/user/2506542244708072" title="掘金 → https:&#x2F;&#x2F;juejin.im&#x2F;user&#x2F;2506542244708072" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>掘金</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某|公众号：码猿技术专栏</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RtlQOgOT3M0hgyMeogykSQjT-gzGzoHsz',
+      appKey     : 'vSCxLU88wnXVf0Pa8mwJrCPm',
+      placeholder: "欢迎关注博主微信公众号【码猿技术专栏】",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
