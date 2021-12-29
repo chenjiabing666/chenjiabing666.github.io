@@ -188,6 +188,108 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/10/24/%E5%AF%B9%E6%AF%947%E7%A7%8D%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%96%B9%E6%A1%88%EF%BC%8C%E8%BF%98%E6%98%AF%E5%81%8F%E7%88%B1%E9%98%BF%E9%87%8C%E5%BC%80%E6%BA%90%E7%9A%84Seata%EF%BC%8C%E7%9C%9F%E9%A6%99%EF%BC%81-%E5%8E%9F%E7%90%86-%E5%AE%9E%E6%88%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/10/24/%E5%AF%B9%E6%AF%947%E7%A7%8D%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%96%B9%E6%A1%88%EF%BC%8C%E8%BF%98%E6%98%AF%E5%81%8F%E7%88%B1%E9%98%BF%E9%87%8C%E5%BC%80%E6%BA%90%E7%9A%84Seata%EF%BC%8C%E7%9C%9F%E9%A6%99%EF%BC%81-%E5%8E%9F%E7%90%86-%E5%AE%9E%E6%88%98/" class="post-title-link" itemprop="url">对比7种分布式事务方案，还是偏爱阿里开源的Seata，真香！(原理+实战)</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-10-24 22:17:17 / 修改时间：22:18:29" itemprop="dateCreated datePublished" datetime="2021-10-24T22:17:17+08:00">2021-10-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Cloud-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Cloud 进阶</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/10/24/%E5%AF%B9%E6%AF%947%E7%A7%8D%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%96%B9%E6%A1%88%EF%BC%8C%E8%BF%98%E6%98%AF%E5%81%8F%E7%88%B1%E9%98%BF%E9%87%8C%E5%BC%80%E6%BA%90%E7%9A%84Seata%EF%BC%8C%E7%9C%9F%E9%A6%99%EF%BC%81-%E5%8E%9F%E7%90%86-%E5%AE%9E%E6%88%98/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/10/24/%E5%AF%B9%E6%AF%947%E7%A7%8D%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%96%B9%E6%A1%88%EF%BC%8C%E8%BF%98%E6%98%AF%E5%81%8F%E7%88%B1%E9%98%BF%E9%87%8C%E5%BC%80%E6%BA%90%E7%9A%84Seata%EF%BC%8C%E7%9C%9F%E9%A6%99%EF%BC%81-%E5%8E%9F%E7%90%86-%E5%AE%9E%E6%88%98/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>先和大家分享一个好消息：10月初陈某的粉丝数破<strong>一万</strong>了，非常感谢各位读者的支持！</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/54.png"></p>
+<p>这是《Spring Cloud 进阶》专栏的第六篇文章，往期文章如下：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247493854&idx=1&sn=4b3fb7f7e17a76000733899f511ef915&scene=21#wechat_redirect">五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247496653&idx=1&sn=7185077b3bdc1d094aef645d677ec472&scene=21#wechat_redirect">openFeign夺命连环9问，这谁受得了？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/S_8HQYHOG624Vzeu94CFSA">阿里面试这样问：Nacos、Apollo、Config配置中心如何选型？这10个维度告诉你！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/YKzYdMu-7nwszEf9-1M3Uw">阿里面试败北：5种微服务注册中心如何选型？这几个维度告诉你！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/Q7Xv8cypQFrrOQhbd9BOXw">阿里限流神器Sentinel夺命连环 17 问？</a></li>
+</ul>
+<p>这篇文章主要介绍一些目前主流的几种分布式解决方案以及阿里开源的一站式分布式解决方案Seata。</p>
+<p>文章有点长，耐心看完，看完你还不懂分布式事务，欢迎来捶我……………</p>
+<p>文章目录如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/55.png"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/10/24/%E5%AF%B9%E6%AF%947%E7%A7%8D%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E6%96%B9%E6%A1%88%EF%BC%8C%E8%BF%98%E6%98%AF%E5%81%8F%E7%88%B1%E9%98%BF%E9%87%8C%E5%BC%80%E6%BA%90%E7%9A%84Seata%EF%BC%8C%E7%9C%9F%E9%A6%99%EF%BC%81-%E5%8E%9F%E7%90%86-%E5%AE%9E%E6%88%98/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/10/08/%E9%98%BF%E9%87%8C%E9%99%90%E6%B5%81%E7%A5%9E%E5%99%A8Sentinel%E5%85%A5%E9%97%A8%E5%A4%A7%E5%85%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1078,96 +1180,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/09/07/%E5%91%8A%E5%88%ABswagger-ui-%E6%88%91%E9%80%89%E6%8B%A9%E4%BA%86%E8%BF%99%E6%AC%BE%E7%A5%9E%E5%99%A8%EF%BC%81/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/09/07/%E5%91%8A%E5%88%ABswagger-ui-%E6%88%91%E9%80%89%E6%8B%A9%E4%BA%86%E8%BF%99%E6%AC%BE%E7%A5%9E%E5%99%A8%EF%BC%81/" class="post-title-link" itemprop="url">告别swagger-ui,我选择了knife4j这款神器！</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-09-07 13:42:24 / 修改时间：13:44:17" itemprop="dateCreated datePublished" datetime="2021-09-07T13:42:24+08:00">2021-09-07</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">开发工具</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2021/09/07/%E5%91%8A%E5%88%ABswagger-ui-%E6%88%91%E9%80%89%E6%8B%A9%E4%BA%86%E8%BF%99%E6%AC%BE%E7%A5%9E%E5%99%A8%EF%BC%81/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2021/09/07/%E5%91%8A%E5%88%ABswagger-ui-%E6%88%91%E9%80%89%E6%8B%A9%E4%BA%86%E8%BF%99%E6%AC%BE%E7%A5%9E%E5%99%A8%EF%BC%81/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="一、介绍"><a href="#一、介绍" class="headerlink" title="一、介绍"></a>一、介绍</h2><p>knife4j是为Java MVC框架集成Swagger生成Api文档的增强解决方案（在非Java项目中也提供了前端UI的增强解决方案），前身是swagger-bootstrap-ui,取名knife4j是希望她能像一把匕首一样小巧,轻量,并且功能强悍!</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%91%8A%E5%88%AB%20swagger-ui%20%EF%BC%8C%E6%88%91%E9%80%89%E6%8B%A9%E4%BA%86%E8%BF%99%E6%AC%BE%E7%A5%9E%E5%99%A8%EF%BC%81/1.png"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/09/07/%E5%91%8A%E5%88%ABswagger-ui-%E6%88%91%E9%80%89%E6%8B%A9%E4%BA%86%E8%BF%99%E6%AC%BE%E7%A5%9E%E5%99%A8%EF%BC%81/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1251,7 +1263,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">131</span>
+          <span class="site-state-item-count">132</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
