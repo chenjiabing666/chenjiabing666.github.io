@@ -188,6 +188,106 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/20/%E3%80%8AMybatis%E8%BF%9B%E9%98%B6%E3%80%8B%E8%82%9D%E4%BA%8630%E5%A4%A9%E4%B8%93%E6%A0%8F%E6%96%87%E7%AB%A0%EF%BC%8C%E6%95%B4%E7%90%86%E6%88%90%E5%86%8C%EF%BC%81%EF%BC%81%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/04/20/%E3%80%8AMybatis%E8%BF%9B%E9%98%B6%E3%80%8B%E8%82%9D%E4%BA%8630%E5%A4%A9%E4%B8%93%E6%A0%8F%E6%96%87%E7%AB%A0%EF%BC%8C%E6%95%B4%E7%90%86%E6%88%90%E5%86%8C%EF%BC%81%EF%BC%81%EF%BC%81/" class="post-title-link" itemprop="url">《Mybatis进阶》肝了30天专栏文章，整理成册！！！</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-04-20 17:10:42" itemprop="dateCreated datePublished" datetime="2020-04-20T17:10:42+08:00">2020-04-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 21:55:19" itemprop="dateModified" datetime="2020-10-23T21:55:19+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Mybatis%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Mybatis进阶</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/04/20/%E3%80%8AMybatis%E8%BF%9B%E9%98%B6%E3%80%8B%E8%82%9D%E4%BA%8630%E5%A4%A9%E4%B8%93%E6%A0%8F%E6%96%87%E7%AB%A0%EF%BC%8C%E6%95%B4%E7%90%86%E6%88%90%E5%86%8C%EF%BC%81%EF%BC%81%EF%BC%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/04/20/%E3%80%8AMybatis%E8%BF%9B%E9%98%B6%E3%80%8B%E8%82%9D%E4%BA%8630%E5%A4%A9%E4%B8%93%E6%A0%8F%E6%96%87%E7%AB%A0%EF%BC%8C%E6%95%B4%E7%90%86%E6%88%90%E5%86%8C%EF%BC%81%EF%BC%81%EF%BC%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
+<li><p>Mybatis专栏文章写到至今已经有一个月了，从基础到源码详细的介绍了每个知识点，没什么多余的废话，全是工作、面试中常用到的姿势。有读者建议将文章汇总，这样方便阅读，于是特意花费了一天时间整理成册。</p>
+</li>
+<li><p><strong>全册总计92页，总计想3万多字，耗时30多天完成。</strong></p>
+</li>
+<li><p><strong>由于作者水平有限</strong>，如果书中有不理解和错误的内容，感谢及时把疑惑或意见提交给我，作者会及时修正。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/04/20/%E3%80%8AMybatis%E8%BF%9B%E9%98%B6%E3%80%8B%E8%82%9D%E4%BA%8630%E5%A4%A9%E4%B8%93%E6%A0%8F%E6%96%87%E7%AB%A0%EF%BC%8C%E6%95%B4%E7%90%86%E6%88%90%E5%86%8C%EF%BC%81%EF%BC%81%EF%BC%81/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/20/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E8%AE%B2%E4%B8%80%E8%AE%B2Mybatis%E6%8F%92%E4%BB%B6%E7%9A%84%E5%8E%9F%E7%90%86%E5%8F%8A%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%EF%BC%9F/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1121,102 +1221,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/20/Mybatis%E5%85%A5%E9%97%A8%E4%B9%8B%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C%EF%BC%81%EF%BC%81%EF%BC%81/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/04/20/Mybatis%E5%85%A5%E9%97%A8%E4%B9%8B%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C%EF%BC%81%EF%BC%81%EF%BC%81/" class="post-title-link" itemprop="url">Mybatis入门之基本操作！！！</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-04-20 16:59:42" itemprop="dateCreated datePublished" datetime="2020-04-20T16:59:42+08:00">2020-04-20</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-10-28 18:10:43" itemprop="dateModified" datetime="2020-10-28T18:10:43+08:00">2020-10-28</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Mybatis%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Mybatis进阶</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2020/04/20/Mybatis%E5%85%A5%E9%97%A8%E4%B9%8B%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C%EF%BC%81%EF%BC%81%EF%BC%81/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2020/04/20/Mybatis%E5%85%A5%E9%97%A8%E4%B9%8B%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C%EF%BC%81%EF%BC%81%EF%BC%81/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
-<li><p>作为一个资深后端码农天天都要和数据库打交道，最早使用的是 Hiberate，一个封装性极强的持久性框架。自从接触到 Mybatis 就被它的灵活性所折服了，可以自己写 SQL，虽然轻量级，但是麻雀虽小，五脏俱全。这篇文章就来讲讲什么是 Mybatis，如何简单的使用 Mybatis。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/04/20/Mybatis%E5%85%A5%E9%97%A8%E4%B9%8B%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C%EF%BC%81%EF%BC%81%EF%BC%81/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1300,7 +1304,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">132</span>
+          <span class="site-state-item-count">133</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1355,7 +1359,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

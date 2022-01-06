@@ -188,6 +188,99 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/11/28/%E5%AE%9E%E6%88%98%EF%BC%81SpringBootSecurity-JWT%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB%E6%9E%B6%E6%9E%84%E8%AE%A4%E8%AF%81%E7%99%BB%E5%BD%95%EF%BC%8C%E5%B1%85%E7%84%B6%E8%BF%98%E6%9C%89%E4%BA%BA%E4%B8%8D%E4%BC%9A%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/11/28/%E5%AE%9E%E6%88%98%EF%BC%81SpringBootSecurity-JWT%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB%E6%9E%B6%E6%9E%84%E8%AE%A4%E8%AF%81%E7%99%BB%E5%BD%95%EF%BC%8C%E5%B1%85%E7%84%B6%E8%BF%98%E6%9C%89%E4%BA%BA%E4%B8%8D%E4%BC%9A%EF%BC%9F/" class="post-title-link" itemprop="url">实战！Spring Boot Security+JWT前后端分离架构认证登录，居然还有人不会？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-11-28 15:32:33 / 修改时间：15:33:53" itemprop="dateCreated datePublished" datetime="2021-11-28T15:32:33+08:00">2021-11-28</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Security-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Security 进阶</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/11/28/%E5%AE%9E%E6%88%98%EF%BC%81SpringBootSecurity-JWT%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB%E6%9E%B6%E6%9E%84%E8%AE%A4%E8%AF%81%E7%99%BB%E5%BD%95%EF%BC%8C%E5%B1%85%E7%84%B6%E8%BF%98%E6%9C%89%E4%BA%BA%E4%B8%8D%E4%BC%9A%EF%BC%9F/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/11/28/%E5%AE%9E%E6%88%98%EF%BC%81SpringBootSecurity-JWT%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB%E6%9E%B6%E6%9E%84%E8%AE%A4%E8%AF%81%E7%99%BB%E5%BD%95%EF%BC%8C%E5%B1%85%E7%84%B6%E8%BF%98%E6%9C%89%E4%BA%BA%E4%B8%8D%E4%BC%9A%EF%BC%9F/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><strong>大家好，我是不才陈某~</strong></p>
+<p>认证、授权是实战项目中必不可少的部分，而Spring Security则将作为首选安全组件，因此陈某新开了 <a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=2151150065472569352#wechat_redirect">《Spring Security 进阶》</a> 这个专栏，写一写从单体架构到<strong>OAuth2</strong>分布式架构的认证授权。</p>
+<p>Spring security这里就不再过多介绍了，相信大家都用过，也都恐惧过，相比Shiro而言，Spring Security更加重量级，之前的SSM项目更多企业都是用的Shiro，但是Spring Boot出来之后，整合Spring Security更加方便了，用的企业也就多了。</p>
+<p>今天陈某就来介绍一下在前后端分离的项目中如何使用Spring Security进行登录认证。文章的目录如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/19.png"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/11/28/%E5%AE%9E%E6%88%98%EF%BC%81SpringBootSecurity-JWT%E5%89%8D%E5%90%8E%E7%AB%AF%E5%88%86%E7%A6%BB%E6%9E%B6%E6%9E%84%E8%AE%A4%E8%AF%81%E7%99%BB%E5%BD%95%EF%BC%8C%E5%B1%85%E7%84%B6%E8%BF%98%E6%9C%89%E4%BA%BA%E4%B8%8D%E4%BC%9A%EF%BC%9F/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/11/26/%E5%B7%A7%E7%94%A8java8%E7%9A%84Function%E6%B6%88%E7%81%ADif-else/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1074,109 +1167,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/10/31/SpringcloudGateway%E5%A4%BA%E5%91%BD%E8%BF%9E%E7%8E%AF10%E9%97%AE%EF%BC%9F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/10/31/SpringcloudGateway%E5%A4%BA%E5%91%BD%E8%BF%9E%E7%8E%AF10%E9%97%AE%EF%BC%9F/" class="post-title-link" itemprop="url">Spring Cloud Gateway夺命连环10问？</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-10-31 19:17:09 / 修改时间：19:19:03" itemprop="dateCreated datePublished" datetime="2021-10-31T19:17:09+08:00">2021-10-31</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Spring-Cloud-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Cloud 进阶</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2021/10/31/SpringcloudGateway%E5%A4%BA%E5%91%BD%E8%BF%9E%E7%8E%AF10%E9%97%AE%EF%BC%9F/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2021/10/31/SpringcloudGateway%E5%A4%BA%E5%91%BD%E8%BF%9E%E7%8E%AF10%E9%97%AE%EF%BC%9F/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><strong>大家好，我是不才陈某~</strong></p>
-<p>最近有很多小伙伴私信我催更 <a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=2042874937312346114&scene=126#wechat_redirect">《Spring Cloud 进阶》</a>，陈某也总结了一下，最终原因就是陈某之前力求一篇文章将一个组件重要知识点讲透，这样导致了文章篇幅很长，写的时间很长，小伙伴看的也累。</p>
-<p>因此陈某决定后续的文章将每个组件<strong>拆分</strong>成不同的部分，每篇文章介绍一两个知识点，这样既能提高出文效率，小伙伴们也能更上进度及时的学习。</p>
-<p>这是<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=2042874937312346114&scene=126#wechat_redirect">《Spring Cloud 进阶》</a>第<strong>七</strong>篇文章，往期文章如下：</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247493854&idx=1&sn=4b3fb7f7e17a76000733899f511ef915&scene=21#wechat_redirect">五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？</a></li>
-<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247496653&idx=1&sn=7185077b3bdc1d094aef645d677ec472&scene=21#wechat_redirect">openFeign夺命连环9问，这谁受得了？</a></li>
-<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/S_8HQYHOG624Vzeu94CFSA">阿里面试这样问：Nacos、Apollo、Config配置中心如何选型？这10个维度告诉你！</a></li>
-<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/YKzYdMu-7nwszEf9-1M3Uw">阿里面试败北：5种微服务注册中心如何选型？这几个维度告诉你！</a></li>
-<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/Q7Xv8cypQFrrOQhbd9BOXw">阿里限流神器Sentinel夺命连环 17 问？</a></li>
-<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/sXVSFqq2UZ6Pwwt7vx7vIA">对比7种分布式事务方案，还是偏爱阿里开源的Seata，真香！(原理+实战)</a></li>
-</ul>
-<p>这篇文章介绍下微服务中的一个重要角色：网关，对于网关如何选择，由于阿里系暂时未出网关，当然是选择了Spring cloud Gateway，毕竟是亲儿子。</p>
-<p>文章目录如下：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/gateway/16.png"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/10/31/SpringcloudGateway%E5%A4%BA%E5%91%BD%E8%BF%9E%E7%8E%AF10%E9%97%AE%EF%BC%9F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1260,7 +1250,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">132</span>
+          <span class="site-state-item-count">133</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1315,7 +1305,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

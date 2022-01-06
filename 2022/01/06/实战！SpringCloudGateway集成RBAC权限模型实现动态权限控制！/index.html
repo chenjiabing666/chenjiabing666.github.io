@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"chenjiabing666.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="大家好，我是不才陈某~ 这是《Spring Cloud 进阶》第18篇文章，往期文章如下：  五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？ openFeign夺命连环9问，这谁受得了？ 阿里面试这样问：Nacos、Apollo、Config配置中心如何选型？这10个维度告诉你！ 阿里面试败北：5种微服务注册中心如何选型？这几个维度告诉你！ 阿里限流神器Sentinel夺命连环 17 问">
+<meta property="og:type" content="article">
+<meta property="og:title" content="实战！Spring Cloud Gateway集成 RBAC 权限模型实现动态权限控制！">
+<meta property="og:url" content="https://chenjiabing666.github.io/2022/01/06/%E5%AE%9E%E6%88%98%EF%BC%81SpringCloudGateway%E9%9B%86%E6%88%90RBAC%E6%9D%83%E9%99%90%E6%A8%A1%E5%9E%8B%E5%AE%9E%E7%8E%B0%E5%8A%A8%E6%80%81%E6%9D%83%E9%99%90%E6%8E%A7%E5%88%B6%EF%BC%81/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="大家好，我是不才陈某~ 这是《Spring Cloud 进阶》第18篇文章，往期文章如下：  五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？ openFeign夺命连环9问，这谁受得了？ 阿里面试这样问：Nacos、Apollo、Config配置中心如何选型？这10个维度告诉你！ 阿里面试败北：5种微服务注册中心如何选型？这几个维度告诉你！ 阿里限流神器Sentinel夺命连环 17 问">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/213.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/205.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/212.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/206.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/207.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/211.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/208.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/209.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/210.png">
+<meta property="article:published_time" content="2022-01-06T08:04:00.000Z">
+<meta property="article:modified_time" content="2022-01-06T08:05:32.969Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="微服务">
+<meta property="article:tag" content="网关">
+<meta property="article:tag" content="Spring Cloud Gateway">
+<meta property="article:tag" content="Spring Security">
+<meta property="article:tag" content="OAuth2.0">
+<meta property="article:tag" content="实战">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/213.png">
+
+<link rel="canonical" href="https://chenjiabing666.github.io/2022/01/06/%E5%AE%9E%E6%88%98%EF%BC%81SpringCloudGateway%E9%9B%86%E6%88%90RBAC%E6%9D%83%E9%99%90%E6%A8%A1%E5%9E%8B%E5%AE%9E%E7%8E%B0%E5%8A%A8%E6%80%81%E6%9D%83%E9%99%90%E6%8E%A7%E5%88%B6%EF%BC%81/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>实战！Spring Cloud Gateway集成 RBAC 权限模型实现动态权限控制！ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+		<div id="container">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2022/01/06/%E5%AE%9E%E6%88%98%EF%BC%81SpringCloudGateway%E9%9B%86%E6%88%90RBAC%E6%9D%83%E9%99%90%E6%A8%A1%E5%9E%8B%E5%AE%9E%E7%8E%B0%E5%8A%A8%E6%80%81%E6%9D%83%E9%99%90%E6%8E%A7%E5%88%B6%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          实战！Spring Cloud Gateway集成 RBAC 权限模型实现动态权限控制！
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-01-06 16:04:00 / 修改时间：16:05:32" itemprop="dateCreated datePublished" datetime="2022-01-06T16:04:00+08:00">2022-01-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Cloud-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Cloud 进阶</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2022/01/06/%E5%AE%9E%E6%88%98%EF%BC%81SpringCloudGateway%E9%9B%86%E6%88%90RBAC%E6%9D%83%E9%99%90%E6%A8%A1%E5%9E%8B%E5%AE%9E%E7%8E%B0%E5%8A%A8%E6%80%81%E6%9D%83%E9%99%90%E6%8E%A7%E5%88%B6%EF%BC%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2022/01/06/%E5%AE%9E%E6%88%98%EF%BC%81SpringCloudGateway%E9%9B%86%E6%88%90RBAC%E6%9D%83%E9%99%90%E6%A8%A1%E5%9E%8B%E5%AE%9E%E7%8E%B0%E5%8A%A8%E6%80%81%E6%9D%83%E9%99%90%E6%8E%A7%E5%88%B6%EF%BC%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><strong>大家好，我是不才陈某~</strong></p>
+<p>这是<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=2042874937312346114&scene=126#wechat_redirect">《Spring Cloud 进阶》</a><strong>第18篇</strong>文章，往期文章如下：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247493854&idx=1&sn=4b3fb7f7e17a76000733899f511ef915&scene=21#wechat_redirect">五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247496653&idx=1&sn=7185077b3bdc1d094aef645d677ec472&scene=21#wechat_redirect">openFeign夺命连环9问，这谁受得了？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/S_8HQYHOG624Vzeu94CFSA">阿里面试这样问：Nacos、Apollo、Config配置中心如何选型？这10个维度告诉你！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/YKzYdMu-7nwszEf9-1M3Uw">阿里面试败北：5种微服务注册中心如何选型？这几个维度告诉你！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/Q7Xv8cypQFrrOQhbd9BOXw">阿里限流神器Sentinel夺命连环 17 问？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/sXVSFqq2UZ6Pwwt7vx7vIA">对比7种分布式事务方案，还是偏爱阿里开源的Seata，真香！(原理+实战)</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247499894&idx=1&sn=f1606e4c00fd15292269afe052f5bca2&chksm=fcf71fbbcb8096ad349e6da50b0b9141964c2084d0a38eba977fe8baa3fbe8af3b20c7591110&token=1887105114&lang=zh_CN#rd">Spring Cloud Gateway夺命连环10问？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247500540&idx=1&sn=2967bf1f9fa2c4d5b94b7fe291b7869b&chksm=fcf71d31cb8094271b5bbeca85cc03cf7d7c8bbf7c4d5b83a539e39c956e3f4015f91e7742b6&token=2077958771&lang=zh_CN#rd">Spring Cloud Gateway 整合阿里 Sentinel网关限流实战！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247500757&idx=1&sn=ef71f10d5736029c92287f7894c842ed&chksm=fcf71c18cb80950ec3144d66957a9d2914b51b8af22cf59a1ca3f9e2b561a11aca359d50d5a1&scene=178&cur_album_id=2042874937312346114#rd">分布式链路追踪之Spring Cloud Sleuth夺命连环9问？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247501079&idx=1&sn=438ef3a3d65fb4919b61cf6972827bec&chksm=fcf71adacb8093ccc4c3d6dfb8860ca07aefbc761c1ed5126eb4a4e87548441841198db1f8e3&scene=178&cur_album_id=2042874937312346114#rd">链路追踪自从用了SkyWalking，睡的真香！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247501590&idx=1&sn=149d1498504cda7cc391413f14cda9c2&chksm=fcf718dbcb8091cd6907e86e148216bae0a2d5b1664b1e8cc2d3e2c96c38181cc778de5711b6&scene=178&cur_album_id=2042874937312346114#rd">3本书了，7万+字，10篇文章，《Spring Cloud 进阶》基础版 PDF</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502682&idx=1&sn=52a15b623ab6135c134b8262bd605946&chksm=fcf71497cb809d81f1d2dbce76b3e00170f085306b2a2a67a807a6d9e2cf03bf1de3b8f203a2&scene=178&cur_album_id=2042874937312346114#rd">妹子始终没搞懂OAuth2.0，今天整合Spring Cloud Security 一次说明白！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502801&idx=1&sn=56b1af09bfa25d5e44193a7d75dfa623&chksm=fcf7141ccb809d0a1b0b2d7f6d9893c7d3e560dd8996296276f0274d2578236ee87e9124810d&scene=178&cur_album_id=2042874937312346114#rd">OAuth2.0实战！使用JWT令牌认证！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502905&idx=1&sn=32ba3ae4e0a4097d238f64719c88b7f7&chksm=fcf713f4cb809ae2ccb706b8e9f8184739d3c7b97d388467bfe9ff31a8c15768b6de05054f08&scene=178&cur_album_id=2042874937312346114#rd">OAuth2.0实战！玩转认证、资源服务异常自定义这些骚操作！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247503249&idx=1&sn=b33ae3ff70a08b17ee0779d6ccb30b53&chksm=fcf7125ccb809b4aa4985da09e620e06c606754e6a72681c93dcc88bdc9aa7ba0cb64f52dbc3&token=1286998820&lang=zh_CN#rd">实战干货！Spring Cloud Gateway 整合 OAuth2.0 实现分布式统一认证授权！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247503263&idx=1&sn=edc475e36127792e35112c4746e53d37&chksm=fcf71252cb809b44d7ae246e9503e1d6b91b29965c0cd7ebfc7da9c1a098fe186cd977736c40&token=1144087588&lang=zh_CN#rd">字节面试这样问：跨库多表存在大量数据依赖问题有哪些解决方案？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&amp;mid=2247504322&amp;idx=1&amp;sn=4b0a2488a4edcb025d0694604e86f840&amp;chksm=fcf70e0fcb808719b98a65891bc08e9490db09f07debd4521052978a319ab052f8a72b93c1a7&token=284256295&lang=zh_CN#rd">实战！退出登录时如何借助外力使JWT令牌失效？</a></li>
+</ul>
+<p>这篇文章介绍下网关层如何集成RBAC权限模型进行认证鉴权，文章目录如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/213.png"></p>
+<span id="more"></span>
+
+<h2 id="什么是RBAC权限模型？"><a href="#什么是RBAC权限模型？" class="headerlink" title="什么是RBAC权限模型？"></a>什么是RBAC权限模型？</h2><p><strong>RBAC</strong>(Role-Based Access Control)<strong>基于角色访问控制</strong>，目前使用最为广泛的权限模型。</p>
+<p>相信大家对这种权限模型已经比较了解了。此模型有三个<strong>用户</strong>、<strong>角色</strong>和<strong>权限</strong>，在传统的权限模型用户直接关联加了角色层，解耦了用户和权限，使得权限系统有了更清晰的职责划分和更高的灵活度。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/205.png"></p>
+<p>以上五张表的SQL就不再详细贴出来了，都会放在案例源码的<strong>doc</strong>目录下，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/212.png"></p>
+<h2 id="设计思路"><a href="#设计思路" class="headerlink" title="设计思路"></a>设计思路</h2><p><strong>RBAC</strong>权限模型是基于角色的，因此在Spring Security中的权限就是角色，具体的认证授权流程如下：</p>
+<ol>
+<li>用户登录申请令牌</li>
+<li>通过<strong>UserDetailService</strong>查询、加载用户信息、比如密码、权限(角色)….封装到<strong>UserDetails</strong>中</li>
+<li>令牌申请成功，携带令牌访问资源</li>
+<li>网关层面比较访问的<strong>URL所需要的权限</strong>（Redis中）是否与当前令牌具备的权限有交集。有交集则表示具备访问该URL的权限。</li>
+<li>具备权限则访问，否则拒绝</li>
+</ol>
+<p>上述只是大致的流程，其中还有一些细节有待商榷，如下：</p>
+<h3 id="1、URL对应的权限如何维护？"><a href="#1、URL对应的权限如何维护？" class="headerlink" title="1、URL对应的权限如何维护？"></a><strong>1、URL对应的权限如何维护？</strong></h3><p>这个就比较容易实现了，涉及到<strong>RBAC</strong>权限模式的三张表，分别为<strong>权限表</strong>、<strong>角色表</strong>、<strong>权限角色</strong>对应关系表。具体实现流程如下：</p>
+<ol>
+<li>项目启动时将权限（URL）和角色的对应关系加载到Redis中。</li>
+<li>对于管理界面涉及到URL相应关系的变动要实时的变更到Redis。</li>
+</ol>
+<p>比如权限中有这么一条数据，如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/206.png"></p>
+<p>其中的 <strong>/order/info</strong> 这个URL就是一个权限，管理员可以对其分配给指定的角色。</p>
+<h3 id="2、如何实现Restful风格的权限控制？"><a href="#2、如何实现Restful风格的权限控制？" class="headerlink" title="2、如何实现Restful风格的权限控制？"></a><strong>2、如何实现Restful风格的权限控制？</strong></h3><p>restful风格的接口URL是相同的，不同的只是请求方式，因此要想做到权限的精细控制还需要保留请求方式，比如POST，GET，PUT，DELETE….</p>
+<p>可以在权限表中的url字段放置一个<strong>method</strong>标识，比如POST，此时的完整URL为：<strong>POST:/order/info</strong></p>
+<blockquote>
+<p>当然<code>*:/order/info</code>中的星号表示一切请求方式都满足。</p>
+</blockquote>
+<h3 id="3、这样能实现动态权限控制吗？"><a href="#3、这样能实现动态权限控制吗？" class="headerlink" title="3、这样能实现动态权限控制吗？"></a><strong>3、这样能实现动态权限控制吗？</strong></h3><p>权限的控制方式有很多种，比如Security自身的注解、方法拦截，其实扩展Spring Security也是可以实现动态权限控制的，这个在后面的文章中会单独介绍！</p>
+<p>陈某此篇文章是将权限、角色对应关系存入Redis中，因此想要实现动态权限控制只需要在Redis中维护这种关系即可。Redis中的数据如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/207.png"></p>
+<h2 id="案例实现"><a href="#案例实现" class="headerlink" title="案例实现"></a>案例实现</h2><p>此篇文章还是基于以下三个模块进行改动，有不清楚的可以查看陈某往期文章。</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>oauth2-cloud-auth-server</td>
+<td>OAuth2.0认证授权服</td>
+</tr>
+<tr>
+<td>oauth2-cloud-gateway</td>
+<td>网关服务</td>
+</tr>
+<tr>
+<td>oauth2-cloud-auth-common</td>
+<td>公共模块</td>
+</tr>
+</tbody></table>
+<p>涉及到的更改目录如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/211.png"></p>
+<h3 id="1、从数据库加载URL-lt-gt-角色对应关系到Redis"><a href="#1、从数据库加载URL-lt-gt-角色对应关系到Redis" class="headerlink" title="1、从数据库加载URL&lt;-&gt;角色对应关系到Redis"></a><strong>1、从数据库加载URL&lt;-&gt;角色对应关系到Redis</strong></h3><p>在项目启动之初直接读取数据库中的权限加载到Redis中，当然方法有很多种，自己根据情况选择。代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/208.png"></p>
+<p>此处代码在<strong>oauth2-cloud-auth-server</strong>模块下。</p>
+<blockquote>
+<p>案例源码已经上传GitHub，关注公众号：<strong>码猿技术专栏</strong>，回复关键词：<strong>9529</strong> 获取！</p>
+</blockquote>
+<h3 id="2、实现UserDetailsService加载权限"><a href="#2、实现UserDetailsService加载权限" class="headerlink" title="2、实现UserDetailsService加载权限"></a><strong>2、实现UserDetailsService加载权限</strong></h3><p><strong>UserDetailsService</strong>相信大家都已经很熟悉了，主要作用就是根据用户名从数据库中加载用户的详细信息。</p>
+<p>代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/209.png"></p>
+<p><strong>①</strong>处的代码是将通过JPA从数据库中查询用户信息并且组装角色，必须是以 <strong>ROLE_</strong> 开头。</p>
+<p><strong>②</strong>处的代码是将获取的角色封装进入<strong>authorities</strong>向下传递。</p>
+<p>此处代码在<strong>oauth2-cloud-auth-server</strong>模块下。</p>
+<blockquote>
+<p>案例源码已经上传GitHub，关注公众号：<strong>码猿技术专栏</strong>，回复关键词：<strong>9529</strong> 获取！</p>
+</blockquote>
+<h3 id="3、鉴权管理器中校验权限"><a href="#3、鉴权管理器中校验权限" class="headerlink" title="3、鉴权管理器中校验权限"></a><strong>3、鉴权管理器中校验权限</strong></h3><p>在上篇文章中<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&amp;mid=2247503249&amp;idx=1&amp;sn=b33ae3ff70a08b17ee0779d6ccb30b53&amp;chksm=fcf7125ccb809b4aa4985da09e620e06c606754e6a72681c93dcc88bdc9aa7ba0cb64f52dbc3&token=284256295&lang=zh_CN#rd">实战干货！Spring Cloud Gateway 整合 OAuth2.0 实现分布式统一认证授权！</a>详细介绍了鉴权管理器的作用，这里就不再细说了。代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/210.png"></p>
+<p><strong>①</strong>处的代码是将请求URL组装成restful风格的，比如<strong>POST:/order/info</strong></p>
+<p><strong>②</strong>处的代码是从Redis中取出URL和角色对应关系遍历，通过<strong>AntPathMatcher</strong>进行比对，获取当前请求URL的所需的角色。</p>
+<p><strong>③</strong>处的代码就是比较当前URL所需的角色和当前用户的角色，分为两步：</p>
+<ul>
+<li>如果是超级管理员，则直接放行，不必比较权限</li>
+<li>不是超级管理员就需要比较角色，有交集才能放行</li>
+</ul>
+<p>此处的代码在<strong>oauth2-cloud-gateway</strong>模块中。</p>
+<blockquote>
+<p>案例源码已经上传GitHub，关注公众号：<strong>码猿技术专栏</strong>，回复关键词：<strong>9529</strong> 获取！</p>
+</blockquote>
+<h3 id="4、总结"><a href="#4、总结" class="headerlink" title="4、总结"></a><strong>4、总结</strong></h3><p>关键代码就是上述三处，另外关于一些<strong>DAO</strong>层的相关代码就不再贴出来了，自己下载源码看看！</p>
+<blockquote>
+<p>案例源码已经上传GitHub，关注公众号：<strong>码猿技术专栏</strong>，回复关键词：<strong>9529</strong> 获取！</p>
+</blockquote>
+<h2 id="附加的更改"><a href="#附加的更改" class="headerlink" title="附加的更改"></a>附加的更改</h2><p>这篇文章中顺带将客户端信息也放在了数据库中，前面的文章都是放在内存中。</p>
+<p>数据库中新建一张表，SQL如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `oauth_client_details` (</span><br><span class="line">  `client_id` <span class="type">varchar</span>(<span class="number">48</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;客户端id&#x27;</span>,</span><br><span class="line">  `resource_ids` <span class="type">varchar</span>(<span class="number">256</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;资源的id，多个用逗号分隔&#x27;</span>,</span><br><span class="line">  `client_secret` <span class="type">varchar</span>(<span class="number">256</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;客户端的秘钥&#x27;</span>,</span><br><span class="line">  `<span class="keyword">scope</span>` <span class="type">varchar</span>(<span class="number">256</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;客户端的权限，多个用逗号分隔&#x27;</span>,</span><br><span class="line">  `authorized_grant_types` <span class="type">varchar</span>(<span class="number">256</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;授权类型，五种，多个用逗号分隔&#x27;</span>,</span><br><span class="line">  `web_server_redirect_uri` <span class="type">varchar</span>(<span class="number">256</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;授权码模式的跳转uri&#x27;</span>,</span><br><span class="line">  `authorities` <span class="type">varchar</span>(<span class="number">256</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;权限，多个用逗号分隔&#x27;</span>,</span><br><span class="line">  `access_token_validity` <span class="type">int</span>(<span class="number">11</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;access_token的过期时间，单位毫秒，覆盖掉硬编码&#x27;</span>,</span><br><span class="line">  `refresh_token_validity` <span class="type">int</span>(<span class="number">11</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;refresh_token的过期时间，单位毫秒，覆盖掉硬编码&#x27;</span>,</span><br><span class="line">  `additional_information` <span class="type">varchar</span>(<span class="number">4096</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;扩展字段，JSON&#x27;</span>,</span><br><span class="line">  `autoapprove` <span class="type">varchar</span>(<span class="number">256</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;默认false，是否自动授权&#x27;</span>,</span><br><span class="line">  <span class="keyword">PRIMARY</span> KEY (`client_id`)</span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>utf8;</span><br></pre></td></tr></table></figure>
+
+<p>认证服务中的OAuth2.0的配置文件中将客户端的信息从数据库中加载，该实现类为<strong>JdbcClientDetailsService</strong>，关键代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">configure</span><span class="params">(ClientDetailsServiceConfigurer clients)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">       <span class="comment">//使用JdbcClientDetailsService，从数据库中加载客户端的信息</span></span><br><span class="line">       clients.withClientDetails(<span class="keyword">new</span> JdbcClientDetailsService(dataSource));</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇文章介绍了网关集成RBAC权限模型进行认证鉴权，核心思想就是将权限信息加载Redis缓存中，在网关层面的鉴权管理器中进行权限的校验，其中还整合了Restful风格的URL。</p>
+<h2 id="最后说一句（别白嫖，求关注）"><a href="#最后说一句（别白嫖，求关注）" class="headerlink" title="最后说一句（别白嫖，求关注）"></a>最后说一句（别白嫖，求关注）</h2><p>陈某每一篇文章都是精心输出，已经写了<strong>3个专栏</strong>，整理成<strong>PDF</strong>，获取方式如下：</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=2042874937312346114#wechat_redirect">《Spring Cloud 进阶》</a>PDF：关注公众号：【<strong>码猿技术专栏</strong>】回复关键词 <strong>Spring Cloud 进阶</strong> 获取！</li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=1532834475389288449#wechat_redirect">《Spring Boot 进阶》</a>PDF：关注公众号：【<strong>码猿技术专栏</strong>】回复关键词 <strong>Spring Boot进阶</strong> 获取！</li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=1500819225232343046#wechat_redirect">《Mybatis 进阶》</a>PDF：关注公众号：【<strong>码猿技术专栏</strong>】回复关键词 <strong>Mybatis 进阶</strong> 获取！</li>
+</ol>
+<p>如果这篇文章对你有所帮助，或者有所启发的话，帮忙<strong>点赞</strong>、<strong>在看</strong>、<strong>转发</strong>、<strong>收藏</strong>，你的支持就是我坚持下去的最大动力！</p>
+<p>关注公众号：<strong>【码猿技术专栏】</strong>，公众号内有超赞的粉丝福利，回复：<strong>加群</strong>，可以加入技术讨论群，和大家一起讨论技术，吹牛逼！</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    不才陈某  |  微信公众号【码猿技术专栏】
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://chenjiabing666.github.io/2022/01/06/%E5%AE%9E%E6%88%98%EF%BC%81SpringCloudGateway%E9%9B%86%E6%88%90RBAC%E6%9D%83%E9%99%90%E6%A8%A1%E5%9E%8B%E5%AE%9E%E7%8E%B0%E5%8A%A8%E6%80%81%E6%9D%83%E9%99%90%E6%8E%A7%E5%88%B6%EF%BC%81/" title="实战！Spring Cloud Gateway集成 RBAC 权限模型实现动态权限控制！">https://chenjiabing666.github.io/2022/01/06/实战！SpringCloudGateway集成RBAC权限模型实现动态权限控制！/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+  <li class="post-copyright-license">
+    并保留本声明和上方二维码。感谢您的阅读和支持！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">微信公众号</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/" rel="tag"># 微服务</a>
+              <a href="/tags/%E7%BD%91%E5%85%B3/" rel="tag"># 网关</a>
+              <a href="/tags/Spring-Cloud-Gateway/" rel="tag"># Spring Cloud Gateway</a>
+              <a href="/tags/Spring-Security/" rel="tag"># Spring Security</a>
+              <a href="/tags/OAuth2-0/" rel="tag"># OAuth2.0</a>
+              <a href="/tags/%E5%AE%9E%E6%88%98/" rel="tag"># 实战</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/12/29/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E9%80%80%E5%87%BA%E7%99%BB%E5%BD%95%E6%97%B6%E5%A6%82%E4%BD%95%E8%AE%A9JWT%E4%BB%A4%E7%89%8C%E5%A4%B1%E6%95%88%EF%BC%9F/" rel="prev" title="OAuth2.0实战！退出登录时如何让JWT令牌失效？">
+      <i class="fa fa-chevron-left"></i> OAuth2.0实战！退出登录时如何让JWT令牌失效？
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+		  <script src="https://readmore.openwrite.cn/js/readmore.js" type="text/javascript"></script>
+<script>
+    const btw = new BTWPlugin();
+    btw.init({
+        id: 'container',
+        blogId: '27513-1629019452485-311',
+        name: '码猿技术专栏',
+        qrcode: 'https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg',
+        keyword: 'vip',
+    });
+</script>
+        </div>
+		</div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFRBAC%E6%9D%83%E9%99%90%E6%A8%A1%E5%9E%8B%EF%BC%9F"><span class="nav-text">什么是RBAC权限模型？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E8%AE%A1%E6%80%9D%E8%B7%AF"><span class="nav-text">设计思路</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81URL%E5%AF%B9%E5%BA%94%E7%9A%84%E6%9D%83%E9%99%90%E5%A6%82%E4%BD%95%E7%BB%B4%E6%8A%A4%EF%BC%9F"><span class="nav-text">1、URL对应的权限如何维护？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0Restful%E9%A3%8E%E6%A0%BC%E7%9A%84%E6%9D%83%E9%99%90%E6%8E%A7%E5%88%B6%EF%BC%9F"><span class="nav-text">2、如何实现Restful风格的权限控制？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E8%BF%99%E6%A0%B7%E8%83%BD%E5%AE%9E%E7%8E%B0%E5%8A%A8%E6%80%81%E6%9D%83%E9%99%90%E6%8E%A7%E5%88%B6%E5%90%97%EF%BC%9F"><span class="nav-text">3、这样能实现动态权限控制吗？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A1%88%E4%BE%8B%E5%AE%9E%E7%8E%B0"><span class="nav-text">案例实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E4%BB%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E5%8A%A0%E8%BD%BDURL-lt-gt-%E8%A7%92%E8%89%B2%E5%AF%B9%E5%BA%94%E5%85%B3%E7%B3%BB%E5%88%B0Redis"><span class="nav-text">1、从数据库加载URL&lt;-&gt;角色对应关系到Redis</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E5%AE%9E%E7%8E%B0UserDetailsService%E5%8A%A0%E8%BD%BD%E6%9D%83%E9%99%90"><span class="nav-text">2、实现UserDetailsService加载权限</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E9%89%B4%E6%9D%83%E7%AE%A1%E7%90%86%E5%99%A8%E4%B8%AD%E6%A0%A1%E9%AA%8C%E6%9D%83%E9%99%90"><span class="nav-text">3、鉴权管理器中校验权限</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4%E3%80%81%E6%80%BB%E7%BB%93"><span class="nav-text">4、总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E5%8A%A0%E7%9A%84%E6%9B%B4%E6%94%B9"><span class="nav-text">附加的更改</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%90%8E%E8%AF%B4%E4%B8%80%E5%8F%A5%EF%BC%88%E5%88%AB%E7%99%BD%E5%AB%96%EF%BC%8C%E6%B1%82%E5%85%B3%E6%B3%A8%EF%BC%89"><span class="nav-text">最后说一句（别白嫖，求关注）</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="不才陈某"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">133</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">65</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png" title="微信公众号 → https:&#x2F;&#x2F;gitee.com&#x2F;chenjiabing666&#x2F;BlogImage&#x2F;raw&#x2F;master&#x2F;myjszl_log.png" rel="noopener" target="_blank"><i class="fab fa-weixin fa-fw"></i>微信公众号</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.im/user/2506542244708072" title="掘金 → https:&#x2F;&#x2F;juejin.im&#x2F;user&#x2F;2506542244708072" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>掘金</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某|公众号：码猿技术专栏</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RtlQOgOT3M0hgyMeogykSQjT-gzGzoHsz',
+      appKey     : 'vSCxLU88wnXVf0Pa8mwJrCPm',
+      placeholder: "欢迎关注博主微信公众号【码猿技术专栏】",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
