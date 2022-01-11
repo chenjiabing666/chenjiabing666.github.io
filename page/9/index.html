@@ -188,6 +188,103 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/10/14/Spring%20Boot%E7%AC%AC%E5%9B%9B%E5%BC%B9%EF%BC%8C%E4%B8%80%E6%96%87%E5%B8%A6%E4%BD%A0%E6%90%9E%E6%87%82%E6%97%A5%E5%BF%97%E6%A1%86%E6%9E%B6%E5%A6%82%E4%BD%95%E5%88%87%E6%8D%A2%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/14/Spring%20Boot%E7%AC%AC%E5%9B%9B%E5%BC%B9%EF%BC%8C%E4%B8%80%E6%96%87%E5%B8%A6%E4%BD%A0%E6%90%9E%E6%87%82%E6%97%A5%E5%BF%97%E6%A1%86%E6%9E%B6%E5%A6%82%E4%BD%95%E5%88%87%E6%8D%A2%EF%BC%9F/" class="post-title-link" itemprop="url">一文带你搞懂日志框架如何切换？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-14 10:04:42" itemprop="dateCreated datePublished" datetime="2020-10-14T10:04:42+08:00">2020-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 19:10:22" itemprop="dateModified" datetime="2020-10-23T19:10:22+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/10/14/Spring%20Boot%E7%AC%AC%E5%9B%9B%E5%BC%B9%EF%BC%8C%E4%B8%80%E6%96%87%E5%B8%A6%E4%BD%A0%E6%90%9E%E6%87%82%E6%97%A5%E5%BF%97%E6%A1%86%E6%9E%B6%E5%A6%82%E4%BD%95%E5%88%87%E6%8D%A2%EF%BC%9F/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/10/14/Spring%20Boot%E7%AC%AC%E5%9B%9B%E5%BC%B9%EF%BC%8C%E4%B8%80%E6%96%87%E5%B8%A6%E4%BD%A0%E6%90%9E%E6%87%82%E6%97%A5%E5%BF%97%E6%A1%86%E6%9E%B6%E5%A6%82%E4%BD%95%E5%88%87%E6%8D%A2%EF%BC%9F/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>首先要感谢一下读者朋友们的支持，你们每一个的赞都是对陈某最大的肯定，陈某也会一如既往的加油，奥利给！！！</p>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Spring%20Boot%E7%AC%AC%E5%9B%9B%E5%BC%B9%EF%BC%8C%E6%97%A5%E5%BF%97%E6%A1%86%E6%9E%B6%E5%A6%82%E4%BD%95%E5%88%87%E6%8D%A2%EF%BC%9F/1.png"><br>言归正传，上一篇文章写了Spring Boot的默认日志框架Logback的基本配置，有兴趣的可以看看：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/5hyGi6X6BhfCC5kTEvUyFg">Spring Boot第三弹，一文带你搞懂日志如何配置？</a>。</p>
+<p>今天就来介绍一下Spring Boot如何无感的切换日志框架？</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/10/14/Spring%20Boot%E7%AC%AC%E5%9B%9B%E5%BC%B9%EF%BC%8C%E4%B8%80%E6%96%87%E5%B8%A6%E4%BD%A0%E6%90%9E%E6%87%82%E6%97%A5%E5%BF%97%E6%A1%86%E6%9E%B6%E5%A6%82%E4%BD%95%E5%88%87%E6%8D%A2%EF%BC%9F/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/10/14/Spring%20Boot%E7%AC%AC%E4%B8%89%E5%BC%B9%EF%BC%8C%E4%B8%80%E6%96%87%E5%B8%A6%E4%BD%A0%E6%90%9E%E6%87%82%E6%97%A5%E5%BF%97%E5%A6%82%E4%BD%95%E9%85%8D%E7%BD%AE%EF%BC%9F/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1294,157 +1391,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/26/%E7%9C%8B%E5%AE%8C%E8%BF%99%E7%AF%87%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F%E7%9A%84%E6%96%87%E7%AB%A0%EF%BC%8C%E4%BF%9D%E8%AF%81%E4%BD%A0%E8%83%BD%E5%92%8C%E9%9D%A2%E8%AF%95%E5%AE%98%E4%BA%92%E6%89%AF%EF%BC%81%EF%BC%81%EF%BC%81/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/04/26/%E7%9C%8B%E5%AE%8C%E8%BF%99%E7%AF%87%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F%E7%9A%84%E6%96%87%E7%AB%A0%EF%BC%8C%E4%BF%9D%E8%AF%81%E4%BD%A0%E8%83%BD%E5%92%8C%E9%9D%A2%E8%AF%95%E5%AE%98%E4%BA%92%E6%89%AF%EF%BC%81%EF%BC%81%EF%BC%81/" class="post-title-link" itemprop="url">看完这篇缓存穿透的文章，保证你能和面试官互扯！！！</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-04-26 22:05:19" itemprop="dateCreated datePublished" datetime="2020-04-26T22:05:19+08:00">2020-04-26</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-08-19 14:59:25" itemprop="dateModified" datetime="2020-08-19T14:59:25+08:00">2020-08-19</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%9D%82%E8%B0%88/" itemprop="url" rel="index"><span itemprop="name">杂谈</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2020/04/26/%E7%9C%8B%E5%AE%8C%E8%BF%99%E7%AF%87%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F%E7%9A%84%E6%96%87%E7%AB%A0%EF%BC%8C%E4%BF%9D%E8%AF%81%E4%BD%A0%E8%83%BD%E5%92%8C%E9%9D%A2%E8%AF%95%E5%AE%98%E4%BA%92%E6%89%AF%EF%BC%81%EF%BC%81%EF%BC%81/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2020/04/26/%E7%9C%8B%E5%AE%8C%E8%BF%99%E7%AF%87%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F%E7%9A%84%E6%96%87%E7%AB%A0%EF%BC%8C%E4%BF%9D%E8%AF%81%E4%BD%A0%E8%83%BD%E5%92%8C%E9%9D%A2%E8%AF%95%E5%AE%98%E4%BA%92%E6%89%AF%EF%BC%81%EF%BC%81%EF%BC%81/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
-<li>昨天有读者朋友留言，想要陈某写一篇防止缓存穿透的文章，今天特意写了一篇。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F/4.png"></li>
-<li>文章目录如下：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F/%E7%9C%8B%E5%AE%8C%E8%BF%99%E7%AF%87%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F%E7%9A%84%E6%96%87%E7%AB%A0%EF%BC%8C%E4%BF%9D%E8%AF%81%E4%BD%A0%E8%83%BD%E5%92%8C%E9%9D%A2%E8%AF%95%E5%AE%98%E4%BA%92%E6%89%AF.png"></li>
-</ul>
-<h2 id="什么是缓存穿透？"><a href="#什么是缓存穿透？" class="headerlink" title="什么是缓存穿透？"></a>什么是缓存穿透？</h2><ul>
-<li><strong>缓存穿透</strong>其实是指从缓存中没有查到数据，而不得不从后端系统（比如数据库）中查询的情况。</li>
-<li>缓存毕竟是在内存中，不可能所有的数据都存储在 Redis 中，因此少量的缓存穿透是不可避免的，也是系统能够承受的，但是一旦在瞬间发生大量的缓存穿透，数据库的压力会瞬间增大，后果可想而知。</li>
-<li>在开发中使用缓存的方案如下图，在查询数据库之前会先查询 Redis：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F/1.png" alt="Redis缓存"></li>
-<li>缓存穿透的整个过程分为如下几个步骤：<ol>
-<li>应用查询缓存，<strong>缓存不命中</strong></li>
-<li>DB 层查询不命中，<strong>不将空结果缓存</strong></li>
-<li>返回空结果</li>
-<li>下一个请求继续重复1,2,3步。</li>
-</ol>
-</li>
-</ul>
-<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><ul>
-<li>万事万物都是相生相克，既然出现了缓存穿透，就一定有避免的方案。</li>
-<li>下面介绍两种缓存的方案，分别是<code>缓存空值</code>、<code>布隆过滤器</code>。</li>
-</ul>
-<h3 id="缓存空值"><a href="#缓存空值" class="headerlink" title="缓存空值"></a>缓存空值</h3><ul>
-<li>回顾缓存穿透的定义知道，<strong>大量空值没有缓存导致重复的访问 DB 层</strong>，由此解决方案也是很明显了，直接将返回的空值也缓存即可。此时的执行步骤如下图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F/2.png" alt="缓存空值"></li>
-<li>如上图所示，如果缓存不命中，查询 DB 层之后，直接将空值缓存在 Redis 中。伪代码如下：</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Object nullValue = <span class="keyword">new</span> Object();</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">  Object valueFromDB = getFromDB(uid); <span class="comment">//从数据库中查询数据</span></span><br><span class="line">  <span class="keyword">if</span> (valueFromDB == <span class="keyword">null</span>) &#123;</span><br><span class="line">    cache.set(uid, nullValue, <span class="number">10</span>);   <span class="comment">//如果从数据库中查询到空值，就把空值写入缓存，设置较短的超时时间</span></span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    cache.set(uid, valueFromDB, <span class="number">1000</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125; <span class="keyword">catch</span>(Exception e) &#123;</span><br><span class="line">  <span class="comment">// 出现异常也要写入缓存</span></span><br><span class="line">  cache.set(uid, nullValue, <span class="number">10</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>通过伪代码可以很清楚的了解了缓存空值的流程，但是需要注意以下问题：<ul>
-<li><strong>缓存一定要设置过期时间</strong>：因为空值并不是准确的业务数据，并且会占用缓存空间，所以要给空值加上一个过期时间，使得能够在短期之内被淘汰。但是随之而来的一个问题就是在一定的时间窗口内缓存的数据和实际数据不一致，比如设置 10 秒钟过期时间，但是在这 10 秒之内业务又写入了数据，那么返回就不应该为空值了，所以还要考虑数据一致的问题，解决方法很简单，利用消息系统或者主动更新的方式清除掉缓存中的数据即可。</li>
-</ul>
-</li>
-</ul>
-<h3 id="布隆过滤器"><a href="#布隆过滤器" class="headerlink" title="布隆过滤器"></a>布隆过滤器</h3><ul>
-<li>1970 年布隆提出了一种布隆过滤器的算法，用来判断一个元素是否在一个集合中。这种算法由一个二进制数组和一个 Hash 算法组成。</li>
-<li>具体的算法思想这里不再详细解释了，如有不了解的可以看陈某上一篇文章<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/Vo935pCXH0aPgG20f1ppEg">大白话布隆过滤器，又能和面试官扯皮了~</a>。</li>
-<li>解决缓存穿透的大致思想：<strong>在访问缓存层和存储层之前，可以通过定时任务或者系统任务来初始化布隆过滤器，将存在的 key 用布隆过滤器提前保存起来，做第一层的拦截</strong>。例如：一个推荐系统有 4 亿个用户 id， 每个小时算法工程师会根据每个用户之前历史行为计算出推荐数据放到存储层中， 但是最新的用户由于没有历史行为， 就会发生缓存穿透的行为， 为此可以将所有推荐数据的用户做成布隆过滤器。 如果布隆过滤器认为该用户 id 不存在， 那么就不会访问存储层， 在一定程度保护了存储层。此时的结构如下图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F/6.png" alt="布隆过滤器"></li>
-<li>当然布隆过滤器的<strong>假阳性</strong>的存在导致了误判率，但是我们可以尽量的降低误判率，一个解决方案就是：使用多个 Hash 算法为元素计算出多个 Hash 值，只有所有 Hash 值对应的数组中的值都为 1 时，才会认为这个元素在集合中。</li>
-<li>这种方法适用于<code>数据命中不高</code>、 <code>数据相对固定</code>、 <code>实时性低</code>（通常是<code>数据 集较大</code>）的应用场景，代码维护较为复杂，但是缓存空间占用少。为什么呢？因为布隆过滤器不支持删除元素，一旦数据变化，并不能及时的更新布隆过滤器。</li>
-</ul>
-<h2 id="两种方案对比"><a href="#两种方案对比" class="headerlink" title="两种方案对比"></a>两种方案对比</h2><ul>
-<li>两种方案各有优缺点，具体使用哪种方案还是要根据业务场景和系统体量来定。具体的区别如下表：</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>方案</th>
-<th>适用场景</th>
-<th>维护成本</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>缓存对象</td>
-<td>1. 数据命中不高 2. 数据频繁变化，实时性高</td>
-<td>代码维护点单、需要过多的缓存空间，数据一致性需要自己实现</td>
-</tr>
-<tr>
-<td>布隆过滤器</td>
-<td>1. 数据命中不高 2.数据相对固定，实时性低</td>
-<td>代码维护复杂、缓存空间占用少</td>
-</tr>
-</tbody></table>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
-<li>至此，如何解决缓存穿透的问题已经介绍完了，觉得写得不错的，有所收获的朋友，点点在看，分享关注一波。</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1528,7 +1474,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">133</span>
+          <span class="site-state-item-count">134</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1541,7 +1487,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">65</span>
+        <span class="site-state-item-count">67</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

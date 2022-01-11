@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"chenjiabing666.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="大家好，我是不才陈某~ 这是《Spring Cloud 进阶》第19篇文章，往期文章如下：  五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？ openFeign夺命连环9问，这谁受得了？ 阿里面试这样问：Nacos、Apollo、Config配置中心如何选型？这10个维度告诉你！ 阿里面试败北：5种微服务注册中心如何选型？这几个维度告诉你！ 阿里限流神器Sentinel夺命连环 17 问">
+<meta property="og:type" content="article">
+<meta property="og:title" content="实战！阿里神器 Seata 实现 TCC模式 解决分布式事务，真香！">
+<meta property="og:url" content="https://chenjiabing666.github.io/2022/01/11/%E5%AE%9E%E6%88%98%EF%BC%81%E9%98%BF%E9%87%8C%E7%A5%9E%E5%99%A8Seata%E5%AE%9E%E7%8E%B0TCC%E6%A8%A1%E5%BC%8F%E8%A7%A3%E5%86%B3%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%EF%BC%8C%E7%9C%9F%E9%A6%99%EF%BC%81/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="大家好，我是不才陈某~ 这是《Spring Cloud 进阶》第19篇文章，往期文章如下：  五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？ openFeign夺命连环9问，这谁受得了？ 阿里面试这样问：Nacos、Apollo、Config配置中心如何选型？这10个维度告诉你！ 阿里面试败北：5种微服务注册中心如何选型？这几个维度告诉你！ 阿里限流神器Sentinel夺命连环 17 问">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/74.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/15.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/16.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/17.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/18.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/61.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/62.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/63.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/64.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/65.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/66.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/73.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/67.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/68.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/69.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/70.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/71.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/72.png">
+<meta property="article:published_time" content="2022-01-11T05:33:16.000Z">
+<meta property="article:modified_time" content="2022-01-11T05:34:30.432Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="微服务">
+<meta property="article:tag" content="分布式事务">
+<meta property="article:tag" content="实战">
+<meta property="article:tag" content="Seata">
+<meta property="article:tag" content="TCC">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/74.png">
+
+<link rel="canonical" href="https://chenjiabing666.github.io/2022/01/11/%E5%AE%9E%E6%88%98%EF%BC%81%E9%98%BF%E9%87%8C%E7%A5%9E%E5%99%A8Seata%E5%AE%9E%E7%8E%B0TCC%E6%A8%A1%E5%BC%8F%E8%A7%A3%E5%86%B3%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%EF%BC%8C%E7%9C%9F%E9%A6%99%EF%BC%81/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>实战！阿里神器 Seata 实现 TCC模式 解决分布式事务，真香！ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+		<div id="container">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2022/01/11/%E5%AE%9E%E6%88%98%EF%BC%81%E9%98%BF%E9%87%8C%E7%A5%9E%E5%99%A8Seata%E5%AE%9E%E7%8E%B0TCC%E6%A8%A1%E5%BC%8F%E8%A7%A3%E5%86%B3%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%EF%BC%8C%E7%9C%9F%E9%A6%99%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          实战！阿里神器 Seata 实现 TCC模式 解决分布式事务，真香！
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-01-11 13:33:16 / 修改时间：13:34:30" itemprop="dateCreated datePublished" datetime="2022-01-11T13:33:16+08:00">2022-01-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Cloud-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Cloud 进阶</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2022/01/11/%E5%AE%9E%E6%88%98%EF%BC%81%E9%98%BF%E9%87%8C%E7%A5%9E%E5%99%A8Seata%E5%AE%9E%E7%8E%B0TCC%E6%A8%A1%E5%BC%8F%E8%A7%A3%E5%86%B3%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%EF%BC%8C%E7%9C%9F%E9%A6%99%EF%BC%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2022/01/11/%E5%AE%9E%E6%88%98%EF%BC%81%E9%98%BF%E9%87%8C%E7%A5%9E%E5%99%A8Seata%E5%AE%9E%E7%8E%B0TCC%E6%A8%A1%E5%BC%8F%E8%A7%A3%E5%86%B3%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%EF%BC%8C%E7%9C%9F%E9%A6%99%EF%BC%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><strong>大家好，我是不才陈某~</strong></p>
+<p>这是<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=2042874937312346114&scene=126#wechat_redirect">《Spring Cloud 进阶》</a>第<strong>19</strong>篇文章，往期文章如下：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247493854&idx=1&sn=4b3fb7f7e17a76000733899f511ef915&scene=21#wechat_redirect">五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247496653&idx=1&sn=7185077b3bdc1d094aef645d677ec472&scene=21#wechat_redirect">openFeign夺命连环9问，这谁受得了？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/S_8HQYHOG624Vzeu94CFSA">阿里面试这样问：Nacos、Apollo、Config配置中心如何选型？这10个维度告诉你！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/YKzYdMu-7nwszEf9-1M3Uw">阿里面试败北：5种微服务注册中心如何选型？这几个维度告诉你！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/Q7Xv8cypQFrrOQhbd9BOXw">阿里限流神器Sentinel夺命连环 17 问？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/sXVSFqq2UZ6Pwwt7vx7vIA">对比7种分布式事务方案，还是偏爱阿里开源的Seata，真香！(原理+实战)</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247499894&idx=1&sn=f1606e4c00fd15292269afe052f5bca2&chksm=fcf71fbbcb8096ad349e6da50b0b9141964c2084d0a38eba977fe8baa3fbe8af3b20c7591110&token=1887105114&lang=zh_CN#rd">Spring Cloud Gateway夺命连环10问？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247500540&idx=1&sn=2967bf1f9fa2c4d5b94b7fe291b7869b&chksm=fcf71d31cb8094271b5bbeca85cc03cf7d7c8bbf7c4d5b83a539e39c956e3f4015f91e7742b6&token=2077958771&lang=zh_CN#rd">Spring Cloud Gateway 整合阿里 Sentinel网关限流实战！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247500757&idx=1&sn=ef71f10d5736029c92287f7894c842ed&chksm=fcf71c18cb80950ec3144d66957a9d2914b51b8af22cf59a1ca3f9e2b561a11aca359d50d5a1&scene=178&cur_album_id=2042874937312346114#rd">分布式链路追踪之Spring Cloud Sleuth夺命连环9问？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247501079&idx=1&sn=438ef3a3d65fb4919b61cf6972827bec&chksm=fcf71adacb8093ccc4c3d6dfb8860ca07aefbc761c1ed5126eb4a4e87548441841198db1f8e3&scene=178&cur_album_id=2042874937312346114#rd">链路追踪自从用了SkyWalking，睡的真香！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247501590&idx=1&sn=149d1498504cda7cc391413f14cda9c2&chksm=fcf718dbcb8091cd6907e86e148216bae0a2d5b1664b1e8cc2d3e2c96c38181cc778de5711b6&scene=178&cur_album_id=2042874937312346114#rd">3本书了，7万+字，10篇文章，《Spring Cloud 进阶》基础版 PDF</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502682&idx=1&sn=52a15b623ab6135c134b8262bd605946&chksm=fcf71497cb809d81f1d2dbce76b3e00170f085306b2a2a67a807a6d9e2cf03bf1de3b8f203a2&scene=178&cur_album_id=2042874937312346114#rd">妹子始终没搞懂OAuth2.0，今天整合Spring Cloud Security 一次说明白！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502801&idx=1&sn=56b1af09bfa25d5e44193a7d75dfa623&chksm=fcf7141ccb809d0a1b0b2d7f6d9893c7d3e560dd8996296276f0274d2578236ee87e9124810d&scene=178&cur_album_id=2042874937312346114#rd">OAuth2.0实战！使用JWT令牌认证！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502905&idx=1&sn=32ba3ae4e0a4097d238f64719c88b7f7&chksm=fcf713f4cb809ae2ccb706b8e9f8184739d3c7b97d388467bfe9ff31a8c15768b6de05054f08&scene=178&cur_album_id=2042874937312346114#rd">OAuth2.0实战！玩转认证、资源服务异常自定义这些骚操作！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247503249&idx=1&sn=b33ae3ff70a08b17ee0779d6ccb30b53&chksm=fcf7125ccb809b4aa4985da09e620e06c606754e6a72681c93dcc88bdc9aa7ba0cb64f52dbc3&token=1286998820&lang=zh_CN#rd">实战干货！Spring Cloud Gateway 整合 OAuth2.0 实现分布式统一认证授权！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247503263&idx=1&sn=edc475e36127792e35112c4746e53d37&chksm=fcf71252cb809b44d7ae246e9503e1d6b91b29965c0cd7ebfc7da9c1a098fe186cd977736c40&token=1144087588&lang=zh_CN#rd">字节面试这样问：跨库多表存在大量数据依赖问题有哪些解决方案？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&amp;mid=2247504322&amp;idx=1&amp;sn=4b0a2488a4edcb025d0694604e86f840&amp;chksm=fcf70e0fcb808719b98a65891bc08e9490db09f07debd4521052978a319ab052f8a72b93c1a7&token=284256295&lang=zh_CN#rd">实战！退出登录时如何借助外力使JWT令牌失效？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&amp;mid=2247504442&amp;idx=1&amp;sn=48c1dd73c038e3d936db4e5134f7bbc2&amp;chksm=fcf70df7cb8084e1556cac092fdb68ffd6503cbb287485ef76e9941611d134258c38d03e890a&token=780863812&lang=zh_CN#rd">实战！Spring Cloud Gateway集成 RBAC 权限模型实现动态权限控制！</a></li>
+</ul>
+<p>今天这篇文章介绍一下<strong>Seata</strong>如何实现<strong>TCC</strong>事务模式，文章目录如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/74.png" alt="目录"></p>
+<span id="more"></span>
+
+
+
+<h2 id="什么是TCC模式？"><a href="#什么是TCC模式？" class="headerlink" title="什么是TCC模式？"></a>什么是TCC模式？</h2><p>TCC（Try Confirm Cancel）方案是一种应用层面侵入业务的两阶段提交。是目前最火的一种柔性事务方案，其核心思想是：<strong>针对每个操作，都要注册一个与其对应的确认和补偿（撤销）操作</strong>。</p>
+<p>TCC分为两个阶段，分别如下：</p>
+<ul>
+<li><strong>第一阶段</strong>：Try（尝试），主要是对业务系统做检测及资源预留 <strong>(加锁，锁住资源)</strong></li>
+<li><strong>第二阶段</strong>：本阶段根据第一阶段的结果，决定是执行<strong>confirm</strong>还是<strong>cancel</strong><ol>
+<li><strong>Confirm</strong>（确认）：执行真正的业务（执行业务，释放锁）</li>
+<li><strong>Cancle</strong>（取消）：是预留资源的取消（出问题，释放锁）</li>
+</ol>
+</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/15.png" alt="TCC"></p>
+<p>为了方便理解，下面以电商下单为例进行方案解析，这里把整个过程简单分为扣减库存，订单创建 2 个步骤，库存服务和订单服务分别在不同的服务器节点上。</p>
+<p>假设商品库存为 100，购买数量为 2，这里检查和更新库存的同时，冻结用户购买数量的库存，同时创建订单，订单状态为待确认。</p>
+<h4 id="①Try-阶段"><a href="#①Try-阶段" class="headerlink" title="①Try 阶段"></a>①Try 阶段</h4><p>TCC 机制中的 Try 仅是一个初步操作，它和后续的确认一起才能真正构成一个完整的业务逻辑，这个阶段主要完成：</p>
+<ul>
+<li>完成所有业务检查( 一致性 ) 。</li>
+<li>预留必须业务资源( 准隔离性 ) 。</li>
+<li>Try 尝试执行业务。</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/16.png" alt="Try阶段"></p>
+<h4 id="②Confirm-Cancel-阶段"><a href="#②Confirm-Cancel-阶段" class="headerlink" title="②Confirm / Cancel 阶段"></a>②Confirm / Cancel 阶段</h4><p>根据 <strong>Try</strong> 阶段服务是否全部正常执行，继续执行确认操作（Confirm）或取消操作（Cancel）。</p>
+<p>Confirm 和 Cancel 操作满足幂等性，如果 Confirm 或 Cancel 操作执行失败，将会不断重试直到执行完成。</p>
+<p>Confirm：当 Try 阶段服务全部正常执行， 执行确认业务逻辑操作，业务如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/17.png" alt="Try-&gt;Confirm"></p>
+<p>这里使用的资源一定是 Try 阶段预留的业务资源。在 TCC 事务机制中认为，如果在 Try 阶段能正常的预留资源，那 Confirm 一定能完整正确的提交。</p>
+<p>Confirm 阶段也可以看成是对 Try 阶段的一个补充，Try+Confirm 一起组成了一个完整的业务逻辑。</p>
+<p>Cancel：当 Try 阶段存在服务执行失败， 进入 Cancel 阶段，业务如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/18.png" alt="Try-Cancel"></p>
+<p>Cancel 取消执行，释放 Try 阶段预留的业务资源，上面的例子中，Cancel 操作会把冻结的库存释放，并更新订单状态为取消。</p>
+<p>以上便是TCC模式的全部概念，这部分内容在陈某之前的文章也是详细的介绍过：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/sXVSFqq2UZ6Pwwt7vx7vIA">对比7种分布式事务方案，还是偏爱阿里开源的Seata，真香！(原理+实战)</a></p>
+<h2 id="TCC模式的三种类型？"><a href="#TCC模式的三种类型？" class="headerlink" title="TCC模式的三种类型？"></a>TCC模式的三种类型？</h2><p>业内实际生产中对TCC模式进行了扩展，总结出了如下三种类型，其实从官方的定义中无此说法，不过是企业生产中根据实际的需求衍生出来的三种方案。</p>
+<h3 id="1、通用型-TCC-解决方案"><a href="#1、通用型-TCC-解决方案" class="headerlink" title="1、通用型 TCC 解决方案"></a>1、通用型 TCC 解决方案</h3><p>通用型TCC解决方案是最经典的TCC事务模型的实现，正如第一节介绍的模型，所有的从业务都参与到主业务的决策中。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/61.png" alt="通用型TCC"></p>
+<p><strong>适用场景</strong>：</p>
+<p>由于从业务服务是同步调用，其结果会影响到主业务服务的决策，因此通用型 TCC 分布式事务解决方案<strong>适用于执行时间确定且较短的业务</strong>，比如电商系统的三个核心服务：订单服务、账户服务、库存服务。</p>
+<p>这个三个服务要么同时成功，要么同时失败。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/62.png"></p>
+<p>当库存服务、账户服务的第二阶段调用完成后，整个分布式事务完成。</p>
+<h3 id="2、异步确保型-TCC-解决方案"><a href="#2、异步确保型-TCC-解决方案" class="headerlink" title="2、异步确保型 TCC 解决方案"></a>2、异步确保型 TCC 解决方案</h3><p>异步确保型 TCC 解决方案的直接从业务服务是可靠消息服务，而真正的从业务服务则通过消息服务解耦，作为消息服务的消费端，异步地执行。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/63.png" alt="异步确保型"></p>
+<p>可靠消息服务需要提供 Try，Confirm，Cancel 三个接口。Try 接口预发送，只负责持久化存储消息数据；Confirm 接口确认发送，这时才开始真正的投递消息；Cancel 接口取消发送，删除消息数据。</p>
+<p>消息服务的消息数据独立存储，独立伸缩，降低从业务服务与消息系统间的耦合，在消息服务可靠的前提下，实现分布式事务的最终一致性。</p>
+<p>此解决方案虽然增加了消息服务的维护成本，但由于消息服务代替从业务服务实现了 TCC 接口，从业务服务不需要任何改造，接入成本非常低。</p>
+<p><strong>适用场景：</strong></p>
+<p>由于从业务服务消费消息是一个异步的过程，执行时间不确定，可能会导致不一致时间窗口增加。因此，异步确保性 TCC 分布式事务解决方案只适用于对最终一致性时间敏感度较低的一些被动型业务（从业务服务的处理结果不影响主业务服务的决策，只被动的接收主业务服务的决策结果）。比如会员注册服务和邮件发送服务：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/64.png"></p>
+<h3 id="3、补偿型-TCC-解决方案"><a href="#3、补偿型-TCC-解决方案" class="headerlink" title="3、补偿型 TCC 解决方案"></a>3、补偿型 TCC 解决方案</h3><p>补偿型 TCC 解决方案与通用型 TCC 解决方案的结构相似，其从业务服务也需要参与到主业务服务的活动决策当中。但不一样的是，前者的从业务服务只需要提供 Do 和 Compensate 两个接口，而后者需要提供三个接口。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/65.png"></p>
+<p>Do 接口直接执行真正的完整业务逻辑，完成业务处理，业务执行结果外部可见；Compensate 操作用于业务补偿，抵消或部分抵消正向业务操作的业务结果，Compensate操作需满足幂等性。</p>
+<p>与通用型解决方案相比，补偿型解决方案的从业务服务不需要改造原有业务逻辑，只需要额外增加一个补偿回滚逻辑即可，业务改造量较小。但要注意的是，业务在一阶段就执行完整个业务逻辑，无法做到有效的事务隔离，当需要回滚时，可能存在补偿失败的情况，还需要额外的异常处理机制，比如人工介入。</p>
+<p><strong>适用场景</strong>：</p>
+<p>由于存在回滚补偿失败的情况，补偿型 TCC 分布式事务解决方案只适用于一些并发冲突较少或者需要与外部交互的业务，这些外部业务不属于被动型业务，其执行结果会影响主业务服务的决策。</p>
+<blockquote>
+<p>以上部分内容参考自：<a target="_blank" rel="noopener" href="https://seata.io/zh-cn/blog/tcc-mode-applicable-scenario-analysis.html?utm_source=gold_browser_extension">https://seata.io/zh-cn/blog/tcc-mode-applicable-scenario-analysis.html?utm_source=gold_browser_extension</a></p>
+</blockquote>
+<h2 id="TCC事务模式的落地实现"><a href="#TCC事务模式的落地实现" class="headerlink" title="TCC事务模式的落地实现"></a>TCC事务模式的落地实现</h2><p>在前面文章中介绍了Seata的<strong>AT</strong>模式，有不清楚的可以看：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/sXVSFqq2UZ6Pwwt7vx7vIA">对比7种分布式事务方案，还是偏爱阿里开源的Seata，真香！(原理+实战)</a></p>
+<p>当然Seata支持的事务模式不局限于AT模式，还有<strong>TCC</strong>模式、<strong>SAGA</strong>模式、<strong>XA</strong>模式，下面整合一下TCC模式。</p>
+<h3 id="1、演示场景"><a href="#1、演示场景" class="headerlink" title="1、演示场景"></a>1、演示场景</h3><p>就以电商系统中下订单为例，为了演示，直接去掉账户服务，以订单服务、库存服务为例介绍。</p>
+<p>具体的逻辑如下：</p>
+<ol>
+<li>客户端调用下订单接口</li>
+<li>扣库存</li>
+<li>创建订单</li>
+<li>请求完成</li>
+</ol>
+<p>根据上面的逻辑可知，订单服务肯定是主业务服务，事务的发起方，库存服务是从业务服务，参与事务的决策。</p>
+<p>Seata的AT模式解决方案伪代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@GlobalTransactional</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Result&lt;Void&gt; <span class="title">createOrder</span><span class="params">(Long productId,Long num,.....)</span></span>&#123;</span><br><span class="line">    <span class="comment">//1、扣库存</span></span><br><span class="line">    reduceStorage();</span><br><span class="line">    <span class="comment">//2、创建订单</span></span><br><span class="line">    saveOrder();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p><strong>@GlobalTransactional</strong>这个注解用于发起一个全局事务。</p>
+<p>但是AT模式有局限性，如下：</p>
+<ul>
+<li>性能低，锁定资源时间太长</li>
+<li>无法解决跨应用的事务</li>
+</ul>
+<p>因此对于要求性能的下单接口，可以考虑使用TCC模式进行拆分成两阶段执行，这样整个流程锁定资源的时间将会变短，性能也能提高。</p>
+<p>此时的TCC模式的拆分如下：</p>
+<p><strong>1、一阶段的Try操作</strong></p>
+<p>TCC模式中的Try阶段其实就是预留资源，在这个过程中可以将需要的商品数量的<strong>库存冻结</strong>，这样就要在库存表中维护一个冻结的库存这个字段。</p>
+<p>伪代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">try</span><span class="params">()</span></span>&#123;</span><br><span class="line">  <span class="comment">//冻结库存</span></span><br><span class="line">  frozenStorage();</span><br><span class="line">  <span class="comment">//生成订单，状态为待确认</span></span><br><span class="line">  saveOrder();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：@Transactional开启了本地事务，只要出现了异常，本地事务将会回滚，同时执行第二阶段的cancel操作。</p>
+</blockquote>
+<p><strong>2、二阶段的confirm操作</strong></p>
+<p>confirm操作在一阶段try操作成功之后提交事务，涉及到的操作如下：</p>
+<ol>
+<li>释放try操作冻结的库存（冻结库存-购买数量）</li>
+<li>生成订单</li>
+</ol>
+<p>伪代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">confirm</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">//释放掉try操作预留的库存</span></span><br><span class="line">    cleanFrozen();</span><br><span class="line">    <span class="comment">//修改订单，状态为已完成</span></span><br><span class="line">    updateOrder();</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：这里如果返回false，遵循TCC规范，应该要不断重试，直到confirm完成。</p>
+</blockquote>
+<p><strong>3、二阶段的cancel操作</strong></p>
+<p><strong>cancel</strong>操作在一阶段<strong>try</strong>操作出现异常之后执行，用于回滚资源，涉及到的操作如下：</p>
+<ol>
+<li>恢复冻结的库存（冻结库存-购买数量、库存+购买数量）</li>
+<li>删除订单</li>
+</ol>
+<p>伪代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">cancel</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">//释放掉try操作预留的库存</span></span><br><span class="line">    rollbackFrozen();</span><br><span class="line">    <span class="comment">//修改订单，状态为已完成</span></span><br><span class="line">    delOrder();</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：这里如果返回false，遵循TCC规范，应该要不断重试，直到cancel完成。</p>
+</blockquote>
+<h3 id="2、TCC事务模型的三个异常"><a href="#2、TCC事务模型的三个异常" class="headerlink" title="2、TCC事务模型的三个异常"></a>2、TCC事务模型的三个异常</h3><p>实现TCC事务模型涉及到的三个异常是不可避免的，实际生产中必须要规避这三大异常。</p>
+<p><strong>1、空回滚</strong></p>
+<p><strong>定义</strong>：在未调用<strong>try</strong>方法或try方法未执行成功的情况下，就执行了<strong>cancel</strong>方法进行了回滚。</p>
+<p>怎么理解呢？未调用try方法就执行了cancel方法，这个很容易理解，既然没有预留资源，那么肯定是不能回滚。</p>
+<p><strong>try方法未执行成功是什么意思？</strong></p>
+<p>可以看上节中的第一阶段try方法的伪代码，由于try方法开启了本地事务，一旦try方法执行过程中出现了异常，将会导致try方法的本地事务回滚（注意这里不是cancel方法回滚，而是try方法的本地事务回滚），这样其实try方法中的所有操作都将会回滚，也就没有必要调用cancel方法。</p>
+<p>但是实际上一旦try方法抛出了异常，那么必定是要调用cancel方法进行回滚，这样就导致了空回滚。</p>
+<p><strong>解决方案</strong>：</p>
+<p>解决逻辑很简单：在cancel方法执行操作之前，必须要知道try方法是否执行成功。</p>
+<p><strong>2、幂等性</strong></p>
+<p>TCC模式定义中提到：如果confirm或者cancel方法执行失败，要一直重试直到成功。</p>
+<p>这里就涉及了幂等性，confirm和cancel方法必须保证同一个全局事务中的幂等性。</p>
+<p><strong>解决方案</strong>：</p>
+<p>解决逻辑很简单：对付幂等，自然是要利用幂等标识进行防重操作。</p>
+<p><strong>3、悬挂</strong></p>
+<p>事务协调器在调用 TCC 服务的一阶段 Try 操作时，可能会出现因网络拥堵而导致的超时，此时事务管理器会触发二阶段回滚，调用 TCC 服务的 Cancel 操作，Cancel 调用未超时；</p>
+<p>在此之后，拥堵在网络上的一阶段 Try 数据包被 TCC 服务收到，出现了二阶段 Cancel 请求比一阶段 Try 请求先执行的情况，此 TCC 服务在执行晚到的 Try 之后，将永远不会再收到二阶段的 Confirm 或者 Cancel ，造成 TCC 服务悬挂。</p>
+<p><strong>解决方案</strong>：</p>
+<p>解决逻辑很简单：在执行try方法操作资源之前判断cancel方法是否已经执行；同样的在cancel方法执行后要记录执行的状态。</p>
+<p><strong>4、总结</strong></p>
+<p>针对以上三个异常，落地的解决方案很多，比如维护一个<strong>事务状态表</strong>，每个事务的执行阶段全部记录下来。</p>
+<ul>
+<li>幂等：在执行confirm或者cancel之前根据事务状态表查询当前全局事务是否已经执行过confirm或者cancel方法</li>
+<li>空回滚：在执行cancel之前才能根据事务状态表查询当前全局事务是否已经执行成功try方法</li>
+<li>悬挂：在执行try方法之前，根据事务状态表查询当前全局事务是否已经执行过cancel方法</li>
+</ul>
+<h2 id="Seata整合TCC实现"><a href="#Seata整合TCC实现" class="headerlink" title="Seata整合TCC实现"></a>Seata整合TCC实现</h2><p>关于如何搭建项目、添加依赖这里就不再细说了，不熟悉的可以看我之前的文章：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/sXVSFqq2UZ6Pwwt7vx7vIA">对比7种分布式事务方案，还是偏爱阿里开源的Seata，真香！(原理+实战)</a></p>
+<p>本节只介绍关键代码，毕竟篇幅有限，其他部分请自行下载源码。</p>
+<blockquote>
+<p>案例源码已上传GitHub，关注公众号：<strong>码猿技术专栏</strong>，回复关键：<strong>9531</strong> 获取！</p>
+</blockquote>
+<p>源码目录如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/66.png" alt="源码目录"></p>
+<p>项目启动所需要的相关文件如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/73.png"></p>
+<p><strong>nacos</strong>目录中的<strong>SEATA_GROUP</strong>是Seata事务服务端和客户端所需要的相关配置，直接导入nacos即可。</p>
+<p><strong>seata</strong>目录中的conf是1.3.0版本服务端的配置</p>
+<p><strong>SQL</strong>目录是相关的几个数据库。</p>
+<h3 id="1、TCC接口定义"><a href="#1、TCC接口定义" class="headerlink" title="1、TCC接口定义"></a>1、TCC接口定义</h3><p>在<strong>order-boot</strong>模块创建OrderTccService，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/67.png"></p>
+<p>代码中注释已经很完整了，下面挑几个重点介绍一下：</p>
+<ol>
+<li><strong>@LocalTCC</strong>：该注解开启TCC事务</li>
+<li><strong>@TwoPhaseBusinessAction</strong>：该注解标注在try方法上，其中的三个属性如下：<ol>
+<li><strong>name</strong>：TCC事务的名称，必须是唯一的</li>
+<li><strong>commitMethod</strong>：confirm方法的名称，默认是commit</li>
+<li><strong>rollbackMethod</strong>：cancel方法的名称，，默认是rollback</li>
+</ol>
+</li>
+<li>confirm和cancel的返回值尤为重要，返回false则会不断的重试。</li>
+</ol>
+<h3 id="2、TCC接口实现"><a href="#2、TCC接口实现" class="headerlink" title="2、TCC接口实现"></a>2、TCC接口实现</h3><p>定义有了，总要实现，如下：</p>
+<p><strong>1、try方法</strong></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/68.png" alt="try方法"></p>
+<p><strong>①</strong>处的代码是为了防止悬挂异常，从事务日志表中获取全局事务ID的状态，如果是cancel状态则不执行。</p>
+<p><strong>②</strong>处的代码冻结库存</p>
+<p><strong>③</strong>处的代码生成订单，状态为待确认</p>
+<p><strong>④</strong>处的代码向幂等工具类中添加一个标记，<strong>key</strong>为<strong>当前类</strong>和<strong>全局事务ID</strong>，<strong>value</strong>为当前时间戳。</p>
+<blockquote>
+<p>注意：必须要开启本地事务，如上代码使用@Transactional开启本地事务</p>
+</blockquote>
+<p><strong>2、confirm方法</strong></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/69.png" alt="confirm方法"></p>
+<p><strong>①</strong>处的代码从幂等工具类中根据当前类和全局事务ID获取值，由于try阶段执行成功会向其中添加值，confirm方法执行成功会移出这个值，因此在confirm开头判断这个值是否存在就起到了幂等效果，防止重试的效果。</p>
+<p><strong>⑥</strong>处的代码从幂等工具类中移出try方法中添加的值。</p>
+<p><strong>②</strong>处的代码是从<strong>BusinessActionContext</strong>中获取try方法中的入参。</p>
+<p><strong>③</strong>处的代码是释放掉冻结的库存</p>
+<p><strong>④</strong>处的代码是修改订单的状态为已完成。</p>
+<blockquote>
+<p>注意：1. 开启本地事务  2. 注意返回值，返回false时将会重试</p>
+</blockquote>
+<p><strong>3、cancel方法</strong></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/70.png" alt="cancel方法"></p>
+<p><strong>①</strong>处的代码是向事务日志记录表中插入一条数据，标记当前事务进入cancel方法，用来防止悬挂，这个和try方法中的<strong>①</strong>处的代码相呼应。</p>
+<p><strong>②</strong>处的代码是为了防止幂等和空回滚，因为只有当try方法中执行成功幂等工具类中对应的当前类和全局事务ID才会存储该值。这样既防止了幂等，也防止了空回滚。</p>
+<p><strong>③</strong>处的代码恢复冻结的库存。</p>
+<p><strong>④</strong>处的代码删除这笔订单</p>
+<p><strong>⑤</strong>处的代码是移出幂等工具类当前类和全局事务ID对应的值。</p>
+<h3 id="3、如何防止TCC模型的三个异常？"><a href="#3、如何防止TCC模型的三个异常？" class="headerlink" title="3、如何防止TCC模型的三个异常？"></a>3、如何防止TCC模型的三个异常？</h3><p>实现方法有很多，有些案例是全部使用事务日志表记录当前的状态，这样完美的解决了幂等、空回滚、悬挂的问题。</p>
+<p>陈某这里为了方便，使用了两种方案，如下：</p>
+<p><strong>1、幂等、空回滚</strong></p>
+<p>使用了一个幂等工具类，其中是个Map，key为当前类和全局事务ID，value是时间戳。</p>
+<p>代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/71.png"></p>
+<p>思路如下：</p>
+<ol>
+<li>在try方法最后使用幂等工具类中的add方法添加值</li>
+<li>在confirm、cancel方法中使用幂等工具类中的remove方法移出值</li>
+<li>在confirm、cancel方法中使用幂等工具类中get方法获取值，如果为空，则表示已经执行过了，直接返回true，这样既防止了幂等，也防止了空回滚。</li>
+</ol>
+<p><strong>2、悬挂</strong></p>
+<p>悬挂的实现依靠的是事务日志表，表结构如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `transactional_record` (</span><br><span class="line">  `id` <span class="type">bigint</span>(<span class="number">11</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT,</span><br><span class="line">  `xid` <span class="type">varchar</span>(<span class="number">100</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  `status` <span class="type">int</span>(<span class="number">1</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span> COMMENT <span class="string">&#x27;1. try  2 commit 3 cancel &#x27;</span>,</span><br><span class="line">  <span class="keyword">PRIMARY</span> KEY (`id`) <span class="keyword">USING</span> BTREE</span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>utf8mb4;</span><br></pre></td></tr></table></figure>
+
+<p>其中的xid是全局事务ID，status是事务的状态。</p>
+<blockquote>
+<p>其他的字段自己可以扩展</p>
+</blockquote>
+<p>解决悬挂问题的逻辑如下：</p>
+<ol>
+<li>cancel方法中将当前全局事务ID记录到事务日志表中，状态为cancel</li>
+<li>try方法执行资源操作前检查事务日志表中当前全局事务ID是否已经是cancel状态</li>
+</ol>
+<h3 id="4、创建订单的业务方法"><a href="#4、创建订单的业务方法" class="headerlink" title="4、创建订单的业务方法"></a>4、创建订单的业务方法</h3><p>上面只是完成了TCC的三个方法，主业务事务发起方还未提供，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/seata/72.png"></p>
+<p><strong>@GlobalTransactional</strong>这个注解开启了全局事务，是事务的发起方。</p>
+<p>内部直接调用的TCC的try方法。</p>
+<h3 id="5、其他的配置"><a href="#5、其他的配置" class="headerlink" title="5、其他的配置"></a>5、其他的配置</h3><p>以上只是列出了关键的步骤，剩余其他的配置自己根据案例源码完善，如下：</p>
+<ol>
+<li>接口测试</li>
+<li>整合nacos</li>
+<li>整合feign</li>
+<li>整合seata，TCC模式中的配置和AT模式的Seata配置相同</li>
+</ol>
+<blockquote>
+<p>注意：一定要配置Seata的事务组<strong>tx-service-group</strong>，配置方法见之前的文章。</p>
+</blockquote>
+<h3 id="6、总结"><a href="#6、总结" class="headerlink" title="6、总结"></a>6、总结</h3><p>TCC事务模型相对来说比较简单的一种，有兴趣的可以下载源码试试。</p>
+<blockquote>
+<p>案例源码已上传GitHub，关注公众号：<strong>码猿技术专栏</strong>，回复关键：<strong>9531</strong> 获取！</p>
+</blockquote>
+<h2 id="最后说一句（别白嫖，求关注）"><a href="#最后说一句（别白嫖，求关注）" class="headerlink" title="最后说一句（别白嫖，求关注）"></a>最后说一句（别白嫖，求关注）</h2><p>陈某每一篇文章都是精心输出，已经写了<strong>3个专栏</strong>，整理成<strong>PDF</strong>，获取方式如下：</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=2042874937312346114#wechat_redirect">《Spring Cloud 进阶》</a>PDF：关注公众号：【<strong>码猿技术专栏</strong>】回复关键词 <strong>Spring Cloud 进阶</strong> 获取！</li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=1532834475389288449#wechat_redirect">《Spring Boot 进阶》</a>PDF：关注公众号：【<strong>码猿技术专栏</strong>】回复关键词 <strong>Spring Boot进阶</strong> 获取！</li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=1500819225232343046#wechat_redirect">《Mybatis 进阶》</a>PDF：关注公众号：【<strong>码猿技术专栏</strong>】回复关键词 <strong>Mybatis 进阶</strong> 获取！</li>
+</ol>
+<p>如果这篇文章对你有所帮助，或者有所启发的话，帮忙<strong>点赞</strong>、<strong>在看</strong>、<strong>转发</strong>、<strong>收藏</strong>，你的支持就是我坚持下去的最大动力！</p>
+<p>关注公众号：<strong>【码猿技术专栏】</strong>，公众号内有超赞的粉丝福利，回复：<strong>加群</strong>，可以加入技术讨论群，和大家一起讨论技术，吹牛逼！</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    不才陈某  |  微信公众号【码猿技术专栏】
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://chenjiabing666.github.io/2022/01/11/%E5%AE%9E%E6%88%98%EF%BC%81%E9%98%BF%E9%87%8C%E7%A5%9E%E5%99%A8Seata%E5%AE%9E%E7%8E%B0TCC%E6%A8%A1%E5%BC%8F%E8%A7%A3%E5%86%B3%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%EF%BC%8C%E7%9C%9F%E9%A6%99%EF%BC%81/" title="实战！阿里神器 Seata 实现 TCC模式 解决分布式事务，真香！">https://chenjiabing666.github.io/2022/01/11/实战！阿里神器Seata实现TCC模式解决分布式事务，真香！/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+  <li class="post-copyright-license">
+    并保留本声明和上方二维码。感谢您的阅读和支持！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">微信公众号</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/" rel="tag"># 微服务</a>
+              <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1/" rel="tag"># 分布式事务</a>
+              <a href="/tags/%E5%AE%9E%E6%88%98/" rel="tag"># 实战</a>
+              <a href="/tags/Seata/" rel="tag"># Seata</a>
+              <a href="/tags/TCC/" rel="tag"># TCC</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/01/06/%E5%AE%9E%E6%88%98%EF%BC%81SpringCloudGateway%E9%9B%86%E6%88%90RBAC%E6%9D%83%E9%99%90%E6%A8%A1%E5%9E%8B%E5%AE%9E%E7%8E%B0%E5%8A%A8%E6%80%81%E6%9D%83%E9%99%90%E6%8E%A7%E5%88%B6%EF%BC%81/" rel="prev" title="实战！Spring Cloud Gateway集成 RBAC 权限模型实现动态权限控制！">
+      <i class="fa fa-chevron-left"></i> 实战！Spring Cloud Gateway集成 RBAC 权限模型实现动态权限控制！
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+		  <script src="https://readmore.openwrite.cn/js/readmore.js" type="text/javascript"></script>
+<script>
+    const btw = new BTWPlugin();
+    btw.init({
+        id: 'container',
+        blogId: '27513-1629019452485-311',
+        name: '码猿技术专栏',
+        qrcode: 'https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg',
+        keyword: 'vip',
+    });
+</script>
+        </div>
+		</div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFTCC%E6%A8%A1%E5%BC%8F%EF%BC%9F"><span class="nav-text">什么是TCC模式？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E2%91%A0Try-%E9%98%B6%E6%AE%B5"><span class="nav-text">①Try 阶段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E2%91%A1Confirm-Cancel-%E9%98%B6%E6%AE%B5"><span class="nav-text">②Confirm &#x2F; Cancel 阶段</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCC%E6%A8%A1%E5%BC%8F%E7%9A%84%E4%B8%89%E7%A7%8D%E7%B1%BB%E5%9E%8B%EF%BC%9F"><span class="nav-text">TCC模式的三种类型？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E9%80%9A%E7%94%A8%E5%9E%8B-TCC-%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-text">1、通用型 TCC 解决方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E5%BC%82%E6%AD%A5%E7%A1%AE%E4%BF%9D%E5%9E%8B-TCC-%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-text">2、异步确保型 TCC 解决方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E8%A1%A5%E5%81%BF%E5%9E%8B-TCC-%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-text">3、补偿型 TCC 解决方案</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCC%E4%BA%8B%E5%8A%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E8%90%BD%E5%9C%B0%E5%AE%9E%E7%8E%B0"><span class="nav-text">TCC事务模式的落地实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E6%BC%94%E7%A4%BA%E5%9C%BA%E6%99%AF"><span class="nav-text">1、演示场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81TCC%E4%BA%8B%E5%8A%A1%E6%A8%A1%E5%9E%8B%E7%9A%84%E4%B8%89%E4%B8%AA%E5%BC%82%E5%B8%B8"><span class="nav-text">2、TCC事务模型的三个异常</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Seata%E6%95%B4%E5%90%88TCC%E5%AE%9E%E7%8E%B0"><span class="nav-text">Seata整合TCC实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81TCC%E6%8E%A5%E5%8F%A3%E5%AE%9A%E4%B9%89"><span class="nav-text">1、TCC接口定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81TCC%E6%8E%A5%E5%8F%A3%E5%AE%9E%E7%8E%B0"><span class="nav-text">2、TCC接口实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E5%A6%82%E4%BD%95%E9%98%B2%E6%AD%A2TCC%E6%A8%A1%E5%9E%8B%E7%9A%84%E4%B8%89%E4%B8%AA%E5%BC%82%E5%B8%B8%EF%BC%9F"><span class="nav-text">3、如何防止TCC模型的三个异常？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4%E3%80%81%E5%88%9B%E5%BB%BA%E8%AE%A2%E5%8D%95%E7%9A%84%E4%B8%9A%E5%8A%A1%E6%96%B9%E6%B3%95"><span class="nav-text">4、创建订单的业务方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5%E3%80%81%E5%85%B6%E4%BB%96%E7%9A%84%E9%85%8D%E7%BD%AE"><span class="nav-text">5、其他的配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6%E3%80%81%E6%80%BB%E7%BB%93"><span class="nav-text">6、总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%90%8E%E8%AF%B4%E4%B8%80%E5%8F%A5%EF%BC%88%E5%88%AB%E7%99%BD%E5%AB%96%EF%BC%8C%E6%B1%82%E5%85%B3%E6%B3%A8%EF%BC%89"><span class="nav-text">最后说一句（别白嫖，求关注）</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="不才陈某"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">134</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">67</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png" title="微信公众号 → https:&#x2F;&#x2F;gitee.com&#x2F;chenjiabing666&#x2F;BlogImage&#x2F;raw&#x2F;master&#x2F;myjszl_log.png" rel="noopener" target="_blank"><i class="fab fa-weixin fa-fw"></i>微信公众号</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.im/user/2506542244708072" title="掘金 → https:&#x2F;&#x2F;juejin.im&#x2F;user&#x2F;2506542244708072" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>掘金</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某|公众号：码猿技术专栏</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RtlQOgOT3M0hgyMeogykSQjT-gzGzoHsz',
+      appKey     : 'vSCxLU88wnXVf0Pa8mwJrCPm',
+      placeholder: "欢迎关注博主微信公众号【码猿技术专栏】",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
