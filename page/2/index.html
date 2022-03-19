@@ -188,6 +188,214 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/12/20/%E5%AE%9E%E6%88%98%E5%B9%B2%E8%B4%A7%EF%BC%81SpringCloudGateway%E9%9B%86%E6%88%90OAuth2-0%E5%AE%9E%E7%8E%B0%E5%88%86%E5%B8%83%E5%BC%8F%E7%BB%9F%E4%B8%80%E8%AE%A4%E8%AF%81%E6%8E%88%E6%9D%83%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/12/20/%E5%AE%9E%E6%88%98%E5%B9%B2%E8%B4%A7%EF%BC%81SpringCloudGateway%E9%9B%86%E6%88%90OAuth2-0%E5%AE%9E%E7%8E%B0%E5%88%86%E5%B8%83%E5%BC%8F%E7%BB%9F%E4%B8%80%E8%AE%A4%E8%AF%81%E6%8E%88%E6%9D%83%EF%BC%81/" class="post-title-link" itemprop="url">实战干货！Spring Cloud Gateway集成OAuth2.0 实现分布式统一认证授权！</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-12-20 18:14:50 / 修改时间：18:18:57" itemprop="dateCreated datePublished" datetime="2021-12-20T18:14:50+08:00">2021-12-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Cloud-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Cloud 进阶</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/12/20/%E5%AE%9E%E6%88%98%E5%B9%B2%E8%B4%A7%EF%BC%81SpringCloudGateway%E9%9B%86%E6%88%90OAuth2-0%E5%AE%9E%E7%8E%B0%E5%88%86%E5%B8%83%E5%BC%8F%E7%BB%9F%E4%B8%80%E8%AE%A4%E8%AF%81%E6%8E%88%E6%9D%83%EF%BC%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/12/20/%E5%AE%9E%E6%88%98%E5%B9%B2%E8%B4%A7%EF%BC%81SpringCloudGateway%E9%9B%86%E6%88%90OAuth2-0%E5%AE%9E%E7%8E%B0%E5%88%86%E5%B8%83%E5%BC%8F%E7%BB%9F%E4%B8%80%E8%AE%A4%E8%AF%81%E6%8E%88%E6%9D%83%EF%BC%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><strong>大家好，我是不才陈某~</strong></p>
+<p>这是<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=2042874937312346114&scene=126#wechat_redirect">《Spring Cloud 进阶》</a><strong>第15篇</strong>文章，往期文章如下：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247493854&idx=1&sn=4b3fb7f7e17a76000733899f511ef915&scene=21#wechat_redirect">五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247496653&idx=1&sn=7185077b3bdc1d094aef645d677ec472&scene=21#wechat_redirect">openFeign夺命连环9问，这谁受得了？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/S_8HQYHOG624Vzeu94CFSA">阿里面试这样问：Nacos、Apollo、Config配置中心如何选型？这10个维度告诉你！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/YKzYdMu-7nwszEf9-1M3Uw">阿里面试败北：5种微服务注册中心如何选型？这几个维度告诉你！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/Q7Xv8cypQFrrOQhbd9BOXw">阿里限流神器Sentinel夺命连环 17 问？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/sXVSFqq2UZ6Pwwt7vx7vIA">对比7种分布式事务方案，还是偏爱阿里开源的Seata，真香！(原理+实战)</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247499894&idx=1&sn=f1606e4c00fd15292269afe052f5bca2&chksm=fcf71fbbcb8096ad349e6da50b0b9141964c2084d0a38eba977fe8baa3fbe8af3b20c7591110&token=1887105114&lang=zh_CN#rd">Spring Cloud Gateway夺命连环10问？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247500540&idx=1&sn=2967bf1f9fa2c4d5b94b7fe291b7869b&chksm=fcf71d31cb8094271b5bbeca85cc03cf7d7c8bbf7c4d5b83a539e39c956e3f4015f91e7742b6&token=2077958771&lang=zh_CN#rd">Spring Cloud Gateway 整合阿里 Sentinel网关限流实战！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247500757&idx=1&sn=ef71f10d5736029c92287f7894c842ed&chksm=fcf71c18cb80950ec3144d66957a9d2914b51b8af22cf59a1ca3f9e2b561a11aca359d50d5a1&scene=178&cur_album_id=2042874937312346114#rd">分布式链路追踪之Spring Cloud Sleuth夺命连环9问？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247501079&idx=1&sn=438ef3a3d65fb4919b61cf6972827bec&chksm=fcf71adacb8093ccc4c3d6dfb8860ca07aefbc761c1ed5126eb4a4e87548441841198db1f8e3&scene=178&cur_album_id=2042874937312346114#rd">链路追踪自从用了SkyWalking，睡的真香！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247501590&idx=1&sn=149d1498504cda7cc391413f14cda9c2&chksm=fcf718dbcb8091cd6907e86e148216bae0a2d5b1664b1e8cc2d3e2c96c38181cc778de5711b6&scene=178&cur_album_id=2042874937312346114#rd">3本书了，7万+字，10篇文章，《Spring Cloud 进阶》基础版 PDF</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502682&idx=1&sn=52a15b623ab6135c134b8262bd605946&chksm=fcf71497cb809d81f1d2dbce76b3e00170f085306b2a2a67a807a6d9e2cf03bf1de3b8f203a2&scene=178&cur_album_id=2042874937312346114#rd">妹子始终没搞懂OAuth2.0，今天整合Spring Cloud Security 一次说明白！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502801&idx=1&sn=56b1af09bfa25d5e44193a7d75dfa623&chksm=fcf7141ccb809d0a1b0b2d7f6d9893c7d3e560dd8996296276f0274d2578236ee87e9124810d&scene=178&cur_album_id=2042874937312346114#rd">OAuth2.0实战！使用JWT令牌认证！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502905&idx=1&sn=32ba3ae4e0a4097d238f64719c88b7f7&chksm=fcf713f4cb809ae2ccb706b8e9f8184739d3c7b97d388467bfe9ff31a8c15768b6de05054f08&scene=178&cur_album_id=2042874937312346114#rd">OAuth2.0实战！玩转认证、资源服务异常自定义这些骚操作！</a></li>
+</ul>
+<p>今天这篇文章介绍一下<strong>Spring Cloud Gateway</strong>整合<strong>OAuth2.0</strong>实现认证授权，涉及到的知识点有点多，有不清楚的可以看下陈某的往期文章。</p>
+<p>文章目录如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/171.png"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/12/20/%E5%AE%9E%E6%88%98%E5%B9%B2%E8%B4%A7%EF%BC%81SpringCloudGateway%E9%9B%86%E6%88%90OAuth2-0%E5%AE%9E%E7%8E%B0%E5%88%86%E5%B8%83%E5%BC%8F%E7%BB%9F%E4%B8%80%E8%AE%A4%E8%AF%81%E6%8E%88%E6%9D%83%EF%BC%81/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/12/08/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E7%8E%A9%E8%BD%AC%E8%AE%A4%E8%AF%81%E3%80%81%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BF%99%E4%BA%9B%E9%AA%9A%E6%93%8D%E4%BD%9C%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/12/08/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E7%8E%A9%E8%BD%AC%E8%AE%A4%E8%AF%81%E3%80%81%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BF%99%E4%BA%9B%E9%AA%9A%E6%93%8D%E4%BD%9C%EF%BC%81/" class="post-title-link" itemprop="url">OAuth2.0实战！玩转认证、资源服务异常自定义这些骚操作！</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-12-08 21:10:00 / 修改时间：21:13:12" itemprop="dateCreated datePublished" datetime="2021-12-08T21:10:00+08:00">2021-12-08</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Security-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Security 进阶</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/12/08/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E7%8E%A9%E8%BD%AC%E8%AE%A4%E8%AF%81%E3%80%81%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BF%99%E4%BA%9B%E9%AA%9A%E6%93%8D%E4%BD%9C%EF%BC%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/12/08/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E7%8E%A9%E8%BD%AC%E8%AE%A4%E8%AF%81%E3%80%81%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BF%99%E4%BA%9B%E9%AA%9A%E6%93%8D%E4%BD%9C%EF%BC%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p><strong>大家好，我是不才陈某~</strong></p>
+<p>这是<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=2151150065472569352#wechat_redirect">《Spring Security 进阶》</a>的第<strong>4</strong>篇文章，往期文章如下：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502546&idx=1&sn=bfb6fd9d96d8c5bf107a4981ba5e1547&chksm=fcf7151fcb809c09b7ae29de8c0af0d00976539a46ee5f9bf583a6a7b196ea82f26ce98fd982&token=1622810645&lang=zh_CN#rd">实战！Spring Boot Security+JWT前后端分离架构登录认证！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502682&idx=1&sn=52a15b623ab6135c134b8262bd605946&chksm=fcf71497cb809d81f1d2dbce76b3e00170f085306b2a2a67a807a6d9e2cf03bf1de3b8f203a2&token=404376711&lang=zh_CN#rd">妹子始终没搞懂OAuth2.0，今天整合Spring Cloud Security 一次说明白！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502801&idx=1&sn=56b1af09bfa25d5e44193a7d75dfa623&chksm=fcf7141ccb809d0a1b0b2d7f6d9893c7d3e560dd8996296276f0274d2578236ee87e9124810d&token=867552718&lang=zh_CN#rd">OAuth2.0实战！使用JWT令牌认证！</a></li>
+</ul>
+<p>文章都是成体系的，陈某默认看到这篇文章的读者都已经看了前期的文章，之前的知识点就不再详细介绍了。</p>
+<p>今天这篇文章主要介绍一下实际工作中使用Spring Security需要定制的一些异常信息。</p>
+<p>文章目录如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Security/141.png"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/12/08/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E7%8E%A9%E8%BD%AC%E8%AE%A4%E8%AF%81%E3%80%81%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%BC%82%E5%B8%B8%E8%87%AA%E5%AE%9A%E4%B9%89%E8%BF%99%E4%BA%9B%E9%AA%9A%E6%93%8D%E4%BD%9C%EF%BC%81/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/12/05/OAuth2-0%E5%AE%9E%E6%88%98%EF%BC%81%E4%BD%BF%E7%94%A8JWT%E4%BB%A4%E7%89%8C%E8%AE%A4%E8%AF%81%EF%BC%81/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -977,200 +1185,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/11/14/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA%E8%87%AA%E4%BB%8E%E7%94%A8%E4%BA%86SkyWalking%EF%BC%8C%E7%9D%A1%E7%9A%84%E7%9C%9F%E9%A6%99%EF%BC%81/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/11/14/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA%E8%87%AA%E4%BB%8E%E7%94%A8%E4%BA%86SkyWalking%EF%BC%8C%E7%9D%A1%E7%9A%84%E7%9C%9F%E9%A6%99%EF%BC%81/" class="post-title-link" itemprop="url">链路追踪自从用了SkyWalking，睡的真香！</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-11-14 21:06:51 / 修改时间：21:10:06" itemprop="dateCreated datePublished" datetime="2021-11-14T21:06:51+08:00">2021-11-14</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Spring-Cloud-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Cloud 进阶</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2021/11/14/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA%E8%87%AA%E4%BB%8E%E7%94%A8%E4%BA%86SkyWalking%EF%BC%8C%E7%9D%A1%E7%9A%84%E7%9C%9F%E9%A6%99%EF%BC%81/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2021/11/14/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA%E8%87%AA%E4%BB%8E%E7%94%A8%E4%BA%86SkyWalking%EF%BC%8C%E7%9D%A1%E7%9A%84%E7%9C%9F%E9%A6%99%EF%BC%81/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><strong>大家好，我是不才陈某~</strong></p>
-<p>这是<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=2042874937312346114&scene=126#wechat_redirect">《Spring Cloud 进阶》</a><strong>第十篇</strong>文章，往期文章如下：</p>
-<ul>
-<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247493854&idx=1&sn=4b3fb7f7e17a76000733899f511ef915&scene=21#wechat_redirect">五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？</a></li>
-<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247496653&idx=1&sn=7185077b3bdc1d094aef645d677ec472&scene=21#wechat_redirect">openFeign夺命连环9问，这谁受得了？</a></li>
-<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/S_8HQYHOG624Vzeu94CFSA">阿里面试这样问：Nacos、Apollo、Config配置中心如何选型？这10个维度告诉你！</a></li>
-<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/YKzYdMu-7nwszEf9-1M3Uw">阿里面试败北：5种微服务注册中心如何选型？这几个维度告诉你！</a></li>
-<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/Q7Xv8cypQFrrOQhbd9BOXw">阿里限流神器Sentinel夺命连环 17 问？</a></li>
-<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/sXVSFqq2UZ6Pwwt7vx7vIA">对比7种分布式事务方案，还是偏爱阿里开源的Seata，真香！(原理+实战)</a></li>
-<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247499894&idx=1&sn=f1606e4c00fd15292269afe052f5bca2&chksm=fcf71fbbcb8096ad349e6da50b0b9141964c2084d0a38eba977fe8baa3fbe8af3b20c7591110&token=1887105114&lang=zh_CN#rd">Spring Cloud Gateway夺命连环10问？</a></li>
-<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247500540&idx=1&sn=2967bf1f9fa2c4d5b94b7fe291b7869b&chksm=fcf71d31cb8094271b5bbeca85cc03cf7d7c8bbf7c4d5b83a539e39c956e3f4015f91e7742b6&token=2077958771&lang=zh_CN#rd">Spring Cloud Gateway 整合阿里 Sentinel网关限流实战！</a></li>
-<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247500757&idx=1&sn=ef71f10d5736029c92287f7894c842ed&chksm=fcf71c18cb80950ec3144d66957a9d2914b51b8af22cf59a1ca3f9e2b561a11aca359d50d5a1&token=498818367&lang=zh_CN#rd">分布式链路追踪之Spring Cloud Sleuth夺命连环9问？</a></li>
-</ul>
-<p>本篇文章介绍链路追踪的另外一种解决方案Skywalking，文章目录如下：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/skywalking/34.png"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/11/14/%E9%93%BE%E8%B7%AF%E8%BF%BD%E8%B8%AA%E8%87%AA%E4%BB%8E%E7%94%A8%E4%BA%86SkyWalking%EF%BC%8C%E7%9D%A1%E7%9A%84%E7%9C%9F%E9%A6%99%EF%BC%81/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/11/09/%E5%B7%A7%E7%94%A8Java8%E7%9A%84Stream%E6%9D%A5%E4%BC%98%E5%8C%96%E4%BB%A3%E7%A0%81-%E5%A4%AA%E6%B8%85%E7%88%BD%E4%BA%86%EF%BC%81/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/11/09/%E5%B7%A7%E7%94%A8Java8%E7%9A%84Stream%E6%9D%A5%E4%BC%98%E5%8C%96%E4%BB%A3%E7%A0%81-%E5%A4%AA%E6%B8%85%E7%88%BD%E4%BA%86%EF%BC%81/" class="post-title-link" itemprop="url">巧用 Java 8 的 Stream 来优化代码，太清爽了！</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2021-11-09 18:46:17 / 修改时间：18:50:51" itemprop="dateCreated datePublished" datetime="2021-11-09T18:46:17+08:00">2021-11-09</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Java 进阶</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2021/11/09/%E5%B7%A7%E7%94%A8Java8%E7%9A%84Stream%E6%9D%A5%E4%BC%98%E5%8C%96%E4%BB%A3%E7%A0%81-%E5%A4%AA%E6%B8%85%E7%88%BD%E4%BA%86%EF%BC%81/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2021/11/09/%E5%B7%A7%E7%94%A8Java8%E7%9A%84Stream%E6%9D%A5%E4%BC%98%E5%8C%96%E4%BB%A3%E7%A0%81-%E5%A4%AA%E6%B8%85%E7%88%BD%E4%BA%86%EF%BC%81/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p><strong>大家好，我是不才陈某~</strong></p>
-<p>Java8的新特性主要是Lambda表达式和流，当流和Lambda表达式结合起来一起使用时，因为流申明式处理数据集合的特点，可以让代码变得简洁易读</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/stream/5.png"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/11/09/%E5%B7%A7%E7%94%A8Java8%E7%9A%84Stream%E6%9D%A5%E4%BC%98%E5%8C%96%E4%BB%A3%E7%A0%81-%E5%A4%AA%E6%B8%85%E7%88%BD%E4%BA%86%EF%BC%81/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1254,7 +1268,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">137</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

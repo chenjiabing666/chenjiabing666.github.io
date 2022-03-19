@@ -188,6 +188,198 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/10/14/Spring%20Boot%E7%AC%AC%E4%B8%83%E5%BC%B9%EF%BC%8C%E8%BF%87%E6%BB%A4%E5%99%A8%E5%A6%82%E4%BD%95%E9%85%8D%E7%BD%AE%EF%BC%8C%E4%B8%80%E6%B3%A2%E6%A2%AD%E5%93%88~/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/14/Spring%20Boot%E7%AC%AC%E4%B8%83%E5%BC%B9%EF%BC%8C%E8%BF%87%E6%BB%A4%E5%99%A8%E5%A6%82%E4%BD%95%E9%85%8D%E7%BD%AE%EF%BC%8C%E4%B8%80%E6%B3%A2%E6%A2%AD%E5%93%88~/" class="post-title-link" itemprop="url">过滤器如何配置，一波梭哈~</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-14 10:07:42" itemprop="dateCreated datePublished" datetime="2020-10-14T10:07:42+08:00">2020-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 19:12:33" itemprop="dateModified" datetime="2020-10-23T19:12:33+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/10/14/Spring%20Boot%E7%AC%AC%E4%B8%83%E5%BC%B9%EF%BC%8C%E8%BF%87%E6%BB%A4%E5%99%A8%E5%A6%82%E4%BD%95%E9%85%8D%E7%BD%AE%EF%BC%8C%E4%B8%80%E6%B3%A2%E6%A2%AD%E5%93%88~/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/10/14/Spring%20Boot%E7%AC%AC%E4%B8%83%E5%BC%B9%EF%BC%8C%E8%BF%87%E6%BB%A4%E5%99%A8%E5%A6%82%E4%BD%95%E9%85%8D%E7%BD%AE%EF%BC%8C%E4%B8%80%E6%B3%A2%E6%A2%AD%E5%93%88~/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>上篇文章介绍了Spring Boot中如何配置拦截器，今天这篇文章就来讲讲类似于拦截器的一个组件：过滤器。</p>
+<p>其实在实际开发中过滤器真的接触的不多，但是在应用中却是不可或缺的角色，值得花费一个章节专门介绍一下。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/10/14/Spring%20Boot%E7%AC%AC%E4%B8%83%E5%BC%B9%EF%BC%8C%E8%BF%87%E6%BB%A4%E5%99%A8%E5%A6%82%E4%BD%95%E9%85%8D%E7%BD%AE%EF%BC%8C%E4%B8%80%E6%B3%A2%E6%A2%AD%E5%93%88~/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/10/14/Spring%20Boot%E7%AC%AC%E5%85%AD%E5%BC%B9%EF%BC%8C%E6%8B%A6%E6%88%AA%E5%99%A8%E5%A6%82%E4%BD%95%E9%85%8D%E7%BD%AE%EF%BC%8C%E7%9C%8B%E8%BF%99%E5%84%BF~/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/14/Spring%20Boot%E7%AC%AC%E5%85%AD%E5%BC%B9%EF%BC%8C%E6%8B%A6%E6%88%AA%E5%99%A8%E5%A6%82%E4%BD%95%E9%85%8D%E7%BD%AE%EF%BC%8C%E7%9C%8B%E8%BF%99%E5%84%BF~/" class="post-title-link" itemprop="url">拦截器如何配置，看这儿~</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-14 10:06:42" itemprop="dateCreated datePublished" datetime="2020-10-14T10:06:42+08:00">2020-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 19:11:54" itemprop="dateModified" datetime="2020-10-23T19:11:54+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/10/14/Spring%20Boot%E7%AC%AC%E5%85%AD%E5%BC%B9%EF%BC%8C%E6%8B%A6%E6%88%AA%E5%99%A8%E5%A6%82%E4%BD%95%E9%85%8D%E7%BD%AE%EF%BC%8C%E7%9C%8B%E8%BF%99%E5%84%BF~/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/10/14/Spring%20Boot%E7%AC%AC%E5%85%AD%E5%BC%B9%EF%BC%8C%E6%8B%A6%E6%88%AA%E5%99%A8%E5%A6%82%E4%BD%95%E9%85%8D%E7%BD%AE%EF%BC%8C%E7%9C%8B%E8%BF%99%E5%84%BF~/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>上篇文章讲了Spring Boot的WEB开发基础内容，相信读者朋友们已经有了初步的了解，知道如何写一个接口。</p>
+<p>今天这篇文章来介绍一下拦截器在Spring Boot中如何自定义以及配置。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/10/14/Spring%20Boot%E7%AC%AC%E5%85%AD%E5%BC%B9%EF%BC%8C%E6%8B%A6%E6%88%AA%E5%99%A8%E5%A6%82%E4%BD%95%E9%85%8D%E7%BD%AE%EF%BC%8C%E7%9C%8B%E8%BF%99%E5%84%BF~/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/10/14/Spring%20Boot%E7%AC%AC%E4%BA%94%E5%BC%B9%EF%BC%8CWEB%E5%BC%80%E5%8F%91%E5%88%9D%E4%BA%86%E8%A7%A3~/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -958,348 +1150,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/05/08/select%E8%AF%AD%E5%8F%A5%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88%EF%BC%9F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/05/08/select%E8%AF%AD%E5%8F%A5%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88%EF%BC%9F/" class="post-title-link" itemprop="url">select语句做了什么？</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-05-08 18:51:57" itemprop="dateCreated datePublished" datetime="2020-05-08T18:51:57+08:00">2020-05-08</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-10-21 21:35:09" itemprop="dateModified" datetime="2020-10-21T21:35:09+08:00">2020-10-21</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%B9%B2%E8%B4%A7%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">数据库干货篇</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2020/05/08/select%E8%AF%AD%E5%8F%A5%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88%EF%BC%9F/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2020/05/08/select%E8%AF%AD%E5%8F%A5%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88%EF%BC%9F/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <section id="nice" data-tool="mdnice编辑器" data-website="https://www.mdnice.com" style="padding: 0 10px; word-spacing: 0px; word-wrap: break-word; text-align: left; font-family: Optima-Regular, Optima, PingFangSC-light, PingFangTC-light, 'PingFang SC', Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; line-height: 1.6; letter-spacing: .034em; color: rgb(63, 63, 63); font-size: 16px; word-break: all;"><h2 data-tool="mdnice编辑器" style="padding: 0px; font-weight: bold; color: black; font-size: 22px; display: block; text-align: center; background-image: url(https://my-wechat.mdnice.com/koala-2.png); background-position: center center; background-repeat: no-repeat; background-attachment: initial; background-origin: initial; background-clip: initial; background-size: 50px; margin-top: 1em; margin-bottom: 10px;"><span class="prefix" style="display: none;"></span><span class="content" style="text-align: center; display: inline-block; height: 38px; line-height: 42px; color: #48b378; background-position: left center; background-repeat: no-repeat; background-attachment: initial; background-origin: initial; background-clip: initial; background-size: 63px; margin-top: 38px; font-size: 18px; margin-bottom: 10px;">导读</span><span class="suffix"></span></h2>
-<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
-<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">Mysql在中小型企业中是个香饽饽，目前主流的数据库之一，几乎没有一个后端开发者不会使用的，但是作为一个老司机，仅仅会用真的不够。</p>
-</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">今天陈某透过一个简单的查询语句来讲述在Mysql内部的执行过程。</p>
-</section></li></ul>
-<pre class="custom" data-tool="mdnice编辑器" style="margin-top: 10px; margin-bottom: 10px; border-radius: 5px; box-shadow: rgba(0, 0, 0, 0.55) 0px 2px 10px;"><span style="display: block; background: url(https://my-wechat.mdnice.com/point.png); height: 30px; width: 100%; background-size: 40px; background-repeat: no-repeat; background-color: #f8f8f8; margin-bottom: -7px; border-radius: 5px; background-position: 10px 10px;"></span><code class="hljs" style="overflow-x: auto; padding: 16px; color: #333; display: -webkit-box; font-family: Operator Mono, Consolas, Monaco, Menlo, monospace; font-size: 12px; -webkit-overflow-scrolling: touch; padding-top: 15px; background: #f8f8f8; border-radius: 5px;">select * from table where id=10;
-</code></pre>
-<h2 data-tool="mdnice编辑器" style="padding: 0px; font-weight: bold; color: black; font-size: 22px; display: block; text-align: center; background-image: url(https://my-wechat.mdnice.com/koala-2.png); background-position: center center; background-repeat: no-repeat; background-attachment: initial; background-origin: initial; background-clip: initial; background-size: 50px; margin-top: 1em; margin-bottom: 10px;"><span class="prefix" style="display: none;"></span><span class="content" style="text-align: center; display: inline-block; height: 38px; line-height: 42px; color: #48b378; background-position: left center; background-repeat: no-repeat; background-attachment: initial; background-origin: initial; background-clip: initial; background-size: 63px; margin-top: 38px; font-size: 18px; margin-bottom: 10px;">撸它</span><span class="suffix"></span></h2>
-<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
-<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">首先通过一张图片来了解一下Mysql的基础架构，如下：</p>
-<figure style="margin: 0; margin-top: 10px; margin-bottom: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center;"><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/MYSQL%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/1.png" alt style="display: block; margin: 0 auto; max-width: 100%; border-radius: 4px; margin-bottom: 25px;"></figure>
-</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">从上图可以看出，Mysql大致分为Server层和存储引擎层两部分。</p>
-</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">Server层包括连接器、查询缓存、分析器、优化器等，其中包含了Mysql的大多数核心功能以及所有的内置函数（如日期，时间函数等），所有跨存储引擎的功能都在这一层实现，比如存储过程、触发器、视图等。</p>
-</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">存储引擎层负责数据的存储和提取。它的架构是可插拔式的，支持InnoDB、MyISAM等多个存储引擎。Mysql中主流的存储引擎是InnoDB，由于它对事务的支持让它从Mysql5.5.5版本开始成为了默认的存储引擎。</p>
-</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">大致了解了整体架构，现在说说每一个基础的模块都承担着怎样的责任。</p>
-</section></li></ul>
-<h3 data-tool="mdnice编辑器" style="margin-bottom: 15px; padding: 0px; font-weight: bold; color: black; font-size: 20px; margin-top: 1.2em;"><span style="background-image: url(https://my-wechat.mdnice.com/koala-3.png); background-size: 100% 100%; background-repeat: no-repeat; display: inline-block; width: 16px; height: 15px; line-height: 15px; margin-bottom: -1px;"></span><span class="prefix" style="display: none;"></span><span class="content" style="font-size: 17px; font-weight: bold; display: inline-block; margin-left: 8px; color: #48b378;">1. 连接器</span><span class="suffix" style="display: none;"></span></h3>
-<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
-<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;">顾名思义，是客户端和Mysql之间连接的媒介，负责登录、获取权限、维持连接和管理连接。连接命令一般如下：</section></li></ul>
-<pre class="custom" data-tool="mdnice编辑器" style="margin-top: 10px; margin-bottom: 10px; border-radius: 5px; box-shadow: rgba(0, 0, 0, 0.55) 0px 2px 10px;"><span style="display: block; background: url(https://my-wechat.mdnice.com/point.png); height: 30px; width: 100%; background-size: 40px; background-repeat: no-repeat; background-color: #f8f8f8; margin-bottom: -7px; border-radius: 5px; background-position: 10px 10px;"></span><code class="hljs" style="overflow-x: auto; padding: 16px; color: #333; display: -webkit-box; font-family: Operator Mono, Consolas, Monaco, Menlo, monospace; font-size: 12px; -webkit-overflow-scrolling: touch; padding-top: 15px; background: #f8f8f8; border-radius: 5px;">mysql [-h] ip [- P] port -u [user] -p 
-</code></pre>
-<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
-<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">在完成经典的TCP握手后，连接器会开始认证身份，要求输入密码。</p>
-<ul style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: square;">
-<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;">密码认证通过，连接器会查询出拥有的权限，即使管理员修改了权限，也不会影响你这次的连接，只有重新连接才会生效。</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;">密码认证失败，会收到提示信息Access denied for user。</section></li></ul>
-</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">连接完成后，没有后续动作的连接将会变成空闲连接，你可以输入<code style="font-size: 14px; word-wrap: break-word; padding: 2px 4px; border-radius: 4px; margin: 0 2px; background-color: rgba(27,31,35,.05); font-family: Operator Mono, Consolas, Monaco, Menlo, monospace; word-break: break-all; color: #28ca71;">show processlist</code>命令看到它。如下图，其中的Command这一列显示为sleep的这一行表示在系统里面有一个空闲连接。</p>
-<figure style="margin: 0; margin-top: 10px; margin-bottom: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center;"><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/MYSQL%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/2.png" alt style="display: block; margin: 0 auto; max-width: 100%; border-radius: 4px; margin-bottom: 25px;"></figure>
-</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">客户端如果太长时间没有执行动作，连接器将会自动断开，这个时间由参数<code style="font-size: 14px; word-wrap: break-word; padding: 2px 4px; border-radius: 4px; margin: 0 2px; background-color: rgba(27,31,35,.05); font-family: Operator Mono, Consolas, Monaco, Menlo, monospace; word-break: break-all; color: #28ca71;">wait_timeout</code>控制，默认值是8小时。</p>
-</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">如果在连接被断开之后，客户端再次发送请求的话，就会收到一个错误提醒： Lost connection to MySQL server during query。这时候如果你要继续，就需要重连，然后再执行请求了。</p>
-</section></li></ul>
-<h3 data-tool="mdnice编辑器" style="margin-bottom: 15px; padding: 0px; font-weight: bold; color: black; font-size: 20px; margin-top: 1.2em;"><span style="background-image: url(https://my-wechat.mdnice.com/koala-3.png); background-size: 100% 100%; background-repeat: no-repeat; display: inline-block; width: 16px; height: 15px; line-height: 15px; margin-bottom: -1px;"></span><span class="prefix" style="display: none;"></span><span class="content" style="font-size: 17px; font-weight: bold; display: inline-block; margin-left: 8px; color: #48b378;">2. 查询缓存【废材，8.0 版本完全删除】</span><span class="suffix" style="display: none;"></span></h3>
-<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
-<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">连接建立完成后，你就可以select语句了，执行之前会查询缓存。</p>
-</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">查询缓存在Mysql中的是默认关闭的，因为缓存命中率非常低，只要有对表执行一个更新操作，这个表的所有查询缓存都将被清空。怎么样？一句废材足以形容了！！！</p>
-</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">废材的东西不必多讲，主流的Redis的缓存你不用，别再搞这废材了。</p>
-</section></li></ul>
-<h3 data-tool="mdnice编辑器" style="margin-bottom: 15px; padding: 0px; font-weight: bold; color: black; font-size: 20px; margin-top: 1.2em;"><span style="background-image: url(https://my-wechat.mdnice.com/koala-3.png); background-size: 100% 100%; background-repeat: no-repeat; display: inline-block; width: 16px; height: 15px; line-height: 15px; margin-bottom: -1px;"></span><span class="prefix" style="display: none;"></span><span class="content" style="font-size: 17px; font-weight: bold; display: inline-block; margin-left: 8px; color: #48b378;">3. 分析器</span><span class="suffix" style="display: none;"></span></h3>
-<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
-<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">如果没有命中查询缓存，就要执行查询了，但是在执行查询之前，需要对SQL语句做解析，判断你这条语句有没有语法错误。</p>
-</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">分析器会做 '词法分析' ，你输入的无非可就是多个字符串和空格组成的SQL语句，MYSQL需要识别出里面的字符串是什么，代表什么，有没有关键词等。</p>
-</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">MYSQL会从你输入的select 这个关键字识别出来是一个查询语句，table是表名，id是列名。</p>
-</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">做完这些会做 '语法分析' ，根据MYSQL定义的规则来判断你的SQL语句有没有语法错误，如果你的语法不对，就会收到类似如下的提醒：</p>
-</section></li></ul>
-<pre class="custom" data-tool="mdnice编辑器" style="margin-top: 10px; margin-bottom: 10px; border-radius: 5px; box-shadow: rgba(0, 0, 0, 0.55) 0px 2px 10px;"><span style="display: block; background: url(https://my-wechat.mdnice.com/point.png); height: 30px; width: 100%; background-size: 40px; background-repeat: no-repeat; background-color: #f8f8f8; margin-bottom: -7px; border-radius: 5px; background-position: 10px 10px;"></span><code class="hljs" style="overflow-x: auto; padding: 16px; color: #333; display: -webkit-box; font-family: Operator Mono, Consolas, Monaco, Menlo, monospace; font-size: 12px; -webkit-overflow-scrolling: touch; padding-top: 15px; background: #f8f8f8; border-radius: 5px;">ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'elect * from t where ID=1' at line 1
-</code></pre>
-<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
-<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;">一般语法错误会提示第一个出现错误的位置，所以你要关注的是紧接“use near”的内容。</section></li></ul>
-<h3 data-tool="mdnice编辑器" style="margin-bottom: 15px; padding: 0px; font-weight: bold; color: black; font-size: 20px; margin-top: 1.2em;"><span style="background-image: url(https://my-wechat.mdnice.com/koala-3.png); background-size: 100% 100%; background-repeat: no-repeat; display: inline-block; width: 16px; height: 15px; line-height: 15px; margin-bottom: -1px;"></span><span class="prefix" style="display: none;"></span><span class="content" style="font-size: 17px; font-weight: bold; display: inline-block; margin-left: 8px; color: #48b378;">4. 优化器</span><span class="suffix" style="display: none;"></span></h3>
-<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
-<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">经过分析器词法和语法的分析，此时就能知道这条SQL语句是干什么的。但是在开始执行之前，MYSQL底层还要使用优化器对这条SQL语句进行优化处理。</p>
-</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">MYSQL内部会对这条SQL进行评估，比如涉及到多个索引会比较使用哪个索引代价更小、多表join的时候会考虑决定各个表的连接顺序。</p>
-</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">优化器的作用一句话总结：根据MYSQL内部的算法决定如何执行这条SQL语句来达到MYSQL认为代价最小目的。</p>
-</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">优化器阶段完成后，这个语句的执行方案就确定了，接下来就交给执行器执行了。</p>
-</section></li></ul>
-<h3 data-tool="mdnice编辑器" style="margin-bottom: 15px; padding: 0px; font-weight: bold; color: black; font-size: 20px; margin-top: 1.2em;"><span style="background-image: url(https://my-wechat.mdnice.com/koala-3.png); background-size: 100% 100%; background-repeat: no-repeat; display: inline-block; width: 16px; height: 15px; line-height: 15px; margin-bottom: -1px;"></span><span class="prefix" style="display: none;"></span><span class="content" style="font-size: 17px; font-weight: bold; display: inline-block; margin-left: 8px; color: #48b378;">5. 执行器</span><span class="suffix" style="display: none;"></span></h3>
-<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
-<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">MYSQL通过分析器知道了要做什么，通过优化器知道了如何做，于是就进入了执行器阶段。</p>
-</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">执行器开始执行之前，需要检查一下用户对表table有没有执行的权限，没有返回权限不足的错误，有的话就执行。</p>
-</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">执行也是分类的，如果Id不是索引则全表扫描，一行一行的查找，如果是索引则在索引组织表中查询，索引的查询很复杂，其中涉及到B+树等算法，这里不再详细介绍。</p>
-</section></li></ul>
-<h2 data-tool="mdnice编辑器" style="padding: 0px; font-weight: bold; color: black; font-size: 22px; display: block; text-align: center; background-image: url(https://my-wechat.mdnice.com/koala-2.png); background-position: center center; background-repeat: no-repeat; background-attachment: initial; background-origin: initial; background-clip: initial; background-size: 50px; margin-top: 1em; margin-bottom: 10px;"><span class="prefix" style="display: none;"></span><span class="content" style="text-align: center; display: inline-block; height: 38px; line-height: 42px; color: #48b378; background-position: left center; background-repeat: no-repeat; background-attachment: initial; background-origin: initial; background-clip: initial; background-size: 63px; margin-top: 38px; font-size: 18px; margin-bottom: 10px;">总结</span><span class="suffix"></span></h2>
-<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
-<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">一条SQL语句在MYSQL内部执行的过程涉及到的内部模块有：连接器、查询缓存、分析器、优化器、执行器、存储引擎。</p>
-</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">至此，MYSQL的基础架构已经讲完了。</p>
-</section></li></ul>
-
-
-
-
-
-
-
-
-
-
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/28/%E7%BA%BF%E4%B8%8ABug%E6%97%A0%E6%B3%95%E5%A4%8D%E7%8E%B0%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9F%E8%80%81%E5%8F%B8%E6%9C%BA%E6%95%99%E4%BD%A0%E4%B8%80%E6%8B%9B%EF%BC%8CSpringBoot%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95%E4%B8%8D%E7%94%A8%E6%84%81%EF%BC%81/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/04/28/%E7%BA%BF%E4%B8%8ABug%E6%97%A0%E6%B3%95%E5%A4%8D%E7%8E%B0%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9F%E8%80%81%E5%8F%B8%E6%9C%BA%E6%95%99%E4%BD%A0%E4%B8%80%E6%8B%9B%EF%BC%8CSpringBoot%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95%E4%B8%8D%E7%94%A8%E6%84%81%EF%BC%81/" class="post-title-link" itemprop="url">线上Bug无法复现怎么办？老司机教你一招，SpringBoot远程调试不用愁！</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-04-28 11:03:37" itemprop="dateCreated datePublished" datetime="2020-04-28T11:03:37+08:00">2020-04-28</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-08-19 14:58:25" itemprop="dateModified" datetime="2020-08-19T14:58:25+08:00">2020-08-19</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%9D%82%E8%B0%88/" itemprop="url" rel="index"><span itemprop="name">杂谈</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2020/04/28/%E7%BA%BF%E4%B8%8ABug%E6%97%A0%E6%B3%95%E5%A4%8D%E7%8E%B0%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9F%E8%80%81%E5%8F%B8%E6%9C%BA%E6%95%99%E4%BD%A0%E4%B8%80%E6%8B%9B%EF%BC%8CSpringBoot%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95%E4%B8%8D%E7%94%A8%E6%84%81%EF%BC%81/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2020/04/28/%E7%BA%BF%E4%B8%8ABug%E6%97%A0%E6%B3%95%E5%A4%8D%E7%8E%B0%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9F%E8%80%81%E5%8F%B8%E6%9C%BA%E6%95%99%E4%BD%A0%E4%B8%80%E6%8B%9B%EF%BC%8CSpringBoot%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95%E4%B8%8D%E7%94%A8%E6%84%81%EF%BC%81/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
-<li>在部署线上项目时，相信大家都会遇到一个问题，线上的 Bug 但是在本地不会复现，多么无奈。</li>
-<li>此时最常用的就是取到前端传递的数据用接口测试工具测试，比如 POSTMAN，复杂不，难受不？</li>
-<li>今天陈某教你一招，让你轻松调试线上的 Bug。文章目录如下：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/7.png"></li>
-</ul>
-<h2 id="什么是-JPDA？"><a href="#什么是-JPDA？" class="headerlink" title="什么是 JPDA？"></a>什么是 JPDA？</h2><ul>
-<li><p><code>JPDA</code>(Java Platform Debugger Architecture)，即 Java 平台调试体系，具体结构图如下图所示。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/1.png"></p>
-</li>
-<li><p>其中实现调试功能的主要协议是<code>JDWP</code>协议，在 <code>Java SE 5</code> 以前版本，JVM 端的实现接口是 <code>JVMPI</code>(Java Virtual Machine Profiler Interface)，而在 <code>Java SE 5</code> 及以后版本，使用 <code>JVMTI</code>(Java Virtual Machine Tool Interface) 来替代 JVMPI。</p>
-</li>
-<li><p>因此，如果使用 Java SE 5 之前版本，使用调试功能的命令为：</p>
-</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -Xdebug -Xrunjdwp:...</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>而 <code>Java SE 5</code> 及之后版本，使用调试功能的命令为：</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -agentlib:jdwp=...</span><br></pre></td></tr></table></figure>
-
-<h2 id="调试命令"><a href="#调试命令" class="headerlink" title="调试命令"></a>调试命令</h2><ul>
-<li>现在开发中最常见的一条远程调试的的命令如下：</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=<span class="number">9091</span> -jar xxx.jar</span><br></pre></td></tr></table></figure>
-
-<h2 id="参数说明"><a href="#参数说明" class="headerlink" title="参数说明"></a>参数说明</h2><ul>
-<li>基于前面的调试命令，我们来分析一下基本的参数代表什么意思。</li>
-</ul>
-<h3 id="transport"><a href="#transport" class="headerlink" title="transport"></a>transport</h3><ul>
-<li>指定运行的被调试应用和调试者之间的通信协议，它由几个可选值：<ol>
-<li><code>dt_socket</code>：主要的方式，采用<code>socket</code>方式连接。</li>
-<li><code>dt_shmem</code>：采用共享内存方式连接，仅支持 Windows 平台。</li>
-</ol>
-</li>
-</ul>
-<h3 id="server"><a href="#server" class="headerlink" title="server"></a>server</h3><ul>
-<li>指定当前应用作为调试服务端还是客户端，默认为<code>n</code>。</li>
-<li>如果你想将当前应用作为被调试应用，设置该值为 <code>y</code>,如果你想将当前应用作为客户端，作为调试的发起者，设置该值为<code>n</code>。</li>
-</ul>
-<h3 id="suspend"><a href="#suspend" class="headerlink" title="suspend"></a>suspend</h3><ul>
-<li>当前应用启动后，是否阻塞应用直到被连接，默认值为 <code>y</code>。</li>
-<li>在大部分的应用场景，这个值为 <code>n</code>，即不需要应用阻塞等待连接。一个可能为 <code>y</code>的应用场景是，你的程序在启动时出现了一个故障，为了调试，必须等到调试方连接上来后程序再启动。</li>
-</ul>
-<h3 id="address"><a href="#address" class="headerlink" title="address"></a>address</h3><ul>
-<li>暴露的调试连接端口，默认值为 <code>8000</code>。</li>
-<li><strong>此端口一定不能与项目端口重复，且必须是服务器开放的端口。</strong></li>
-</ul>
-<h3 id="onthrow"><a href="#onthrow" class="headerlink" title="onthrow"></a>onthrow</h3><ul>
-<li>当程序抛出设定异常时，中断调试。</li>
-</ul>
-<h3 id="onuncaught"><a href="#onuncaught" class="headerlink" title="onuncaught"></a>onuncaught</h3><ul>
-<li>当程序抛出未捕获异常时，是否中断调试，默认值为 n。</li>
-</ul>
-<h3 id="launch"><a href="#launch" class="headerlink" title="launch"></a>launch</h3><ul>
-<li>当调试中断时，执行的程序。</li>
-</ul>
-<h3 id="timeout"><a href="#timeout" class="headerlink" title="timeout"></a>timeout</h3><ul>
-<li>该参数限定为<code>java -agentlib:jdwp=…</code>可用，单位为毫秒<code>ms</code>。</li>
-<li>当 <code>suspend = y</code> 时，该值表示等待连接的超时；当 <code>suspend = n</code> 时，该值表示连接后的使用超时。</li>
-</ul>
-<h2 id="参考命令"><a href="#参考命令" class="headerlink" title="参考命令"></a>参考命令</h2><ol>
-<li><p><code>-agentlib:jdwp=transport=dt_socket,server=y,address=8000</code>：以 Socket 方式监听 8000 端口，程序启动阻塞（suspend 的默认值为 y）直到被连接。</p>
-</li>
-<li><p><code>-agentlib:jdwp=transport=dt_socket,server=y,address=localhost:8000,timeout=5000</code>：以 Socket 方式监听 8000 端口，当程序启动后 5 秒无调试者连接的话终止，程序启动阻塞（suspend 的默认值为 y）直到被连接。</p>
-</li>
-<li><p><code>-agentlib:jdwp=transport=dt_shmem,server=y,suspend=n</code>：选择可用的共享内存连接地址并使用 stdout 打印，程序启动不阻塞。</p>
-</li>
-<li><p><code>-agentlib:jdwp=transport=dt_socket,address=myhost:8000</code>：以 socket 方式连接到 <code>myhost:8000</code>上的调试程序，在连接成功前启动阻塞。</p>
-</li>
-<li><p><code>-agentlib:jdwp=transport=dt_socket,server=y,address=8000,onthrow=java.io.IOException,launch=/usr/local/bin/debugstub</code>：以 Socket 方式监听 8000 端口，程序启动阻塞（suspend 的默认值为 y）直到被连接。当抛出 IOException 时中断调试，转而执行 <code>usr/local/bin/debugstub</code>程序。</p>
-</li>
-</ol>
-<h3 id="IDEA-远程调试示例"><a href="#IDEA-远程调试示例" class="headerlink" title="IDEA 远程调试示例"></a>IDEA 远程调试示例</h3><ul>
-<li>首先打包 SpringBoot 项目，在服务器上运行，执行以下命令：</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=<span class="number">9190</span> -jar debug-demo.jar</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><p>出现下图的界面，表示运行成功：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/2.png"></p>
-</li>
-<li><p>然后在 IDEA 中，点击 <code>Edit Configurations</code>，在弹框中点击 <code>+</code> 号，然后选择<code>Remote</code>。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/3.png"></p>
-</li>
-<li><p>填写服务器的地址及端口，点击 OK 即可。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/4.png"></p>
-</li>
-<li><p>配置完毕后，DEBUG 调试运行即可。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/5.png"></p>
-</li>
-<li><p>配置完毕后点击保存即可，因为我配置的 suspend=n，因此服务端程序无需阻塞等待我们的连接。我们点击 IDEA 调试按钮，当我访问某一接口时，能够正常调试。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/6.png"></p>
-</li>
-</ul>
-<h2 id="小福利"><a href="#小福利" class="headerlink" title="小福利"></a>小福利</h2><ul>
-<li>作者为大家准备了接近 10M 的面试题，涵盖后端各个技术维度，老规矩，公众号内回复关键词<code>JAVA面试题</code>即可免费获取。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/8.png"></li>
-<li>关注微信公众号回复关键词：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E4%B8%83%E7%A7%92%E7%BC%96%E7%A8%8B.jpg"></li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -1383,7 +1233,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">135</span>
+          <span class="site-state-item-count">137</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

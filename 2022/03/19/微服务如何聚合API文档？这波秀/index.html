@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"chenjiabing666.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="大家好，我是不才陈某~ 这是《Spring Cloud 进阶》第22篇文章，往期文章如下：  五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？ openFeign夺命连环9问，这谁受得了？ 阿里面试这样问：Nacos、Apollo、Config配置中心如何选型？这10个维度告诉你！ 阿里面试败北：5种微服务注册中心如何选型？这几个维度告诉你！ 阿里限流神器Sentinel夺命连环 17 问">
+<meta property="og:type" content="article">
+<meta property="og:title" content="微服务如何聚合API文档？这波秀~">
+<meta property="og:url" content="https://chenjiabing666.github.io/2022/03/19/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%A6%82%E4%BD%95%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3%EF%BC%9F%E8%BF%99%E6%B3%A2%E7%A7%80/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="大家好，我是不才陈某~ 这是《Spring Cloud 进阶》第22篇文章，往期文章如下：  五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？ openFeign夺命连环9问，这谁受得了？ 阿里面试这样问：Nacos、Apollo、Config配置中心如何选型？这10个维度告诉你！ 阿里面试败北：5种微服务注册中心如何选型？这几个维度告诉你！ 阿里限流神器Sentinel夺命连环 17 问">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/15.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/1.gif">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/2.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/3.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/4.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/5.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/6.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/7.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/8.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/9.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/10.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/11.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/12.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/13.png">
+<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/14.png">
+<meta property="article:published_time" content="2022-03-19T08:04:48.000Z">
+<meta property="article:modified_time" content="2022-03-19T08:05:51.536Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="微服务">
+<meta property="article:tag" content="网关">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/15.png">
+
+<link rel="canonical" href="https://chenjiabing666.github.io/2022/03/19/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%A6%82%E4%BD%95%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3%EF%BC%9F%E8%BF%99%E6%B3%A2%E7%A7%80/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>微服务如何聚合API文档？这波秀~ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+		<div id="container">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2022/03/19/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%A6%82%E4%BD%95%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3%EF%BC%9F%E8%BF%99%E6%B3%A2%E7%A7%80/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          微服务如何聚合API文档？这波秀~
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-03-19 16:04:48 / 修改时间：16:05:51" itemprop="dateCreated datePublished" datetime="2022-03-19T16:04:48+08:00">2022-03-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Cloud-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Cloud 进阶</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2022/03/19/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%A6%82%E4%BD%95%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3%EF%BC%9F%E8%BF%99%E6%B3%A2%E7%A7%80/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2022/03/19/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%A6%82%E4%BD%95%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3%EF%BC%9F%E8%BF%99%E6%B3%A2%E7%A7%80/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><strong>大家好，我是不才陈某~</strong></p>
+<p>这是<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=2042874937312346114&scene=126#wechat_redirect">《Spring Cloud 进阶》</a>第<strong>22</strong>篇文章，往期文章如下：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247493854&idx=1&sn=4b3fb7f7e17a76000733899f511ef915&scene=21#wechat_redirect">五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247496653&idx=1&sn=7185077b3bdc1d094aef645d677ec472&scene=21#wechat_redirect">openFeign夺命连环9问，这谁受得了？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/S_8HQYHOG624Vzeu94CFSA">阿里面试这样问：Nacos、Apollo、Config配置中心如何选型？这10个维度告诉你！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/YKzYdMu-7nwszEf9-1M3Uw">阿里面试败北：5种微服务注册中心如何选型？这几个维度告诉你！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/Q7Xv8cypQFrrOQhbd9BOXw">阿里限流神器Sentinel夺命连环 17 问？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/sXVSFqq2UZ6Pwwt7vx7vIA">对比7种分布式事务方案，还是偏爱阿里开源的Seata，真香！(原理+实战)</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247499894&idx=1&sn=f1606e4c00fd15292269afe052f5bca2&chksm=fcf71fbbcb8096ad349e6da50b0b9141964c2084d0a38eba977fe8baa3fbe8af3b20c7591110&token=1887105114&lang=zh_CN#rd">Spring Cloud Gateway夺命连环10问？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247500540&idx=1&sn=2967bf1f9fa2c4d5b94b7fe291b7869b&chksm=fcf71d31cb8094271b5bbeca85cc03cf7d7c8bbf7c4d5b83a539e39c956e3f4015f91e7742b6&token=2077958771&lang=zh_CN#rd">Spring Cloud Gateway 整合阿里 Sentinel网关限流实战！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247500757&idx=1&sn=ef71f10d5736029c92287f7894c842ed&chksm=fcf71c18cb80950ec3144d66957a9d2914b51b8af22cf59a1ca3f9e2b561a11aca359d50d5a1&scene=178&cur_album_id=2042874937312346114#rd">分布式链路追踪之Spring Cloud Sleuth夺命连环9问？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247501079&idx=1&sn=438ef3a3d65fb4919b61cf6972827bec&chksm=fcf71adacb8093ccc4c3d6dfb8860ca07aefbc761c1ed5126eb4a4e87548441841198db1f8e3&scene=178&cur_album_id=2042874937312346114#rd">链路追踪自从用了SkyWalking，睡的真香！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247501590&idx=1&sn=149d1498504cda7cc391413f14cda9c2&chksm=fcf718dbcb8091cd6907e86e148216bae0a2d5b1664b1e8cc2d3e2c96c38181cc778de5711b6&scene=178&cur_album_id=2042874937312346114#rd">3本书了，7万+字，10篇文章，《Spring Cloud 进阶》基础版 PDF</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502682&idx=1&sn=52a15b623ab6135c134b8262bd605946&chksm=fcf71497cb809d81f1d2dbce76b3e00170f085306b2a2a67a807a6d9e2cf03bf1de3b8f203a2&scene=178&cur_album_id=2042874937312346114#rd">妹子始终没搞懂OAuth2.0，今天整合Spring Cloud Security 一次说明白！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502801&idx=1&sn=56b1af09bfa25d5e44193a7d75dfa623&chksm=fcf7141ccb809d0a1b0b2d7f6d9893c7d3e560dd8996296276f0274d2578236ee87e9124810d&scene=178&cur_album_id=2042874937312346114#rd">OAuth2.0实战！使用JWT令牌认证！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247502905&idx=1&sn=32ba3ae4e0a4097d238f64719c88b7f7&chksm=fcf713f4cb809ae2ccb706b8e9f8184739d3c7b97d388467bfe9ff31a8c15768b6de05054f08&scene=178&cur_album_id=2042874937312346114#rd">OAuth2.0实战！玩转认证、资源服务异常自定义这些骚操作！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247503249&idx=1&sn=b33ae3ff70a08b17ee0779d6ccb30b53&chksm=fcf7125ccb809b4aa4985da09e620e06c606754e6a72681c93dcc88bdc9aa7ba0cb64f52dbc3&token=1286998820&lang=zh_CN#rd">实战干货！Spring Cloud Gateway 整合 OAuth2.0 实现分布式统一认证授权！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247503263&idx=1&sn=edc475e36127792e35112c4746e53d37&chksm=fcf71252cb809b44d7ae246e9503e1d6b91b29965c0cd7ebfc7da9c1a098fe186cd977736c40&token=1144087588&lang=zh_CN#rd">字节面试这样问：跨库多表存在大量数据依赖问题有哪些解决方案？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&amp;mid=2247504322&amp;idx=1&amp;sn=4b0a2488a4edcb025d0694604e86f840&amp;chksm=fcf70e0fcb808719b98a65891bc08e9490db09f07debd4521052978a319ab052f8a72b93c1a7&token=284256295&lang=zh_CN#rd">实战！退出登录时如何借助外力使JWT令牌失效？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&amp;mid=2247504442&amp;idx=1&amp;sn=48c1dd73c038e3d936db4e5134f7bbc2&amp;chksm=fcf70df7cb8084e1556cac092fdb68ffd6503cbb287485ef76e9941611d134258c38d03e890a&token=780863812&lang=zh_CN#rd">实战！Spring Cloud Gateway集成 RBAC 权限模型实现动态权限控制！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&amp;mid=2247504650&amp;idx=1&amp;sn=d7b3df7bcb8483a503749c863e0e0217&amp;chksm=fcf70cc7cb8085d11b46fd08613e6749ee5be6d25183f0f6c2561506e34954564cfe2d7fd46a&token=439402375&lang=zh_CN#rd">实战！阿里神器 Seata 实现 TCC模式 解决分布式事务，真香！</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247504759&idx=1&sn=e50d5b44eb64debf43c6d644f55c68b5&chksm=fcf70cbacb8085aca5cd88688973ed45cd8bd9a4642ae97727f3684b431f80316e5c073d6946&scene=178&cur_album_id=2042874937312346114#rd">实战！openFeign如何实现全链路JWT令牌信息不丢失？</a></li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247505342&idx=1&sn=3e701ee24e1a87ce3b438d840aa1c356&chksm=fcf70a73cb80836547debd445832ae757e0b786ee71fc9b4229025d07a1eebd3ef219a4c2438&scene=178&cur_album_id=2042874937312346114#rd">微服务下蓝绿发布、滚动发布、灰度发布等方案，必须懂！</a></li>
+</ul>
+<p>今天这篇文章介绍一下微服务如何聚合<strong>Swagger</strong>实现接口文档管理。</p>
+<p>文章目录如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/15.png"></p>
+<span id="more"></span>
+
+
+
+<h2 id="为什么需要聚合？"><a href="#为什么需要聚合？" class="headerlink" title="为什么需要聚合？"></a>为什么需要聚合？</h2><p>微服务模块众多，如果不聚合文档，则访问每个服务的API文档都需要<strong>单独</strong>访问一个Swagger UI界面，这么做客户端能否接受？</p>
+<p><strong>反正作为强迫症的我是接受不了…….</strong></p>
+<p>既然使用了微服务，就应该有<strong>统一的API文档入口</strong>。</p>
+<h2 id="如何聚合？"><a href="#如何聚合？" class="headerlink" title="如何聚合？"></a>如何聚合？</h2><p>统一的文档入口显然应该聚合到网关中，通过<strong>网关</strong>的入口统一映射到各个模块。</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/1.gif" alt="演示"></p>
+<p>本文采用<strong>Spring Cloud Gateway</strong> 聚合 <strong>Swagger</strong> 的 方式 生成API文档。</p>
+<p>案例源码结构如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/2.png"></p>
+<p>本文只介绍如何聚合Swagger，关于网关、注册中心等内容不再介绍，有不了解的看陈某前面文章。</p>
+<h2 id="单个服务如何聚合Swagger？"><a href="#单个服务如何聚合Swagger？" class="headerlink" title="单个服务如何聚合Swagger？"></a>单个服务如何聚合Swagger？</h2><p>这里的单个服务不包括网关，网关需要单独配置。</p>
+<p>单个服务聚合其实很简单，就是普通的Spring Boot 整合 Swagger，但是微服务模块众多，不能每个微服都整合一番，因此可以自定义一个<strong>swagger-starter</strong>，之后每个微服务都依赖这个starter即可。</p>
+<p>详细的步骤如下：</p>
+<h3 id="1、创建swagger-starter"><a href="#1、创建swagger-starter" class="headerlink" title="1、创建swagger-starter"></a>1、创建swagger-starter</h3><p>自定义starter这里就不再介绍了，都是基础的知识；</p>
+<p>目录结构如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/3.png"></p>
+<p><strong>1、添加依赖</strong></p>
+<p>对于Swagger原生的UI界面陈某不太喜欢，因此使用了一款看起来还不错的UI界面，依赖如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--swagger--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>io.springfox<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>springfox-boot-starter<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!--swagger-ui  这里是用了一个好看一点ui界面--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.github.xiaoymin<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>swagger-bootstrap-ui<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<blockquote>
+<p>对于UI界面，每个人审美不同，选择自己喜欢的就好。</p>
+</blockquote>
+<p><strong>2、自动配置类配置Swagger</strong></p>
+<p>陈某是将每个服务的API信息抽离出一个属性类<strong>SwaggerProperties</strong>，后续只需要在每个服务的配置文件中指定即可。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="meta">@ConfigurationProperties(prefix = SwaggerProperties.PREFIX)</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="meta">@EnableConfigurationProperties</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SwaggerProperties</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String PREFIX=<span class="string">&quot;spring.swagger&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//包</span></span><br><span class="line">    <span class="keyword">private</span> String basePackage;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//作者相关信息</span></span><br><span class="line">    <span class="keyword">private</span> Author author;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//API的相关信息</span></span><br><span class="line">    <span class="keyword">private</span> ApiInfo apiInfo;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Data</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">ApiInfo</span></span>&#123;</span><br><span class="line">        String title;</span><br><span class="line">        String description;</span><br><span class="line">        String version;</span><br><span class="line">        String termsOfServiceUrl;</span><br><span class="line">        String license;</span><br><span class="line">        String licenseUrl;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Data</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">Author</span></span>&#123;</span><br><span class="line">        <span class="keyword">private</span> String name;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> String email;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">private</span> String url;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>对于Swagger的配置其实很简单，分为如下部分：</p>
+<ol>
+<li>API文档基本信息配置</li>
+<li>授权信息配置（基于OAuth2的认证配置）</li>
+</ol>
+<p>API文档配置无非就是配置文档的基本信息，比如文档标题、作者、联系方式…..</p>
+<p>代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/4.png"></p>
+<p>授权信息配置也很简单，就是在全局信息的请求头中配置一个能够放置令牌的地方，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/5.png"></p>
+<p>此处对应UI界面的地方如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/6.png"></p>
+<p>只需要将获取token令牌设置到这里即可。</p>
+<p>好了，swagger-starter关键代码就介绍完了，详细配置见源码。</p>
+<blockquote>
+<p>案例源码已上传GitHub，关注公众号：<strong>码猿技术专栏</strong>，回复关键：<strong>9528</strong> 获取！</p>
+</blockquote>
+<h3 id="2、微服务引用swagger-starter"><a href="#2、微服务引用swagger-starter" class="headerlink" title="2、微服务引用swagger-starter"></a>2、微服务引用swagger-starter</h3><p>单个微服务引用就很简单了，只需要添加如下依赖：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>cn.myjszl<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>swagger-starter<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>接下来只需要在配置文件配置<strong>API</strong>相关的信息即可，比如订单服务的配置如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/7.png"></p>
+<p>好了，至此单个服务的配置完成了。</p>
+<p>此时我们可以验证一下，直接访问：<a target="_blank" rel="noopener" href="http://localhost:3002/swagger-order-boot/v2/api-docs%EF%BC%8C%E7%BB%93%E6%9E%9C%E5%A6%82%E4%B8%8B%E5%9B%BE%EF%BC%9A">http://localhost:3002/swagger-order-boot/v2/api-docs，结果如下图：</a></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/8.png"></p>
+<h2 id="网关如何聚合Swagger？"><a href="#网关如何聚合Swagger？" class="headerlink" title="网关如何聚合Swagger？"></a>网关如何聚合Swagger？</h2><p>网关聚合的思想很简单，就是从路由中获取微服务的访问地址，然后拼接上 <strong>/v2/api-docs</strong> 即可。</p>
+<p>同样的还是要添加Swagger的两个依赖，如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!--swagger--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>io.springfox<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>springfox-boot-starter<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">&lt;!--swagger-ui  这里是用了一个好看一点ui界面--&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.github.xiaoymin<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>swagger-bootstrap-ui<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>创建<strong>GatewaySwaggerResourcesProvider</strong>实现<strong>SwaggerResourcesProvider</strong>，重写其中的get方法，代码如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/9.png"></p>
+<blockquote>
+<p>案例源码已上传GitHub，关注公众号：<strong>码猿技术专栏</strong>，回复关键：<strong>9528</strong> 获取！</p>
+</blockquote>
+<p>好了，网关的配置这里就完成了。</p>
+<p>此时启动网关、订单、库存服务，直接访问网关的文档：<a target="_blank" rel="noopener" href="http://localhost:3001/doc.html%EF%BC%8C%E7%BB%93%E6%9E%9C%E5%A6%82%E4%B8%8B%E5%9B%BE%EF%BC%9A">http://localhost:3001/doc.html，结果如下图：</a></p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/10.png"></p>
+<h2 id="API文档好用的功能介绍"><a href="#API文档好用的功能介绍" class="headerlink" title="API文档好用的功能介绍"></a>API文档好用的功能介绍</h2><p>不得不说这款Swagger UI 界面还是比较简单易用的，个人用起来还不错。</p>
+<h3 id="1、搜索功能"><a href="#1、搜索功能" class="headerlink" title="1、搜索功能"></a>1、搜索功能</h3><p>在右上角的搜索功能可以根据接口描述搜索相关的接口信息，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/11.png"></p>
+<h3 id="2、离线文档"><a href="#2、离线文档" class="headerlink" title="2、离线文档"></a>2、离线文档</h3><p>可以直接拷贝文档的MarkDown形式转换成Html或者PDF生成离线文档，如下图：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/12.png"></p>
+<h3 id="3、令牌配置"><a href="#3、令牌配置" class="headerlink" title="3、令牌配置"></a>3、令牌配置</h3><p>在访问需要认证的接口时，可以通过配置令牌，这样令牌将会全局生效，不必每个请求都要配置一遍，如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/13.png"></p>
+<h3 id="4、配置缓存"><a href="#4、配置缓存" class="headerlink" title="4、配置缓存"></a>4、配置缓存</h3><p>该文档的所有配置，包括请求参数、授权令牌等信息都是缓存的，也就是说配置一次，下次再打开的时候也是默认存在的。</p>
+<h3 id="5、全局参数配置"><a href="#5、全局参数配置" class="headerlink" title="5、全局参数配置"></a>5、全局参数配置</h3><p>对于一些全局的参数，比如请求头中需要携带请求客户端、版本号等信息，可以在全局参数中配置，如下：</p>
+<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3/14.png"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本篇文章介绍了微服务集成网关聚合Swagger文档，开发中非常实用。</p>
+<h2 id="最后说一句（别白嫖，求关注）"><a href="#最后说一句（别白嫖，求关注）" class="headerlink" title="最后说一句（别白嫖，求关注）"></a>最后说一句（别白嫖，求关注）</h2><p>陈某每一篇文章都是精心输出，已经写了<strong>3个专栏</strong>，整理成<strong>PDF</strong>，获取方式如下：</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=2042874937312346114#wechat_redirect">《Spring Cloud 进阶》</a>PDF：关注公众号：【<strong>码猿技术专栏</strong>】回复关键词 <strong>Spring Cloud 进阶</strong> 获取！</li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=1532834475389288449#wechat_redirect">《Spring Boot 进阶》</a>PDF：关注公众号：【<strong>码猿技术专栏</strong>】回复关键词 <strong>Spring Boot进阶</strong> 获取！</li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=1500819225232343046#wechat_redirect">《Mybatis 进阶》</a>PDF：关注公众号：【<strong>码猿技术专栏</strong>】回复关键词 <strong>Mybatis 进阶</strong> 获取！</li>
+</ol>
+<p>如果这篇文章对你有所帮助，或者有所启发的话，帮忙<strong>点赞</strong>、<strong>在看</strong>、<strong>转发</strong>、<strong>收藏</strong>，你的支持就是我坚持下去的最大动力！</p>
+<p>关注公众号：<strong>【码猿技术专栏】</strong>，公众号内有超赞的粉丝福利，回复：<strong>加群</strong>，可以加入技术讨论群，和大家一起讨论技术，吹牛逼！</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    不才陈某  |  微信公众号【码猿技术专栏】
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://chenjiabing666.github.io/2022/03/19/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%A6%82%E4%BD%95%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3%EF%BC%9F%E8%BF%99%E6%B3%A2%E7%A7%80/" title="微服务如何聚合API文档？这波秀~">https://chenjiabing666.github.io/2022/03/19/微服务如何聚合API文档？这波秀/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+  <li class="post-copyright-license">
+    并保留本声明和上方二维码。感谢您的阅读和支持！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">微信公众号</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/" rel="tag"># 微服务</a>
+              <a href="/tags/%E7%BD%91%E5%85%B3/" rel="tag"># 网关</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/03/19/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%B8%8B%E8%93%9D%E7%BB%BF%E5%8F%91%E5%B8%83%E3%80%81%E6%BB%9A%E5%8A%A8%E5%8F%91%E5%B8%83%E3%80%81%E7%81%B0%E5%BA%A6%E5%8F%91%E5%B8%83%E7%AD%89%E6%96%B9%E6%A1%88%EF%BC%8C%E5%BF%85%E9%A1%BB%E6%87%82%EF%BC%81/" rel="prev" title="微服务下蓝绿发布、滚动发布、灰度发布等方案，必须懂！">
+      <i class="fa fa-chevron-left"></i> 微服务下蓝绿发布、滚动发布、灰度发布等方案，必须懂！
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+		  <script src="https://readmore.openwrite.cn/js/readmore.js" type="text/javascript"></script>
+<script>
+    const btw = new BTWPlugin();
+    btw.init({
+        id: 'container',
+        blogId: '27513-1629019452485-311',
+        name: '码猿技术专栏',
+        qrcode: 'https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg',
+        keyword: 'vip',
+    });
+</script>
+        </div>
+		</div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E8%81%9A%E5%90%88%EF%BC%9F"><span class="nav-text">为什么需要聚合？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%81%9A%E5%90%88%EF%BC%9F"><span class="nav-text">如何聚合？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%95%E4%B8%AA%E6%9C%8D%E5%8A%A1%E5%A6%82%E4%BD%95%E8%81%9A%E5%90%88Swagger%EF%BC%9F"><span class="nav-text">单个服务如何聚合Swagger？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E5%88%9B%E5%BB%BAswagger-starter"><span class="nav-text">1、创建swagger-starter</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%BC%95%E7%94%A8swagger-starter"><span class="nav-text">2、微服务引用swagger-starter</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E5%85%B3%E5%A6%82%E4%BD%95%E8%81%9A%E5%90%88Swagger%EF%BC%9F"><span class="nav-text">网关如何聚合Swagger？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#API%E6%96%87%E6%A1%A3%E5%A5%BD%E7%94%A8%E7%9A%84%E5%8A%9F%E8%83%BD%E4%BB%8B%E7%BB%8D"><span class="nav-text">API文档好用的功能介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1%E3%80%81%E6%90%9C%E7%B4%A2%E5%8A%9F%E8%83%BD"><span class="nav-text">1、搜索功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2%E3%80%81%E7%A6%BB%E7%BA%BF%E6%96%87%E6%A1%A3"><span class="nav-text">2、离线文档</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3%E3%80%81%E4%BB%A4%E7%89%8C%E9%85%8D%E7%BD%AE"><span class="nav-text">3、令牌配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4%E3%80%81%E9%85%8D%E7%BD%AE%E7%BC%93%E5%AD%98"><span class="nav-text">4、配置缓存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5%E3%80%81%E5%85%A8%E5%B1%80%E5%8F%82%E6%95%B0%E9%85%8D%E7%BD%AE"><span class="nav-text">5、全局参数配置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%90%8E%E8%AF%B4%E4%B8%80%E5%8F%A5%EF%BC%88%E5%88%AB%E7%99%BD%E5%AB%96%EF%BC%8C%E6%B1%82%E5%85%B3%E6%B3%A8%EF%BC%89"><span class="nav-text">最后说一句（别白嫖，求关注）</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="不才陈某"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">137</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">68</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png" title="微信公众号 → https:&#x2F;&#x2F;gitee.com&#x2F;chenjiabing666&#x2F;BlogImage&#x2F;raw&#x2F;master&#x2F;myjszl_log.png" rel="noopener" target="_blank"><i class="fab fa-weixin fa-fw"></i>微信公众号</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.im/user/2506542244708072" title="掘金 → https:&#x2F;&#x2F;juejin.im&#x2F;user&#x2F;2506542244708072" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>掘金</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某|公众号：码猿技术专栏</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RtlQOgOT3M0hgyMeogykSQjT-gzGzoHsz',
+      appKey     : 'vSCxLU88wnXVf0Pa8mwJrCPm',
+      placeholder: "欢迎关注博主微信公众号【码猿技术专栏】",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

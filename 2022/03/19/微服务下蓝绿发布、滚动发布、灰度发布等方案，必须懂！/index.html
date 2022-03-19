@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"chenjiabing666.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="大家好，我是不才陈某~ 在项目迭代的过程中，不可避免需要上线。上线对应着部署，或者重新部署；部署对应着修改；修改则意味着风险。目前有很多部署发布的技术， 这儿将常见的做一个总结。 上面所说难免有些抽象， 举一个情景例子， 加入你是微博项目负责人员， 现在新版本较原来的老版本有很大的改变， 这设计到服务架构、前端UI等等， 经过测试功能没有障碍， 那么这时候如何让用户切换到新的版本呢? 显而易见，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="微服务下蓝绿发布、滚动发布、灰度发布等方案，必须懂！">
+<meta property="og:url" content="https://chenjiabing666.github.io/2022/03/19/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%B8%8B%E8%93%9D%E7%BB%BF%E5%8F%91%E5%B8%83%E3%80%81%E6%BB%9A%E5%8A%A8%E5%8F%91%E5%B8%83%E3%80%81%E7%81%B0%E5%BA%A6%E5%8F%91%E5%B8%83%E7%AD%89%E6%96%B9%E6%A1%88%EF%BC%8C%E5%BF%85%E9%A1%BB%E6%87%82%EF%BC%81/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="大家好，我是不才陈某~ 在项目迭代的过程中，不可避免需要上线。上线对应着部署，或者重新部署；部署对应着修改；修改则意味着风险。目前有很多部署发布的技术， 这儿将常见的做一个总结。 上面所说难免有些抽象， 举一个情景例子， 加入你是微博项目负责人员， 现在新版本较原来的老版本有很大的改变， 这设计到服务架构、前端UI等等， 经过测试功能没有障碍， 那么这时候如何让用户切换到新的版本呢? 显而易见，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/8Jeic82Or04lPzQ0vDC0FJVVnF9QMN1P3LOdCGbGAvP3GASjneoZzlkSxP8Cq9IUb66rdCZZAWlNVqAyD68DxUA/640?wx_fmt=png">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/8Jeic82Or04lPzQ0vDC0FJVVnF9QMN1P3lkQicaAGkdxzz9S98ow6pnKicTFtf1FPQAFIO6zKQhN0Z8OPoeGgibmvw/640?wx_fmt=png">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/8Jeic82Or04lPzQ0vDC0FJVVnF9QMN1P3oVR9QKOUMibIEt0HZsicmQmkPMBYvCFKUyjJDWS6MT6caicyYMYibr6SaQ/640?wx_fmt=png">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/8Jeic82Or04lPzQ0vDC0FJVVnF9QMN1P3gOnsTmrW9ibY3PUhOWpdJAYXhkFunxOCibM3bmQCUZS6I54UibAt93hGQ/640?wx_fmt=png">
+<meta property="article:published_time" content="2022-03-19T08:03:08.000Z">
+<meta property="article:modified_time" content="2022-03-19T08:04:19.737Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="微服务">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://mmbiz.qpic.cn/mmbiz_png/8Jeic82Or04lPzQ0vDC0FJVVnF9QMN1P3LOdCGbGAvP3GASjneoZzlkSxP8Cq9IUb66rdCZZAWlNVqAyD68DxUA/640?wx_fmt=png">
+
+<link rel="canonical" href="https://chenjiabing666.github.io/2022/03/19/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%B8%8B%E8%93%9D%E7%BB%BF%E5%8F%91%E5%B8%83%E3%80%81%E6%BB%9A%E5%8A%A8%E5%8F%91%E5%B8%83%E3%80%81%E7%81%B0%E5%BA%A6%E5%8F%91%E5%B8%83%E7%AD%89%E6%96%B9%E6%A1%88%EF%BC%8C%E5%BF%85%E9%A1%BB%E6%87%82%EF%BC%81/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>微服务下蓝绿发布、滚动发布、灰度发布等方案，必须懂！ | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+		<div id="container">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2022/03/19/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%B8%8B%E8%93%9D%E7%BB%BF%E5%8F%91%E5%B8%83%E3%80%81%E6%BB%9A%E5%8A%A8%E5%8F%91%E5%B8%83%E3%80%81%E7%81%B0%E5%BA%A6%E5%8F%91%E5%B8%83%E7%AD%89%E6%96%B9%E6%A1%88%EF%BC%8C%E5%BF%85%E9%A1%BB%E6%87%82%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          微服务下蓝绿发布、滚动发布、灰度发布等方案，必须懂！
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-03-19 16:03:08 / 修改时间：16:04:19" itemprop="dateCreated datePublished" datetime="2022-03-19T16:03:08+08:00">2022-03-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Cloud-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Cloud 进阶</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2022/03/19/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%B8%8B%E8%93%9D%E7%BB%BF%E5%8F%91%E5%B8%83%E3%80%81%E6%BB%9A%E5%8A%A8%E5%8F%91%E5%B8%83%E3%80%81%E7%81%B0%E5%BA%A6%E5%8F%91%E5%B8%83%E7%AD%89%E6%96%B9%E6%A1%88%EF%BC%8C%E5%BF%85%E9%A1%BB%E6%87%82%EF%BC%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2022/03/19/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%B8%8B%E8%93%9D%E7%BB%BF%E5%8F%91%E5%B8%83%E3%80%81%E6%BB%9A%E5%8A%A8%E5%8F%91%E5%B8%83%E3%80%81%E7%81%B0%E5%BA%A6%E5%8F%91%E5%B8%83%E7%AD%89%E6%96%B9%E6%A1%88%EF%BC%8C%E5%BF%85%E9%A1%BB%E6%87%82%EF%BC%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><strong>大家好，我是不才陈某~</strong></p>
+<p>在项目迭代的过程中，不可避免需要<strong>上线</strong>。上线对应着部署，或者重新部署；部署对应着修改；修改则意味着风险。目前有很多部署发布的技术， 这儿将常见的做一个总结。</p>
+<p>上面所说难免有些抽象， 举一个情景例子， 加入你是微博项目负责人员， 现在新版本较原来的老版本有很大的改变， 这设计到服务架构、前端UI等等， 经过测试功能没有障碍， 那么这时候如何让用户切换到新的版本呢?</p>
+<p>显而易见， 第一次发布的应用是没有所谓的这个问题的， 这种如何发布的思考只会出现在后面的版本迭代中。</p>
+<span id="more"></span>
+
+
+<h2 id="蓝绿发布"><a href="#蓝绿发布" class="headerlink" title="蓝绿发布"></a>蓝绿发布</h2><p>蓝绿部署中，一共有两套系统：一套是正在提供服务系统(也就是上面说的<strong>旧版</strong>)，标记为“<strong>绿色</strong>”；另一套是准备发布的系统，标记为“<strong>蓝色</strong>”。两套系统都是功能完善的，并且正在运行的系统，只是系统版本和对外服务情况不同。正在对外提供服务的老系统是绿色系统，新部署的系统是蓝色系统。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/8Jeic82Or04lPzQ0vDC0FJVVnF9QMN1P3LOdCGbGAvP3GASjneoZzlkSxP8Cq9IUb66rdCZZAWlNVqAyD68DxUA/640?wx_fmt=png"></p>
+<p><strong>蓝色系统不对外提供服务，用来做啥？</strong></p>
+<p>用来做发布前测试，测试过程中发现任何问题，可以直接在蓝色系统上修改，不干扰用户正在使用的系统。</p>
+<p>蓝色系统经过反复的测试、修改、验证，确定达到上线标准之后，直接将用户切换到蓝色系统， 切换后的一段时间内，依旧是蓝绿两套系统并存，但是用户访问的已经是蓝色系统。这段时间内观察蓝色系统（新系统）工作状态，如果出现问题，直接切换回绿色系统。</p>
+<p>当确信对外提供服务的蓝色系统工作正常，不对外提供服务的绿色系统已经不再需要的时候，蓝色系统正式成为对外提供服务系统，成为新的绿色系统。原先的绿色系统可以销毁，将资源释放出来，用于[部署下一个蓝色系统。</p>
+<h3 id="蓝绿发布特点"><a href="#蓝绿发布特点" class="headerlink" title="蓝绿发布特点"></a>蓝绿发布特点</h3><ol>
+<li>蓝绿部署的目的是减少发布时的中断时间、能够快速撤回发布。</li>
+<li>两套系统没有耦合的时候才能百分百保证不干扰</li>
+</ol>
+<h3 id="蓝绿发布注意事项"><a href="#蓝绿发布注意事项" class="headerlink" title="蓝绿发布注意事项"></a>蓝绿发布注意事项</h3><p>蓝绿部署只是[上线策略中的一种，它不是可以应对所有情况的万能方案。蓝绿部署能够简单快捷实施的前提假设是目标系统是非常内聚的，如果目标系统相当复杂，那么如何切换、两套系统的数据是否需要以及如何同步等，都需要仔细考虑。</p>
+<p>当你切换到蓝色环境时，需要妥当处理未完成的业务和新的业务。如果你的数据库后端无法处理，会是一个比较麻烦的问题。</p>
+<ul>
+<li>可能会出现需要同时处理“微服务架构应用”和“传统架构应用”的情况，如果在蓝绿[部署中协调不好这两者，还是有可能会导致服务停止。</li>
+<li>需要提前考虑数据库与应用部署同步迁移 /回滚的问题。</li>
+<li>蓝绿部署需要有基础设施支持。</li>
+<li>在非隔离基础架构（ VM 、 Docker 等）上执行蓝绿[部署，蓝色环境和绿色环境有被摧毁的风险。</li>
+</ul>
+<h2 id="滚动发布"><a href="#滚动发布" class="headerlink" title="滚动发布"></a>滚动发布</h2><p>一般是取出一个或者多个服务器停止服务，执行更新，并重新将其投入使用。周而复始，直到集群中所有的实例都更新成新版本。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/8Jeic82Or04lPzQ0vDC0FJVVnF9QMN1P3lkQicaAGkdxzz9S98ow6pnKicTFtf1FPQAFIO6zKQhN0Z8OPoeGgibmvw/640?wx_fmt=png"></p>
+<p><strong>发布流程:</strong></p>
+<p>相对于蓝绿发布需要一套完备的机器不同， 滚动发布只需要一台机器(这儿这是为了理解， 实际可能是多台)， 我们只需要将部分功能部署在这台机器上， 然后去替换正在运行的机器。</p>
+<p> 如上图， 将更新后的功能部署在<strong>Server1</strong> 上， 然后<strong>Server1</strong>去替换正在运行的Server， 替换下来的物理机又可以继续部署<strong>Server2</strong>的新版本， 然后去替换正在工作的<strong>Server2</strong> ， 以此类推， 直到替换完所有的服务器， 至此 ，服务更新完成。</p>
+<h3 id="滚动发布特点"><a href="#滚动发布特点" class="headerlink" title="滚动发布特点"></a>滚动发布特点</h3><ol>
+<li>这种部署方式相对于蓝绿部署，更加<strong>节约资源</strong>——它不需要运行两个集群、两倍的实例数。我们可以部分部署，例如每次只取出集群的20%进行升级。</li>
+<li><strong>回滚困难</strong></li>
+</ol>
+<h3 id="滚动发布注意事项"><a href="#滚动发布注意事项" class="headerlink" title="滚动发布注意事项"></a>滚动发布注意事项</h3><ol>
+<li><p>滚动发布没有一个确定可行的环境。使用蓝绿[部署，我们能够清晰地知道老版本是可行的，而使用滚动发布，我们无法确定。</p>
+</li>
+<li><p>修改了现有的环境。</p>
+</li>
+<li><p>回滚困难。举个例子，在某一次发布中，我们需要更新100个实例，每次更新10个实例，每次部署需要5分钟。当滚动发布到第80个实例时，发现了问题，需要回滚，这个回滚却是一个痛苦，并且漫长的过程。</p>
+</li>
+<li><p>有的时候，我们还可能对系统进行动态伸缩，如果部署期间，系统自动扩容/缩容了，我们还需判断到底哪个节点使用的是哪个代码。尽管有一些自动化的运维工具，但是依然令人心惊胆战。</p>
+</li>
+<li><p>因为是逐步更新，那么我们在上线代码的时候，就会短暂出现新老版本不一致的情况，如果对上线要求较高的场景，那么就需要考虑如何做好兼容的问题。</p>
+</li>
+</ol>
+<h2 id="灰度发布"><a href="#灰度发布" class="headerlink" title="灰度发布"></a>灰度发布</h2><p>灰度发布， 也叫金丝雀发布。是指在黑与白之间，能够平滑过渡的一种发布方式。<strong>AB test</strong>就是一种灰度发布方式，让一部分用户继续用<strong>A</strong>，一部分用户开始用<strong>B</strong>，如果用户对B没有什么反对意见，那么逐步扩大范围，把所有用户都迁移到B上面来。</p>
+<p>灰度发布可以保证整体系统的稳定，在初始灰度的时候就可以发现、调整问题，以保证其影响度，而我们平常所说的<strong>金丝雀部署</strong>也就是灰度发布的一种方式。</p>
+<p>具体到服务器上， 实际操作中还可以做更多控制，譬如说，给最初更新的<strong>10</strong>台服务器设置较低的权重、控制发送给这10台服务器的请求数，然后逐渐提高权重、增加请求数。一种平滑过渡的思路， 这个控制叫做“<strong>流量切分</strong>”。</p>
+<blockquote>
+<p>17世纪，英国矿井工人发现，金丝雀对瓦斯这种气体十分敏感。空气中哪怕有极其微量的瓦斯，金丝雀也会停止歌唱；而当瓦斯含量超过一定限度时，虽然鲁钝的人类毫无察觉，金丝雀却早已毒发身亡。当时在采矿设备相对简陋的条件下，工人们每次下井都会带上一只金丝雀作为“瓦斯检测指标”，以便在危险状况下紧急撤离。</p>
+</blockquote>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/8Jeic82Or04lPzQ0vDC0FJVVnF9QMN1P3oVR9QKOUMibIEt0HZsicmQmkPMBYvCFKUyjJDWS6MT6caicyYMYibr6SaQ/640?wx_fmt=png"></p>
+<p><strong>过程:</strong></p>
+<ol>
+<li>准备好部署各个阶段的工件，包括：构建工件，测试脚本，配置文件和部署清单文件。</li>
+<li>将“金丝雀”服务器部署进服务器中， 测试。</li>
+<li>从负载均衡列表中移除掉“金丝雀”服务器。</li>
+<li>升级“金丝雀”应用（排掉原有流量并进行[部署）。</li>
+<li>对应用进行自动化测试。</li>
+<li>将“金丝雀”服务器重新添加到负载均衡列表中（连通性和健康检查）。</li>
+<li>如果“金丝雀”在线使用测试成功，升级剩余的其他服务器。（否则就回滚）</li>
+</ol>
+<h2 id="A-B-测试"><a href="#A-B-测试" class="headerlink" title="A/B 测试"></a>A/B 测试</h2><p>A/B测试和蓝绿发布、滚动发布以及金丝雀发布，完全是两回事。</p>
+<p>蓝绿发布、滚动发布和金丝雀是发布策略，目标是确保新上线的系统稳定，关注的是新系统的BUG、隐患。</p>
+<p>A/B测试是效果测试，同一时间有多个版本的服务对外服务，这些服务都是经过足够测试，达到了上线标准的服务，有差异但是没有新旧之分（它们上线时可能采用了蓝绿部署的方式）。</p>
+<p>A/B测试关注的是不同版本的服务的实际效果，譬如说转化率、订单情况等。</p>
+<p>A/B测试时，线上同时运行多个版本的服务，这些服务通常会有一些体验上的差异，譬如说页面样式、颜色、操作流程不同。相关人员通过分析各个版本服务的实际效果，选出效果最好的版本。</p>
+<p><img src="https://mmbiz.qpic.cn/mmbiz_png/8Jeic82Or04lPzQ0vDC0FJVVnF9QMN1P3gOnsTmrW9ibY3PUhOWpdJAYXhkFunxOCibM3bmQCUZS6I54UibAt93hGQ/640?wx_fmt=png"></p>
+<h2 id="最后说一句（别白嫖，求关注）"><a href="#最后说一句（别白嫖，求关注）" class="headerlink" title="最后说一句（别白嫖，求关注）"></a>最后说一句（别白嫖，求关注）</h2><p>陈某每一篇文章都是精心输出，已经写了<strong>3个专栏</strong>，整理成<strong>PDF</strong>，获取方式如下：</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=2042874937312346114#wechat_redirect">《Spring Cloud 进阶》</a>PDF：关注公众号：【<strong>码猿技术专栏</strong>】回复关键词 <strong>Spring Cloud 进阶</strong> 获取！</li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=1532834475389288449#wechat_redirect">《Spring Boot 进阶》</a>PDF：关注公众号：【<strong>码猿技术专栏</strong>】回复关键词 <strong>Spring Boot进阶</strong> 获取！</li>
+<li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzU3MDAzNDg1MA==&action=getalbum&album_id=1500819225232343046#wechat_redirect">《Mybatis 进阶》</a>PDF：关注公众号：【<strong>码猿技术专栏</strong>】回复关键词 <strong>Mybatis 进阶</strong> 获取！</li>
+</ol>
+<p>如果这篇文章对你有所帮助，或者有所启发的话，帮忙<strong>点赞</strong>、<strong>在看</strong>、<strong>转发</strong>、<strong>收藏</strong>，你的支持就是我坚持下去的最大动力！</p>
+<p>关注公众号：<strong>【码猿技术专栏】</strong>，公众号内有超赞的粉丝福利，回复：<strong>加群</strong>，可以加入技术讨论群，和大家一起讨论技术，吹牛逼！</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    不才陈某  |  微信公众号【码猿技术专栏】
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://chenjiabing666.github.io/2022/03/19/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E4%B8%8B%E8%93%9D%E7%BB%BF%E5%8F%91%E5%B8%83%E3%80%81%E6%BB%9A%E5%8A%A8%E5%8F%91%E5%B8%83%E3%80%81%E7%81%B0%E5%BA%A6%E5%8F%91%E5%B8%83%E7%AD%89%E6%96%B9%E6%A1%88%EF%BC%8C%E5%BF%85%E9%A1%BB%E6%87%82%EF%BC%81/" title="微服务下蓝绿发布、滚动发布、灰度发布等方案，必须懂！">https://chenjiabing666.github.io/2022/03/19/微服务下蓝绿发布、滚动发布、灰度发布等方案，必须懂！/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+  <li class="post-copyright-license">
+    并保留本声明和上方二维码。感谢您的阅读和支持！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">微信公众号</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/" rel="tag"># 微服务</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2022/01/17/openFeign%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E4%BB%A4%E7%89%8C%E4%B8%AD%E7%BB%A7%EF%BC%9F/" rel="prev" title="openFeign如何实现令牌中继？">
+      <i class="fa fa-chevron-left"></i> openFeign如何实现令牌中继？
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/03/19/%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%A6%82%E4%BD%95%E8%81%9A%E5%90%88API%E6%96%87%E6%A1%A3%EF%BC%9F%E8%BF%99%E6%B3%A2%E7%A7%80/" rel="next" title="微服务如何聚合API文档？这波秀~">
+      微服务如何聚合API文档？这波秀~ <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+		  <script src="https://readmore.openwrite.cn/js/readmore.js" type="text/javascript"></script>
+<script>
+    const btw = new BTWPlugin();
+    btw.init({
+        id: 'container',
+        blogId: '27513-1629019452485-311',
+        name: '码猿技术专栏',
+        qrcode: 'https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg',
+        keyword: 'vip',
+    });
+</script>
+        </div>
+		</div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%93%9D%E7%BB%BF%E5%8F%91%E5%B8%83"><span class="nav-text">蓝绿发布</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%93%9D%E7%BB%BF%E5%8F%91%E5%B8%83%E7%89%B9%E7%82%B9"><span class="nav-text">蓝绿发布特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%93%9D%E7%BB%BF%E5%8F%91%E5%B8%83%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-text">蓝绿发布注意事项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%BB%9A%E5%8A%A8%E5%8F%91%E5%B8%83"><span class="nav-text">滚动发布</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BB%9A%E5%8A%A8%E5%8F%91%E5%B8%83%E7%89%B9%E7%82%B9"><span class="nav-text">滚动发布特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%BB%9A%E5%8A%A8%E5%8F%91%E5%B8%83%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-text">滚动发布注意事项</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%81%B0%E5%BA%A6%E5%8F%91%E5%B8%83"><span class="nav-text">灰度发布</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#A-B-%E6%B5%8B%E8%AF%95"><span class="nav-text">A&#x2F;B 测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%90%8E%E8%AF%B4%E4%B8%80%E5%8F%A5%EF%BC%88%E5%88%AB%E7%99%BD%E5%AB%96%EF%BC%8C%E6%B1%82%E5%85%B3%E6%B3%A8%EF%BC%89"><span class="nav-text">最后说一句（别白嫖，求关注）</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="不才陈某"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">137</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">68</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png" title="微信公众号 → https:&#x2F;&#x2F;gitee.com&#x2F;chenjiabing666&#x2F;BlogImage&#x2F;raw&#x2F;master&#x2F;myjszl_log.png" rel="noopener" target="_blank"><i class="fab fa-weixin fa-fw"></i>微信公众号</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.im/user/2506542244708072" title="掘金 → https:&#x2F;&#x2F;juejin.im&#x2F;user&#x2F;2506542244708072" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>掘金</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某|公众号：码猿技术专栏</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RtlQOgOT3M0hgyMeogykSQjT-gzGzoHsz',
+      appKey     : 'vSCxLU88wnXVf0Pa8mwJrCPm',
+      placeholder: "欢迎关注博主微信公众号【码猿技术专栏】",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
