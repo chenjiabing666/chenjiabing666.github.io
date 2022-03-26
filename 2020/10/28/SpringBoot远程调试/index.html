@@ -27,19 +27,19 @@
 <meta property="og:site_name" content="不才陈某技术博客">
 <meta property="og:description" content="前言上周末一个朋友庆生，无意间听他说起了近况，说公司项目太多了，每天一堆BUG需要修复，项目来回切换启动，真是挺烦的。 随着项目越来越多，特别是身处外包公司的朋友，每天可能需要切换两三个项目，难道一有问题就本地启动项目调试？ 今天这篇文章就来介绍一下什么是远程调试，Spring Boot如何开启远程调试？">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%BA%94%E5%BC%B9%EF%BC%8C%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/1.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%BA%94%E5%BC%B9%EF%BC%8C%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/2.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%BA%94%E5%BC%B9%EF%BC%8C%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/3.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%BA%94%E5%BC%B9%EF%BC%8C%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/4.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%BA%94%E5%BC%B9%EF%BC%8C%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/5.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%BA%94%E5%BC%B9%EF%BC%8C%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/1.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%BA%94%E5%BC%B9%EF%BC%8C%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/2.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%BA%94%E5%BC%B9%EF%BC%8C%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/3.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%BA%94%E5%BC%B9%EF%BC%8C%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/4.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%BA%94%E5%BC%B9%EF%BC%8C%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/5.png">
 <meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/8.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/myjszl_log.png">
 <meta property="article:published_time" content="2020-10-28T15:14:36.000Z">
-<meta property="article:modified_time" content="2020-11-13T09:52:32.319Z">
+<meta property="article:modified_time" content="2022-03-26T06:39:30.096Z">
 <meta property="article:author" content="不才陈某">
 <meta property="article:tag" content="Spring Boot">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%BA%94%E5%BC%B9%EF%BC%8C%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/1.png">
+<meta name="twitter:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%BA%94%E5%BC%B9%EF%BC%8C%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/1.png">
 
 <link rel="canonical" href="https://chenjiabing666.github.io/2020/10/28/SpringBoot%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/">
 
@@ -230,7 +230,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-11-13 17:52:32" itemprop="dateModified" datetime="2020-11-13T17:52:32+08:00">2020-11-13</time>
+                <time title="修改时间：2022-03-26 14:39:30" itemprop="dateModified" datetime="2022-03-26T14:39:30+08:00">2022-03-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -285,7 +285,7 @@
 </blockquote>
 <h2 id="为什么要远程调试？"><a href="#为什么要远程调试？" class="headerlink" title="为什么要远程调试？"></a>为什么要远程调试？</h2><p>随着项目的体量越来越大，启动的时间的也是随之增长，何必为了调试一个BUG花费十分钟的时间去启动项目呢？你不怕老大骂你啊？</p>
 <h2 id="什么是JPDA？"><a href="#什么是JPDA？" class="headerlink" title="什么是JPDA？"></a>什么是JPDA？</h2><p><code>JPDA</code>(<code>Java Platform Debugger Architecture</code>)，即 Java 平台调试体系，具体结构图如下图所示：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%BA%94%E5%BC%B9%EF%BC%8C%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/1.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%BA%94%E5%BC%B9%EF%BC%8C%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/1.png"></p>
 <p>其中实现调试功能的主要协议是<code>JDWP</code>协议，在 <code>Java SE 5</code> 以前版本，JVM 端的实现接口是 <code>JVMPI</code>(Java Virtual Machine Profiler Interface)，而在<code>Java SE 5</code>及以后版本，使用 <code>JVMTI</code>(Java Virtual Machine Tool Interface) 来替代 JVMPI。</p>
 <p>因此，如果你使用的是<code>Java SE 5</code>之前的版本，则使用的调试命令格式如下：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -Xdebug -Xrunjdwp:...</span><br></pre></td></tr></table></figure>
@@ -344,17 +344,17 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=<span class="number">9193</span> -jar debug-demo.jar</span><br></pre></td></tr></table></figure>
 
 <p>项目启动成功后，点击 <code>Edit Configurations</code>，在弹框中点击 <code>+</code> 号，然后选择<code>Remote</code>。</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%BA%94%E5%BC%B9%EF%BC%8C%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/2.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%BA%94%E5%BC%B9%EF%BC%8C%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/2.png"></p>
 <p>然后填写服务器的地址及端口，点击 <code>OK</code> 即可。</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%BA%94%E5%BC%B9%EF%BC%8C%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/3.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%BA%94%E5%BC%B9%EF%BC%8C%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/3.png"></p>
 <p>以上步骤配置完成后，点击DEBUG调试运行即可。</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%BA%94%E5%BC%B9%EF%BC%8C%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/4.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%BA%94%E5%BC%B9%EF%BC%8C%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/4.png"></p>
 <p>配置完毕后点击保存即可，因为我配置的 <code>suspend=n</code>，因此服务端程序无需阻塞等待我们的连接。我们点击 <code>IDEA</code> 调试按钮，当我访问某一接口时，能够正常调试。</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%BA%94%E5%BC%B9%EF%BC%8C%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/5.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%E7%AC%AC%E5%8D%81%E4%BA%94%E5%BC%B9%EF%BC%8C%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/5.png"></p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>每天一个小知识，今天你学到了吗？</p>
 <p>另外作者为大家准备接近<code>10M</code>的面筋，涵盖后端的各个层面，老规矩，公众号内回复<code>Java面试宝典</code>即可获取。</p>
 <p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/8.png"></p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/myjszl_log.png"></p>
 
     </div>
 

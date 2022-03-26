@@ -27,88 +27,88 @@
 <meta property="og:site_name" content="不才陈某技术博客">
 <meta property="og:description" content="1、前言这是《spring Cloud 进阶》专栏的第五篇文章，这篇文章介绍一下阿里开源的流量防卫兵Sentinel，一款非常优秀的开源项目，经过近10年的双十一的考验，非常成熟的一款产品。往期文章如下：  五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？ openFeign夺命连环9问，这谁受得了？ 阿里面试这样问：Nacos、Apollo、Config配置中心如何选型？这10个维度告诉">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/69.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/1.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/3.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/3.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/4.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/5.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/6.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/7.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/8.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/9.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/11.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/12.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/12.gif">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/13.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/14.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/15.gif">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/15.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/16.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/10.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/17.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/18.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/19.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/20.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/21.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/22.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/23.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/24.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/25.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/26.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/27.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/28.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/29.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/30.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/31.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/32.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/33.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/34.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/35.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/36.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/37.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/42.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/43.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/44.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/45.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/46.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/47.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/48.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/49.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/50.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/51.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/52.gif">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/38.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/39.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/40.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/41.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/52.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/58.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/53.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/54.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/55.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/56.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/57.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/56.jpg">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/59.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/60.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/61.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/62.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/63.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/64.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/65.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/66.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/67.png">
-<meta property="og:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/68.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/69.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/1.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/3.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/Nacos%E4%BB%8B%E7%BB%8D/3.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/4.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/5.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/6.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/7.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/8.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/9.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/11.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/12.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/12.gif">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/13.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/14.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/15.gif">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/15.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/16.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/10.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/17.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/18.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/19.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/20.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/21.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/22.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/23.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/24.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/25.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/26.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/27.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/28.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/29.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/30.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/31.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/32.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/33.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/34.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/35.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/36.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/37.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/42.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/43.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/44.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/45.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/46.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/47.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/48.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/49.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/50.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/51.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/52.gif">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/38.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/39.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/40.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/41.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/52.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/58.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/53.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/54.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/55.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/56.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/57.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/56.jpg">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/59.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/60.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/61.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/62.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/63.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/64.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/65.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/66.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/67.png">
+<meta property="og:image" content="http://124.221.134.51/BlogImage/sentinel/68.png">
 <meta property="article:published_time" content="2021-10-08T02:17:14.000Z">
-<meta property="article:modified_time" content="2021-10-08T02:19:14.931Z">
+<meta property="article:modified_time" content="2022-03-26T06:39:30.293Z">
 <meta property="article:author" content="不才陈某">
 <meta property="article:tag" content="Spring Cloud">
 <meta property="article:tag" content="限流">
 <meta property="article:tag" content="微服务">
 <meta property="article:tag" content="sentinel">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/69.png">
+<meta name="twitter:image" content="http://124.221.134.51/BlogImage/sentinel/69.png">
 
 <link rel="canonical" href="https://chenjiabing666.github.io/2021/10/08/%E9%98%BF%E9%87%8C%E9%99%90%E6%B5%81%E7%A5%9E%E5%99%A8Sentinel%E5%85%A5%E9%97%A8%E5%A4%A7%E5%85%A8/">
 
@@ -291,10 +291,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2021-10-08 10:17:14 / 修改时间：10:19:14" itemprop="dateCreated datePublished" datetime="2021-10-08T10:17:14+08:00">2021-10-08</time>
+              <time title="创建时间：2021-10-08 10:17:14" itemprop="dateCreated datePublished" datetime="2021-10-08T10:17:14+08:00">2021-10-08</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-26 14:39:30" itemprop="dateModified" datetime="2022-03-26T14:39:30+08:00">2022-03-26</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -345,7 +351,7 @@
 <li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/YKzYdMu-7nwszEf9-1M3Uw">阿里面试败北：5种微服务注册中心如何选型？这几个维度告诉你！</a></li>
 </ul>
 <p>文章目录如下：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/69.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/69.png"></p>
 <span id="more"></span>
 
 <h2 id="2、什么是sentinel？"><a href="#2、什么是sentinel？" class="headerlink" title="2、什么是sentinel？"></a>2、什么是sentinel？</h2><p>sentinel顾名思义：卫兵；在Redis中叫做<strong>哨兵</strong>，用于监控主从切换，但是在微服务中叫做<strong>流量防卫兵</strong>。</p>
@@ -358,7 +364,7 @@
 <li><strong>完善的 SPI 扩展机制</strong>：Sentinel 提供简单易用、完善的 SPI 扩展接口。您可以通过实现扩展接口来快速地定制逻辑。例如定制规则管理、适配动态数据源等。</li>
 </ul>
 <p><strong>Sentinel 的主要特性如下图</strong>：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/1.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/1.png"></p>
 <p><strong>Sentinel 分为两个部分</strong>:</p>
 <ul>
 <li>核心库（Java 客户端）不依赖任何框架/库，能够运行于所有 Java 运行时环境，同时对 Dubbo / Spring Cloud 等框架也有较好的支持。</li>
@@ -367,16 +373,16 @@
 <p><strong>总之一句话：sentinel真牛逼，完爆Hystrix………</strong></p>
 <h2 id="3、sentinel和Hystrix有何区别？"><a href="#3、sentinel和Hystrix有何区别？" class="headerlink" title="3、sentinel和Hystrix有何区别？"></a>3、sentinel和Hystrix有何区别？</h2><p>不多说了，总之一句话：Hystrix赶紧放弃，用sentinel……</p>
 <p>具体区别如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/3.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/3.png"></p>
 <h2 id="4、sentinel版本如何选择？"><a href="#4、sentinel版本如何选择？" class="headerlink" title="4、sentinel版本如何选择？"></a>4、sentinel版本如何选择？</h2><p>由于陈某写的是Spring Cloud 进阶一个系列，使用的聚合项目，因此版本还是保持和之前文章一样，不清楚的可以看这篇：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/UHzew6pIl5sRtRfCgBtLMQ">五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？</a></p>
 <p>这里选择的<code>spring-cloud-alibaba-dependencies</code>的版本是<code>2.2.1.RELEASE</code>，因此sentinel版本选择<code>1.7.1</code>，大家可以根据自己的版本选择对应sentinel的版本，版本对应关系如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/Nacos%E4%BB%8B%E7%BB%8D/3.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/Nacos%E4%BB%8B%E7%BB%8D/3.png"></p>
 <blockquote>
 <p><strong>注意</strong>：一定要按照官方推荐的版本适配，否则出现意想不到的BUG追悔莫及………</p>
 </blockquote>
 <h2 id="5、Sentinel-控制台如何安装？"><a href="#5、Sentinel-控制台如何安装？" class="headerlink" title="5、Sentinel 控制台如何安装？"></a>5、Sentinel 控制台如何安装？</h2><p>sentinel和<strong>nacos</strong>一样，都有一个控制台，但是这里不用自己手动搭建一个微服务，官方已经搭建好了，只需要下载对应得jar包运行即可。下载地址：<a target="_blank" rel="noopener" href="https://github.com/alibaba/Sentinel/tags">https://github.com/alibaba/Sentinel/tags</a></p>
 <p>选择对应得版本下载即可，我这里选择<code>1.7.1</code>版本，下载的jar包如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/4.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/4.png"></p>
 <blockquote>
 <p>当然你可以通过源码构建：mvn clean package</p>
 </blockquote>
@@ -394,12 +400,12 @@
 </li>
 </ul>
 <p>启动成功之后，浏览器访问：<a href="http://localhost:8080，登录页面如下图：">http://localhost:8080，登录页面如下图：</a></p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/5.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/5.png"></p>
 <blockquote>
 <p>默认的用户名和密码：sentinel/sentinel</p>
 </blockquote>
 <p>登录成功之后页面如下：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/6.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/6.png"></p>
 <p>可以看到目前只有一个服务<code>sentinel-dashboard</code>被监控了，<strong>这个服务就是自己</strong>。</p>
 <blockquote>
 <p><strong>注意</strong>：上述参数都是可选的，没必要可以不填。</p>
@@ -418,7 +424,7 @@
 <p><strong>注意</strong>：部署多台控制台时，session 默认不会在各实例之间共享，这一块需要自行改造。</p>
 </blockquote>
 <p>除了用户名密码相关的配置，sentinel控制台还提供了其他的可配置选项，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/7.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/7.png"></p>
 <h2 id="6、微服务如何接入sentinel控制台？"><a href="#6、微服务如何接入sentinel控制台？" class="headerlink" title="6、微服务如何接入sentinel控制台？"></a>6、微服务如何接入sentinel控制台？</h2><p>微服务为什么要集成sentinel控制台，sentinel不是提供了相关的API吗？</p>
 <p>其实Spring Boot 官方一直提倡<strong>约定&gt;配置&gt;编码</strong>的规则，能够不硬编码何乐而不为呢？</p>
 <p>因此本文后续内容主要还是结合sentinel控制台进行讲解，关于API的使用大家可以按照官方文档学习，讲解的非常清楚。</p>
@@ -444,7 +450,7 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;/sentinel&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FlowLimitController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/test&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">test</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;接收到一条消息--------&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <h3 id="5、启动微服务"><a href="#5、启动微服务" class="headerlink" title="5、启动微服务"></a>5、启动微服务</h3><p>启动9008这个微服务，然后浏览器输入：<code>http://localhost:9008/sentinel/test</code>，此时查看sentinel控制台，将会看见<strong>sentinel-service</strong>这个服务已经被监控了，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/8.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/8.png"></p>
 <p><strong>注意</strong>：sentinel是<strong>懒加载</strong>机制，只有访问过一次的资源才会被监控。</p>
 <p>不过可以通过配置关闭懒加载，在项目启动时就连接sentinel控制台，配置如下：</p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">    <span class="attr">sentinel:</span></span><br><span class="line">      <span class="comment"># 取消控制台懒加载，项目启动即连接Sentinel</span></span><br><span class="line">      <span class="attr">eager:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
@@ -468,12 +474,12 @@
 <li><strong>controlBehavior</strong>：  流控效果（直接拒绝(0) / 排队等待(2) / 预热冷启动(1))，默认值直接拒绝。</li>
 </ul>
 <p>以上元素限流元素对应的类是<code>com.alibaba.csp.sentinel.slots.block.flow.FlowRule</code>，各元素如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/9.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/9.png"></p>
 <blockquote>
 <p><strong>注意</strong>：各个元素的取值以及默认值一定要记住，后续配置将会用到。</p>
 </blockquote>
 <p>以上几个元素在sentinel控制台对应规则如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/11.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/11.png"></p>
 <h3 id="1、三种流控效果"><a href="#1、三种流控效果" class="headerlink" title="1、三种流控效果"></a>1、三种流控效果</h3><p>流控效果总共分为三种，对应元素<code>controlBehavior</code>，分别如下：</p>
 <h4 id="快速失败"><a href="#快速失败" class="headerlink" title="快速失败"></a>快速失败</h4><p>默认的流量控制方式，当QPS超过任意规则的阈值后，新的请求就会被立即拒绝，拒绝方式为抛出<code>FlowException</code>。</p>
 <h4 id="warm-up"><a href="#warm-up" class="headerlink" title="warm up"></a>warm up</h4><p>即<strong>预热/冷启动</strong>方式。当系统长期处于低水位的情况下，当流量突然增加时，直接把系统拉升到高水位可能瞬间把系统压垮。通过”冷启动”，让通过的流量<strong>缓慢增加</strong>，在<strong>一定时间内</strong>逐渐增加到<strong>阈值上限</strong>，给冷系统一个<strong>预热</strong>的时间，避免冷系统被压垮。</p>
@@ -485,9 +491,9 @@
 <p>算法中有一个<strong>冷却因子</strong><code>coldFactor</code>，默认值是<strong>3</strong>，即请求 QPS 从 <strong><code>threshold(阈值) / 3</code></strong> 开始，经预热时长逐渐升至设定的 QPS 阈值。</p>
 </blockquote>
 <p>比如设定QPS阈值为3，流控效果为warm up，预热时长为5秒，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/12.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/12.png"></p>
 <p>这样配置之后有什么效果呢：QPS起初会从(3/3/=1)每秒通过一次请求开始预热直到5秒之后达到每秒通过3次请求。动态效果图如下：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/12.gif"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/12.gif"></p>
 <p>从上述动画可以清楚的看见：前几秒是频繁流控的，直到5秒，QPS阈值达到了3。</p>
 <blockquote>
 <p>具体算法原理请看：<a target="_blank" rel="noopener" href="https://github.com/alibaba/Sentinel/wiki/%E9%99%90%E6%B5%81---%E5%86%B7%E5%90%AF%E5%8A%A8">https://github.com/alibaba/Sentinel/wiki/%E9%99%90%E6%B5%81---%E5%86%B7%E5%90%AF%E5%8A%A8</a></p>
@@ -499,14 +505,14 @@
 <p><strong>简单举个栗子</strong>：你去大学食堂吃饭，只有一个阿姨在打饭，那么所有人都要排队打饭，每次只有一个人打到饭，其他人都在排队等待。</p>
 <p><strong>不同的是sentinel有个超时等待时间，一旦超过这个预定设置的时间将会被限流。</strong></p>
 <p>该方式作用如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/13.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/13.png"></p>
 <blockquote>
 <p>这种方式适合用于请求以突刺状来到，这个时候我们不希望一下子把所有的请求都通过，这样可能会把系统压垮；同时我们也期待系统以稳定的速度，逐步处理这些请求，以起到“<strong>削峰填谷</strong>”的效果，而不是拒绝所有请求。</p>
 </blockquote>
 <p>比如设置QPS阈值为1，超时等待时间为10000毫秒，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/14.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/14.png"></p>
 <p>此时的效果如下：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/15.gif"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/15.gif"></p>
 <p>从上图可以看到：连续点击刷新请求，虽然设置了QPS阈值为1，但是并没有被限流，而是在等待，因为设置了超时等待时间为10秒。</p>
 <blockquote>
 <p>具体算法原理请看：<a target="_blank" rel="noopener" href="https://github.com/alibaba/Sentinel/wiki/%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6-%E5%8C%80%E9%80%9F%E6%8E%92%E9%98%9F%E6%A8%A1%E5%BC%8F">https://github.com/alibaba/Sentinel/wiki/%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6-%E5%8C%80%E9%80%9F%E6%8E%92%E9%98%9F%E6%A8%A1%E5%BC%8F</a></p>
@@ -527,15 +533,15 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;/sentinel&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FlowLimitController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 下单接口</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/order&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">order</span><span class="params">()</span>  </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;下单成功..........&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 支付接口</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/pay&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">pay</span><span class="params">()</span>  </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;支付成功..........&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <p>此时的流控规则配置如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/15.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/15.png"></p>
 <p><strong>注意</strong>：关联之后，这里设置的限流规则是对被关联资源，也就是<code>/sentinel/pay</code>这个资源，但是真正被限流则是<code>/sentinel/order</code>。</p>
 <p>如何演示效果呢？很简单，只需要不断的请求<code>/sentinel/pay</code>达到阈值，然后在请求<code>/sentinel/order</code>。</p>
 <p>利用POSTMAN不断向<code>/sentinel/pay</code>发出请求，然后浏览器请求<code>/sentinel/order</code>，结果如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/16.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/16.png"></p>
 <p>可以看到订单接口被限流了………….</p>
 <h3 id="3、两种统计类型"><a href="#3、两种统计类型" class="headerlink" title="3、两种统计类型"></a>3、两种统计类型</h3><p>流控分为两种统计类型，分别是<strong>QPS</strong>，<strong>并发线程数</strong>，很多人不太明白这两种统计类型有什么区别？</p>
 <p><strong>举个栗子</strong>：陈某带了一个亿去银行存钱，但是银行大门保安要查健康码，每秒最多只能同时进入4个人，并且银行中只有两个工作人员工作，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/10.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/10.png"></p>
 <p><strong>此时的QPS含义</strong>：从保安到银行这一段，即是保安放行进入银行的人数。</p>
 <p><strong>此时并发线程数的含义</strong>：银行只有两个工作人员在工作，那么最多只能同时处理两个任务，这里并发线程数的阈值就是2。</p>
 <h2 id="8、降级规则如何配置？"><a href="#8、降级规则如何配置？" class="headerlink" title="8、降级规则如何配置？"></a>8、降级规则如何配置？</h2><p>熔断降级在日常生活中也是比较常见的，场景如下：</p>
@@ -544,7 +550,7 @@
 <li>电压过高导致保险丝触发熔断保护</li>
 </ul>
 <p>在大型的分布式系统中，一个请求的依赖如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/17.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/17.png"></p>
 <p>如果这个时候，某个服务出现一些异常，比如：</p>
 <ul>
 <li>服务提供者不可用(硬件故障、程序bug、网络故障、用户请求量较大)</li>
@@ -554,9 +560,9 @@
 <p>那么将会导致整个服务不可用，用古话来讲就是：<strong>千里之堤毁于蚁穴</strong>。</p>
 <p>所谓编程源于生活，架构师们根据生活的经验设计出了服务的熔断降级策略，很好的解决了这类问题。</p>
 <p>熔断降级规则对应sentinel控制台的降级规则这一栏，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/18.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/18.png"></p>
 <p>熔断降级涉及到的几个属性如下表：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/19.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/19.png"></p>
 <p>源码中对应得类为：<code>com.alibaba.csp.sentinel.slots.block.degrade.DegradeRule</code>。</p>
 <h4 id="三种熔断策略"><a href="#三种熔断策略" class="headerlink" title="三种熔断策略"></a>三种熔断策略</h4><p>Sentinel 提供以下几种熔断策略：</p>
 <ol>
@@ -568,9 +574,9 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;/sentinel/provider&quot;)</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FlowLimitController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@GetMapping(&quot;/test&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">test</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        <span class="comment">//休眠3秒钟</span></span><br><span class="line">        Thread.sleep(<span class="number">3000</span>);</span><br><span class="line">        log.info(<span class="string">&quot;收到一条消息----test&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;接收到一条消息--------&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>在控台为这个接口设置平均响应时间为200毫秒，时间窗口为1秒，<strong>大致意思</strong>：平均的响应时间大于200毫秒之后，在接下来的1秒时间内将会直接熔断，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/20.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/20.png"></p>
 <p>使用<strong>Jmeter</strong>开启10个线程循环跑，然后在浏览器中访问这个接口，返回结果如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/21.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/21.png"></p>
 <p>为什么呢？由于的接口中休眠了3秒，平均响应时间肯定大于200毫秒，因此直接被熔断了。</p>
 <blockquote>
 <p><strong>注意</strong>：这里熔断后直接返回默认的信息，后面会介绍如何定制熔断返回信息。</p>
@@ -583,9 +589,9 @@
 <p>官方文档：<a target="_blank" rel="noopener" href="https://github.com/alibaba/Sentinel/wiki/%E7%83%AD%E7%82%B9%E5%8F%82%E6%95%B0%E9%99%90%E6%B5%81">https://github.com/alibaba/Sentinel/wiki/%E7%83%AD%E7%82%B9%E5%8F%82%E6%95%B0%E9%99%90%E6%B5%81</a></p>
 </blockquote>
 <p>概念理解了，来看下sentinel控制台如何设置热点参数限流，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/22.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/22.png"></p>
 <p>规则对应得源码在<code>com.alibaba.csp.sentinel.slots.block.flow.param.ParamFlowRule</code>这个类中，各种属性含义如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/23.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/23.png"></p>
 <p>规则都懂了，下面我们通过实战来演示一下热点参数到底是如何限流的。</p>
 <p><strong>注意</strong>：热点参数限流只作用于八大基本类型。</p>
 <h3 id="1、创建一个资源"><a href="#1、创建一个资源" class="headerlink" title="1、创建一个资源"></a>1、创建一个资源</h3><p>现在先创建一个service，用<code>@SentinelResource</code>这个注解定义一个资源，这个注解后续将会详细介绍，先忽略，代码如下：</p>
@@ -601,28 +607,28 @@
 
 <p>可以看到接口中有两个参数，分别是<code>p1</code>、<code>p2</code>。</p>
 <h3 id="3、添加热点参数限流规则"><a href="#3、添加热点参数限流规则" class="headerlink" title="3、添加热点参数限流规则"></a>3、添加热点参数限流规则</h3><p>在sentinel控制台点击<code>热点规则-&gt;新增热点限流规则</code>，添加如下图规则：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/24.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/24.png"></p>
 <p>上述配置的具体含义：当<code>OrderQuery</code>这个资源中的<strong>第0个参数</strong>QPS超过<strong>1秒1次</strong>将会被限流。这里参数索引是从0开始，第0个就是对应接口中的<code>p1</code>这个参数。</p>
 <p><strong>第一个测试</strong>：浏览器直接访问：<a target="_blank" rel="noopener" href="http://localhost:9009/sentinel/provider/order/query?p1=22&amp;p2=1222%EF%BC%8C%E8%BF%9E%E7%BB%AD%E7%82%B9%E5%87%BB%E5%B0%86%E4%BC%9A%E7%9C%8B%E5%88%B0%E8%BF%99%E4%B8%AA%E6%8E%A5%E5%8F%A3%E8%A2%AB%E7%86%94%E6%96%AD%E9%99%8D%E7%BA%A7%E4%BA%86%EF%BC%8C%E5%A6%82%E4%B8%8B%E5%9B%BE%EF%BC%9A">http://localhost:9009/sentinel/provider/order/query?p1=22&amp;p2=1222，连续点击将会看到这个接口被熔断降级了，如下图：</a></p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/25.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/25.png"></p>
 <p>这也正是验证了上述的热点参数限流配置。</p>
 <p><strong>第二个测试</strong>：浏览器输入：<a target="_blank" rel="noopener" href="http://localhost:9009/sentinel/provider/order/query?p2=1222%EF%BC%8C%E8%BF%9E%E7%BB%AD%E7%82%B9%E5%87%BB%E5%B0%86%E4%BC%9A%E7%9C%8B%E5%88%B0%E8%BF%99%E4%B8%AA%E6%8E%A5%E5%8F%A3%E5%B9%B6%E6%B2%A1%E6%9C%89%E8%A2%AB%E7%86%94%E6%96%AD%E9%99%8D%E7%BA%A7%EF%BC%8C%E5%A6%82%E4%B8%8B%E5%9B%BE%EF%BC%9A">http://localhost:9009/sentinel/provider/order/query?p2=1222，连续点击将会看到这个接口并没有被熔断降级，如下图：</a></p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/26.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/26.png"></p>
 <blockquote>
 <p><strong>注意</strong>：对于热点参数限流，只有包含指定索引的参数请求才会被限流，否则不影响。</p>
 </blockquote>
 <p>此时产品说：ID为100的这个产品点击量太少了，你们赶紧调整下这个商品的限流规则。这个时候该怎么办呢？</p>
 <p>别着急，sentinel显然考虑到了这一点，提供了<strong>参数例外项</strong>这项配置，针对产品需求配置如下：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/27.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/27.png"></p>
 <p>从上图配置中，我们将参数值<strong>p1</strong>这个参数值等于100的时候，限流阈值设置成了100，也就是说<code>p1=100</code>这个请求QPS放宽到1秒请求100次以上才会被限流。</p>
 <p><strong>验证</strong>：浏览器输入地址：<a target="_blank" rel="noopener" href="http://localhost:9009/sentinel/provider/order/query?p1=100%EF%BC%8C%E6%97%A0%E8%AE%BA%E7%82%B9%E5%87%BB%E5%A4%9A%E4%B9%88%E5%BF%AB%EF%BC%8C%E9%83%BD%E6%B2%A1%E6%9C%89%E8%A2%AB%E7%86%94%E6%96%AD%E9%99%8D%E7%BA%A7%EF%BC%8C%E6%98%BE%E7%84%B6%E6%98%AF%E9%85%8D%E7%BD%AE%E7%94%9F%E6%95%88%E4%BA%86%EF%BC%8C%E5%A6%82%E4%B8%8B%E5%9B%BE%EF%BC%9A">http://localhost:9009/sentinel/provider/order/query?p1=100，无论点击多么快，都没有被熔断降级，显然是配置生效了，如下图：</a></p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/28.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/28.png"></p>
 <blockquote>
 <p>以上源码在sentinel-openfeign-provider9009这个模块中，文末有源码获取方式。</p>
 </blockquote>
 <h2 id="10、系统自适应如何限流？"><a href="#10、系统自适应如何限流？" class="headerlink" title="10、系统自适应如何限流？"></a>10、系统自适应如何限流？</h2><p>前面热点参数、普通流量限流都是针对的某个接口，这里系统自适应限流针对是整个系统的入口流量，从单台机器的 <strong>load</strong>、<strong>CPU 使用率</strong>、<strong>平均 RT</strong>、<strong>入口 QPS</strong> 和<strong>并发线程数</strong>等几个维度监控应用指标，让系统尽可能跑在最大吞吐量的同时保证系统整体的稳定性。</p>
 <p>sentinel控制台对应如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/29.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/29.png"></p>
 <p>阈值类型有五种，分别如下：</p>
 <ul>
 <li><strong>Load 自适应</strong>（仅对 Linux/Unix-like 机器生效）：系统的 load1 作为启发指标，进行自适应系统保护。当系统 load1 超过设定的启发值，且系统当前的并发线程数超过估算的系统容量时才会触发系统保护（BBR 阶段）。系统容量由系统的 <code>maxQps * minRt</code> 估算得出。设定参考值一般是 <code>CPU cores * 2.5</code>。</li>
@@ -635,9 +641,9 @@
 <p>官方文档：<a target="_blank" rel="noopener" href="https://github.com/alibaba/Sentinel/wiki/%E7%B3%BB%E7%BB%9F%E8%87%AA%E9%80%82%E5%BA%94%E9%99%90%E6%B5%81">https://github.com/alibaba/Sentinel/wiki/%E7%B3%BB%E7%BB%9F%E8%87%AA%E9%80%82%E5%BA%94%E9%99%90%E6%B5%81</a></p>
 </blockquote>
 <p>系统规则的配置比较简单，这里以入口QPS为例进行演示，为了演示真实情况，清掉所有的限流规则，添加系统规则，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/30.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/30.png"></p>
 <p>这个QPS系统规则一配置，该微服务中的所有接口都将会被这个规则限制，比如访问：<a target="_blank" rel="noopener" href="http://localhost:9009/sentinel/provider/pay%EF%BC%8C%E8%BF%9E%E7%BB%AD%E7%82%B9%E5%87%BB%EF%BC%8C%E5%A6%82%E4%B8%8B%E5%9B%BE%EF%BC%9A">http://localhost:9009/sentinel/provider/pay，连续点击，如下图：</a></p>
-<img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/31.png" />
+<img src="http://124.221.134.51/BlogImage/sentinel/31.png" />
 
 <p>可以看到已经被限流了，不仅是这个接口，所有接口都会生效。</p>
 <p><strong>注意</strong>：系统规则中的入口QPS这个规则不建议配置，一旦配置上了可能导致整个服务不可用。</p>
@@ -652,20 +658,20 @@
 <p>官方文档：<a target="_blank" rel="noopener" href="https://github.com/alibaba/Sentinel/wiki/%E6%B3%A8%E8%A7%A3%E6%94%AF%E6%8C%81">https://github.com/alibaba/Sentinel/wiki/%E6%B3%A8%E8%A7%A3%E6%94%AF%E6%8C%81</a></p>
 </blockquote>
 <p>使用<code>@SentinelResource</code>注解自定义一个限流异常返回信息，先自定义一个资源，指定兜底方法为<code>handler</code>，代码如下：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/32.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/32.png"></p>
 <p>第二步：写个对应得兜底方法，必须在同一个类中，代码如下：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/33.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/33.png"></p>
 <p>第三步：对资源<code>QueryOrder</code>新增一个限流规则，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/34.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/34.png"></p>
 <p>第四步：写个controller，代码就不晒了，自己写吧，哈哈。。。。</p>
 <p>第五步：调用接口，疯狂点击，将会出现兜底方法中定义的返回信息，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/35.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/35.png"></p>
 <p>到这儿基本算是成功了，但是有个问题：<strong>兜底方法必须要和业务方法放在同一个类中，这样代码耦合度不是很高吗？</strong></p>
 <p><code>@SentinelResource</code>提供一个属性<code>blockHandlerClass</code>，完美的解决了这一个问题，能够将兜底方法单独放在一个类中，下面来介绍一下。</p>
 <p><strong>第一步</strong>：新建一个单独的类<code>CommonHandler</code>来放置兜底方法，代码如下：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/36.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/36.png"></p>
 <p><strong>第二步</strong>：在<code>@SentinelResource</code>注解中指定blockHandlerClass为上面的类，blockHandler指定兜底方法名，代码如下：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/37.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/37.png"></p>
 <p>好了，至此就完成了，自己照着试试吧…….</p>
 <blockquote>
 <p>上述源码在sentinel-openfeign-provider9009这个模块中，源码获取方式见文末。</p>
@@ -696,38 +702,38 @@
 <p>官方文档：<a target="_blank" rel="noopener" href="https://github.com/alibaba/Sentinel/wiki/%E6%B3%A8%E8%A7%A3%E6%94%AF%E6%8C%81">https://github.com/alibaba/Sentinel/wiki/%E6%B3%A8%E8%A7%A3%E6%94%AF%E6%8C%81</a></p>
 </blockquote>
 <p>下面定义一个创建订单的接口，手动制造一个<code>1/0</code>异常，代码如下：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/42.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/42.png"></p>
 <p>上述接口并没有进行异常降级处理，因此调用该接口直接返回了异常信息，非常不友好，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/43.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/43.png"></p>
 <p>我们可以使用<code>fallback</code>指定异常降级的兜底方法，此时业务方法改造如下：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/44.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/44.png"></p>
 <p>使用<code>fallbackClass</code>属性指定单独一个类处理异常降级，降低了代码的耦合度，<code>fallback</code>属性指定了降级兜底的方法，代码如下：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/45.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/45.png"></p>
 <p>此时再次访问接口，虽然有异常，但是返回的确实降级兜底方法中的返回信息，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/46.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/46.png"></p>
 <p>到了这里基本满足了异常降级的处理需求，但是仍然有个疑问：<strong>能否只用一个方法处理全部的异常？</strong></p>
 <p>答案是：<strong>能</strong>，<strong>必须能</strong>，此时就要用到<code>defaultFallback </code>这个属性了，指定默认的降级兜底方法，此时的业务方法变成如下代码：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/47.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/47.png"></p>
 <p><code>defaultFallback</code>属性指定了默认的降级兜底方法，这个方法代码如下：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/48.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/48.png"></p>
 <p>好了，异常降级处理到这儿已经介绍完了，但是仍然有一个问题：<strong>若 blockHandler 和 fallback 都进行了配置，那么哪个会生效？</strong></p>
 <blockquote>
 <p><strong>结论</strong>：若 blockHandler 和 fallback 都进行了配置，则被限流降级而抛出 <code>BlockException</code> 时只会进入 <code>blockHandler</code> 处理逻辑。若未配置 <code>blockHandler</code>、<code>fallback</code> 和 <code>defaultFallback</code>，则被限流降级时会将 <code>BlockException</code> <strong>直接抛出</strong>。</p>
 </blockquote>
 <p>将<code>createOrder</code>这个业务接口改造一下，同时指定blockHandler和fallback，代码如下：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/49.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/49.png"></p>
 <p>此时不配置任何规则，直接访问接口，可以看到这里直接进入了异常降级处理，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/50.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/50.png"></p>
 <p>我们对<code>createOrder</code>这个资源配置降级规则：60秒内如果出现2个以上的异常直接限流，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/51.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/51.png"></p>
 <p>此时我们再次访问这个接口，可以看到前两次直接进入了<code>fallback</code>指定的方法中（并未达到限流的异常数阈值），两次之后就被限流了，进入了<code>blockHandler</code>方法中，效果如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/52.gif"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/52.gif"></p>
 <blockquote>
 <p>上述源码在sentinel-openfeign-provider9009这个模块中，源码获取方式见文末。</p>
 </blockquote>
 <h2 id="13、sentinel的黑白名单如何设置？"><a href="#13、sentinel的黑白名单如何设置？" class="headerlink" title="13、sentinel的黑白名单如何设置？"></a>13、sentinel的黑白名单如何设置？</h2><p>顾名思义，黑名单就是拉黑呗，拉黑就是不能访问了呗，sentinel能够针对请求来源进行是否放行，若配置白名单则只有请求来源位于白名单内时才可通过；若配置黑名单则请求来源位于黑名单时不通过，其余的请求通过。</p>
 <p>sentinel控制台对应得规则配置如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/38.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/38.png"></p>
 <p>该规则对应得源码为<code>com.alibaba.csp.sentinel.slots.block.authority.AuthorityRule</code>，几个属性如下：</p>
 <ul>
 <li><code>resource</code>：资源名，即限流规则的作用对象。</li>
@@ -740,11 +746,11 @@
 <p>这里有个问题：<strong>请求来源是什么，怎么获取？</strong></p>
 <p>Sentinel提供了一个接口<code>RequestOriginParser</code>，我们可以实现这个接口根据自己业务的规则解析出请求来源名称。</p>
 <p>下面我以<strong>IP</strong>作为区分请求来源，代码如下：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/39.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/39.png"></p>
 <p>然后将<code>127.0.0.1</code>设置为黑名单，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/40.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/40.png"></p>
 <p>直接访问：<a target="_blank" rel="noopener" href="http://127.0.0.1:9009/sentinel/rate/order/query?id=1002%EF%BC%8C%E7%BB%93%E6%9E%9C%E5%A6%82%E4%B8%8B%E5%9B%BE%EF%BC%9A">http://127.0.0.1:9009/sentinel/rate/order/query?id=1002，结果如下图：</a></p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/41.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/41.png"></p>
 <p>可以看到被限流了哦……………..</p>
 <p>好了，黑白名单就介绍到这里。</p>
 <blockquote>
@@ -752,10 +758,10 @@
 </blockquote>
 <h2 id="14、限流规则如何持久化？"><a href="#14、限流规则如何持久化？" class="headerlink" title="14、限流规则如何持久化？"></a>14、限流规则如何持久化？</h2><p>Sentinel默认限流规则是存储在<strong>内存</strong>中，只要服务重启之后对应得限流规则也会消失，实际的生产中肯定是不允许这种操作，因此限流规则的持久化迫在眉睫。</p>
 <p>sentinel官方文档提供了两种持久化模式，分别如下：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/52.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/52.png"></p>
 <p>但是官方推荐使用<code>Push</code>模式，下面陈某就Push模式介绍一下持久化限流规则。这里使用Nacos作为配置中心。</p>
 <p>盗用官方一张架构图，如下：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/58.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/58.png"></p>
 <h3 id="1、添加依赖"><a href="#1、添加依赖" class="headerlink" title="1、添加依赖"></a>1、添加依赖</h3><p>这里需要添加一个依赖，如下：</p>
 <figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.alibaba.csp<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>sentinel-datasource-nacos<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
@@ -766,20 +772,20 @@
 <p>上述配置仅仅展示了和持久化相关的一些配置，其他相关的配置代码就不贴了，稍后自己看源码。</p>
 <p><code>spring.cloud.sentinel.datasource</code>下可以配置多个规则，陈某这里只配置了限流和降级规则，其他规则自己尝试配一下，不同规则通过<code>rule-type</code>区分，其取值都在<code>com.alibaba.cloud.sentinel.datasource.RuleType</code>这个枚举类中，对应着sentinel中的几大统计规则。</p>
 <h3 id="3、在Nacos添加对应的规则配置"><a href="#3、在Nacos添加对应的规则配置" class="headerlink" title="3、在Nacos添加对应的规则配置"></a>3、在Nacos添加对应的规则配置</h3><p>上述配置中对应的限流（flow）规则如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/53.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/53.png"></p>
 <p>上述配置中对应的降级（degrade）规则如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/54.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/54.png"></p>
 <p>先不纠结JSON数据里面到底是什么，先看效果，全部发布之后，Nacos中总共有了两个配置，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/55.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/55.png"></p>
 <p>上图中可以看到我们的两种规则已经在Nacos配置好了，来看一下sentinel中是否已经生效了，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/56.png"></p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/57.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/56.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/57.png"></p>
 <p>哦了，已经生效了，由于是push模式，只要nacos中点击发布配置，相关规则配置就会推送到sentinel中。</p>
 <blockquote>
 <p>上述源码在sentinel-openfeign-provider9009这个模块中，源码获取方式见文末。</p>
 </blockquote>
 <p><strong>伏笔</strong>：push模式只能保证Nacos中的修改推送到sentinel控制台，<strong>但是sentinel控制台的限流规则修改如何推送到Nacos呢？</strong>别着急，下面将会介绍…………..</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/56.jpg"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/56.jpg"></p>
 <h3 id="4、JSON中到底怎么写？"><a href="#4、JSON中到底怎么写？" class="headerlink" title="4、JSON中到底怎么写？"></a>4、JSON中到底怎么写？</h3><p>很多人好奇JOSN中的配置到底怎么写？其实很简单，陈某在介绍各种规则的时候都明确告诉你每种规则对应源码中的实现类，比如流控规则对应的类就是<code>com.alibaba.csp.sentinel.slots.block.flow.FlowRule</code>，JOSN中各个属性也是来源于这个类。</p>
 <p>下面陈某列出各个规则的JSON配置，开发中照着改即可。</p>
 <p><strong>1、流控规则</strong></p>
@@ -807,7 +813,7 @@
 <p>这个还是比较复杂的，sentinel只帮我们实现了流控规则的demo，其他的还是要自己修改，这点不太人性化….</p>
 <p>在这之前需要自己下载对应版本的sentinel控制台的源码，地址：<a target="_blank" rel="noopener" href="https://github.com/alibaba/Sentinel/tags">https://github.com/alibaba/Sentinel/tags</a></p>
 <h3 id="流控规则源码修改"><a href="#流控规则源码修改" class="headerlink" title="流控规则源码修改"></a>流控规则源码修改</h3><p>在源码的test目录下有sentinel提供的demo，分别有apollo、nacos、zookeeper，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/59.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/59.png"></p>
 <p>这里我们是Nacos，因此只需要nacos包下面的demo。修改步骤如下：</p>
 <p><strong>1、去掉sentinel-datasource-nacos依赖的scop</strong></p>
 <p>这个sentinel-datasource-nacos依赖默认是<code>&lt;scope&gt;test&lt;/scope&gt;</code>，因此我们需要去掉这个，如下：</p>
@@ -818,7 +824,7 @@
 </blockquote>
 <p><strong>2、复制test环境下的nacos整个包到main下</strong></p>
 <p>将这个nacos包复制到<code>com.alibaba.csp.sentinel.dashboard.rule</code>这个包下，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/60.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/60.png"></p>
 <p><strong>3、将FlowControllerV2中的代码复制到FlowControllerV1中</strong></p>
 <p><code>com.alibaba.csp.sentinel.dashboard.controller.v2.FlowControllerV2</code>这个是sentinel提供的demo，只需要将其中的代码全部覆盖到<code>com.alibaba.csp.sentinel.dashboard.controller.FlowControllerV1</code>中。</p>
 <p><strong>4、修改FlowControllerV1中的代码</strong></p>
@@ -831,10 +837,10 @@
 
 <p><strong>5、注意nacos的相关配置</strong></p>
 <p><code>com.alibaba.csp.sentinel.dashboard.rule.nacos.NacosConfigUtil</code>这个工具类中对应的是限流规则在nacos中的一些配置项，有<code>groupId</code>、<code>dataId</code>…对应的配置如下：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/61.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/61.png"></p>
 <p><strong>需要两边统一，可以自己修改。</strong></p>
 <p><code>com.alibaba.csp.sentinel.dashboard.rule.nacos.NacosConfig</code>这个类中有个方法如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/62.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/62.png"></p>
 <p><strong>默认指定的nacos地址是本地的，这个需要修改。</strong></p>
 <p><strong>6、完成</strong></p>
 <p>以上步骤已经改造了sentinel控制台的流控规则，打包启动控制台代码，命令如下：</p>
@@ -863,17 +869,17 @@
 </ul>
 <p>下面就以嵌入模式为例介绍一下如何配置。</p>
 <p>就以<code>sentinel-openfeign-provider9009</code>这个模块作为演示，直接启动三个集群，端口分别为<code>9009</code>、<code>9011</code>、<code>9013</code>，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/63.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/63.png"></p>
 <p>启动成功，在sentinel控制台将会看到有三个实例已经被监控了，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/64.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/64.png"></p>
 <p>此时只需要在控制台指定一个服务为token server，其他的为token client，<strong>集群流控-&gt;新增token server</strong>，操作如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/65.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/65.png"></p>
 <p>选取一个作为服务端，另外两个作为客户端，此时就已经配置好了，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/66.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/66.png"></p>
 <p>此时就可以添加集群流控规则了，可以在sentinel控制台直接添加，也可以通过Nacos直接配置，下图是通过Nacos配置的，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/67.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/67.png"></p>
 <p>Nacos推送成功后将会在sentinel控制台看到这条流控规则的配置，如下图：</p>
-<p><img src="https://gitee.com/chenjiabing666/BlogImage/raw/master/sentinel/68.png"></p>
+<p><img src="http://124.221.134.51/BlogImage/sentinel/68.png"></p>
 <p>OK，至此集群流控到这儿就介绍完了，配置好之后可以自己试一下效果，陈某就不再演示了。</p>
 <blockquote>
 <p>官方文档：<a target="_blank" rel="noopener" href="https://github.com/alibaba/Sentinel/wiki/%E9%9B%86%E7%BE%A4%E6%B5%81%E6%8E%A7">https://github.com/alibaba/Sentinel/wiki/%E9%9B%86%E7%BE%A4%E6%B5%81%E6%8E%A7</a></p>
