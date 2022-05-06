@@ -27,34 +27,34 @@
 <meta property="og:site_name" content="不才陈某技术博客">
 <meta property="og:description" content="前言Spring Boot 专栏已经写了五十多天了，前面二十章从基础应用到高级整合避重就轻介绍的都是工作、面试中常见的知识点。 今天开始底层源码介绍的阶段，相对内容比较深一点，作者也尽可能介绍的通俗易懂，层次分明一点。相信读过我写的Mybatis专栏的文章都知道，只要跟着作者的步骤，方法一步步研究，其实源码并不难。 这篇文章花了四天时间精雕细琢，力求介绍的通俗易懂，毕竟源码相对难度更高些，希望通过">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/22.jpg">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/1.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/2.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/3.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/4.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/5.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/6.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/7.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/8.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/9.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/11.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/12.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/13.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/14.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/15.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/16.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/17.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/18.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/19.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/20.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/22.jpg">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/1.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/2.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/3.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/4.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/5.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/6.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/7.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/8.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/9.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/11.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/12.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/13.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/14.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/15.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/16.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/17.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/18.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/19.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/20.png">
 <meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis%E8%BF%9B%E9%98%B6PDF/2.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/myjszl_log.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/myjszl_log.png">
 <meta property="article:published_time" content="2020-11-20T02:53:38.000Z">
-<meta property="article:modified_time" content="2022-03-26T06:39:30.330Z">
+<meta property="article:modified_time" content="2022-05-06T14:21:26.172Z">
 <meta property="article:author" content="不才陈某">
 <meta property="article:tag" content="Spring Boot">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/22.jpg">
+<meta name="twitter:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/22.jpg">
 
 <link rel="canonical" href="https://chenjiabing666.github.io/2020/11/20/SpringBoot%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/">
 
@@ -245,7 +245,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-26 14:39:30" itemprop="dateModified" datetime="2022-03-26T14:39:30+08:00">2022-03-26</time>
+                <time title="修改时间：2022-05-06 22:21:26" itemprop="dateModified" datetime="2022-05-06T22:21:26+08:00">2022-05-06</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -300,13 +300,13 @@
 <p>至于从哪入手不是很简单的问题吗，当然主启动类了，即是标注着<code>@SpringBootApplication</code>注解并且有着<code>main()</code>方法的类，如下一段代码：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@SpringBootApplication</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AnnotationDemoApplication</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        SpringApplication.run(AnnotationDemoApplication.class, args);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>话不多说，<code>DEBUG</code>伺候，别怕，搞它……..</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/22.jpg"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/22.jpg"></p>
 <h2 id="源码如何切分？"><a href="#源码如何切分？" class="headerlink" title="源码如何切分？"></a>源码如何切分？</h2><p><code>SpringApplication</code>中的静态<code>run()</code>方法并不是一步完成的，最终执行的源码如下：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//org.springframework.context.ConfigurableApplicationContext</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ConfigurableApplicationContext <span class="title">run</span><span class="params">(Class&lt;?&gt;[] primarySources, String[] args)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">new</span> SpringApplication(primarySources).run(args);</span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
 
 <p>很显然分为两个步骤，分别是创建<code>SpringApplication</code>和执行<code>run()</code>方法，下面将分为这两个部分介绍。</p>
 <h2 id="如何创建SpringApplication？"><a href="#如何创建SpringApplication？" class="headerlink" title="如何创建SpringApplication？"></a>如何创建SpringApplication？</h2><p>创建即是<code>new</code>对象了，<code>DEBUG</code>跟进代码，最终执行的<code>SpringApplication</code>构造方法如下图：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/1.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/1.png"></p>
 <p>如上图中标注的注释，创建过程重用的其实分为<code>②</code>、<code>③</code>、<code>④</code>这三个阶段，下面将会一一介绍每个阶段做了什么事。</p>
 <h3 id="设置应用类型"><a href="#设置应用类型" class="headerlink" title="设置应用类型"></a>设置应用类型</h3><p>这个过程非常重要，直接决定了项目的类型，应用类型分为三种，都在<code>WebApplicationType</code>这个枚举类中，如下：</p>
 <ol>
@@ -320,36 +320,36 @@
 <p>这里我引入了<code>spring-boot-starter-web</code>,肯定是<code>Servlet</code>的web程序。</p>
 <h3 id="设置初始化器-Initializer"><a href="#设置初始化器-Initializer" class="headerlink" title="设置初始化器(Initializer)"></a>设置初始化器(Initializer)</h3><p>初始化器<code>ApplicationContextInitializer</code>是个好东西，用于<code>IOC</code>容器刷新之前初始化一些组件，比如<code>ServletContextApplicationContextInitializer</code>。</p>
 <p>那么如何获取初始化器呢？跟着上图中的代码进入，在<code>SpringApplication</code>中的如下图中的方法：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/2.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/2.png"></p>
 <p>相对重要的就是第一步获取初始化器的名称了，这个肯定是<code>全类名</code>了，详细源码肯定在<code>loadFactoryNames()</code>方法中了，跟着源码进入，最终调用的是<code>#SpringFactoriesLoader.loadSpringFactories()</code>方法。</p>
 <p><code>loadSpringFactories()</code>方法就不再详细解释了，其实就是从类路径<code>META-INF/spring.factories</code>中加载<code>ApplicationContextInitializer</code>的值。</p>
 <p>在<code>spring-boot-autoconfigure</code>的<code>spring.factories</code>文件中的值如下图：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/3.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/3.png"></p>
 <blockquote>
 <p>上图中的只是一部分初始化器，因为<code>spring.factories</code>文件不止一个。</p>
 </blockquote>
 <p>下图中是我的<code>demo</code>中注入的初始化器，现实项目中并不止这些。</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/4.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/4.png"></p>
 <blockquote>
 <p>这也告诉我们自定义一个<code>ApplicationContextInitializer</code>只需要实现接口，在<code>spring.factories</code>文件中设置即可。</p>
 </blockquote>
 <h3 id="设置监听器-Listener"><a href="#设置监听器-Listener" class="headerlink" title="设置监听器(Listener)"></a>设置监听器(Listener)</h3><p>监听器（<code>ApplicationListener</code>）这个概念在<code>Spring</code>中就已经存在，主要用于监听特定的事件(<code>ApplicationEvent</code>)，比如IOC容器刷新、容器关闭等。</p>
 <p><code>Spring Boot</code>扩展了<code>ApplicationEvent</code>构建了<code>SpringApplicationEvent</code>这个抽象类，主要用于<code>Spring Boot</code>启动过程中触发的事件，比如程序启动中、程序启动完成等。如下图：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/5.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/5.png"></p>
 <p>监听器如何获取？从源码中知道其实和初始化器(<code>ApplicationContextInitializer</code>)执行的是同一个方法，同样是从<code>META-INF/spring.factories</code>文件中获取。</p>
 <p>在<code>spring-boot-autoconfigure</code>的<code>spring.factories</code>文件中的值如下图：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/6.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/6.png"></p>
 <blockquote>
 <p><code>spring.factories</code>文件不止一个，同样监听器也不止以上这些。</p>
 </blockquote>
 <p>作者<code>demo</code>中注入的一些监听器如下图：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/7.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/7.png"></p>
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><code>SpringApplication</code>的构建都是为了<code>run()</code>方法启动做铺垫，构造方法中总共就有几行代码，最重要的部分就是设置应用类型、设置初始化器、设置监听器。</p>
 <blockquote>
 <p><strong>注意</strong>：初始化器和这里的监听器都要放置在<code>spring.factories</code>文件中才能在这一步骤加载，否则不会生效，因此此时<code>IOC容器</code>还未创建，即使将其注入到<code>IOC容器</code>中也是不会生效的。</p>
 </blockquote>
 <p>作者简单的画了张执行流程图，仅供参考，如下：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/8.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/8.png"></p>
 <h2 id="执行run-方法"><a href="#执行run-方法" class="headerlink" title="执行run()方法"></a>执行run()方法</h2><p>上面分析了<code>SpringApplication</code>的构建过程，一切都做好了铺垫，现在到了启动的过程了。</p>
 <p>作者根据源码将启动过程分为了<strong>8步</strong>，下面将会一一介绍。</p>
 <h3 id="1-获取、启动运行过程监听器"><a href="#1-获取、启动运行过程监听器" class="headerlink" title="1. 获取、启动运行过程监听器"></a>1. 获取、启动运行过程监听器</h3><p><code>SpringApplicationRunListener</code>这个监听器和<code>ApplicationListener</code>不同，它是用来监听应用程序启动过程的，接口的各个方法含义如下：</p>
@@ -362,7 +362,7 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">org.springframework.boot.SpringApplicationRunListener=\</span><br><span class="line">org.springframework.boot.context.event.EventPublishingRunListener</span><br></pre></td></tr></table></figure>
 
 <p>最终注入的是<code>EventPublishingRunListener</code>这个实现类，创建实例过程肯定是通过反射了，因此我们看看它的构造方法，如下图：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/9.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/9.png"></p>
 <p>这个运行监听器内部有一个事件广播器(<code>SimpleApplicationEventMulticaster</code>)，主要用来广播特定的事件(<code>SpringApplicationEvent</code>)来触发特定的监听器<code>ApplicationListener</code>。</p>
 <blockquote>
 <p><code>EventPublishingRunListener</code>中的每个方法用来触发<code>SpringApplicationEvent</code>中的不同子类。</p>
@@ -371,7 +371,7 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//执行starting()方法</span></span><br><span class="line">listeners.starting(bootstrapContext, <span class="keyword">this</span>.mainApplicationClass);</span><br></pre></td></tr></table></figure>
 
 <p>执行<code>SpringApplicationRunListeners</code>的<code>starting()</code>方法，跟进去其实很简单，遍历执行上面获取的运行监听器，这里只有一个<code>EventPublishingRunListener</code>。因此执行的是它的<code>starting()</code>方法，源码如下图：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/11.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/11.png"></p>
 <p>上述源码中逻辑很简单，其实只是执行了<code>multicastEvent()</code>方法，广播了<code>ApplicationStartingEvent</code>事件。至于<code>multicastEvent()</code>内部方法感兴趣的可以看看，其实就是遍历<code>ApplicationListener</code>的实现类，找到监听<code>ApplicationStartingEvent</code>这个事件的监听器，执行<code>onApplicationEvent()</code>方法。</p>
 <h4 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h4><p>这一步其实就是广播了<code>ApplicationStartingEvent</code>事件来触发监听这个事件的<code>ApplicationListener</code>。</p>
 <blockquote>
@@ -381,7 +381,7 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ConfigurableEnvironment environment = prepareEnvironment(listeners, bootstrapContext, applicationArguments);</span><br></pre></td></tr></table></figure>
 
 <p><code>prepareEnvironment</code>方法内部广播了<code>ApplicationEnvironmentPreparedEvent</code>事件，源码如下图：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/12.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/12.png"></p>
 <blockquote>
 <p>环境构建这一步加载了系统环境配置、用户自定义配置并且广播了<code>ApplicationEnvironmentPreparedEvent</code>事件，触发监听器。</p>
 </blockquote>
@@ -389,7 +389,7 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">context = createApplicationContext();</span><br></pre></td></tr></table></figure>
 
 <p>跟进代码，真正执行的是<code>ApplicationContextFactory</code>方法，如下图：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/13.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/13.png"></p>
 <p>根据<code>webApplicationType</code>决定创建的类型，很显然，我这里的是<code>servlet</code>，因此创建的是<code>AnnotationConfigServletWebServerApplicationContext</code>。</p>
 <blockquote>
 <p>这一步仅仅是创建了<code>IOC容器</code>，未有其他操作。</p>
@@ -398,20 +398,20 @@
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">prepareContext(context, environment, listeners, applicationArguments,printedBanner);</span><br></pre></td></tr></table></figure>
 
 <p><code>prepareContext()</code>源码解析如下图，内容还是挺多的：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/14.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/14.png"></p>
 <p>从上图可以看出步骤很多，下面将会详细介绍几个重点的内容。</p>
 <h4 id="调用初始化器"><a href="#调用初始化器" class="headerlink" title="调用初始化器"></a>调用初始化器</h4><p>在<code>SpringApplication</code>构建过程中设置的初始化器，从<code>spring.factories</code>取值的。执行的流程很简单，遍历执行，源码如下图：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/15.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/15.png"></p>
 <blockquote>
 <p>将自定义的<code>ApplicationContextInitializer</code>放在<code>META-INF/spring.factories</code>中，在此时也是会被调用。</p>
 </blockquote>
 <h4 id="加载启动类，注入容器"><a href="#加载启动类，注入容器" class="headerlink" title="加载启动类，注入容器"></a>加载启动类，注入容器</h4><p>这一步是将主启动类加载到<code>IOC容器</code>中，作为后续自动配置的入口。</p>
 <p>在<code>SpringApplication</code>构建过程中将主启动类放置在<code>primarySources</code>这个集合中，此时的<code>getAllSources()</code>即是从其中取值，如下图：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/16.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/16.png"></p>
 <p>这里取出的就是主启动类，当然你的项目中可能不止一个，接下来就是将其加载到IOC容器中了，源码如下：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">load(context, sources.toArray(<span class="keyword">new</span> Object[<span class="number">0</span>]));</span><br></pre></td></tr></table></figure>
 <p>跟着代码进去，其实主要逻辑都在<code>BeanDefinitionLoader.load()</code>方法，如下图：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/17.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/17.png"></p>
 <blockquote>
 <p>将主启动类加载到<code>beanDefinitionMap</code>，后续该启动类将作为开启自动配置化的入口，后续章节详细介绍。</p>
 </blockquote>
@@ -428,22 +428,22 @@
 <p>但是这里广播事件和前几次不同，并不是广播给<code>SpringApplication</code>中的监听器（在构建过程中从<code>spring.factories</code>文件获取的监听器）。因此在<code>IOC容器</code>中注入的监听器（使用<code>@Component</code>等方式注入的）也能够生效。前面几个事件只有在<code>spring.factories</code>文件中设置的监听器才会生效。</p>
 </blockquote>
 <p>跟着代码进入，可以看到<code>started()</code>方法源码如下：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/18.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/18.png"></p>
 <p>这里并没有用事件广播器<code>SimpleApplicationEventMulticaster</code>广播事件，而是使用<code>ConfigurableApplicationContext</code>直接在<code>IOC容器</code>中发布事件。</p>
 <h3 id="8-执行Runners"><a href="#8-执行Runners" class="headerlink" title="8. 执行Runners"></a>8. 执行Runners</h3><p><code>Spring Boot</code> 提供了两种<code>Runner</code>让我们定制一些额外的操作，分别是<code>CommandLineRunner</code>和<code>ApplicationRunner</code>，关于这两个的区别，后面文章详细介绍。</p>
 <p>调用的源码如下：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">callRunners(context, applicationArguments);</span><br></pre></td></tr></table></figure>
 
 <p>跟进代码，其实真正调执行的是如下方法：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/19.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/19.png"></p>
 <p>逻辑很简单，从<code>IOC容器</code>中获取，遍历调用。</p>
 <h3 id="总结-2"><a href="#总结-2" class="headerlink" title="总结"></a>总结</h3><p><code>Spring Boot</code> 启动流程相对简单些，作者将其细分了以上八个步骤，希望能够帮助读者理解，流程图如下：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/20.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%20%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/20.png"></p>
 <h2 id="总结-3"><a href="#总结-3" class="headerlink" title="总结"></a>总结</h2><p><code>Spring Boot</code>启动流程就介绍到这里了，需要重点理解<code>run()</code>方法执行的八个步骤以及事件、初始化器、监听器等组件的执行时间点。</p>
 <p>作者每一篇文章都很用心，这篇源码解析花了三天时间精雕细琢，力求讲解的通俗易懂，希望能够帮助到你。</p>
 <p>另外作者的第一本<code>PDF</code>书籍已经整理好了，由浅入深的详细介绍了Mybatis基础以及底层源码，有需要的朋友公众号回复关键词<strong>Mybatis进阶</strong>即可获取，目录如下：</p>
 <p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis%E8%BF%9B%E9%98%B6PDF/2.png"></p>
-<p><img src="http://124.221.134.51/BlogImage/myjszl_log.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/myjszl_log.png"></p>
 
     </div>
 

@@ -27,23 +27,23 @@
 <meta property="og:site_name" content="不才陈某技术博客">
 <meta property="og:description" content="前言Spring Boot中的热部署相信大家用的最多的就是devtools，没办法，官推的。 JRebel相对于devtools，个人觉得无论是加载速度还是使用便捷，JRebel完胜。 作为前辈级别的开发利器，JRebel真的值得开一章节来好好介绍下。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/2.jpg">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/3.jpg">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/4.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/5.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/6.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/4.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/7.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/6.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/8.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/2.jpg">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/3.jpg">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/4.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/5.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/6.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/4.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/7.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/6.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/8.png">
 <meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/8.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/myjszl_log.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/myjszl_log.png">
 <meta property="article:published_time" content="2020-11-02T10:44:23.000Z">
-<meta property="article:modified_time" content="2022-03-26T06:39:29.768Z">
+<meta property="article:modified_time" content="2022-05-06T14:21:25.467Z">
 <meta property="article:author" content="不才陈某">
 <meta property="article:tag" content="Spring Boot">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://124.221.134.51/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/2.jpg">
+<meta name="twitter:image" content="https://www.java-family.cn/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/2.jpg">
 
 <link rel="canonical" href="https://chenjiabing666.github.io/2020/11/02/SpringBoot%E7%83%AD%E9%83%A8%E7%BD%B2%E6%8F%92%E4%BB%B6JRebel/">
 
@@ -234,7 +234,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-26 14:39:29" itemprop="dateModified" datetime="2022-03-26T14:39:29+08:00">2022-03-26</time>
+                <time title="修改时间：2022-05-06 22:21:25" itemprop="dateModified" datetime="2022-05-06T22:21:25+08:00">2022-05-06</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -292,12 +292,12 @@
 <p><strong>本地热部署</strong>则是能够在项目运行中感知到特定文件代码的修改而使项目不重新启动就能生效。</p>
 </blockquote>
 <h2 id="什么是远程热部署？"><a href="#什么是远程热部署？" class="headerlink" title="什么是远程热部署？"></a>什么是远程热部署？</h2><p>远程热部署的<code>远程</code>两字指的是<strong>远程服务器</strong>，平时开发中，只要本地代码改动了，必须要重新打包上传服务器重新启动之后才会生效，<strong>你这样干过吗？…….</strong></p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/2.jpg" alt="嗯？好像干过"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/2.jpg" alt="嗯？好像干过"></p>
 <blockquote>
 <p><strong>远程热部署</strong>则是本地代码改变之后，不用重新打包上传服务器重启项目就能生效，本地改变之后能够自动改变服务器上的项目代码。</p>
 </blockquote>
 <p>有些人听到这里懵逼了，这是什么鬼？还有这么神奇的东西………..</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/3.jpg" alt="别惊讶，就是这么神奇"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/3.jpg" alt="别惊讶，就是这么神奇"></p>
 <h2 id="JRebel和devtools的区别"><a href="#JRebel和devtools的区别" class="headerlink" title="JRebel和devtools的区别"></a>JRebel和devtools的区别</h2><p>前辈和后辈的比较其实没什么可比性，如果不是JRebel<strong>收费</strong>了，绝对是所有程序员的首选。但还是要说说他们之间的区别，如下：</p>
 <ol>
 <li><code>JRebel</code>加载的速度优于<code>devtools</code></li>
@@ -306,14 +306,14 @@
 </ol>
 <h2 id="如何安装JRebel？"><a href="#如何安装JRebel？" class="headerlink" title="如何安装JRebel？"></a>如何安装JRebel？</h2><p>本地热部署只需要在<code>IDEA</code>中装一个JRebel的插件，远程热部署需要在服务器上装一个JRebel，这两种方式在上一篇文章都介绍过，不会的可以去看看：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/VBGoGMz0y2Y-y6NcdMcaLg">撸了个反向代理工具，搞一搞JRebel</a>。</p>
 <h2 id="如何本地热部署？"><a href="#如何本地热部署？" class="headerlink" title="如何本地热部署？"></a>如何本地热部署？</h2><p><code>JRebel</code>插件安装完成之后，将<code>IDEA</code>中的<code>自动编译</code>开启，然后找到<code>IDEA</code>中的<code>JRebel</code>的工具面板，将所需要热部署的项目或者模块勾选上即可，如下图：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/4.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/4.png"></p>
 <blockquote>
 <p>勾选成功之后将会在项目或者模块的<code>src/resource</code>下生成一个<code>rebel.xml</code>文件。</p>
 </blockquote>
 <p>此时在<code>Spring Boot</code>的主启动类上右键，将会出现以<code>JRebel</code>启动的选项，如下图：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/5.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/5.png"></p>
 <p>当然在<code>IDEA</code>的右上角也存在启动的按钮，如下图：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/6.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/6.png"></p>
 <blockquote>
 <p><code>①</code>是本地启动和<code>DEBUG</code>模式启动，<code>②</code>是远程热部署的时候更新按钮。</p>
 </blockquote>
@@ -325,7 +325,7 @@
 <p>此处设置的<code>123456789</code>则是远程的密码，在<code>IDEA</code>连接服务器的时候需要。</p>
 </blockquote>
 <p>服务器配置成功后，在IDEA中JRebel的面板中设置远程热部署的模块，如下图：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/4.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/4.png"></p>
 <blockquote>
 <p>勾选成功后，将会在<code>src/resource</code>下生成一个<code>rebel-remote.xml</code>文件。</p>
 </blockquote>
@@ -338,7 +338,7 @@
 <p>项目启动成功后，服务器上的配置就完成了。</p>
 </blockquote>
 <p>此时在IDEA中需要设置连接到刚才启动的项目，打开<code>File-&gt;setting-&gt;JRbel&amp;XRebel-&gt;JRbel Remote Servers</code>，如下图：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/7.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/7.png"></p>
 <p>步骤如下：</p>
 <ol>
 <li>点击<code>+</code>号添加一个服务</li>
@@ -353,9 +353,9 @@
 <li>点击<code>OK</code>，即可添加成功。</li>
 </ol>
 <p>以上设置成功后，点击右上角的远程部署按钮，下图中的<code>②</code>号按钮，则会自动更新服务器上已启动项目的代码使之本地修改在服务端自动生效：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/6.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/6.png"></p>
 <p>在<code>JRebel Console</code>这个面板中将会打印出远程热部署更新的日志信息，如下图：</p>
-<p><img src="http://124.221.134.51/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/8.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/Spring%20Boot%E4%BD%BF%E7%94%A8JRebel%E7%83%AD%E9%83%A8%E7%BD%B2/8.png"></p>
 <blockquote>
 <p>只要本地有了更改，点击远程热部署按钮，则会自动上传代码到服务器端并实时更新，不用重新启动项目。</p>
 </blockquote>
@@ -373,7 +373,7 @@
 <p>希望这篇文章介绍的<code>JRebel</code>能够提高读者们的开发效率，反正我是提高了，哈哈~</p>
 <p>另外作者为大家准备接近<code>10M</code>的面筋，涵盖后端的各个层面，老规矩，公众号内回复<code>Java面试宝典</code>即可获取。</p>
 <p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/8.png"></p>
-<p><img src="http://124.221.134.51/BlogImage/myjszl_log.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/myjszl_log.png"></p>
 
     </div>
 

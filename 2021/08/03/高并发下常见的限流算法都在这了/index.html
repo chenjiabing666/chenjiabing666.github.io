@@ -27,21 +27,21 @@
 <meta property="og:site_name" content="不才陈某技术博客">
 <meta property="og:description" content="限流简介现在说到高可用系统，都会说到高可用的保护手段：缓存、降级和限流，本博文就主要说说限流。限流是流量限速（Rate Limit）的简称，是指只允许指定的事件进入系统，超过的部分将被拒绝服务、排队或等待、降级等处理。对于server服务而言，限流为了保证一部分的请求流量可以得到正常的响应，总好过全部的请求都不能得到响应，甚至导致系统雪崩。限流与熔断经常被人弄混，博主认为它们最大的区别在于限流主要">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/13.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/1.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/2.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/3.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/4.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/5.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/6.png">
-<meta property="og:image" content="http://124.221.134.51/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/6.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/13.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/1.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/2.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/3.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/4.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/5.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/6.png">
+<meta property="og:image" content="https://www.java-family.cn/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/6.png">
 <meta property="article:published_time" content="2021-08-03T03:29:56.000Z">
-<meta property="article:modified_time" content="2022-03-26T06:39:30.090Z">
+<meta property="article:modified_time" content="2022-05-06T14:21:26.284Z">
 <meta property="article:author" content="不才陈某">
 <meta property="article:tag" content="算法">
 <meta property="article:tag" content="限流">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://124.221.134.51/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/13.png">
+<meta name="twitter:image" content="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/13.png">
 
 <link rel="canonical" href="https://chenjiabing666.github.io/2021/08/03/%E9%AB%98%E5%B9%B6%E5%8F%91%E4%B8%8B%E5%B8%B8%E8%A7%81%E7%9A%84%E9%99%90%E6%B5%81%E7%AE%97%E6%B3%95%E9%83%BD%E5%9C%A8%E8%BF%99%E4%BA%86/">
 
@@ -232,7 +232,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-26 14:39:30" itemprop="dateModified" datetime="2022-03-26T14:39:30+08:00">2022-03-26</time>
+                <time title="修改时间：2022-05-06 22:21:26" itemprop="dateModified" datetime="2022-05-06T22:21:26+08:00">2022-05-06</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -277,7 +277,7 @@
 
       
         <h2 id="限流简介"><a href="#限流简介" class="headerlink" title="限流简介"></a>限流简介</h2><p>现在说到高可用系统，都会说到高可用的保护手段：缓存、降级和限流，本博文就主要说说限流。限流是流量限速（Rate Limit）的简称，是指只允许指定的事件进入系统，超过的部分将被拒绝服务、排队或等待、降级等处理。对于server服务而言，限流为了保证一部分的请求流量可以得到正常的响应，总好过全部的请求都不能得到响应，甚至导致系统雪崩。限流与熔断经常被人弄混，博主认为它们最大的区别在于限流主要在server实现，而熔断主要在client实现，当然了，一个服务既可以充当server也可以充当client，这也是让限流与熔断同时存在一个服务中，这两个概念才容易被混淆。</p>
-<p><img src="http://124.221.134.51/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/13.png"></p>
+<p><img src="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/13.png"></p>
 <span id="more"></span>
 
 <p>那为什么需要限流呢？很多人第一反应就是服务扛不住了所以需要限流。这是不全面的说法，博主认为限流是因为资源的稀缺或出于安全防范的目的，采取的自我保护的措施。限流可以保证使用有限的资源提供最大化的服务能力，按照预期流量提供服务，超过的部分将会拒绝服务、排队或等待、降级等处理。关注公众号‘码猿技术专栏’，回复关键词‘9527’获取Spring Cloud Alibaba实战视频教程！</p>
@@ -292,7 +292,7 @@
 </ul>
 <p>这是通过响应头告诉调用方服务端的限流频次是怎样的，保证后端的接口访问上限，客户端也可以根据响应的Header调整请求。</p>
 <h2 id="限流分类"><a href="#限流分类" class="headerlink" title="限流分类"></a>限流分类</h2><p><code>限流</code>，拆分来看，就两个字<code>限</code>和<code>流</code>，<code>限</code>就是动词限制，很好理解。但是<code>流</code>在不同的场景之下就是不同资源或指标，多样性就在<code>流</code>中体现。在网络流量中可以是字节流，在数据库中可以是TPS，在API中可以是QPS亦可以是并发请求数，在商品中还可以是库存数… …但是不管是哪一种『流』，这个流必须可以<strong>被量化，可以被度量，可以被观察到、可以统计出来</strong>。我们把限流的分类基于不同的方式分为不同的类别，如下图。</p>
-<p><img src="http://124.221.134.51/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/1.png" alt="img"></p>
+<p><img src="https://www.java-family.cn/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/1.png" alt="img"></p>
 <p>因为篇幅有限，本文只会挑选几个常见的类型分类进行说明。</p>
 <h3 id="限流粒度分类"><a href="#限流粒度分类" class="headerlink" title="限流粒度分类"></a>限流粒度分类</h3><p>根据限流的粒度分类：</p>
 <ul>
@@ -300,9 +300,9 @@
 <li>分布式限流</li>
 </ul>
 <p>现状的系统基本上都是分布式架构，单机的模式已经很少了，这里说的单机限流更加准确一点的说法是单服务节点限流。单机限流是指请求进入到某一个服务节点后超过了限流阈值，服务节点采取了一种限流保护措施。关注公众号‘码猿技术专栏’，回复关键词‘9527’获取Spring Cloud Alibaba实战视频教程！</p>
-<p><img src="http://124.221.134.51/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/2.png" alt="img"></p>
+<p><img src="https://www.java-family.cn/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/2.png" alt="img"></p>
 <p>分布式限流狭义的说法是在接入层实现多节点合并限流，比如NGINX+redis，分布式网关等，广义的分布式限流是多个节点（可以为不同服务节点）有机整合，形成整体的限流服务。</p>
-<p><img src="http://124.221.134.51/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/3.png" alt="img"></p>
+<p><img src="https://www.java-family.cn/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/3.png" alt="img"></p>
 <p>单机限流防止流量压垮服务节点，缺乏对整体流量的感知。分布式限流适合做细粒度不同的限流控制，可以根据场景不同匹配不同的限流规则。与单机限流最大的区别，分布式限流需要中心化存储，常见的使用redis实现。引入了中心化存储，就需要解决以下问题：</p>
 <ul>
 <li><p>数据一致性</p>
@@ -324,7 +324,7 @@
 <li>基于资源限流</li>
 </ul>
 <p>基于请求限流，一般的实现方式有<strong>限制总量</strong>和<strong>限制QPS</strong>。限制总量就是限制某个指标的上限，比如抢购某一个商品，放量是10w，那么最多只能卖出10w件。微信的抢红包，群里发一个红包拆分为10个，那么最多只能有10人可以抢到，第十一个人打开就会显示『手慢了，红包派完了』。</p>
-<p><img src="http://124.221.134.51/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/4.png" alt="img"></p>
+<p><img src="https://www.java-family.cn/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/4.png" alt="img"></p>
 <p>限制QPS，也是我们常说的限流方式，只要在接口层级进行，某一个接口只允许1秒只能访问100次，那么它的峰值QPS只能为100。限制QPS的方式最难的点就是如何预估阈值，如何定位阈值，下文中会说到。关注公众号‘码猿技术专栏’，回复关键词‘9527’获取Spring Cloud Alibaba实战视频教程！</p>
 <p>基于资源限流是基于服务资源的使用情况进行限制，需要定位到服务的关键资源有哪些，并对其进行限制，如限制TCP连接数、线程数、内存使用量等。限制资源更能有效地反映出服务当前地清理，但与限制QPS类似，面临着如何确认资源的阈值为多少。这个阈值需要不断地调优，不停地实践才可以得到一个较为满意地值。</p>
 <h3 id="限流算法分类"><a href="#限流算法分类" class="headerlink" title="限流算法分类"></a>限流算法分类</h3><p>不论是按照什么维度，基于什么方式的分类，其限流的底层均是需要算法来实现。下面介绍实现常见的限流算法：</p>
@@ -334,7 +334,7 @@
 <li>漏桶算法</li>
 </ul>
 <h4 id="计数器"><a href="#计数器" class="headerlink" title="计数器"></a>计数器</h4><h5 id="固定窗口计数器"><a href="#固定窗口计数器" class="headerlink" title="固定窗口计数器"></a>固定窗口计数器</h5><p>计数限流是最为简单的限流算法，日常开发中，我们说的限流很多都是说固定窗口计数限流算法，比如某一个接口或服务1s最多只能接收1000个请求，那么我们就会设置其限流为1000QPS。该算法的实现思路非常简单，维护一个固定单位时间内的计数器，如果检测到单位时间已经过去就重置计数器为零。</p>
-<p><img src="http://124.221.134.51/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/5.png" alt="img"></p>
+<p><img src="https://www.java-family.cn/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/5.png" alt="img"></p>
 <p>其操作步骤：</p>
 <ol>
 <li>时间线划分为多个独立且固定大小窗口；</li>
@@ -359,7 +359,7 @@
 <p>常见的实现方式主要有基于redis zset的方式和循环队列实现。基于redis zset可将Key为限流标识ID，Value保持唯一，可以用UUID生成，Score 也记为同一时间戳，最好是纳秒级的。使用redis提供的 ZADD、EXPIRE、ZCOUNT 和 zremrangebyscore 来实现，并同时注意开启 Pipeline 来尽可能提升性能。实现很简单，但是缺点就是zset的数据结构会越来越大。</p>
 <h4 id="漏桶算法"><a href="#漏桶算法" class="headerlink" title="漏桶算法"></a>漏桶算法</h4><p>漏桶算法是水先进入到漏桶里，漏桶再以一定的速率出水，当流入水的数量大于流出水时，多余的水直接溢出。把水换成请求来看，漏桶相当于服务器队列，但请求量大于限流阈值时，多出来的请求就会被拒绝服务。漏桶算法使用队列实现，可以以固定的速率控制流量的访问速度，可以做到流量的“平整化”处理。</p>
 <p>大家可以通过网上最流行的一张图来理解。</p>
-<p><img src="http://124.221.134.51/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/6.png" alt="img"></p>
+<p><img src="https://www.java-family.cn/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/6.png" alt="img"></p>
 <p>漏桶算法实现步骤：</p>
 <ol>
 <li>将每个请求放入固定大小的队列进行存储；</li>
@@ -374,7 +374,7 @@
 <li>如果令牌桶满了则多余的令牌会直接丢弃，当请求到达时，会尝试从令牌桶中取令牌，取到了令牌的请求可以执行；</li>
 <li>如果桶空了，则拒绝该请求。</li>
 </ol>
-<p><img src="http://124.221.134.51/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/6.png" alt="img"></p>
+<p><img src="https://www.java-family.cn/BlogImage/%E4%B8%80%E6%96%87%E8%81%8A%E9%80%8F%E9%99%90%E6%B5%81%E8%BF%99%E4%BA%8B/6.png" alt="img"></p>
 <h4 id="四种策略该如何选择？"><a href="#四种策略该如何选择？" class="headerlink" title="四种策略该如何选择？"></a>四种策略该如何选择？</h4><ul>
 <li>固定窗口：实现简单，但是过于粗暴，除非情况紧急，为了能快速止损眼前的问题可以作为临时应急的方案。</li>
 <li>滑动窗口：限流算法简单易实现，可以应对有少量突增流量场景。</li>
