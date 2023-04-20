@@ -27,12 +27,12 @@
 <meta property="og:site_name" content="不才陈某技术博客">
 <meta property="og:description" content="这是《Spring Cloud 进阶》专栏第三篇文章，前两篇分别介绍了Nacos、openFeign，有不清楚的可以回看之前的文章：  五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？ openFeign夺命连环9问，这谁受得了？  今天这篇文章将从10个维度介绍一下配置中心的选型问题，为什么要写这篇文章呢？是因为：  工作所需，要做一款好用的开源产品，去试用提供相似功能的开源产品是必要的">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E5%AF%B9%E6%AF%94/1.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E5%AF%B9%E6%AF%94/2.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E5%AF%B9%E6%AF%94/3.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E5%AF%B9%E6%AF%94/4.png">
+<meta property="og:image" content="http://img.java-family.cn/%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E5%AF%B9%E6%AF%94/1.png">
+<meta property="og:image" content="http://img.java-family.cn/%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E5%AF%B9%E6%AF%94/2.png">
+<meta property="og:image" content="http://img.java-family.cn/%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E5%AF%B9%E6%AF%94/3.png">
+<meta property="og:image" content="http://img.java-family.cn/%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E5%AF%B9%E6%AF%94/4.png">
 <meta property="article:published_time" content="2021-09-17T10:34:35.000Z">
-<meta property="article:modified_time" content="2022-05-06T14:21:25.280Z">
+<meta property="article:modified_time" content="2023-04-20T08:32:08.669Z">
 <meta property="article:author" content="不才陈某">
 <meta property="article:tag" content="Spring Cloud">
 <meta property="article:tag" content="Nacos">
@@ -40,7 +40,7 @@
 <meta property="article:tag" content="spring cloud Config">
 <meta property="article:tag" content="微服务">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://www.java-family.cn/BlogImage/%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E5%AF%B9%E6%AF%94/1.png">
+<meta name="twitter:image" content="http://img.java-family.cn/%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E5%AF%B9%E6%AF%94/1.png">
 
 <link rel="canonical" href="https://chenjiabing666.github.io/2021/09/17/Nacos%E3%80%81Apollo%E3%80%81Config%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E5%A6%82%E4%BD%95%E9%80%89%E5%9E%8B%EF%BC%9F%E8%BF%9910%E4%B8%AA%E7%BB%B4%E5%BA%A6%E5%91%8A%E8%AF%89%E4%BD%A0%EF%BC%81/">
 
@@ -231,7 +231,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-05-06 22:21:25" itemprop="dateModified" datetime="2022-05-06T22:21:25+08:00">2022-05-06</time>
+                <time title="修改时间：2023-04-20 16:32:08" itemprop="dateModified" datetime="2023-04-20T16:32:08+08:00">2023-04-20</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -327,7 +327,7 @@
 <p>Nacos控制台和后端配置服务是部署在一起的，可以通过不同的域名切换来支持多集群。</p>
 <h2 id="5、配置实时推送的对比"><a href="#5、配置实时推送的对比" class="headerlink" title="5、配置实时推送的对比"></a>5、配置实时推送的对比</h2><p>当配置变更的时候，配置中心需要将配置实时推送到应用客户端。</p>
 <p>Nacos和Apollo配置推送都是基于HTTP长轮询，客户端和配置中心建立HTTP长联接，当配置变更的的时候，配置中心把配置推送到客户端。</p>
-<p><img src="https://www.java-family.cn/BlogImage/%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E5%AF%B9%E6%AF%94/1.png"></p>
+<p><img src="http://img.java-family.cn/%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E5%AF%B9%E6%AF%94/1.png"></p>
 <p>Spring Cloud Config原生不支持配置的实时推送，需要依赖Git的WebHook、Spring Cloud Bus和客户端/bus/refresh端点:</p>
 <ul>
 <li>基于Git的WebHook，配置变更触发server端refresh</li>
@@ -335,7 +335,7 @@
 <li>Spring Cloud Bus接到消息并通知给客户端</li>
 <li>客户端接收到通知，请求Server端获取最新配置</li>
 </ul>
-<p><img src="https://www.java-family.cn/BlogImage/%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E5%AF%B9%E6%AF%94/2.png"></p>
+<p><img src="http://img.java-family.cn/%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E5%AF%B9%E6%AF%94/2.png"></p>
 <p>整体比较下来，Nacos和Apollo在配置实时推送链路上是比较简单高效的，Spring Cloud Config的配置推送引入Spring Cloud Bus，链路较长，比较复杂。</p>
 <h2 id="6、部署结构-amp-高可用的对比"><a href="#6、部署结构-amp-高可用的对比" class="headerlink" title="6、部署结构 &amp; 高可用的对比"></a>6、部署结构 &amp; 高可用的对比</h2><h3 id="1、Spring-Cloud-Config"><a href="#1、Spring-Cloud-Config" class="headerlink" title="1、Spring Cloud Config"></a>1、Spring Cloud Config</h3><p>Spring Cloud Config包含config-server、Git和Spring Cloud Bus三大组件：</p>
 <ul>
@@ -379,8 +379,8 @@
 <h3 id="3节点写场景"><a href="#3节点写场景" class="headerlink" title="3节点写场景"></a>3节点写场景</h3><p>同样的方式，将配置中心的压测节点数都部署成3个节点。Nacos QPS可以达到6000，Apollo可以达到3300 QPS（CPU压满），此时MySQL数据库因为配置较高，未成为性能瓶颈。Spring Cloud Config三个节点时候，Git也是一个节点，写QPS为5。</p>
 <p>整体上来看，Nacos的读写性能最高，Apollo次之，Spring Cloud Config的依赖Git场景不适合开放的大规模自动化运维API。</p>
 <h2 id="10、功能特性对比总结"><a href="#10、功能特性对比总结" class="headerlink" title="10、功能特性对比总结"></a>10、功能特性对比总结</h2><p>这里列一个表格总结一下三个产品的功能特点。</p>
-<p><img src="https://www.java-family.cn/BlogImage/%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E5%AF%B9%E6%AF%94/3.png"></p>
-<p><img src="https://www.java-family.cn/BlogImage/%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E5%AF%B9%E6%AF%94/4.png"></p>
+<p><img src="http://img.java-family.cn/%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E5%AF%B9%E6%AF%94/3.png"></p>
+<p><img src="http://img.java-family.cn/%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E5%AF%B9%E6%AF%94/4.png"></p>
 <p>总的来说，Apollo和Nacos相对于Spring Cloud Config的生态支持更广，在配置管理流程上做的更好。Apollo相对于Nacos在配置管理做的更加全面，不过使用起来也要麻烦一些。Nacos使用起来相对比较简洁，在对性能要求比较高的大规模场景更适合。</p>
 <p>此外，Nacos除了提供配置中心的功能，还提供了动态服务发现、服务共享与管理的功能，降低了服务化改造过程中的难度。</p>
 <p>以上，我们从产品功能、使用体验、实施过程和性能 4 个纬度对Spring Cloud Config、Apollo和Nacos进行对比。但对于一个开源项目的选型，除了以上这4个方面，项目上的人力投入（迭代进度、文档的完整性）、社区的活跃度（issue的数量和解决速度、Contributor数量、社群的交流频次等）、社区的规范程度（免责说明、安全性说明等），这些可能才是用户更关注的内容。</p>

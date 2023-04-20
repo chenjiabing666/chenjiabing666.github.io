@@ -27,23 +27,23 @@
 <meta property="og:site_name" content="不才陈某技术博客">
 <meta property="og:description" content="大家好，我是不才陈某~ 这是《Spring Cloud 进阶》第八篇文章，往期文章如下：  五十五张图告诉你微服务的灵魂摆渡者Nacos究竟有多强？ openFeign夺命连环9问，这谁受得了？ 阿里面试这样问：Nacos、Apollo、Config配置中心如何选型？这10个维度告诉你！ 阿里面试败北：5种微服务注册中心如何选型？这几个维度告诉你！ 阿里限流神器Sentinel夺命连环 17 问？">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/gateway/25.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/gateway/17.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/gateway/18.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/gateway/19.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/gateway/20.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/gateway/21.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/gateway/22.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg">
+<meta property="og:image" content="http://img.java-family.cn/gateway/25.png">
+<meta property="og:image" content="http://img.java-family.cn/gateway/17.png">
+<meta property="og:image" content="http://img.java-family.cn/gateway/18.png">
+<meta property="og:image" content="http://img.java-family.cn/gateway/19.png">
+<meta property="og:image" content="http://img.java-family.cn/gateway/20.png">
+<meta property="og:image" content="http://img.java-family.cn/gateway/21.png">
+<meta property="og:image" content="http://img.java-family.cn/gateway/22.png">
+<meta property="og:image" content="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg">
 <meta property="article:published_time" content="2021-11-03T12:26:23.000Z">
-<meta property="article:modified_time" content="2022-05-06T14:21:26.026Z">
+<meta property="article:modified_time" content="2023-04-20T08:32:08.941Z">
 <meta property="article:author" content="不才陈某">
 <meta property="article:tag" content="Spring Cloud">
 <meta property="article:tag" content="微服务">
 <meta property="article:tag" content="网关">
 <meta property="article:tag" content="Spring Cloud Gateway">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://www.java-family.cn/BlogImage/gateway/25.png">
+<meta name="twitter:image" content="http://img.java-family.cn/gateway/25.png">
 
 <link rel="canonical" href="https://chenjiabing666.github.io/2021/11/03/SpringcloudGateway%E6%95%B4%E5%90%88sentinel%E9%99%90%E6%B5%81/">
 
@@ -234,7 +234,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-05-06 22:21:26" itemprop="dateModified" datetime="2022-05-06T22:21:26+08:00">2022-05-06</time>
+                <time title="修改时间：2023-04-20 16:32:08" itemprop="dateModified" datetime="2023-04-20T16:32:08+08:00">2023-04-20</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -291,7 +291,7 @@
 </ul>
 <p>前一篇文章介绍了<a href="(https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247499894&idx=1&sn=f1606e4c00fd15292269afe052f5bca2&chksm=fcf71fbbcb8096ad349e6da50b0b9141964c2084d0a38eba977fe8baa3fbe8af3b20c7591110&token=1887105114&lang=zh_CN#rd)">Spring Cloud Gateway</a>的一些基础知识点，今天陈某就来唠一唠网关层面如何做限流？</p>
 <p>文章目录如下：</p>
-<p><img src="https://www.java-family.cn/BlogImage/gateway/25.png"></p>
+<p><img src="http://img.java-family.cn/gateway/25.png"></p>
 <span id="more"></span>
 
 <h2 id="网关如何限流？"><a href="#网关如何限流？" class="headerlink" title="网关如何限流？"></a>网关如何限流？</h2><p>Spring Cloud Gateway本身自带的限流实现，过滤器是<code>RequestRateLimiterGatewayFilterFactory</code>，不过这种上不了台面的就不再介绍了，有兴趣的可以实现下。</p>
@@ -323,18 +323,18 @@
 <p>上述配置中设置了一个路由<code>gateway-provider</code>，只要请求路径满足<code>/gateway/provider/**</code>都会被路由到<code>gateway-provider</code>这个服务中。</p>
 <h3 id="限流配置"><a href="#限流配置" class="headerlink" title="限流配置"></a>限流配置</h3><p>经过上述两个步骤其实已经整合好了Sentinel，此时访问一下接口：<a target="_blank" rel="noopener" href="http://localhost:9026/gateway/provider/port">http://localhost:9026/gateway/provider/port</a></p>
 <p>然后在sentinel控制台可以看到已经被监控了，监控的路由是<code>gateway-provider</code>，如下图：</p>
-<p><img src="https://www.java-family.cn/BlogImage/gateway/17.png"></p>
+<p><img src="http://img.java-family.cn/gateway/17.png"></p>
 <p>此时我们可以为其新增一个route维度的限流，如下图：</p>
-<p><img src="https://www.java-family.cn/BlogImage/gateway/18.png"></p>
+<p><img src="http://img.java-family.cn/gateway/18.png"></p>
 <p>上图中对<code>gateway-provider</code>这个路由做出了限流，QPS阈值为1。</p>
 <p>此时快速访问：<a target="_blank" rel="noopener" href="http://localhost:9026/gateway/provider/port%EF%BC%8C%E7%9C%8B%E5%88%B0%E5%B7%B2%E7%BB%8F%E8%A2%AB%E9%99%90%E6%B5%81%E4%BA%86%EF%BC%8C%E5%A6%82%E4%B8%8B%E5%9B%BE%EF%BC%9A">http://localhost:9026/gateway/provider/port，看到已经被限流了，如下图：</a></p>
-<p><img src="https://www.java-family.cn/BlogImage/gateway/19.png"></p>
+<p><img src="http://img.java-family.cn/gateway/19.png"></p>
 <p>以上route维度的限流已经配置成功，小伙伴可以自己照着上述步骤尝试一下。</p>
 <p>API分组限流也很简单，首先需要定义一个分组，<strong>API管理-&gt; 新增API分组</strong>，如下图：</p>
-<p><img src="https://www.java-family.cn/BlogImage/gateway/20.png"></p>
+<p><img src="http://img.java-family.cn/gateway/20.png"></p>
 <p>匹配模式选择了精确匹配（还有前缀匹配，正则匹配），因此只有这个uri：<code>http://xxxx/gateway/provider/port</code>会被限流。</p>
 <p>第二步需要对这个分组添加流控规则，<strong>流控规则-&gt;新增网关流控</strong>，如下图：</p>
-<p><img src="https://www.java-family.cn/BlogImage/gateway/21.png"></p>
+<p><img src="http://img.java-family.cn/gateway/21.png"></p>
 <p>API名称那里选择对应的分组即可，新增之后，限流规则就生效了。</p>
 <p>陈某不再测试了，小伙伴自己动手测试一下吧……………</p>
 <blockquote>
@@ -360,7 +360,7 @@
 <p>两种方式介绍完了，根据业务需求自己选择适合的方式，当然陈某更喜欢第一种，理由：<strong>约定&gt;配置&gt;编码</strong>。</p>
 <h2 id="网关限流了，服务就安全了吗？"><a href="#网关限流了，服务就安全了吗？" class="headerlink" title="网关限流了，服务就安全了吗？"></a>网关限流了，服务就安全了吗？</h2><p>很多人认为只要网关层面做了限流，躲在身后的服务就可以高枕无忧了，你是不是也有这种想法？</p>
 <p>很显然这种想法是错误的，复杂的微服务架构一个独立服务不仅仅被一方调用，往往是多方调用，如下图：</p>
-<p><img src="https://www.java-family.cn/BlogImage/gateway/22.png"></p>
+<p><img src="http://img.java-family.cn/gateway/22.png"></p>
 <p>商品服务不仅仅被网关层调用，还被内部订单服务调用，这时候仅仅在网关层限流，那么商品服务还安全吗？</p>
 <p>一旦大量的请求订单服务，比如大促秒杀，商品服务不做限流会被瞬间击垮。</p>
 <p>因此需要根据公司业务场景对自己负责的服务也要进行限流兜底，最常见的方案：<strong>网关层集群限流+内部服务的单机限流兜底</strong>，这样才能保证不被流量冲垮。</p>
@@ -371,7 +371,7 @@
 <h2 id="最后说一句（求关注，别白嫖我）"><a href="#最后说一句（求关注，别白嫖我）" class="headerlink" title="最后说一句（求关注，别白嫖我）"></a>最后说一句（求关注，别白嫖我）</h2><p>陈某每一篇原创文章都是精心输出，尤其是《Spring Cloud 进阶》专栏的文章，知识点太多，要想讲的细，必须要花很多时间准备，从知识点到源码demo。</p>
 <p>如果这篇文章对你有所帮助，或者有所启发的话，帮忙<strong>点赞</strong>、<strong>在看</strong>、<strong>转发</strong>、<strong>收藏</strong>，你的支持就是我坚持下去的最大动力！</p>
 <p>关注公众号：【码猿技术专栏】，公众号内有超赞的粉丝福利，回复：加群，可以加入技术讨论群，和大家一起讨论技术，吹牛逼！</p>
-<p><img src="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg"></p>
+<p><img src="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg"></p>
 
     </div>
 

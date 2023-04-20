@@ -27,17 +27,17 @@
 <meta property="og:site_name" content="不才陈某技术博客">
 <meta property="og:description" content="大家好，我是不才陈某~  前言什么样的代码是好代码呢？好的代码应该命名规范、可读性强、扩展性强、健壮性……而不好的代码又有哪些典型特征呢？这25种代码坏味道大家要注意啦 1. Duplicated Code （重复代码）重复代码就是不同地点，有着相同的程序结构。一般是因为需求迭代比较快，开发小伙伴担心影响已有功能，就复制粘贴造成的。重复代码很难维护的，如果你要修改其中一段的代码逻辑，就需要修改多次">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/3.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/4.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/5.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/6.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/7.png">
+<meta property="og:image" content="http://img.java-family.cn/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/3.png">
+<meta property="og:image" content="http://img.java-family.cn/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/4.png">
+<meta property="og:image" content="http://img.java-family.cn/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/5.png">
+<meta property="og:image" content="http://img.java-family.cn/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/6.png">
+<meta property="og:image" content="http://img.java-family.cn/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/7.png">
 <meta property="article:published_time" content="2021-11-21T09:07:30.000Z">
-<meta property="article:modified_time" content="2022-05-06T14:21:26.153Z">
+<meta property="article:modified_time" content="2023-04-20T08:32:08.716Z">
 <meta property="article:author" content="不才陈某">
 <meta property="article:tag" content="代码优化">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://www.java-family.cn/BlogImage/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/3.png">
+<meta name="twitter:image" content="http://img.java-family.cn/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/3.png">
 
 <link rel="canonical" href="https://chenjiabing666.github.io/2021/11/21/25%E7%A7%8D%E4%BB%A3%E7%A0%81%E5%9D%8F%E5%91%B3%E9%81%93%E6%80%BB%E7%BB%93-%E4%BC%98%E5%8C%96%E7%A4%BA%E4%BE%8B/">
 
@@ -228,7 +228,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-05-06 22:21:26" itemprop="dateModified" datetime="2022-05-06T22:21:26+08:00">2022-05-06</time>
+                <time title="修改时间：2023-04-20 16:32:08" itemprop="dateModified" datetime="2023-04-20T16:32:08+08:00">2023-04-20</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -379,7 +379,7 @@
 
 <p>当然，多态只是优化的一个方案，一个方向。如果只是单一函数有些简单选择示例，并不建议动不动就使用动态，因为显得有点杀鸡使用牛刀了。</p>
 <h2 id="11-Parallel-Inheritance-Hierarchies（-平行继承体系）"><a href="#11-Parallel-Inheritance-Hierarchies（-平行继承体系）" class="headerlink" title="11.Parallel Inheritance Hierarchies（ 平行继承体系）"></a>11.Parallel Inheritance Hierarchies（ 平行继承体系）</h2><p>平行继承体系 其实算是<code>Shotgun Surgery</code>的特殊情况啦。当你为A类的一个子类Ax，也必须为另一个类B相应的增加一个子类Bx。</p>
-<p><img src="https://www.java-family.cn/BlogImage/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/3.png"></p>
+<p><img src="http://img.java-family.cn/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/3.png"></p>
 <p><strong>解决方法</strong>：遇到这种情况，就要消除两个继承体系之间的引用，有一个类是可以去掉继承关系的。</p>
 <h2 id="12-Lazy-Class-冗赘类"><a href="#12-Lazy-Class-冗赘类" class="headerlink" title="12. Lazy Class (冗赘类)"></a>12. Lazy Class (冗赘类)</h2><p>把这些不再重要的类里面的逻辑，合并到相关类，删掉旧的。一个比较常见的场景就是，假设系统已经有日期工具类<code>DateUtils</code>，有些小伙伴在开发中，需要用到日期转化等，不管三七二十一，又自己实现一个新的日期工具类。</p>
 <h2 id="13-Speculative-Generality-夸夸其谈未来性"><a href="#13-Speculative-Generality-夸夸其谈未来性" class="headerlink" title="13. Speculative Generality(夸夸其谈未来性)"></a>13. Speculative Generality(夸夸其谈未来性)</h2><p>尽量避免过度设计的代码。例如：</p>
@@ -401,11 +401,11 @@
 
 <p>其实，A可以直接通过C去获取C，而不需要通过B去获取。</p>
 <h2 id="17-Inappropriate-Intimacy（狎昵关系）"><a href="#17-Inappropriate-Intimacy（狎昵关系）" class="headerlink" title="17. Inappropriate Intimacy（狎昵关系）"></a>17. Inappropriate Intimacy（狎昵关系）</h2><p>如果两个类过于亲密，过分狎昵，你中有我，我中有你，两个类彼此使用对方的私有的东西，就是一种坏代码味道。我们称之为<code>Inappropriate Intimacy（狎昵关系）</code></p>
-<p><img src="https://www.java-family.cn/BlogImage/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/4.png"></p>
+<p><img src="http://img.java-family.cn/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/4.png"></p>
 <p>建议尽量把有关联的方法或属性抽离出来，放到公共类，以减少关联。</p>
-<p><img src="https://www.java-family.cn/BlogImage/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/5.png"></p>
+<p><img src="http://img.java-family.cn/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/5.png"></p>
 <h2 id="18-Alternative-Classes-with-Different-Interfaces-（异曲同工的类）"><a href="#18-Alternative-Classes-with-Different-Interfaces-（异曲同工的类）" class="headerlink" title="18. Alternative Classes with Different Interfaces （异曲同工的类）"></a>18. Alternative Classes with Different Interfaces （异曲同工的类）</h2><p>A类的接口a，和B类的接口b，做的的是相同一件事，或者类似的事情。我们就把A和B叫做异曲同工的类。</p>
-<p><img src="https://www.java-family.cn/BlogImage/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/6.png"></p>
+<p><img src="http://img.java-family.cn/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/6.png"></p>
 <p>可以通过<strong>重命名，移动函数，或抽象子类</strong>等方式优化</p>
 <h2 id="19-Incomplete-Library-Class-不完美的类库"><a href="#19-Incomplete-Library-Class-不完美的类库" class="headerlink" title="19. Incomplete Library Class (不完美的类库)"></a>19. Incomplete Library Class (不完美的类库)</h2><p>大多数对象只要够用就好，如果类库构造得不够好，我们不可能修改其中的类使它完成我们希望完成的工作。可以酱紫：<strong>包一层函数或包成新的类</strong>。</p>
 <h2 id="20-Data-Class-（纯数据类）"><a href="#20-Data-Class-（纯数据类）" class="headerlink" title="20. Data Class （纯数据类）"></a>20. Data Class （纯数据类）</h2><p>什么是Data Class? 它们拥有一些字段，以及用于访问(读写)这些字段的函数。这些类很简单，仅有公共成员变量，或简单操作的函数。</p>
@@ -420,7 +420,7 @@
 <li>需要为这个子类新建一个兄弟类-&gt;<code>Push Down Method</code>和<code>Push Down Field</code>把所有用不到的函数下推给兄弟类，这样一来，超类就只持有所有子类共享的东西。所有超类都应该是抽象的。</li>
 <li>如果子类复用了超类的实现，又不愿意支持超类的接口，可以不以为然。但是不能胡乱修改继承体系-&gt;<code>Replace Inheritance with Delegation</code>(用委派替换继承).</li>
 </ul>
-<p><img src="https://www.java-family.cn/BlogImage/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/7.png"></p>
+<p><img src="http://img.java-family.cn/Spring%20Cloud%20%E8%BF%9B%E9%98%B6PDF/7.png"></p>
 <h2 id="22-Comments-过多的注释"><a href="#22-Comments-过多的注释" class="headerlink" title="22. Comments (过多的注释)"></a>22. Comments (过多的注释)</h2><p>这个点不是说代码不建议写注释哦，而是，建议大家<strong>避免用注释解释代码，避免过多的注释</strong>。这些都是常见注释的坏味道：</p>
 <ul>
 <li>多余的解释</li>

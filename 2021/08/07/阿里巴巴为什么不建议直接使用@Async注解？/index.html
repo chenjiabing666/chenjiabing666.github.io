@@ -27,20 +27,20 @@
 <meta property="og:site_name" content="不才陈某技术博客">
 <meta property="og:description" content="对于异步方法调用，从Spring3开始提供了@Async注解，该注解可以被标在方法上，以便异步地调用该方法。调用者将在调用时立即返回，方法的实际执行将提交给Spring TaskExecutor的任务中，由指定的线程池中的线程执行。 在项目应用中，@Async调用线程池，推荐使用自定义线程池的模式。自定义线程池常用方案：重新实现接口AsyncConfigurer。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/10.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/1.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/2.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/3.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/4.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/5.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/6.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/7.png">
+<meta property="og:image" content="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/10.png">
+<meta property="og:image" content="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/1.png">
+<meta property="og:image" content="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/2.png">
+<meta property="og:image" content="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/3.png">
+<meta property="og:image" content="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/4.png">
+<meta property="og:image" content="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/5.png">
+<meta property="og:image" content="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/6.png">
+<meta property="og:image" content="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/7.png">
 <meta property="article:published_time" content="2021-08-07T12:46:31.000Z">
-<meta property="article:modified_time" content="2022-05-06T14:21:25.628Z">
+<meta property="article:modified_time" content="2023-04-20T08:32:09.315Z">
 <meta property="article:author" content="不才陈某">
 <meta property="article:tag" content="Spring Boot">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/10.png">
+<meta name="twitter:image" content="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/10.png">
 
 <link rel="canonical" href="https://chenjiabing666.github.io/2021/08/07/%E9%98%BF%E9%87%8C%E5%B7%B4%E5%B7%B4%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E7%9B%B4%E6%8E%A5%E4%BD%BF%E7%94%A8@Async%E6%B3%A8%E8%A7%A3%EF%BC%9F/">
 
@@ -231,7 +231,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-05-06 22:21:25" itemprop="dateModified" datetime="2022-05-06T22:21:25+08:00">2022-05-06</time>
+                <time title="修改时间：2023-04-20 16:32:09" itemprop="dateModified" datetime="2023-04-20T16:32:09+08:00">2023-04-20</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -277,7 +277,7 @@
       
         <p>对于异步方法调用，从Spring3开始提供了@Async注解，该注解可以被标在方法上，以便异步地调用该方法。调用者将在调用时立即返回，方法的实际执行将提交给Spring TaskExecutor的任务中，由指定的线程池中的线程执行。</p>
 <p>在项目应用中，@Async调用线程池，推荐使用自定义线程池的模式。自定义线程池常用方案：重新实现接口AsyncConfigurer。</p>
-<p><img src="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/10.png"></p>
+<p><img src="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/10.png"></p>
 <span id="more"></span>
 
 <h2 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h2><h3 id="同步"><a href="#同步" class="headerlink" title="同步"></a>同步</h3><p>同步就是整个处理过程顺序执行，当各个过程都执行完毕，并返回结果。</p>
@@ -297,11 +297,11 @@
 <li>带参数的异步调用，异步方法可以传入参数</li>
 <li>存在返回值，常调用返回Future</li>
 </ul>
-<h2 id="Spring中启用-Async"><a href="#Spring中启用-Async" class="headerlink" title="Spring中启用@Async"></a>Spring中启用@Async</h2><p><img src="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/1.png"></p>
+<h2 id="Spring中启用-Async"><a href="#Spring中启用-Async" class="headerlink" title="Spring中启用@Async"></a>Spring中启用@Async</h2><p><img src="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/1.png"></p>
 <h2 id="Async应用默认线程池"><a href="#Async应用默认线程池" class="headerlink" title="@Async应用默认线程池"></a>@Async应用默认线程池</h2><p>Spring应用默认的线程池，指在@Async注解在使用时，不指定线程池的名称。查看源码，@Async的默认线程池为SimpleAsyncTaskExecutor。</p>
 <h3 id="无返回值调用"><a href="#无返回值调用" class="headerlink" title="无返回值调用"></a>无返回值调用</h3><p>基于@Async无返回值调用，直接在使用类，使用方法（建议在使用方法）上，加上注解。若需要抛出异常，需手动new一个异常抛出。</p>
-<p><img src="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/2.png"></p>
-<h3 id="有返回值Future调用"><a href="#有返回值Future调用" class="headerlink" title="有返回值Future调用"></a>有返回值Future调用</h3><p><img src="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/3.png"></p>
+<p><img src="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/2.png"></p>
+<h3 id="有返回值Future调用"><a href="#有返回值Future调用" class="headerlink" title="有返回值Future调用"></a>有返回值Future调用</h3><p><img src="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/3.png"></p>
 <h3 id="有返回值CompletableFuture调用"><a href="#有返回值CompletableFuture调用" class="headerlink" title="有返回值CompletableFuture调用"></a>有返回值CompletableFuture调用</h3><p>CompletableFuture 并不使用@Async注解，可达到调用系统线程池处理业务的功能。</p>
 <p>JDK5新增了Future接口，用于描述一个异步计算的结果。虽然 Future 以及相关使用方法提供了异步执行任务的能力，但是对于结果的获取却是很不方便，只能通过阻塞或者轮询的方式得到任务的结果。阻塞的方式显然和我们的异步编程的初衷相违背，轮询的方式又会耗费无谓的 CPU 资源，而且也不能及时地得到计算结果。另外关注公众号码猿技术专栏，回复关键词“面试宝典”，送你一份阿里巴巴内部面试宝典！</p>
 <ul>
@@ -318,7 +318,7 @@
 <li>它可能代表一个明确完成的Future，也有可能代表一个完成阶段（ CompletionStage ），它支持在计算完成以后触发一些函数或执行某些动作。</li>
 <li>它实现了Future和CompletionStage接口</li>
 </ul>
-<p><img src="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/4.png"></p>
+<p><img src="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/4.png"></p>
 <h3 id="默认线程池的弊端"><a href="#默认线程池的弊端" class="headerlink" title="默认线程池的弊端"></a>默认线程池的弊端</h3><p>在线程池应用中，参考阿里巴巴java开发规范：线程池不允许使用Executors去创建，不允许使用系统默认的线程池，推荐通过ThreadPoolExecutor的方式，这样的处理方式让开发的工程师更加明确线程池的运行规则，规避资源耗尽的风险。</p>
 <p>Executors各个方法的弊端：</p>
 <ul>
@@ -333,8 +333,8 @@
 <li>配置由自定义的TaskExecutor替代内置的任务执行器</li>
 </ul>
 <p>通过查看Spring源码关于@Async的默认调用规则，会优先查询源码中实现AsyncConfigurer这个接口的类，实现这个接口的类为AsyncConfigurerSupport。但默认配置的线程池和异步处理方法均为空，所以，无论是继承或者重新实现接口，都需指定一个线程池。且重新实现 public Executor getAsyncExecutor()方法。</p>
-<h3 id="实现接口AsyncConfigurer"><a href="#实现接口AsyncConfigurer" class="headerlink" title="实现接口AsyncConfigurer"></a>实现接口AsyncConfigurer</h3><p><img src="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/5.png"></p>
-<h3 id="继承AsyncConfigurerSupport"><a href="#继承AsyncConfigurerSupport" class="headerlink" title="继承AsyncConfigurerSupport"></a>继承AsyncConfigurerSupport</h3><p><img src="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/6.png"></p>
+<h3 id="实现接口AsyncConfigurer"><a href="#实现接口AsyncConfigurer" class="headerlink" title="实现接口AsyncConfigurer"></a>实现接口AsyncConfigurer</h3><p><img src="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/5.png"></p>
+<h3 id="继承AsyncConfigurerSupport"><a href="#继承AsyncConfigurerSupport" class="headerlink" title="继承AsyncConfigurerSupport"></a>继承AsyncConfigurerSupport</h3><p><img src="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/6.png"></p>
 <h3 id="配置自定义的TaskExecutor"><a href="#配置自定义的TaskExecutor" class="headerlink" title="配置自定义的TaskExecutor"></a>配置自定义的TaskExecutor</h3><p>由于AsyncConfigurer的默认线程池在源码中为空，Spring通过beanFactory.getBean(TaskExecutor.class)先查看是否有线程池，未配置时，通过beanFactory.getBean(DEFAULT_TASK_EXECUTOR_BEAN_NAME, Executor.class)，又查询是否存在默认名称为TaskExecutor的线程池。所以可在项目中，定义名称为TaskExecutor的bean生成一个默认线程池。也可不指定线程池的名称，申明一个线程池，本身底层是基于TaskExecutor.class便可。</p>
 <p>比如：</p>
 <figure class="highlight xl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">E<span class="function"><span class="title">xecutor</span>.class:ThreadPoolExecutorAdapter-&gt;</span>T<span class="function"><span class="title">hreadPoolExecutor</span>-&gt;</span>A<span class="function"><span class="title">bstractExecutorService</span>-&gt;</span>E<span class="function"><span class="title">xecutorService</span>-&gt;</span>Executor</span><br></pre></td></tr></table></figure>
@@ -343,7 +343,7 @@
 <figure class="highlight xl"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">T<span class="function"><span class="title">askExecutor</span>.class:ThreadPoolTaskExecutor-&gt;</span>S<span class="function"><span class="title">chedulingTaskExecutor</span>-&gt;</span>A<span class="function"><span class="title">syncTaskExecutor</span>-&gt;</span>TaskExecutor</span><br></pre></td></tr></table></figure>
 
 <p>这样的模式，最终底层为TaskExecutor.class，在替换默认的线程池时，可不指定线程池名称。</p>
-<p><img src="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/7.png" alt="img"></p>
+<p><img src="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/7.png" alt="img"></p>
 
     </div>
 

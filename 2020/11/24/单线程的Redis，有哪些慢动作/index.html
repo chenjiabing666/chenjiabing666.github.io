@@ -27,16 +27,16 @@
 <meta property="og:site_name" content="不才陈某技术博客">
 <meta property="og:description" content="前言现在一提到Redis的第一反应就是快、单线程，但是Redis真的快吗？真的是单线程吗？ 你有没有深入了解一下Redis，看看它的底层有哪些”慢动作”呢？">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/Redis%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E6%93%8D%E4%BD%9C/1.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/Redis%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E6%93%8D%E4%BD%9C/2.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/Redis%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E6%93%8D%E4%BD%9C/3.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/myjszl_log.png">
+<meta property="og:image" content="http://img.java-family.cn/Redis%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E6%93%8D%E4%BD%9C/1.png">
+<meta property="og:image" content="http://img.java-family.cn/Redis%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E6%93%8D%E4%BD%9C/2.png">
+<meta property="og:image" content="http://img.java-family.cn/Redis%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E6%93%8D%E4%BD%9C/3.png">
+<meta property="og:image" content="http://img.java-family.cn/myjszl_log.png">
 <meta property="article:published_time" content="2020-11-24T06:04:34.000Z">
-<meta property="article:modified_time" content="2022-05-06T14:21:25.851Z">
+<meta property="article:modified_time" content="2023-04-20T08:32:09.481Z">
 <meta property="article:author" content="不才陈某">
 <meta property="article:tag" content="Redis">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://www.java-family.cn/BlogImage/Redis%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E6%93%8D%E4%BD%9C/1.png">
+<meta name="twitter:image" content="http://img.java-family.cn/Redis%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E6%93%8D%E4%BD%9C/1.png">
 
 <link rel="canonical" href="https://chenjiabing666.github.io/2020/11/24/%E5%8D%95%E7%BA%BF%E7%A8%8B%E7%9A%84Redis%EF%BC%8C%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E5%8A%A8%E4%BD%9C/">
 
@@ -227,7 +227,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-05-06 22:21:25" itemprop="dateModified" datetime="2022-05-06T22:21:25+08:00">2022-05-06</time>
+                <time title="修改时间：2023-04-20 16:32:09" itemprop="dateModified" datetime="2023-04-20T16:32:09+08:00">2023-04-20</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -278,7 +278,7 @@
 <h2 id="为什么-Redis-这么火？"><a href="#为什么-Redis-这么火？" class="headerlink" title="为什么 Redis 这么火？"></a>为什么 Redis 这么火？</h2><p><code>Redis</code>作为一个内存数据库，它接收一个<code>key</code>到读取数据几乎是<code>微妙级别</code>，一个字<code>快</code>诠释了它火的原因。另一方面就归功于它的数据结构了，你知道<code>Redis</code>有哪些数据结构吗？</p>
 <p>很多人可能会说不就是<code>String</code>（字符串）、<code>List</code>（列表）、<code>Hash</code>（哈希）、<code>Set</code>（集合）和 <code>Sorted Set</code>（有序集合）这五种吗？我想大家可能有一种误区，我说的是底层数据结构，而你说仅仅是数据的保存形式而已。</p>
 <p>那么<code>Redis</code>底层有哪几种数据结构呢？和几种数据保存形式的关系又是什么呢？别着急，先通过一张图了解下，如下图：</p>
-<p><img src="https://www.java-family.cn/BlogImage/Redis%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E6%93%8D%E4%BD%9C/1.png"></p>
+<p><img src="http://img.java-family.cn/Redis%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E6%93%8D%E4%BD%9C/1.png"></p>
 <p>通过上图可以知道只有<code>String</code>对应的是一种数据结构，其他的数据类型对应的都是两种数据结构，我们通常将这四种数据类型称为集合类型，它们的特点是<strong>一个键对应了一个集合的数据</strong>。</p>
 <p>既然数据本身是通过数据结构保存的，那么键和值是什么保存形式呢？</p>
 <h2 id="键和值的保存形式？"><a href="#键和值的保存形式？" class="headerlink" title="键和值的保存形式？"></a>键和值的保存形式？</h2><p>为了实现键和值的快速访问，<code>Redis</code>使用的是<code>哈希表</code>来存放键，使用<code>哈希桶</code>存放值。</p>
@@ -290,7 +290,7 @@
 <p><code>哈希桶</code>中保存的并不是值，而是指向值的<code>指针</code>。</p>
 </blockquote>
 <p>这也解释了为什么<code>哈希桶</code>能够保存集合类型的数据了，也就是说不管是<code>String</code>还是集合类型，<code>哈希桶</code>保存的都是指向具体的值的<code>指针</code>，具体的结构如下图：</p>
-<p><img src="https://www.java-family.cn/BlogImage/Redis%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E6%93%8D%E4%BD%9C/2.png"></p>
+<p><img src="http://img.java-family.cn/Redis%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E6%93%8D%E4%BD%9C/2.png"></p>
 <p>从上图可以看出，每个<code>entry</code>中保存的是<code>*key</code>和<code>*value</code>分别指向了键和值，这样即使保存的值是集合类型也能通过指针 <code>*value</code>找到。</p>
 <blockquote>
 <p>键是保存在哈希表中，哈希表的时间复杂度是<code>O(1)</code>，也就是无论多少个键，总能通过一次计算就找到对应的键。</p>
@@ -305,7 +305,7 @@
 <p><code>Redis</code>底层使用了<code>链式哈希</code>的方式解决了哈希冲突，即是同一个哈希桶中的多个元素用一个<code>链表</code>保存，他们之间用指针<code>*next</code>相连。</p>
 </blockquote>
 <p>此时的哈希表和链式哈希的结构如下图：</p>
-<p><img src="https://www.java-family.cn/BlogImage/Redis%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E6%93%8D%E4%BD%9C/3.png"></p>
+<p><img src="http://img.java-family.cn/Redis%E6%9C%89%E5%93%AA%E4%BA%9B%E6%85%A2%E6%93%8D%E4%BD%9C/3.png"></p>
 <p>从上图可以看到，<code>entry1</code>、<code>entry3</code>、<code>entry3</code>都保存在哈希桶 1 中，导致了哈希冲突。但是此时的<code>entry1</code>中的<code>*next</code>指针指向了<code>entry2</code>，同样<code>entry2</code>中的<code>*next</code>指针指向了<code>entry3</code>。这样下来即使哈希桶中有很多个元素，也能通过这样的方式连接起来，称作<code>哈希冲突链</code>。</p>
 <blockquote>
 <p>这里存在一个问题：链表的查询效率很低，如果哈希桶中元素很多，查找起来会很<strong>慢</strong>，显然这个对于<code>Redis</code>来说是不能接受的。</p>
@@ -376,7 +376,7 @@
 <p>不过<code>Redis</code>提供了<code>Scan</code>系列操作，比如<code>HSCAN</code>、<code>SSCSCAN</code>和<code>ZSCAN</code>,这类操作实现了渐进式遍历，每次只返回有限数量的数据。这样一来，相比于<code>HGETALL</code>、<code>SMEMBERS</code> 这类操作来说，就避免了一次性返回所有元素而导致的 <code>Redis</code> 阻塞。</p>
 <h4 id="3-统计操作通常比较高效"><a href="#3-统计操作通常比较高效" class="headerlink" title="3. 统计操作通常比较高效"></a>3. 统计操作通常比较高效</h4><p>统计操作是指对集合中的所有元素个数的记录，例如<code>LLEN</code> 和<code>SCARD</code>。这类操作复杂度只有<code>O(1)</code>，这是因为当集合类型采用压缩列表、双向链表、整数数组这些数据结构时，这些结构中专门记录了元素的个数统计，因此可以高效地完成相关操作。</p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p><code>Redis</code>之所以这么快，不仅仅因为全部操作都在内存中，还有底层数据结构的支持，但是数据结构虽好，每种数据结构也有各种<strong>慢</strong>的情况，<code>Redis</code>结合各种数据结构的利弊，完善了整个运行机制。</p>
-<p><img src="https://www.java-family.cn/BlogImage/myjszl_log.png"></p>
+<p><img src="http://img.java-family.cn/myjszl_log.png"></p>
 
     </div>
 

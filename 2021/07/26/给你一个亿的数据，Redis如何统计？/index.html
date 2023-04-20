@@ -27,21 +27,21 @@
 <meta property="og:site_name" content="不才陈某技术博客">
 <meta property="og:description" content="前言不知你大规模的用过Redis吗？还是仅仅作为缓存的工具了？在Redis中使用最多的就是集合了，举个例子，如下场景：  签到系统中，一天对应一系列的用户签到记录。 电商系统中，一个商品对应一系列的评论。 交友系统中，某个用户的一系列的好友。">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/14.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/1.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/2.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/3.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/4.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/5.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/6.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/%E4%B8%93%E6%A0%8F%E6%96%87%E7%AB%A0/3.png">
-<meta property="og:image" content="https://www.java-family.cn/BlogImage/myjszl_log.png">
+<meta property="og:image" content="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/14.png">
+<meta property="og:image" content="http://img.java-family.cn/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/1.png">
+<meta property="og:image" content="http://img.java-family.cn/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/2.png">
+<meta property="og:image" content="http://img.java-family.cn/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/3.png">
+<meta property="og:image" content="http://img.java-family.cn/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/4.png">
+<meta property="og:image" content="http://img.java-family.cn/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/5.png">
+<meta property="og:image" content="http://img.java-family.cn/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/6.png">
+<meta property="og:image" content="http://img.java-family.cn/%E4%B8%93%E6%A0%8F%E6%96%87%E7%AB%A0/3.png">
+<meta property="og:image" content="http://img.java-family.cn/myjszl_log.png">
 <meta property="article:published_time" content="2021-07-26T11:10:20.530Z">
-<meta property="article:modified_time" content="2022-05-06T14:21:26.002Z">
+<meta property="article:modified_time" content="2023-04-20T08:32:08.769Z">
 <meta property="article:author" content="不才陈某">
 <meta property="article:tag" content="Redis">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/14.png">
+<meta name="twitter:image" content="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/14.png">
 
 <link rel="canonical" href="https://chenjiabing666.github.io/2021/07/26/%E7%BB%99%E4%BD%A0%E4%B8%80%E4%B8%AA%E4%BA%BF%E7%9A%84%E6%95%B0%E6%8D%AE%EF%BC%8CRedis%E5%A6%82%E4%BD%95%E7%BB%9F%E8%AE%A1%EF%BC%9F/">
 
@@ -232,7 +232,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-05-06 22:21:26" itemprop="dateModified" datetime="2022-05-06T22:21:26+08:00">2022-05-06</time>
+                <time title="修改时间：2023-04-20 16:32:08" itemprop="dateModified" datetime="2023-04-20T16:32:08+08:00">2023-04-20</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -282,7 +282,7 @@
 <li>电商系统中，一个商品对应一系列的评论。</li>
 <li>交友系统中，某个用户的一系列的好友。</li>
 </ol>
-<p><img src="https://www.java-family.cn/BlogImage/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/14.png"></p>
+<p><img src="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/14.png"></p>
 <span id="more"></span>
 
 <p>Redis中集合的特点无非是一个<code>Key</code>对应一系列的数据， 但是数据的作用往往是为了统计的，比如：</p>
@@ -297,13 +297,13 @@
 <p><strong>在你需要对多个集合做聚合统计的时候，Set集合是个不错的选择，除了其中无重复的数据外，Redis还提供了对应的API</strong></p>
 <h3 id="交集"><a href="#交集" class="headerlink" title="交集"></a>交集</h3><p>在上述的例子中交友系统中统计双方的共同好友正是聚合统计中的<code>交集</code>。</p>
 <p>在<code>Redis</code>中可以<code>userid</code>作为<code>key</code>，好友的<code>userid</code>作为<code>value</code>，如下图：</p>
-<p><img src="https://www.java-family.cn/BlogImage/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/1.png"></p>
+<p><img src="http://img.java-family.cn/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/1.png"></p>
 <p>统计两个用户的共同好友只需要两个<code>Set</code>集合的交集，命令如下；</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SINTERSTORE userid:new userid:20002 userid:20003</span><br></pre></td></tr></table></figure>
 <p>上述命令运行完成后，<code>userid:new</code>这个key中存储的将是<code>userid:20002</code>、<code>userid:20003</code>两个集合的交集。</p>
 <h3 id="差集"><a href="#差集" class="headerlink" title="差集"></a>差集</h3><p>举个例子：假设交友系统中需要统计每日新增的好友，此时就需要对临近两天的好友集合取差集了，比如<code>2020/11/1</code>日的好友是<code>set1</code>，<code>2020/11/2</code>日的好友是<code>set2</code>，此时只需要对<code>set1</code>和<code>set2</code>做差集。</p>
 <p>此时的结构应该如何设计呢？如下图：</p>
-<p><img src="https://www.java-family.cn/BlogImage/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/2.png"></p>
+<p><img src="http://img.java-family.cn/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/2.png"></p>
 <p><code>userid:20201101</code>这个<code>key</code>记录了<code>userid</code>用户的<code>2020/11/1</code>日的好友集合。</p>
 <p>差集很简单，只需要执行<code>SDIFFSTORE</code>命令，如下：</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SDIFFSTORE  user:new  userid:20201102 userid:20201101  </span><br></pre></td></tr></table></figure>
@@ -346,11 +346,11 @@
 <p><strong>那么问题来了，需要统计你这个签到系统中连续20天的签到打卡的用户的总数，如何处理呢？假设用户一个亿。</strong></p>
 <p>比如需要统计<code>2020/11/01</code>到<code>2020/11/20</code>天中连续打卡的人数，如何统计呢？</p>
 <p><code>Bitmap</code>中还支持同时对多个BitMap按位做<code>与</code>、<code>或</code>、<code>异或</code>操作，命令如下图：</p>
-<p><img src="https://www.java-family.cn/BlogImage/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/3.png"></p>
+<p><img src="http://img.java-family.cn/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/3.png"></p>
 <p>思路来了，我们可以将每天的日期作为一个<code>key</code>，对应的<code>BitMap</code>存储一亿个用户当天的打卡情况。如下图：</p>
-<p><img src="https://www.java-family.cn/BlogImage/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/4.png"></p>
+<p><img src="http://img.java-family.cn/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/4.png"></p>
 <p>此时我们只需要对<code>2020/11/1</code>到<code>2020/11/20</code>号的<code>Bitmap</code>做按位<code>与</code>操作，最终得到的一个<code>Bitmap</code>中每个bit位置对应的值则代表连续20天打卡的情况，只有连续20天全部打卡，所在的bit位的值才为1。如下图：</p>
-<p><img src="https://www.java-family.cn/BlogImage/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/5.png"></p>
+<p><img src="http://img.java-family.cn/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/5.png"></p>
 <p>最终可以使用<code>BITCOUNT</code>命令进行统计。</p>
 <p>可以尝试计算下内存开销，每天使用 1 个 1 亿位的 Bitmap，大约占 <code>12MB</code> 的内存（<code>10^8/8/1024/1024</code>），20 天的 Bitmap 的内存开销约为 <code>240MB</code>，内存压力不算太大。不过，在实际应用时，最好对 <code>Bitmap</code> 设置过期时间，让 Redis 自动删除不再需要的签到记录，以节省内存开销。</p>
 <p><strong>如果涉及到二值状态，比如用户是否存在，签到打卡，商品是否存在等情况可以使用Bitmap，可以有效的节省内存空间。</strong></p>
@@ -367,15 +367,15 @@
 
 
 <h2 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h2><p>本文介绍了统计的几种类型以及应该用什么集合存储，为了方便理解，作者将支持情况和优缺点汇总了一张表格，如下图：</p>
-<p><img src="https://www.java-family.cn/BlogImage/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/6.png"></p>
+<p><img src="http://img.java-family.cn/Redis%E9%9B%86%E5%90%88%E7%BB%9F%E8%AE%A1/6.png"></p>
 <p><code>Set</code>和<code>Sorted Set</code>支持交集、并集的聚合运算，但是<code>Sorted Set</code>不支差集运算。</p>
 <p><code>Bitmap</code>也能对多个Bitmap做与、异或、或的聚合运算。</p>
 <p><code>List</code>和<code>SortedSet</code>都支持排序统计，但是List是根据元素先后插入顺序排序，Sorted Set支持权重，相对于List排序来说更加灵活。</p>
 <p>对于二值状态统计，判断某个元素是否存在等场景，建议使用<code>Bitmap</code>，节省的内存空间。</p>
 <p>对于基数统计，在大数据量、不要求精准的情况建议使用<code>HyperLogLog</code>，节省内存空间；对于精准的基数统计，最好还是使用<code>Set</code>集合。</p>
 <p>另外，作者已经完成了两个专栏的文章<strong>Mybatis进阶</strong>、<strong>Spring Boot 进阶</strong> ，已经将专栏文章整理成书，有需要的公众号回复关键词<code>Mybatis 进阶</code>、<code>Spring Boot 进阶</code>免费获取。</p>
-<p><img src="https://www.java-family.cn/BlogImage/%E4%B8%93%E6%A0%8F%E6%96%87%E7%AB%A0/3.png"></p>
-<p><img src="https://www.java-family.cn/BlogImage/myjszl_log.png"></p>
+<p><img src="http://img.java-family.cn/%E4%B8%93%E6%A0%8F%E6%96%87%E7%AB%A0/3.png"></p>
+<p><img src="http://img.java-family.cn/myjszl_log.png"></p>
 
     </div>
 
