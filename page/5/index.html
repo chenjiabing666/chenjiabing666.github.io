@@ -188,6 +188,601 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/09/07/%E5%91%8A%E5%88%ABswagger-ui-%E6%88%91%E9%80%89%E6%8B%A9%E4%BA%86%E8%BF%99%E6%AC%BE%E7%A5%9E%E5%99%A8%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/09/07/%E5%91%8A%E5%88%ABswagger-ui-%E6%88%91%E9%80%89%E6%8B%A9%E4%BA%86%E8%BF%99%E6%AC%BE%E7%A5%9E%E5%99%A8%EF%BC%81/" class="post-title-link" itemprop="url">告别swagger-ui,我选择了knife4j这款神器！</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-09-07 13:42:24" itemprop="dateCreated datePublished" datetime="2021-09-07T13:42:24+08:00">2021-09-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-04-20 16:32:09" itemprop="dateModified" datetime="2023-04-20T16:32:09+08:00">2023-04-20</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">开发工具</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/09/07/%E5%91%8A%E5%88%ABswagger-ui-%E6%88%91%E9%80%89%E6%8B%A9%E4%BA%86%E8%BF%99%E6%AC%BE%E7%A5%9E%E5%99%A8%EF%BC%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/09/07/%E5%91%8A%E5%88%ABswagger-ui-%E6%88%91%E9%80%89%E6%8B%A9%E4%BA%86%E8%BF%99%E6%AC%BE%E7%A5%9E%E5%99%A8%EF%BC%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="一、介绍"><a href="#一、介绍" class="headerlink" title="一、介绍"></a>一、介绍</h2><p>knife4j是为Java MVC框架集成Swagger生成Api文档的增强解决方案（在非Java项目中也提供了前端UI的增强解决方案），前身是swagger-bootstrap-ui,取名knife4j是希望她能像一把匕首一样小巧,轻量,并且功能强悍!</p>
+<p><img src="http://img.java-family.cn/%E5%91%8A%E5%88%AB%20swagger-ui%20%EF%BC%8C%E6%88%91%E9%80%89%E6%8B%A9%E4%BA%86%E8%BF%99%E6%AC%BE%E7%A5%9E%E5%99%A8%EF%BC%81/1.png"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/09/07/%E5%91%8A%E5%88%ABswagger-ui-%E6%88%91%E9%80%89%E6%8B%A9%E4%BA%86%E8%BF%99%E6%AC%BE%E7%A5%9E%E5%99%A8%EF%BC%81/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/09/03/SpringBoot%E6%97%A5%E5%BF%97%E3%80%81%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E3%80%81%E6%8E%A5%E5%8F%A3%E6%95%B0%E6%8D%AE%E5%A6%82%E4%BD%95%E8%84%B1%E6%95%8F%EF%BC%9F%E8%80%81%E9%B8%9F%E4%BB%AC%E9%83%BD%E6%98%AF%E8%BF%99%E6%A0%B7%E7%8E%A9%E7%9A%84%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/09/03/SpringBoot%E6%97%A5%E5%BF%97%E3%80%81%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E3%80%81%E6%8E%A5%E5%8F%A3%E6%95%B0%E6%8D%AE%E5%A6%82%E4%BD%95%E8%84%B1%E6%95%8F%EF%BC%9F%E8%80%81%E9%B8%9F%E4%BB%AC%E9%83%BD%E6%98%AF%E8%BF%99%E6%A0%B7%E7%8E%A9%E7%9A%84%EF%BC%81/" class="post-title-link" itemprop="url">Springboot日志、配置文件、接口数据如何脱敏？老鸟们都是这样玩的！</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-09-03 08:53:25" itemprop="dateCreated datePublished" datetime="2021-09-03T08:53:25+08:00">2021-09-03</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-04-20 16:32:09" itemprop="dateModified" datetime="2023-04-20T16:32:09+08:00">2023-04-20</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/09/03/SpringBoot%E6%97%A5%E5%BF%97%E3%80%81%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E3%80%81%E6%8E%A5%E5%8F%A3%E6%95%B0%E6%8D%AE%E5%A6%82%E4%BD%95%E8%84%B1%E6%95%8F%EF%BC%9F%E8%80%81%E9%B8%9F%E4%BB%AC%E9%83%BD%E6%98%AF%E8%BF%99%E6%A0%B7%E7%8E%A9%E7%9A%84%EF%BC%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/09/03/SpringBoot%E6%97%A5%E5%BF%97%E3%80%81%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E3%80%81%E6%8E%A5%E5%8F%A3%E6%95%B0%E6%8D%AE%E5%A6%82%E4%BD%95%E8%84%B1%E6%95%8F%EF%BC%9F%E8%80%81%E9%B8%9F%E4%BB%AC%E9%83%BD%E6%98%AF%E8%BF%99%E6%A0%B7%E7%8E%A9%E7%9A%84%EF%BC%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="一、前言"><a href="#一、前言" class="headerlink" title="一、前言"></a>一、前言</h2><p>核心隐私数据无论对于企业还是用户来说尤其重要，因此要想办法杜绝各种隐私数据的泄漏。下面陈某带大家从以下三个方面讲解一下隐私数据如何脱敏，也是日常开发中需要注意的：</p>
+<ol>
+<li>配置文件数据脱敏</li>
+<li>接口返回数据脱敏</li>
+<li>日志文件数据脱敏</li>
+</ol>
+<p>文章目录如下：</p>
+<p><img src="http://img.java-family.cn/Spring%20Boot%20%E6%95%B0%E6%8D%AE%E8%84%B1%E6%95%8F/6.png"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/09/03/SpringBoot%E6%97%A5%E5%BF%97%E3%80%81%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E3%80%81%E6%8E%A5%E5%8F%A3%E6%95%B0%E6%8D%AE%E5%A6%82%E4%BD%95%E8%84%B1%E6%95%8F%EF%BC%9F%E8%80%81%E9%B8%9F%E4%BB%AC%E9%83%BD%E6%98%AF%E8%BF%99%E6%A0%B7%E7%8E%A9%E7%9A%84%EF%BC%81/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/08/28/8%E7%A7%8D%E6%96%B9%E6%A1%88%E8%A7%A3%E5%86%B3%E9%87%8D%E5%A4%8D%E6%8F%90%E4%BA%A4%E9%97%AE%E9%A2%98%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/08/28/8%E7%A7%8D%E6%96%B9%E6%A1%88%E8%A7%A3%E5%86%B3%E9%87%8D%E5%A4%8D%E6%8F%90%E4%BA%A4%E9%97%AE%E9%A2%98%EF%BC%81/" class="post-title-link" itemprop="url">8种方案解决重复提交问题！</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-08-28 21:36:59" itemprop="dateCreated datePublished" datetime="2021-08-28T21:36:59+08:00">2021-08-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-04-20 16:32:09" itemprop="dateModified" datetime="2023-04-20T16:32:09+08:00">2023-04-20</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/08/28/8%E7%A7%8D%E6%96%B9%E6%A1%88%E8%A7%A3%E5%86%B3%E9%87%8D%E5%A4%8D%E6%8F%90%E4%BA%A4%E9%97%AE%E9%A2%98%EF%BC%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/08/28/8%E7%A7%8D%E6%96%B9%E6%A1%88%E8%A7%A3%E5%86%B3%E9%87%8D%E5%A4%8D%E6%8F%90%E4%BA%A4%E9%97%AE%E9%A2%98%EF%BC%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="1、什么是幂等"><a href="#1、什么是幂等" class="headerlink" title="1、什么是幂等"></a>1、什么是幂等</h2><p><img src="http://img.java-family.cn/8%E7%A7%8D%E6%96%B9%E6%A1%88%E8%A7%A3%E5%86%B3%E9%87%8D%E5%A4%8D%E6%8F%90%E4%BA%A4/1.png"></p>
+<p>在我们编程中常见幂等</p>
+<ul>
+<li><code>select</code>查询天然幂等</li>
+<li><code>delete</code>删除也是幂等,删除同一个多次效果一样</li>
+<li><code>update</code>直接更新某个值的,幂等</li>
+<li><code>update</code>更新累加操作的,非幂等</li>
+<li><code>insert</code>非幂等操作,每次新增一条</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/08/28/8%E7%A7%8D%E6%96%B9%E6%A1%88%E8%A7%A3%E5%86%B3%E9%87%8D%E5%A4%8D%E6%8F%90%E4%BA%A4%E9%97%AE%E9%A2%98%EF%BC%81/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/08/27/%E9%98%BF%E9%87%8C%E5%90%8E%E7%AB%AF%E5%B8%B8%E7%94%A8%E7%9A%8415%E6%AC%BE%E5%BC%80%E5%8F%91%E8%80%85%E5%B7%A5%E5%85%B7/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/08/27/%E9%98%BF%E9%87%8C%E5%90%8E%E7%AB%AF%E5%B8%B8%E7%94%A8%E7%9A%8415%E6%AC%BE%E5%BC%80%E5%8F%91%E8%80%85%E5%B7%A5%E5%85%B7/" class="post-title-link" itemprop="url">阿里后端常用的15款开发者工具</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-08-27 15:33:55" itemprop="dateCreated datePublished" datetime="2021-08-27T15:33:55+08:00">2021-08-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-04-20 16:32:08" itemprop="dateModified" datetime="2023-04-20T16:32:08+08:00">2023-04-20</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">开发工具</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/08/27/%E9%98%BF%E9%87%8C%E5%90%8E%E7%AB%AF%E5%B8%B8%E7%94%A8%E7%9A%8415%E6%AC%BE%E5%BC%80%E5%8F%91%E8%80%85%E5%B7%A5%E5%85%B7/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/08/27/%E9%98%BF%E9%87%8C%E5%90%8E%E7%AB%AF%E5%B8%B8%E7%94%A8%E7%9A%8415%E6%AC%BE%E5%BC%80%E5%8F%91%E8%80%85%E5%B7%A5%E5%85%B7/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>从人工到自动化，从重复到创新，技术演进的历程中，伴随着开发者工具类产品的发展。</p>
+<p>阿里巴巴将自身在各类业务场景下的技术积淀，通过开源、云上实现或工具等形式对外开放，本文将精选了一些阿里巴巴的开发者工具，希望能帮助开发者们提高开发效率、更优雅的写代码。</p>
+<p>由于开发者涉及的技术领域众多，笔者仅从自己熟悉的领域，以后端开发者的视角盘点平时可能用得到的工具。每个工具按照以下几点进行介绍：</p>
+<p>1、工具名称和简介 2、使用场景 3、使用教程 4、获取方式</p>
+<p><img src="http://img.java-family.cn/spring%20Boot%20%E5%88%9D%E5%A7%8B%E5%8C%96%E6%90%9E%E7%82%B9%E4%BA%8B%E6%83%85/11.jpg"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/08/27/%E9%98%BF%E9%87%8C%E5%90%8E%E7%AB%AF%E5%B8%B8%E7%94%A8%E7%9A%8415%E6%AC%BE%E5%BC%80%E5%8F%91%E8%80%85%E5%B7%A5%E5%85%B7/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/08/27/SpringBoot%E9%9B%86%E6%88%90prometheus%E7%9B%91%E6%8E%A7%EF%BC%8C%E4%B8%80%E7%9B%AE%E4%BA%86%E7%84%B6%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/08/27/SpringBoot%E9%9B%86%E6%88%90prometheus%E7%9B%91%E6%8E%A7%EF%BC%8C%E4%B8%80%E7%9B%AE%E4%BA%86%E7%84%B6%EF%BC%81/" class="post-title-link" itemprop="url">SpringBoot集成prometheus监控，一目了然！</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-08-27 10:29:17" itemprop="dateCreated datePublished" datetime="2021-08-27T10:29:17+08:00">2021-08-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-04-20 16:32:08" itemprop="dateModified" datetime="2023-04-20T16:32:08+08:00">2023-04-20</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/08/27/SpringBoot%E9%9B%86%E6%88%90prometheus%E7%9B%91%E6%8E%A7%EF%BC%8C%E4%B8%80%E7%9B%AE%E4%BA%86%E7%84%B6%EF%BC%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/08/27/SpringBoot%E9%9B%86%E6%88%90prometheus%E7%9B%91%E6%8E%A7%EF%BC%8C%E4%B8%80%E7%9B%AE%E4%BA%86%E7%84%B6%EF%BC%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在本文中， 我们来学习使用Spring Actuator，Micrometer，Prometheus和Grafana监控Spring Boot应用程序。你可能觉得这需要大量工作，但是其实很容易！</p>
+<h2 id="1、简介"><a href="#1、简介" class="headerlink" title="1、简介"></a>1、简介</h2><p>当某个应用程序在生产环境中运行时，监控其运行状况是必要的。通过实时了解应用程序的运行状况，你能在问题出现之前得到警告，也可以在客户注意到问题之前解决问题。在本文中，我们将创建一个Spring Boot应用程序，在Spring Actuator，Micrometer，Prometheus和Grafana的帮助下来监控系统。其中，Spring Actuator和Micrometer是Spring Boot App的一部分。</p>
+<p><img src="http://img.java-family.cn/Spring%20Boot%20%E6%80%A7%E8%83%BD%E7%9B%91%E6%8E%A7/1.png"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/08/27/SpringBoot%E9%9B%86%E6%88%90prometheus%E7%9B%91%E6%8E%A7%EF%BC%8C%E4%B8%80%E7%9B%AE%E4%BA%86%E7%84%B6%EF%BC%81/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/08/22/%E5%85%AD%E7%A7%8D%E6%96%B9%E5%BC%8F%EF%BC%8C%E6%95%99%E4%BD%A0%E5%9C%A8SpringBoot%E5%88%9D%E5%A7%8B%E5%8C%96%E6%97%B6%E6%90%9E%E7%82%B9%E4%BA%8B%E6%83%85%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/08/22/%E5%85%AD%E7%A7%8D%E6%96%B9%E5%BC%8F%EF%BC%8C%E6%95%99%E4%BD%A0%E5%9C%A8SpringBoot%E5%88%9D%E5%A7%8B%E5%8C%96%E6%97%B6%E6%90%9E%E7%82%B9%E4%BA%8B%E6%83%85%EF%BC%81/" class="post-title-link" itemprop="url">六种方式，教你在SpringBoot初始化时搞点事情！</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-08-22 14:23:17" itemprop="dateCreated datePublished" datetime="2021-08-22T14:23:17+08:00">2021-08-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2023-04-20 16:32:09" itemprop="dateModified" datetime="2023-04-20T16:32:09+08:00">2023-04-20</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/08/22/%E5%85%AD%E7%A7%8D%E6%96%B9%E5%BC%8F%EF%BC%8C%E6%95%99%E4%BD%A0%E5%9C%A8SpringBoot%E5%88%9D%E5%A7%8B%E5%8C%96%E6%97%B6%E6%90%9E%E7%82%B9%E4%BA%8B%E6%83%85%EF%BC%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/08/22/%E5%85%AD%E7%A7%8D%E6%96%B9%E5%BC%8F%EF%BC%8C%E6%95%99%E4%BD%A0%E5%9C%A8SpringBoot%E5%88%9D%E5%A7%8B%E5%8C%96%E6%97%B6%E6%90%9E%E7%82%B9%E4%BA%8B%E6%83%85%EF%BC%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>在实际工作中总是需要在项目启动时做一些初始化的操作，比如初始化线程池、提前加载好加密证书…….</p>
+<p>那么经典问题来了，这也是面试官经常会问到的一个问题：有哪些手段在Spring Boot 项目启动的时候做一些事情？</p>
+<p>方法有很多种，下面介绍几种常见的方法。</p>
+<p><img src="http://img.java-family.cn/spring%20Boot%20%E5%88%9D%E5%A7%8B%E5%8C%96%E6%90%9E%E7%82%B9%E4%BA%8B%E6%83%85/10.jpg"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/08/22/%E5%85%AD%E7%A7%8D%E6%96%B9%E5%BC%8F%EF%BC%8C%E6%95%99%E4%BD%A0%E5%9C%A8SpringBoot%E5%88%9D%E5%A7%8B%E5%8C%96%E6%97%B6%E6%90%9E%E7%82%B9%E4%BA%8B%E6%83%85%EF%BC%81/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/08/19/SpringBoot2.0%E5%AE%9E%E7%8E%B0%E5%9F%BA%E4%BA%8ERestful%E9%A3%8E%E6%A0%BC%E7%9A%84%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%E4%B8%8E%E4%B8%8B%E8%BD%BD/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -579,600 +1174,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/08/15/5%E7%A7%8D%E5%85%A8%E5%B1%80ID%E7%94%9F%E6%88%90%E6%96%B9%E5%BC%8F%E3%80%81%E4%BC%98%E7%BC%BA%E7%82%B9%E5%8F%8A%E6%94%B9%E8%BF%9B%E6%96%B9%E6%A1%88%EF%BC%8C%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E5%87%A0%E7%A7%8D%EF%BC%9F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/08/15/5%E7%A7%8D%E5%85%A8%E5%B1%80ID%E7%94%9F%E6%88%90%E6%96%B9%E5%BC%8F%E3%80%81%E4%BC%98%E7%BC%BA%E7%82%B9%E5%8F%8A%E6%94%B9%E8%BF%9B%E6%96%B9%E6%A1%88%EF%BC%8C%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E5%87%A0%E7%A7%8D%EF%BC%9F/" class="post-title-link" itemprop="url">5种全局ID生成方式、优缺点及改进方案，你知道哪几种？</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-08-15 16:27:43" itemprop="dateCreated datePublished" datetime="2021-08-15T16:27:43+08:00">2021-08-15</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-04-20 16:32:09" itemprop="dateModified" datetime="2023-04-20T16:32:09+08:00">2023-04-20</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2021/08/15/5%E7%A7%8D%E5%85%A8%E5%B1%80ID%E7%94%9F%E6%88%90%E6%96%B9%E5%BC%8F%E3%80%81%E4%BC%98%E7%BC%BA%E7%82%B9%E5%8F%8A%E6%94%B9%E8%BF%9B%E6%96%B9%E6%A1%88%EF%BC%8C%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E5%87%A0%E7%A7%8D%EF%BC%9F/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2021/08/15/5%E7%A7%8D%E5%85%A8%E5%B1%80ID%E7%94%9F%E6%88%90%E6%96%B9%E5%BC%8F%E3%80%81%E4%BC%98%E7%BC%BA%E7%82%B9%E5%8F%8A%E6%94%B9%E8%BF%9B%E6%96%B9%E6%A1%88%EF%BC%8C%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E5%87%A0%E7%A7%8D%EF%BC%9F/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="全局唯一id介绍"><a href="#全局唯一id介绍" class="headerlink" title="全局唯一id介绍"></a>全局唯一id介绍</h2><p>系统唯一id是我们在设计阶段常常遇到的问题。在复杂的分布式系统中，几乎都需要对大量的数据和消息进行唯一标识。在设计初期，我们需要考虑日后数据量的级别，如果可能会对数据进行分库分表，那么就需要有一个全局唯一id来标识一条数据或记录。生成唯一id的策略有多种，但是每种策略都有它的适用场景、优点以及局限性。</p>
-<p><img src="http://img.java-family.cn/%E4%B8%80%E5%8F%A3%E6%B0%94%E8%AF%B4%E5%87%BA5%E7%A7%8D%E5%85%A8%E5%B1%80ID%E7%94%9F%E6%88%90%E6%96%B9%E6%A1%88/1.png"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/15/5%E7%A7%8D%E5%85%A8%E5%B1%80ID%E7%94%9F%E6%88%90%E6%96%B9%E5%BC%8F%E3%80%81%E4%BC%98%E7%BC%BA%E7%82%B9%E5%8F%8A%E6%94%B9%E8%BF%9B%E6%96%B9%E6%A1%88%EF%BC%8C%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E5%87%A0%E7%A7%8D%EF%BC%9F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/08/13/%E4%B8%A4%E4%B8%87%E5%AD%97%E9%95%BF%E6%96%87%EF%BC%8C%E5%BD%BB%E5%BA%95%E6%90%9E%E6%87%82Kafka/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/08/13/%E4%B8%A4%E4%B8%87%E5%AD%97%E9%95%BF%E6%96%87%EF%BC%8C%E5%BD%BB%E5%BA%95%E6%90%9E%E6%87%82Kafka/" class="post-title-link" itemprop="url">两万字长文，彻底搞懂Kafka</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-08-13 09:22:57" itemprop="dateCreated datePublished" datetime="2021-08-13T09:22:57+08:00">2021-08-13</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-04-20 16:32:08" itemprop="dateModified" datetime="2023-04-20T16:32:08+08:00">2023-04-20</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" itemprop="url" rel="index"><span itemprop="name">消息队列</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2021/08/13/%E4%B8%A4%E4%B8%87%E5%AD%97%E9%95%BF%E6%96%87%EF%BC%8C%E5%BD%BB%E5%BA%95%E6%90%9E%E6%87%82Kafka/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2021/08/13/%E4%B8%A4%E4%B8%87%E5%AD%97%E9%95%BF%E6%96%87%EF%BC%8C%E5%BD%BB%E5%BA%95%E6%90%9E%E6%87%82Kafka/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="1、为什么有消息系统"><a href="#1、为什么有消息系统" class="headerlink" title="1、为什么有消息系统"></a>1、为什么有消息系统</h2><h5 id="1、解耦合"><a href="#1、解耦合" class="headerlink" title="1、解耦合"></a>1、解耦合</h5><h5 id="2、异步处理"><a href="#2、异步处理" class="headerlink" title="2、异步处理"></a>2、异步处理</h5><p>例如电商平台，秒杀活动。</p>
-<p><img src="http://img.java-family.cn/%E4%B8%A4%E4%B8%87%E5%AD%97%E6%90%9E%E6%87%82kafka/18.png"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/13/%E4%B8%A4%E4%B8%87%E5%AD%97%E9%95%BF%E6%96%87%EF%BC%8C%E5%BD%BB%E5%BA%95%E6%90%9E%E6%87%82Kafka/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/08/12/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E6%A1%86%E6%9E%B6%E9%80%89%E5%9E%8B%EF%BC%8C%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E5%87%A0%E7%A7%8D%EF%BC%9F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/08/12/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E6%A1%86%E6%9E%B6%E9%80%89%E5%9E%8B%EF%BC%8C%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E5%87%A0%E7%A7%8D%EF%BC%9F/" class="post-title-link" itemprop="url">分布式定时任务框架选型，你知道哪几种？</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-08-12 10:44:07" itemprop="dateCreated datePublished" datetime="2021-08-12T10:44:07+08:00">2021-08-12</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-04-20 16:32:09" itemprop="dateModified" datetime="2023-04-20T16:32:09+08:00">2023-04-20</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2021/08/12/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E6%A1%86%E6%9E%B6%E9%80%89%E5%9E%8B%EF%BC%8C%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E5%87%A0%E7%A7%8D%EF%BC%9F/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2021/08/12/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E6%A1%86%E6%9E%B6%E9%80%89%E5%9E%8B%EF%BC%8C%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E5%87%A0%E7%A7%8D%EF%BC%9F/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="1-前言"><a href="#1-前言" class="headerlink" title="1. 前言"></a>1. 前言</h2><p>我们先思考下面几个业务场景的解决方案:</p>
-<ul>
-<li>支付系统每天凌晨1点跑批，进行一天清算，每月1号进行上个月清算</li>
-<li>电商整点抢购，商品价格8点整开始优惠</li>
-<li>12306购票系统，超过30分钟没有成功支付订单的，进行回收处理</li>
-<li>商品成功发货后，需要向客户发送短信提醒</li>
-</ul>
-<blockquote>
-<p>类似的业务场景非常多，我们怎么解决？</p>
-</blockquote>
-<p><img src="http://img.java-family.cn/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6%E6%A1%86%E6%9E%B6%E9%80%89%E5%9E%8B/2.png"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/12/%E5%88%86%E5%B8%83%E5%BC%8F%E5%AE%9A%E6%97%B6%E4%BB%BB%E5%8A%A1%E6%A1%86%E6%9E%B6%E9%80%89%E5%9E%8B%EF%BC%8C%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E5%87%A0%E7%A7%8D%EF%BC%9F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/08/07/%E9%98%BF%E9%87%8C%E5%B7%B4%E5%B7%B4%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E7%9B%B4%E6%8E%A5%E4%BD%BF%E7%94%A8@Async%E6%B3%A8%E8%A7%A3%EF%BC%9F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/08/07/%E9%98%BF%E9%87%8C%E5%B7%B4%E5%B7%B4%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E7%9B%B4%E6%8E%A5%E4%BD%BF%E7%94%A8@Async%E6%B3%A8%E8%A7%A3%EF%BC%9F/" class="post-title-link" itemprop="url">阿里巴巴为什么不建议直接使用 @Async 注解？</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-08-07 20:46:31" itemprop="dateCreated datePublished" datetime="2021-08-07T20:46:31+08:00">2021-08-07</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-04-20 16:32:09" itemprop="dateModified" datetime="2023-04-20T16:32:09+08:00">2023-04-20</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2021/08/07/%E9%98%BF%E9%87%8C%E5%B7%B4%E5%B7%B4%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E7%9B%B4%E6%8E%A5%E4%BD%BF%E7%94%A8@Async%E6%B3%A8%E8%A7%A3%EF%BC%9F/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2021/08/07/%E9%98%BF%E9%87%8C%E5%B7%B4%E5%B7%B4%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E7%9B%B4%E6%8E%A5%E4%BD%BF%E7%94%A8@Async%E6%B3%A8%E8%A7%A3%EF%BC%9F/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>对于异步方法调用，从Spring3开始提供了@Async注解，该注解可以被标在方法上，以便异步地调用该方法。调用者将在调用时立即返回，方法的实际执行将提交给Spring TaskExecutor的任务中，由指定的线程池中的线程执行。</p>
-<p>在项目应用中，@Async调用线程池，推荐使用自定义线程池的模式。自定义线程池常用方案：重新实现接口AsyncConfigurer。</p>
-<p><img src="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/10.png"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/07/%E9%98%BF%E9%87%8C%E5%B7%B4%E5%B7%B4%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E7%9B%B4%E6%8E%A5%E4%BD%BF%E7%94%A8@Async%E6%B3%A8%E8%A7%A3%EF%BC%9F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/08/05/%E4%B8%80%E5%8F%A3%E6%B0%94%E8%AF%B4%E5%87%BA%E5%8D%81%E5%85%AD%E4%B8%ADRedis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/08/05/%E4%B8%80%E5%8F%A3%E6%B0%94%E8%AF%B4%E5%87%BA%E5%8D%81%E5%85%AD%E4%B8%ADRedis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/" class="post-title-link" itemprop="url">一口气说出 Redis 16 个常见使用场景</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-08-05 16:51:03" itemprop="dateCreated datePublished" datetime="2021-08-05T16:51:03+08:00">2021-08-05</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-04-20 16:32:08" itemprop="dateModified" datetime="2023-04-20T16:32:08+08:00">2023-04-20</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Redis-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Redis 进阶</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2021/08/05/%E4%B8%80%E5%8F%A3%E6%B0%94%E8%AF%B4%E5%87%BA%E5%8D%81%E5%85%AD%E4%B8%ADRedis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2021/08/05/%E4%B8%80%E5%8F%A3%E6%B0%94%E8%AF%B4%E5%87%BA%E5%8D%81%E5%85%AD%E4%B8%ADRedis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="1、缓存"><a href="#1、缓存" class="headerlink" title="1、缓存"></a>1、缓存</h2><p>String类型</p>
-<p>例如：热点数据缓存（例如报表、明星出轨），对象缓存、全页缓存、可以提升热点数据的访问数据。</p>
-<p><img src="http://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/12.png"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/05/%E4%B8%80%E5%8F%A3%E6%B0%94%E8%AF%B4%E5%87%BA%E5%8D%81%E5%85%AD%E4%B8%ADRedis%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2021/08/04/Spring%20Boot%20%E9%9B%86%E6%88%90%20WebSocket%EF%BC%8C%E8%BD%BB%E6%9D%BE%E5%AE%9E%E7%8E%B0%E4%BF%A1%E6%81%AF%E6%8E%A8%E9%80%81%EF%BC%81/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2021/08/04/Spring%20Boot%20%E9%9B%86%E6%88%90%20WebSocket%EF%BC%8C%E8%BD%BB%E6%9D%BE%E5%AE%9E%E7%8E%B0%E4%BF%A1%E6%81%AF%E6%8E%A8%E9%80%81%EF%BC%81/" class="post-title-link" itemprop="url">Spring Boot 集成 WebSocket，轻松实现信息推送！</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2021-08-04 16:35:36" itemprop="dateCreated datePublished" datetime="2021-08-04T16:35:36+08:00">2021-08-04</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-04-20 16:32:08" itemprop="dateModified" datetime="2023-04-20T16:32:08+08:00">2023-04-20</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2021/08/04/Spring%20Boot%20%E9%9B%86%E6%88%90%20WebSocket%EF%BC%8C%E8%BD%BB%E6%9D%BE%E5%AE%9E%E7%8E%B0%E4%BF%A1%E6%81%AF%E6%8E%A8%E9%80%81%EF%BC%81/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2021/08/04/Spring%20Boot%20%E9%9B%86%E6%88%90%20WebSocket%EF%BC%8C%E8%BD%BB%E6%9D%BE%E5%AE%9E%E7%8E%B0%E4%BF%A1%E6%81%AF%E6%8E%A8%E9%80%81%EF%BC%81/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>在一次项目开发中，使用到了Netty 网络应用框架，以及 MQTT 进行消息数据的收发，这其中需要后台来将获取到的消息主动推送给前端，于是就使用到了MQTT，特此记录一下。</p>
-<h2 id="一、什么是websocket？"><a href="#一、什么是websocket？" class="headerlink" title="一、什么是websocket？"></a>一、什么是websocket？</h2><p>WebSocket 协议是基于 TCP 的一种新的网络协议。</p>
-<p>它实现了客户端与服务器之间的全双工通信，学过计算机网络都知道，既然是全双工，就说明了<strong>服务器可以主动发送信息给客户端</strong>。</p>
-<p>这与我们的推送技术或者是多人在线聊天的功能不谋而合。</p>
-<p><img src="http://img.java-family.cn/websocket%E6%89%AB%E7%A0%81/1.png"></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2021/08/04/Spring%20Boot%20%E9%9B%86%E6%88%90%20WebSocket%EF%BC%8C%E8%BD%BB%E6%9D%BE%E5%AE%9E%E7%8E%B0%E4%BF%A1%E6%81%AF%E6%8E%A8%E9%80%81%EF%BC%81/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1252,20 +1257,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">136</span>
+          <span class="site-state-item-count">142</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">68</span>
+        <span class="site-state-item-count">72</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

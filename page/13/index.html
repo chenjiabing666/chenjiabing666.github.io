@@ -188,6 +188,1004 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/19/Mysql%E4%B8%ADorderby%E5%BA%95%E5%B1%82%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/04/19/Mysql%E4%B8%ADorderby%E5%BA%95%E5%B1%82%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B/" class="post-title-link" itemprop="url">Mysql中orderby底层执行流程</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-04-19 15:46:13" itemprop="dateCreated datePublished" datetime="2020-04-19T15:46:13+08:00">2020-04-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-24 10:22:07" itemprop="dateModified" datetime="2020-10-24T10:22:07+08:00">2020-10-24</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%B9%B2%E8%B4%A7%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">数据库干货篇</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/04/19/Mysql%E4%B8%ADorderby%E5%BA%95%E5%B1%82%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/04/19/Mysql%E4%B8%ADorderby%E5%BA%95%E5%B1%82%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
+<li>在实际的开发中一定会碰到根据某个字段进行排序后来显示结果的需求，但是你真的理解<code>order by</code>在 Mysql 底层是如何执行的吗？</li>
+<li>假设你要查询城市是<code>苏州</code>的所有人名字，并且按照姓名进行排序返回前 1000 个人的姓名、年龄，这条 sql 语句应该如何写？</li>
+<li>首先创建一张用户表，sql 语句如下：</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> <span class="keyword">user</span> (</span><br><span class="line">  id <span class="type">int</span>(<span class="number">11</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  city <span class="type">varchar</span>(<span class="number">16</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  name <span class="type">varchar</span>(<span class="number">16</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  age <span class="type">int</span>(<span class="number">11</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  <span class="keyword">PRIMARY</span> KEY (id),</span><br><span class="line">  KEY city (city)</span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>则上述需求的 sql 查询语句如下：</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> city,name,age <span class="keyword">from</span> <span class="keyword">user</span> <span class="keyword">where</span> city<span class="operator">=</span><span class="string">&#x27;苏州&#x27;</span> <span class="keyword">order</span> <span class="keyword">by</span> name limit <span class="number">1000</span>;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>这条 sql 查询语句相信大家都能写出来，但是你了解它在 Mysql 底层的执行流程吗？今天陈某来大家聊一聊这条 sql 语句是如何执行的以及有什么参数会影响执行的流程。</li>
+<li>本篇文章分为如下几个部分进行详细的阐述：<ol>
+<li><strong>全字段排序</strong></li>
+<li><strong>rowid 排序</strong></li>
+<li><strong>全字段排序 VS rowid 排序</strong></li>
+<li><strong>如何避免排序</strong></li>
+</ol>
+</li>
+</ul>
+<h2 id="全字段排序"><a href="#全字段排序" class="headerlink" title="全字段排序"></a>全字段排序</h2><ul>
+<li>前面聊过索引能够避免全表扫描，因此我们给<code>city</code>这个字段上添加了索引，当然城市的字段很小，不用考虑字符串的索引问题，之前有写过一篇关于如何给字符串的加索引的文章，有不了解朋友看一下这篇文章:<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/xaa8ge7LsHWYROOy4qiRJA">Mysql 性能优化：如何给字符串加索引？</a></li>
+<li>此时用<code>Explain</code>来分析一下的这条查询语句的执行情况，结果如下图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/order%20by%20%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/1.png" alt="Explain分析结果"></li>
+<li><code>Extra</code>这个字段中的<code>Using filesort</code>表示的就是需要排序，MySQL 会给每个线程分配一块内存用于排序，称为<code>sort_buffer</code>。</li>
+<li>既然使用了索引进行查询，我们来简单的画一下<code>city</code>这棵索引树的结构，如下图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/order%20by%20%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/2-1.png" alt="city索引树"></li>
+<li>从上图可以看出，满足<code>city=&#39;苏州&#39;</code>是从<code>ID3</code>到<code>IDX</code>这些记录。</li>
+<li>通常情况下，此条 sql 语句执行流程如下：<ol>
+<li>初始化 sort_buffer，确定放入 name、city、age 这三个字段。</li>
+<li>从索引 city 找到第一个满足<code>city=&#39;苏州&#39;</code>条件的<code>主键id</code>，也就是图中的<code>ID3</code>。</li>
+<li>到<code>主键id索引</code>取出整行，取<code>name</code>、<code>city</code>、<code>age</code>三个字段的值，存入<code>sort_buffer</code>中。</li>
+<li>从索引<code>city</code>取下一个记录的主键 id。</li>
+<li>重复步骤 3、4 直到 city 的值不满足查询条件为止，对应的主键 id 也就是图中的<code>IDX</code>。</li>
+<li>对<code>sort_buffer</code>中的数据按照字段<code>name</code>做快速排序。</li>
+<li>按照排序结果取前 1000 行返回给客户端。</li>
+</ol>
+</li>
+<li>我们称这个排序过程为<code>全字段排序</code>，执行的流程图如下：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/order%20by%20%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/3.png" alt="全字段排序"></li>
+<li>图中<code>按name排序</code>这个动作，可能在内存中完成，也可能需要使用外部排序，这取决于排序所需的内存和参数<code>sort_buffer_size</code>。</li>
+<li><code>sort_buffer_size</code>：就是 MySQL 为排序开辟的内存（sort_buffer）的大小。如果要排序的数据量小于 sort_buffer_size，排序就在内存中完成。但如果排序数据量太大，内存放不下，则不得不利用<code>磁盘临时文件</code>辅助排序。</li>
+</ul>
+<h2 id="rowid-排序"><a href="#rowid-排序" class="headerlink" title="rowid 排序"></a>rowid 排序</h2><ul>
+<li>在上面这个算法过程里面，只对原表的数据读了一遍，剩下的操作都是在<code>sort_buffer</code>和<code>临时文件</code>中执行的。<strong>但这个算法有一个问题，就是如果查询要返回的字段很多的话，那么<code>sort_buffer</code>里面要放的字段数太多，这样内存里能够同时放下的行数很少，要分成很多个临时文件，排序的性能会很差</strong>。</li>
+<li>所以如果单行很大，这个方法效率不够好。</li>
+<li>我们可以修改一个<code>max_length_for_sort_data</code>这个参数使其使用另外一种算法。max_length_for_sort_data，是 MySQL 中专门控制用于排序的行数据的长度的一个参数。它的意思是，如果单行的长度超过这个值，MySQL 就认为单行太大，要换一个算法。</li>
+<li><code>city</code>、<code>name</code>、<code>age</code> 这三个字段的定义总长度是<code>36</code>，我把<code>max_length_for_sort_data</code>设置为 16，我们再来看看计算过程有什么改变。设置的 sql 语句如下：</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SET</span> max_length_for_sort_data <span class="operator">=</span> <span class="number">16</span>;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>新的算法放入 sort_buffer 的字段，只有要排序的列（即 name 字段）和主键 id。</p>
+</li>
+<li><p>但这时，排序的结果就因为少了 city 和 age 字段的值，不能直接返回了，整个执行流程就变成如下所示的样子：</p>
+<ol>
+<li>初始化<code>sort_buffer</code>，确定放入两个字段，即<code>name</code>和<code>id</code>。</li>
+<li>从索引 city 找到第一个满足<code>city=&#39;苏州&#39;</code>条件的<code>主键id</code>，也就是图中的<code>ID3</code>。</li>
+<li>到<code>主键id索引</code>取出整行，取 name、id 这两个字段，存入 sort_buffer 中。</li>
+<li>从索引<code>city</code>取下一个记录的主键 id。</li>
+<li>重复步骤 3、4 直到 city 的值不满足查询条件为止，对应的主键 id 也就是图中的<code>IDX</code>。</li>
+<li>对<code>sort_buffer</code>中的数据按照字段<code>name</code>做快速排序。</li>
+<li>遍历排序结果，取前 1000 行，并按照 id 的值回到原表中取出 city、name 和 age 三个字段返回给客户端。</li>
+</ol>
+</li>
+<li><p>这个执行流程的示意图如下，我把它称为<code>rowid排序</code>。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/order%20by%20%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/4.png" alt="rowid排序"></p>
+</li>
+<li><p><strong>对比<code>全字段排序</code>，<code>rowid排序</code>多了一次<code>回表查询</code>，即是多了<code>第7步</code>的查询主键索引树。</strong></p>
+</li>
+</ul>
+<h2 id="全字段排序-VS-rowid-排序"><a href="#全字段排序-VS-rowid-排序" class="headerlink" title="全字段排序 VS rowid 排序"></a>全字段排序 VS rowid 排序</h2><ul>
+<li>如果 MySQL 实在是担心排序内存太小，会影响排序效率，才会采用 rowid 排序算法，这样排序过程中一次可以排序更多行，但是需要再回到原表去取数据。</li>
+<li>如果 MySQL 认为内存足够大，会优先选择全字段排序，把需要的字段都放到 sort_buffer 中，这样排序后就会直接从内存里面返回查询结果了，不用再回到原表去取数据。</li>
+<li>这也就体现了 MySQL 的一个设计思想：<strong>如果内存够，就要多利用内存，尽量减少磁盘访问</strong>。</li>
+<li><strong>对于 InnoDB 表来说，rowid 排序会要求回表多造成磁盘读，因此不会被优先选择。</strong></li>
+</ul>
+<h2 id="如何避免排序"><a href="#如何避免排序" class="headerlink" title="如何避免排序"></a>如何避免排序</h2><ul>
+<li>其实，并不是所有的<code>order by</code>语句，都需要排序操作的。从上面分析的执行过程，我们可以看到，MySQL 之所以需要生成临时表，并且在临时表上做排序操作，其原因是<strong>原来的数据都是无序的</strong>。</li>
+<li>如果能够保证从<code>city</code>这个索引上取出来的行，天然就是按照 name 递增排序的话，是不是就可以不用再排序了呢？</li>
+<li>因此想到了联合索引，创建<code>(city,name)</code>联合索引，sql 语句如下：</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> <span class="keyword">user</span> <span class="keyword">add</span> index city_user(city, name);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>此时的索引树如下：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/order%20by%20%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/5-1.png" alt="city,name索引树"></li>
+<li>在这个索引里面，我们依然可以用树搜索的方式定位到第一个满足<code>city=&#39;苏州&#39;</code>的记录，并且额外确保了，接下来按顺序取“下一条记录”的遍历过程中，只要 city 的值是苏州，name 的值就一定是有序的。</li>
+<li>按照上图，整个查询的流程如下：<ol>
+<li>从索引(city,name)找到第一个满足 city=’苏州’条件的主键 id。</li>
+<li>到主键 id 索引取出整行，取 name、city、age 三个字段的值，作为结果集的一部分直接返回。</li>
+<li>从索引(city,name)取下一个记录主键 id。</li>
+<li>重复步骤 2、3，直到查到第 1000 条记录，或者是不满足 city=’苏州’条件时循环结束。</li>
+</ol>
+</li>
+<li>对应的流程图如下：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/order%20by%20%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/6.png" alt="city，name联合索引的执行流程"></li>
+<li>可以看到，这个查询过程不需要临时表，也不需要排序。接下来，我们用 explain 的结果来印证一下。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/order%20by%20%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/7.png"></li>
+<li>从图中可以看到，<code>Extra</code>字段中没有<code>Using filesort</code>了，也就是不需要排序了。而且由于<code>(city,name)</code>这个联合索引本身有序，<strong>所以这个查询也不用把 4000 行全都读一遍，只要找到满足条件的前 1000 条记录就可以退出了</strong>。也就是说，在我们这个例子里，只需要扫描 1000 次。</li>
+<li>难道仅仅这样就能满足了？此条查询语句是否能再优化呢？<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/order%20by%20%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/8.jpg"></li>
+<li>朋友们还记得覆盖索引吗？覆盖索引的好处就是能够避免再次回表查询，不了解的朋友们可以看一下陈某之前写的文章：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/-IRhK4KyDCkTd_lojeEolw">Mysql 性能优化：如何使用覆盖索引？</a>。</li>
+<li>我们创建<code>(city,name,age)</code>联合索引，这样在执行上面的查询语句就能使用覆盖索引了，避免了回表查询了，sql 语句如下：</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> <span class="keyword">user</span> <span class="keyword">add</span> index city_user_age(city, name, age);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>此时执行流程图如下：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/order%20by%20%E5%A6%82%E4%BD%95%E5%B7%A5%E4%BD%9C/9-1.png" alt="覆盖索引使用执行流程"></li>
+<li><strong>当然，覆盖索引能够提升效率，但是维护索引也是需要代价的，因此还需要权衡使用。</strong></li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>今天这篇文章，我和你介绍了 MySQL 里面<code>order by</code>语句的几种算法流程。</li>
+<li>在开发系统的时候，你总是不可避免地会使用到 order by 语句。心里要清楚每个语句的排序逻辑是怎么实现的，还要能够分析出在最坏情况下，每个语句的执行对系统资源的消耗，这样才能做到下笔如有神，不犯低级错误。</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/19/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E4%BA%9B%E4%BA%8B%E5%8A%A1%E5%A4%B1%E6%95%88%E7%9A%84%E5%9C%BA%E6%99%AF%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/04/19/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E4%BA%9B%E4%BA%8B%E5%8A%A1%E5%A4%B1%E6%95%88%E7%9A%84%E5%9C%BA%E6%99%AF%EF%BC%9F/" class="post-title-link" itemprop="url">面试官：你知道哪些事务失效的场景？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-04-19 15:45:21 / 修改时间：15:46:33" itemprop="dateCreated datePublished" datetime="2020-04-19T15:45:21+08:00">2020-04-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9D%82%E8%B0%88/" itemprop="url" rel="index"><span itemprop="name">杂谈</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/04/19/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E4%BA%9B%E4%BA%8B%E5%8A%A1%E5%A4%B1%E6%95%88%E7%9A%84%E5%9C%BA%E6%99%AF%EF%BC%9F/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/04/19/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E4%BD%A0%E7%9F%A5%E9%81%93%E5%93%AA%E4%BA%9B%E4%BA%8B%E5%8A%A1%E5%A4%B1%E6%95%88%E7%9A%84%E5%9C%BA%E6%99%AF%EF%BC%9F/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
+<li>声明式事务是Spring功能中最爽之一，可是有些时候，我们在使用声明式事务并未生效，这是为什么呢？</li>
+<li>今天陈某带大家来聊一聊声明事务的几种失效场景。本文将会从以下两个方面来说一下事务为什么会失效？<ol>
+<li>@Transactional介绍</li>
+<li>@Transactional失效场景</li>
+</ol>
+</li>
+</ul>
+<h2 id="Transactional介绍"><a href="#Transactional介绍" class="headerlink" title="@Transactional介绍"></a>@Transactional介绍</h2><ul>
+<li><code>@Transactional</code>是声明式事务的注解，可以被标记在<code>类上</code>、<code>接口</code>、<code>方法</code>上。</li>
+<li>该注解中有很多值得深入了解的几种属性，我们来看一下。</li>
+</ul>
+<h3 id="transactionManager"><a href="#transactionManager" class="headerlink" title="transactionManager"></a>transactionManager</h3><ul>
+<li>指定事务管理器，值为<code>bean</code>的名称，这个主要用于多事务管理器情况下指定。比如多数据源配置的情况下。</li>
+</ul>
+<h3 id="isolation"><a href="#isolation" class="headerlink" title="isolation"></a>isolation</h3><ul>
+<li>事务的隔离级别，默认是<code>Isolation.DEFAULT</code>。</li>
+<li>几种值的含义如下：<ul>
+<li><code>Isolation.DEFAULT</code>：事务默认的隔离级别，使用数据库默认的隔离级别。</li>
+<li><code>Isolation.READ_UNCOMMITTED</code>：这是事务最低的隔离级别，它充许别外一个事务可以看到这个事务未提交的数据。这种隔离级别会产生脏读，不可重复读和幻读。</li>
+<li><code>Isolation.READ_COMMITTED</code>：保证一个事务修改的数据提交后才能被另外一个事务读取。另外一个事务不能读取该事务未提交的数据。这种事务隔离级别可以避免脏读出现，但是可能会出现不可重复读和幻读。</li>
+<li><code>Isolation.REPEATABLE_READ</code>：这种事务隔离级别可以防止脏读，不可重复读。但是可能出现幻读。</li>
+<li><code>Isolation.SERIALIZABLE</code>：这是花费最高代价但是最可靠的事务隔离级别。事务被处理为顺序执行。除了防止脏读，不可重复读外，还避免了幻读。</li>
+</ul>
+</li>
+</ul>
+<h3 id="propagation"><a href="#propagation" class="headerlink" title="propagation"></a>propagation</h3><ul>
+<li>代表事务的传播行为，默认值为<code>Propagation.REQUIRED</code>。</li>
+<li><code>Propagation.REQUIRED</code>：如果存在一个事务，则支持当前事务。如果没有事务则开启一个新的事务。比如A方法内部调用了B方法，此时B方法将会使用A方法的事务。</li>
+<li><code>Propagation.MANDATORY</code>：支持当前事务，如果当前没有事务，就抛出异常。</li>
+<li><code>Propagation.NEVER</code>：以非事务方式执行，如果当前存在事务，则抛出异常。</li>
+<li><code>Propagation.NOT_SUPPORTED</code>：以非事务方式执行操作，如果当前存在事务，就把当前事务挂起。</li>
+<li><code>Propagation.REQUIRES_NEW</code>：新建事务，如果当前存在事务，把当前事务挂起。比如A方法使用默认的事务传播属性，B方法使用<code>REQUIRES_NEW</code>，此时A方法在内部调用B方法，一旦A方法出现异常，A方法中的事务回滚了，但是B方法并没有回滚，因为A和B方法使用的不是同一个事务，B方法新建了一个事务。</li>
+<li><code>Propagation.NESTED</code>：支持当前事务，新增<code>Savepoint</code>点，也就是在进入子事务之前，父事务建立一个回滚点，与当前事务同步提交或回滚。 子事务是父事务的一部分，在父事务还未提交时，子事务一定没有提交。嵌套事务一个非常重要的概念就是内层事务依赖于外层事务。外层事务失败时，会回滚内层事务所做的动作。而内层事务操作失败并不会引起外层事务的回滚。</li>
+</ul>
+<h3 id="timeout"><a href="#timeout" class="headerlink" title="timeout"></a>timeout</h3><ul>
+<li>事务的超时时间，单位为秒。</li>
+</ul>
+<h3 id="readOnly"><a href="#readOnly" class="headerlink" title="readOnly"></a>readOnly</h3><ul>
+<li>该属性用于设置当前事务是否为只读事务，设置为true表示只读，false则表示可读写，默认值为false。如果一个事务只涉及到只读，可以设置为true。</li>
+</ul>
+<h3 id="rollbackFor-属性"><a href="#rollbackFor-属性" class="headerlink" title="rollbackFor 属性"></a>rollbackFor 属性</h3><ul>
+<li>用于指定能够触发事务回滚的异常类型，可以指定多个异常类型。</li>
+<li>默认是在<code>RuntimeException</code>和<code>Error</code>上回滚。</li>
+</ul>
+<h3 id="noRollbackFor"><a href="#noRollbackFor" class="headerlink" title="noRollbackFor"></a>noRollbackFor</h3><ul>
+<li>抛出指定的异常类型，不回滚事务，也可以指定多个异常类型。</li>
+</ul>
+<h2 id="Transactional失效场景"><a href="#Transactional失效场景" class="headerlink" title="@Transactional失效场景"></a>@Transactional失效场景</h2><ul>
+<li>声明式事务失效的场景有很多，陈某这里只是罗列一下几种常见的场景。</li>
+</ul>
+<h3 id="底层数据库引擎不支持事务"><a href="#底层数据库引擎不支持事务" class="headerlink" title="底层数据库引擎不支持事务"></a>底层数据库引擎不支持事务</h3><ul>
+<li>如果数据库引擎不支持事务，则Spring自然无法支持事务。</li>
+</ul>
+<h3 id="在非public修饰的方法使用"><a href="#在非public修饰的方法使用" class="headerlink" title="在非public修饰的方法使用"></a>在非public修饰的方法使用</h3><ul>
+<li>@Transactional注解使用的是AOP，在使用动态代理的时候只能针对<code>public</code>方法进行代理，源码依据在<code>AbstractFallbackTransactionAttributeSource</code>类中的<code>computeTransactionAttribute</code>方法中，如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> TransactionAttribute <span class="title">computeTransactionAttribute</span><span class="params">(Method method,</span></span></span><br><span class="line"><span class="params"><span class="function">    Class&lt;?&gt; targetClass)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// Don&#x27;t allow no-public methods as required.</span></span><br><span class="line">        <span class="keyword">if</span> (allowPublicMethodsOnly() &amp;&amp; !Modifier.isPublic(method.getModifiers())) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>此处如果不是标注在<code>public</code>修饰的方法上并不会抛出异常，但是会导致事务失效。</li>
+</ul>
+<h3 id="异常被-“-踹死了-“"><a href="#异常被-“-踹死了-“" class="headerlink" title="异常被 “ 踹死了 “"></a>异常被 “ 踹死了 “</h3><ul>
+<li>这种情况小白是最容易犯错的，在整个事务的方法中使用<code>try-catch</code>，导致异常无法抛出，自然会导致事务失效。伪代码如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Transactional</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method</span><span class="params">()</span></span>&#123;</span><br><span class="line">  <span class="keyword">try</span>&#123;</span><br><span class="line">    <span class="comment">//插入一条数据</span></span><br><span class="line">    <span class="comment">//更改一条数据</span></span><br><span class="line">  &#125;<span class="keyword">catch</span>(Exception ex)&#123;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="方法中调用同类的方法"><a href="#方法中调用同类的方法" class="headerlink" title="方法中调用同类的方法"></a>方法中调用同类的方法</h3><ul>
+<li>简单的说就是一个类中的<code>A方法</code>（未标注声明式事务）在内部调用了<code>B方法</code>(标注了声明式事务)，这样会导致B方法中的事务失效。</li>
+<li>代码如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span></span>&#123;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">A</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">//插入一条数据</span></span><br><span class="line">    <span class="comment">//调用B方法</span></span><br><span class="line">    B();</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="meta">@Transactional</span></span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">B</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">//插入数据</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><strong>为什么会失效呢？</strong>：其实原因很简单，Spring在扫描Bean的时候会自动为标注了<code>@Transactional</code>注解的类生成一个代理类（proxy）,当有注解的方法被调用的时候，实际上是代理类调用的，代理类在调用之前会开启事务，执行事务的操作，但是同类中的方法互相调用，相当于<code>this.B()</code>，此时的B方法并非是代理类调用，而是直接通过原有的Bean直接调用，所以注解会失效。</li>
+<li><strong>如何解决呢？</strong>：这就涉及到注解失效的原因了，后续文章会介绍到，这里不过多介绍了。</li>
+</ul>
+<h3 id="rollbackFor属性设置错误"><a href="#rollbackFor属性设置错误" class="headerlink" title="rollbackFor属性设置错误"></a>rollbackFor属性设置错误</h3><ul>
+<li>很容易理解，指定异常触发回滚，一旦设置错误，导致一些异常不能触发回滚，此时的声明式事务不就失效了吗。</li>
+</ul>
+<h3 id="noRollbackFor属性设置错误"><a href="#noRollbackFor属性设置错误" class="headerlink" title="noRollbackFor属性设置错误"></a>noRollbackFor属性设置错误</h3><ul>
+<li>这个和rollbackFor属性设置错误类似，一旦设置错误，也会导致异常不能触发回滚，此时的声明式事务会失效。</li>
+</ul>
+<h3 id="propagation属性设置错误"><a href="#propagation属性设置错误" class="headerlink" title="propagation属性设置错误"></a>propagation属性设置错误</h3><ul>
+<li>事务的传播属性在上面已经介绍了，默认的事务传播属性是<code>Propagation.REQUIRED</code>，但是一旦配置了错误的传播属性，也是会导致事务失效，如下三种配置将会导致事务失效：<ul>
+<li>Propagation.SUPPORTS</li>
+<li>Propagation.NOT_SUPPORTED</li>
+<li>Propagation.NEVER</li>
+</ul>
+</li>
+</ul>
+<h3 id="原始SSM项目，重复扫描导致事务失效"><a href="#原始SSM项目，重复扫描导致事务失效" class="headerlink" title="原始SSM项目，重复扫描导致事务失效"></a>原始SSM项目，重复扫描导致事务失效</h3><ul>
+<li>在原始的SSM项目中都配置了<code>context:component-scan</code>并且同时扫描了service层，此时事务将会失效。</li>
+<li>按照Spring配置文件的加载顺序来说，会先加载Springmvc的配置文件，如果在加载Springmvc配置文件的时候把service也加载了，但是此时事务还没加载，将会导致事务无法成功生效。</li>
+<li>解决方法很简单，把扫描service层的配置设置在Spring配置文件或者其他配置文件中即可。</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>事务失效的原因很多，但是千万不要做到一知半解，只有深入理解了，才能在面试过程中对答如流。</li>
+<li><strong>今天的文章就到此结束了，如果觉得陈某写得不错，有所收获的，关注在看来一波，你们的鼓励，将会是我写作的动力，谢谢支持！！！</strong></li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/05/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%9A%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/04/05/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%9A%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F/" class="post-title-link" itemprop="url">设计模式：工厂方法模式</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-04-05 21:44:06 / 修改时间：21:46:31" itemprop="dateCreated datePublished" datetime="2020-04-05T21:44:06+08:00">2020-04-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/04/05/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%9A%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/04/05/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%9A%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="导读"><a href="#导读" class="headerlink" title="导读"></a>导读</h2><ul>
+<li>工厂方法模式是所有设计模式中比较常用的一种模式，但是真正能搞懂用好的少之又少，Spring底层大量的使用该设计模式来进行封装，以致开发者阅读源代码的时候晕头转向。</li>
+<li>今天陈某分别从以下五个方面详细讲述一下工厂方法模式：<ol>
+<li><strong>从什么是工厂方法模式</strong></li>
+<li><strong>通用框架实现</strong></li>
+<li><strong>工厂方法模式的优点</strong></li>
+<li><strong>工厂方法模式的升级</strong></li>
+<li><strong>Spring底层如何使用工厂方法模式</strong></li>
+</ol>
+</li>
+</ul>
+<h2 id="什么是工厂方法模式？"><a href="#什么是工厂方法模式？" class="headerlink" title="什么是工厂方法模式？"></a>什么是工厂方法模式？</h2><ul>
+<li>定义：定义一个用于创建对象的 接口，让子类决定实例化哪一个类。工厂方法使一个类的实例化延迟到其子类。</li>
+<li>工厂方法模式通用类图如下：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F/1.png"></li>
+<li>在工厂方法模式中，抽象产品<code>Product</code>负责定义产品的特性，实现对事物的抽象定义。</li>
+<li><code>AbstractFactory</code>是抽象工厂类，定义了一个抽象工厂方法。具体的如何创建产品由工厂实现类<code>ConcreteFactory</code>完成。</li>
+</ul>
+<h2 id="通用框架实现"><a href="#通用框架实现" class="headerlink" title="通用框架实现"></a>通用框架实现</h2><ul>
+<li><p>工厂方法模式的变种有很多，陈某给出一个比较实用的通用框架。</p>
+</li>
+<li><p><code>抽象产品类</code>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Product</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 公共逻辑方法</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method1</span><span class="params">()</span></span>&#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 抽象方法：由子类实现，根据业务逻辑定义多个</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">method2</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p><code>具体产品类1</code>，继承抽象产品类，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Product1</span> <span class="keyword">extends</span> <span class="title">Product</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 实现抽象产品类的抽象方法</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method2</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p><code>具体产品类2</code>，继承抽象产品类，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Product2</span> <span class="keyword">extends</span> <span class="title">Product</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 实现抽象产品类的抽象方法</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method2</span><span class="params">()</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p><code>抽象工厂类</code>，必须定义一个工厂方法来自己实现具体的创建逻辑，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbstractFactory</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 工厂方法，需要子类实现</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> cls</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> &lt;T&gt;</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">abstract</span> &lt;T extends Product&gt; <span class="function">T <span class="title">create</span><span class="params">(Class&lt;T&gt; cls)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>具体工厂类，使用了反射对具体产品的实例化，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ConcreteFactory</span> <span class="keyword">extends</span> <span class="title">AbstractFactory</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> &lt;T extends Product&gt; <span class="function">T <span class="title">create</span><span class="params">(Class&lt;T&gt; cls)</span> </span>&#123;</span><br><span class="line">        Product product=<span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">try</span>&#123;</span><br><span class="line">            product= (Product) Class.forName(cls.getName()).newInstance();</span><br><span class="line">        &#125;<span class="keyword">catch</span> (Exception ex)&#123;</span><br><span class="line">            ex.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> (T) product;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>测试如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">//创建具体工厂类</span></span><br><span class="line">        ConcreteFactory factory = <span class="keyword">new</span> ConcreteFactory();</span><br><span class="line">        <span class="comment">//调用工厂方法获取产品类1的实例</span></span><br><span class="line">        Product1 product1 = factory.create(Product1.class);</span><br><span class="line">        System.out.println(product1);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>以上是简单的一个通用框架，读者可以根据自己的业务在其上拓展。</p>
+</li>
+</ul>
+<h2 id="工厂方法模式的优点"><a href="#工厂方法模式的优点" class="headerlink" title="工厂方法模式的优点"></a>工厂方法模式的优点</h2><ul>
+<li>良好的封装性，代码结构清晰，调用者不用关系具体的实现过程，只需要提供对应的产品类名称即可。</li>
+<li>易扩展性，在增加产品类的情况下，只需要适当的修改工厂类逻辑或者重新拓展一个工厂类即可。</li>
+<li>屏蔽了产品类，产品类的变化调用者不用关心。比如在使用<code>JDBC</code>连接数据库时，只需要改动一个驱动的名称，数据库就会从<code>Mysql</code>切换到<code>Oracle</code>，极其灵活。</li>
+</ul>
+<h2 id="工厂方法模式的升级"><a href="#工厂方法模式的升级" class="headerlink" title="工厂方法模式的升级"></a>工厂方法模式的升级</h2><ul>
+<li>在复杂的系统中，一个产品的初始化过程是及其复杂的，仅仅一个具体工厂实现可能有些吃力，此时最好的做法就是为每个产品实现一个工厂，达到一个工厂类只负责生产一个产品。</li>
+<li>此时工厂方法模式的类图如下：</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F/2.png"></p>
+<ul>
+<li>如上图，每个产品类都对应了一个工厂，一个工厂只负责生产一个产品，非常符合单一职责原则。</li>
+<li>针对上述的升级过程，那么工厂方法中不需要传入抽象产品类了，因为一个工厂只负责一个产品的生产，此时的抽象工厂类如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbstractFactory</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 工厂方法，需要子类实现</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">abstract</span> &lt;T extends Product&gt; <span class="function">T <span class="title">create</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="Spring底层如何使用工厂方法模式？"><a href="#Spring底层如何使用工厂方法模式？" class="headerlink" title="Spring底层如何使用工厂方法模式？"></a>Spring底层如何使用工厂方法模式？</h2><ul>
+<li>工厂方法模式在Spring底层被广泛的使用，陈某今天举个最常用的例子就是<code>AbstractFactoryBean</code>。</li>
+<li>这个抽象工厂很熟悉了，这里不再讨论具体的作用。其实现了<code>FactoryBean</code>接口，这个接口中<code>getObject()</code>方法返回真正的Bean实例。</li>
+<li><code>AbstractFactoryBean</code>中的<code>getObject()</code>方法如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> T <span class="title">getObject</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">    <span class="comment">//单例，从缓存中取，或者暴露一个早期实例解决循环引用</span></span><br><span class="line">		<span class="keyword">if</span> (isSingleton()) &#123;</span><br><span class="line">			<span class="keyword">return</span> (<span class="keyword">this</span>.initialized ? <span class="keyword">this</span>.singletonInstance : getEarlySingletonInstance());</span><br><span class="line">		&#125;</span><br><span class="line">    <span class="comment">//多实例</span></span><br><span class="line">		<span class="keyword">else</span> &#123; </span><br><span class="line">      <span class="comment">//调用createInstance</span></span><br><span class="line">			<span class="keyword">return</span> createInstance();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">  <span class="comment">//创建对象</span></span><br><span class="line">  <span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> T <span class="title">createInstance</span><span class="params">()</span> <span class="keyword">throws</span> Exception</span>;</span><br></pre></td></tr></table></figure></li>
+<li>从以上代码可以看出，创建对象的职责交给了<code>createInstance</code>这个抽象方法，由其子类去定制自己的创建逻辑。</li>
+<li>下图显示了继承了<code>AbstractFactoryBean</code>的具体工厂类，如下：</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F/3.png"></p>
+<ul>
+<li>其实与其说<code>AbstractFactoryBean</code>是抽象工厂类，不如说<code>FactoryBean</code>是真正的抽象工厂类，前者只是对后者的一种增强，完成大部分的可复用的逻辑。比如常用的<code>sqlSessionFactoryBean</code>只是简单的实现了<code>FactoryBean</code>，并未继承<code>AbstractFactoryBean</code>，至于结论如何，具体看你从哪方面看了。</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>工厂方法模式是一种常见的设计模式，但是真正能够用的高级，用的透彻还是有些难度的，开发者所能做的就是在此模式基础上思考如何优化自己的代码，达到易扩展、封装性强的效果了。</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/05/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%9A%E6%A8%A1%E6%9D%BF%E6%A8%A1%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/04/05/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%9A%E6%A8%A1%E6%9D%BF%E6%A8%A1%E5%BC%8F/" class="post-title-link" itemprop="url">设计模式：模板模式</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-04-05 21:43:52 / 修改时间：21:45:53" itemprop="dateCreated datePublished" datetime="2020-04-05T21:43:52+08:00">2020-04-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/04/05/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%9A%E6%A8%A1%E6%9D%BF%E6%A8%A1%E5%BC%8F/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/04/05/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%EF%BC%9A%E6%A8%A1%E6%9D%BF%E6%A8%A1%E5%BC%8F/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="导读"><a href="#导读" class="headerlink" title="导读"></a>导读</h2><ul>
+<li>模板模式在是Spring底层被广泛的应用，比如事务管理器的实现，JDBC模板的实现。</li>
+<li>今天就来谈谈<strong>什么是模板模式</strong>、<strong>模板模式的优缺点</strong>、<strong>模板模式的简单演示</strong>、<strong>模板模式在Spring底层的实现</strong>。</li>
+</ul>
+<h2 id="什么是模板模式"><a href="#什么是模板模式" class="headerlink" title="什么是模板模式"></a>什么是模板模式</h2><ul>
+<li>模板模式首先要有一个抽象类，这个抽象类公开定义了执行它的方法的方式/模板。它的子类可以按需要重写方法实现，但调用将以抽象类中定义的方式进行。这种类型的设计模式属于行为型模式。</li>
+<li>定义：<strong>定义一个操作中的算法骨架，而将算法的一些步骤延迟到子类中，使得子类可以不改变该算法结构的情况下重定义该算法的某些特定步骤。</strong></li>
+<li>比如在造房子一样，<code>地基</code>，<code>铺线</code>，<code>房子户型</code>都是一样的，由开发商决定，但是在交房之后，室内的<code>装修风格</code>和<code>场景布置</code>却是由业主决定，在这个场景中，开发商其实就是一个抽象类，地基，铺线，房子户型都是可以复用的，但是装修却是不可复用的，必须由业主决定，此时的每一个业主的房子就是一个实现的子类。</li>
+<li>模板方法的实现条件注意：<ol>
+<li>必须是一个抽象类。</li>
+<li>抽象类有一个模板方法，其中定义了算法骨架。</li>
+<li>为了防止恶意操作，模板方法必须加上<code>final</code>关键词。</li>
+<li>模板方法中除了复用的代码，其他的关键代码必须是抽象的，子类可以继承实现。</li>
+</ol>
+</li>
+</ul>
+<h2 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h2><ul>
+<li>它封装了不变部分，扩展可变部分。它把认为是不变部分的算法封装到父类中实现，而把可变部分算法由子类继承实现，便于子类继续扩展。</li>
+<li>它在父类中提取了公共的部分代码，便于代码复用。</li>
+<li>部分方法是由子类实现的，因此子类可以通过扩展方式增加相应的功能，符合开闭原则。</li>
+</ul>
+<h2 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h2><ul>
+<li>对每个不同的实现都需要定义一个子类，这会导致类的个数增加，系统更加庞大，设计也更加抽象。</li>
+<li>父类中的抽象方法由子类实现，子类执行的结果会影响父类的结果，这导致一种反向的控制结构，它提高了代码阅读的难度。</li>
+</ul>
+<h2 id="简单演示"><a href="#简单演示" class="headerlink" title="简单演示"></a>简单演示</h2><ul>
+<li><p>比如游戏的运行需要如下几个步骤：</p>
+<ol>
+<li>初始化游戏</li>
+<li>开始游戏</li>
+<li>结束游戏</li>
+</ol>
+</li>
+<li><p>上述的三个步骤可以是模板类的抽象方法，由具体的子类实现，比如足球游戏。</p>
+</li>
+<li><p>定义模板类，必须是一个抽象类，模板方法必须是<code>final</code>修饰。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Game</span> </span>&#123;</span><br><span class="line">    <span class="comment">//抽象方法</span></span><br><span class="line">   <span class="function"><span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">initialize</span><span class="params">()</span></span>;</span><br><span class="line">   <span class="function"><span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">startPlay</span><span class="params">()</span></span>;</span><br><span class="line">   <span class="function"><span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">endPlay</span><span class="params">()</span></span>;</span><br><span class="line"> </span><br><span class="line">   <span class="comment">//模板方法</span></span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">play</span><span class="params">()</span></span>&#123;</span><br><span class="line"> </span><br><span class="line">      <span class="comment">//初始化游戏</span></span><br><span class="line">      initialize();</span><br><span class="line"> </span><br><span class="line">      <span class="comment">//开始游戏</span></span><br><span class="line">      startPlay();</span><br><span class="line"> </span><br><span class="line">      <span class="comment">//结束游戏</span></span><br><span class="line">      endPlay();</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>定义实现类，足球游戏，继承模板类，实现其中的三个抽象方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Football</span> <span class="keyword">extends</span> <span class="title">Game</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">   <span class="meta">@Override</span></span><br><span class="line">   <span class="function"><span class="keyword">void</span> <span class="title">endPlay</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      System.out.println(<span class="string">&quot;足球游戏结束......&quot;</span>);</span><br><span class="line">   &#125;</span><br><span class="line"> </span><br><span class="line">   <span class="meta">@Override</span></span><br><span class="line">   <span class="function"><span class="keyword">void</span> <span class="title">initialize</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      System.out.println(<span class="string">&quot;足球游戏初始化中......&quot;</span>);</span><br><span class="line">   &#125;</span><br><span class="line"> </span><br><span class="line">   <span class="meta">@Override</span></span><br><span class="line">   <span class="function"><span class="keyword">void</span> <span class="title">startPlay</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      System.out.println(<span class="string">&quot;足球游侠开始了......&quot;</span>);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>此时写一个测试方法，运行足球游戏，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TemplatePatternDemo</span> </span>&#123;</span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">      <span class="comment">//创建足球游戏实例</span></span><br><span class="line">      Game game = <span class="keyword">new</span> Football();</span><br><span class="line">      <span class="comment">//开始游戏</span></span><br><span class="line">      game.play();      </span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>输出结果如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">足球游戏初始化中......</span><br><span class="line">足球游侠开始了......</span><br><span class="line">足球游戏结束......</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="Spring中的模板模式"><a href="#Spring中的模板模式" class="headerlink" title="Spring中的模板模式"></a>Spring中的模板模式</h2><ul>
+<li>Spring底层对于模板模式的使用有很多处，今天陈某带大家康康事务管理器是如何使用模板模式的。</li>
+</ul>
+<h3 id="模板抽象类"><a href="#模板抽象类" class="headerlink" title="模板抽象类"></a>模板抽象类</h3><ul>
+<li><code>AbstractPlatformTransactionManager</code>是Spring中的<code>模板抽象类</code>，来看看它的继承关系图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E6%A8%A1%E6%9D%BF%E6%A8%A1%E5%BC%8F/1.png"></li>
+<li>实现了<code>PlatformTransactionManager</code>接口，重载了接口中的方法。</li>
+</ul>
+<h3 id="模板方法"><a href="#模板方法" class="headerlink" title="模板方法"></a>模板方法</h3><ul>
+<li>事务管理器中抽象类中的模板方法不止一个，比如以下两个方法<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//提交事务</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">commit</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="comment">//获取TransactionStatus</span></span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> TransactionStatus <span class="title">getTransaction</span><span class="params">()</span></span></span><br></pre></td></tr></table></figure></li>
+<li>这两个方法都对于自己要实现的逻辑搭建了一个骨架，主要的功能是由抽象方法完成，由子类来完成。</li>
+</ul>
+<h3 id="抽象方法"><a href="#抽象方法" class="headerlink" title="抽象方法"></a>抽象方法</h3><ul>
+<li>事务管理器抽象类中的抽象方法定义了多个，分别用于处理不同的业务逻辑，由子类实现其中具体的逻辑，如下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//提交事务</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">doCommit</span><span class="params">(DefaultTransactionStatus status)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//回滚事务</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">doRollback</span><span class="params">(DefaultTransactionStatus status)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//开始事务</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">doBegin</span><span class="params">(Object transaction, TransactionDefinition definition)</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="comment">//获取当前的事务对象</span></span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">abstract</span> Object <span class="title">doGetTransaction</span><span class="params">()</span></span></span><br></pre></td></tr></table></figure></li>
+<li>抽象方法的定义便于子类去扩展，在保证算法逻辑不变的情况下，子类能够定制自己的实现。</li>
+</ul>
+<h3 id="具体子类"><a href="#具体子类" class="headerlink" title="具体子类"></a>具体子类</h3><ul>
+<li>事务管理器的模板类有很多的具体子类，如下图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/%E6%A8%A1%E6%9D%BF%E6%A8%A1%E5%BC%8F/2.png"></li>
+<li>其中我们熟悉的有<code>DataSourceTransactionManager</code>、<code>JtaTransactionManager</code>、<code>RabbitTransactionManager</code>。具体承担什么样的角色和责任不是本节的重点，不再细说。</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>模板模式是一个很重要，易扩展的模式，提高了代码复用性，在Spring中有着广泛的应用，比如<code>JDBCTemplate</code>,<code>AbstractPlatformTransactionManager</code>，这些实现都用到了模板模式。</li>
+<li>如果觉得陈某的文章能够对你有所帮助，有所启发，关注分享一波，点个在看，谢谢支持！！！</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/05/Mysql%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88count%E8%BF%99%E4%B9%88%E6%85%A2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/04/05/Mysql%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88count%E8%BF%99%E4%B9%88%E6%85%A2/" class="post-title-link" itemprop="url">Mysql性能优化：为什么count(*)这么慢？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-04-05 21:41:59 / 修改时间：21:43:11" itemprop="dateCreated datePublished" datetime="2020-04-05T21:41:59+08:00">2020-04-05</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%B9%B2%E8%B4%A7%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">数据库干货篇</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/04/05/Mysql%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88count%E8%BF%99%E4%B9%88%E6%85%A2/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/04/05/Mysql%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%EF%BC%9A%E4%B8%BA%E4%BB%80%E4%B9%88count%E8%BF%99%E4%B9%88%E6%85%A2/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="导读"><a href="#导读" class="headerlink" title="导读"></a>导读</h2><ul>
+<li>在开发中一定会用到统计一张表的行数，比如一个交易系统，老板会让你每天生成一个报表，这些统计信息少不了sql中的<code>count</code>函数。</li>
+<li>但是随着记录越来越多，查询的速度会越来越慢，为什么会这样呢？Mysql内部到底是怎么处理的？</li>
+<li>今天这篇文章将从Mysql内部对于<code>count</code>函数是怎样处理的？</li>
+</ul>
+<h2 id="count的实现方式"><a href="#count的实现方式" class="headerlink" title="count的实现方式"></a>count的实现方式</h2><ul>
+<li>在Mysql中的不同的存储引擎对<code>count</code>函数有不同的实现方式。</li>
+<li><code>MyISAM</code>引擎把一个表的总行数存在了磁盘上，因此执行<code>count(*)</code>的时候会直接返回这个数，效率很高（没有<code>where</code>查询条件）。</li>
+<li><code>InnoDB</code>引擎并没有直接将总数存在磁盘上，在执行<code>count(*)</code>函数的时候需要一行一行的将数据读出来，然后累计总数。</li>
+</ul>
+<h2 id="为什么InnoDB不将总数存起来？"><a href="#为什么InnoDB不将总数存起来？" class="headerlink" title="为什么InnoDB不将总数存起来？"></a>为什么InnoDB不将总数存起来？</h2><ul>
+<li><p>说道InnoDB相信读者总会想到其支持事务的特性，事务具有隔离性，如果将总数存起来，怎么保证各个事务之间的总数的一致性呢？不明白的看下图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/count/1.png"></p>
+</li>
+<li><p><code>事务A</code>和<code>事务B</code>中的<code>count(*)</code>的执行结果是不同的，因此InnoDB引擎在每个事务中返回多少行是不确定的，只能一行一行的读出来用来判断总数。</p>
+</li>
+</ul>
+<h2 id="如何提升count效率"><a href="#如何提升count效率" class="headerlink" title="如何提升count效率"></a>如何提升count效率</h2><ul>
+<li>在<code>InnoDB</code>对于如何提升<code>count(*)</code>的查询效率，网上有多种解决办法，这里主要介绍三种，并分析可行性。</li>
+</ul>
+<h3 id="show-table-status"><a href="#show-table-status" class="headerlink" title="show table status"></a>show table status</h3><ul>
+<li><code>show table status</code>这个命令能够很快的查询出数据库中每个表的行数，但是真的能够替代<code>count(*)</code>吗？</li>
+<li>答案是不能。原因很简单，这个命令统计出来的值是一个<strong>估值</strong>，因此是不准确的，官方文档说误差大概在<code>40%-50%</code>。</li>
+<li>因此这种方法直接pass，不准确还用它干嘛。</li>
+</ul>
+<h3 id="缓存系统存储总数"><a href="#缓存系统存储总数" class="headerlink" title="缓存系统存储总数"></a>缓存系统存储总数</h3><ul>
+<li><p>这种方法也是最容易想到的，增加一行就<code>+1</code>，删除一行就<code>-1</code>，并且缓存系统读取也是很快，既简单又方便的为什么不用？</p>
+</li>
+<li><p>缓存系统和Mysql是两个系统，比如<code>redis</code>和<code>Mysql</code>这两个是典型的比较。两个系统最难的就是在高并发下无法保证数据的一致性。通过以下两图我们来理解一下：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/count/2.png"><br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/count/3.png"></p>
+</li>
+<li><p>通过上面两张图，无论是<code>redis计数+1</code>还是<code>insert into user</code>先执行，最终都会导致数据在逻辑上的不一致。第一张图会出现<code>redis计数</code>少了，第二张图虽然计数正确了但是并没有查询出插入的那一行数据。</p>
+</li>
+<li><p>在并发系统里面，我们是无法精确控制不同线程的执行时刻的，因为存在图中的这种操作序列，所以，我们说即使Redis正常工作，这个计数值还是逻辑上不精确的。</p>
+</li>
+</ul>
+<h3 id="在数据库保存计数"><a href="#在数据库保存计数" class="headerlink" title="在数据库保存计数"></a>在数据库保存计数</h3><ul>
+<li><p>通过缓存系统保存的分析得知了使用缓存无法保证数据在逻辑上的一致性，因此我们想到了直接使用数据库来保存，有了<strong>事务</strong>的支持，也就保证了数据的一致性了。</p>
+</li>
+<li><p>如何使用呢？很简单，直接将计数保存在一张表中<code>（table_name,total）</code>。</p>
+</li>
+<li><p>至于执行的逻辑只需要将缓存系统中<code>redis计数+1</code>改成<code>total</code>字段+1即可，如下图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/count/4.png"></p>
+</li>
+<li><p>由于在同一个事务中，保证了数据在逻辑上的一致性。</p>
+</li>
+</ul>
+<h2 id="不同count的用法"><a href="#不同count的用法" class="headerlink" title="不同count的用法"></a>不同count的用法</h2><ul>
+<li><code>count()</code>是一个聚合函数，对于返回的结果集，一行行地判断，如果count函数的参数不是NULL，累计值就加1，否则不加。最后返回累计值。</li>
+<li><code>count</code>的用法有多种，分别是<code>count(*)</code>、<code>count(字段)</code>、<code>count(1)</code>、<code>count(主键id)</code>。那么多种用法，到底有什么差别呢？当然，<strong>前提是没有<code>where</code>条件语句</strong>。</li>
+<li><code>count(id)</code>：InnoDB引擎会遍历整张表，把每一行的id值都取出来，返回给server层。server层拿到id后，判断是不可能为空的，就按行累加。</li>
+<li><code>count(1)</code>：InnoDB引擎遍历整张表，但不取值。server层对于返回的每一行，放一个数字<code>1</code>进去，判断是不可能为空的，按行累加。</li>
+<li><code>count(字段)</code>：<ul>
+<li>如果这个“字段”是定义为<code>not null</code>的话，一行行地从记录里面读出这个字段，判断不能为null，按行累加；</li>
+<li>如果这个字段定义允许为<code>null</code>，那么执行的时候，判断到有可能是null，还要把值取出来再判断一下，不是null才累加。</li>
+</ul>
+</li>
+<li><code>count(*)</code>：不会把全部字段取出来，而是专门做了优化，不取值。<code>count(*)</code>肯定不是null，按行累加。</li>
+<li>所以结论很简单：<strong>按照效率排序的话，<code>count(字段)</code>&lt;<code>count(主键id)</code>&lt;<code>count(1)</code>≈<code>count(*)</code>，所以建议读者，尽量使用<code>count(*)</code>。</strong></li>
+<li><strong>注意</strong>：这里肯定有人会问，<code>count(id)</code>不是走的索引吗，为什么查询效率和其他的差不多呢？陈某在这里解释一下，虽然走的索引，但是还是要一行一行的扫描才能统计出来总数。</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li><code>MyISAM</code>表虽然<code>count(*)</code>很快，但是不支持事务；</li>
+<li><code>show table status</code>命令虽然返回很快，但是不准确；</li>
+<li><code>InnoDB</code>直接<code>count(*)</code>会遍历全表(没有where条件)，虽然结果准确，但会导致性能问题。</li>
+<li>缓存系统的存储计数虽然简单效率高，但是无法保证数据的一致性。</li>
+<li>数据库保存计数很简单，也能保证数据的一致性，建议使用。</li>
+<li><strong>思考题，读者留言区讨论</strong>：在系统高并发的情况下，使用数据库保存计数，是先<code>更新计数+1</code>,还是先<code>插入数据</code>。即是先<code>update total+=1</code>还是先<code>insert into</code>。</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/01/%E6%8E%A5%E5%8F%A3%E5%B9%82%E7%AD%89%E6%80%A7%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/04/01/%E6%8E%A5%E5%8F%A3%E5%B9%82%E7%AD%89%E6%80%A7%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%EF%BC%9F/" class="post-title-link" itemprop="url">接口幂等性如何设计？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-04-01 10:38:34 / 修改时间：10:38:57" itemprop="dateCreated datePublished" datetime="2020-04-01T10:38:34+08:00">2020-04-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9D%82%E8%B0%88/" itemprop="url" rel="index"><span itemprop="name">杂谈</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/04/01/%E6%8E%A5%E5%8F%A3%E5%B9%82%E7%AD%89%E6%80%A7%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%EF%BC%9F/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/04/01/%E6%8E%A5%E5%8F%A3%E5%B9%82%E7%AD%89%E6%80%A7%E5%A6%82%E4%BD%95%E8%AE%BE%E8%AE%A1%EF%BC%9F/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="导读"><a href="#导读" class="headerlink" title="导读"></a>导读</h2><ul>
+<li>现在这个时代大家可能最关心的就是钱了，那么有没有想过你银行转账给你没有一次是转多的，要么失败，要么成功，为什么不能失误一下多转一笔呢？醒醒吧年轻人，别做梦了，做银行的能那么傻x吗？</li>
+<li>今天我们就来谈一谈为什么银行转账不能多给我转一笔？关乎到钱的问题，小伙伴们打起精神！！！</li>
+<li>要想要理解上述的疑惑，不得不提的一个概念就是幂等性，至于什么是幂等性，如何通过代码实现幂等性，下面将会详细讲述。</li>
+</ul>
+<h2 id="什么是幂等性"><a href="#什么是幂等性" class="headerlink" title="什么是幂等性"></a>什么是幂等性</h2><ul>
+<li>所谓幂等性通俗的将就是一次请求和多次请求同一个资源产生相同的副作用。用数学语言表达就是<code>f(x)=f(f(x))</code>。</li>
+<li>维基百科的幂等性定义如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">幂等（idempotent、idempotence）是一个数学与计算机学概念，常见于抽象代数中。</span><br><span class="line">在编程中一个幂等操作的特点是其任意多次执行所产生的影响均与一次执行的影响相同。幂等函数，或幂等方法，是指可以使用相同参数重复执行，并能获得相同结果的函数。这些函数不会影响系统状态，也不用担心重复执行会对系统造成改变。例如，“setTrue()”函数就是一个幂等函数,无论多次执行，其结果都是一样的，更复杂的操作幂等保证是利用唯一交易号(流水号)实现.</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="为什么需要幂等性"><a href="#为什么需要幂等性" class="headerlink" title="为什么需要幂等性"></a>为什么需要幂等性</h2><ul>
+<li>在系统高并发的环境下，很有可能因为网络，阻塞等等问题导致客户端或者调用方并不能及时的收到服务端的反馈甚至是调用超时的问题。总之，就是请求方调用了你的服务，但是没有收到任何的信息，完全懵逼的状态。比如订单的问题，可能会遇到如下的几个问题：</li>
+</ul>
+<ol>
+<li>创建订单时，第一次调用服务超时，再次调用是否产生两笔订单？</li>
+<li>订单创建成功去减库存时，第一次减库存超时，是否会多扣一次？</li>
+<li>订单支付时，服务端扣钱成功，但是接口反馈超时，此时再次调用支付，是否会多扣一笔呢？</li>
+</ol>
+<ul>
+<li>作为消费者，前两种能接受，第三种情况就MMP了，哈哈哈！！！这种情况一般有如下两种解决方式</li>
+</ul>
+<ol>
+<li>服务方提供一个查询操作是否成功的api，第一次超时之后，调用方调用查询接口，如果查到了就走成功的流程，失败了就走失败的流程。</li>
+<li>另一种就是服务方需要使用幂等的方式保证一次和多次的请求结果一致。</li>
+</ol>
+<h2 id="HTTP的幂等性"><a href="#HTTP的幂等性" class="headerlink" title="HTTP的幂等性"></a>HTTP的幂等性</h2><ul>
+<li>GET：只是获取资源，对资源本身没有任何副作用，天然的幂等性。</li>
+<li>HEAD：本质上和GET一样，获取头信息，主要是探活的作用，具有幂等性。</li>
+<li>OPTIONS：获取当前URL所支持的方法，因此也是具有幂等性的。</li>
+<li>DELETE：用于删除资源，有副作用，但是它应该满足幂等性，比如根据id删除某一个资源，调用方可以调用N次而不用担心引起的错误（根据业务需求而变）。</li>
+<li>PUT：用于更新资源，有副作用，但是它应该满足幂等性，比如根据id更新数据，调用多次和N次的作用是相同的（根据业务需求而变）。</li>
+<li>POST：用于添加资源，多次提交很可能产生副作用，比如订单提交，多次提交很可能产生多笔订单。</li>
+</ul>
+<h2 id="幂等性的实现方式"><a href="#幂等性的实现方式" class="headerlink" title="幂等性的实现方式"></a>幂等性的实现方式</h2><ul>
+<li>对于客户端交互的接口，可以在前端拦截一部分，例如防止表单重复提交，按钮置灰，隐藏，不可点击等方式。但是前端进行拦截器显然是针对普通用户，懂点技术的都可以模拟请求调用接口，所以后端幂等性很重要。</li>
+<li>后端的幂等性如何实现？将会从以下几个方面介绍。</li>
+</ul>
+<h3 id="数据库去重表"><a href="#数据库去重表" class="headerlink" title="数据库去重表"></a>数据库去重表</h3><ul>
+<li>在往数据库中插入数据的时候，利用数据库唯一索引特性，保证数据唯一。比如订单的流水号，也可以是多个字段的组合。</li>
+<li>实现比较简单，读者可以自己实现看看，这里不再提供demo了。</li>
+</ul>
+<h3 id="状态机"><a href="#状态机" class="headerlink" title="状态机"></a>状态机</h3><ul>
+<li>很多业务中多有多个状态，比如订单的状态有提交、待支付、已支付、取消、退款等等状态。后端可以根据不同的状态去保证幂等性，比如在退款的时候，一定要保证这笔订单是已支付的状态。</li>
+<li>业务中常常出现，读者可以自己实现看看，不再提供demo。</li>
+</ul>
+<h3 id="TOKEN机制"><a href="#TOKEN机制" class="headerlink" title="TOKEN机制"></a>TOKEN机制</h3><ul>
+<li>针对客户端连续点击或者调用方的超时重试等情况，例如提交订单，此种操作就可以用Token的机制实现防止重复提交。</li>
+<li>TOKEN机制如何实现？简单的说就是调用方在调用接口的时候先向后端请求一个全局ID（TOKEN），请求的时候携带这个全局ID一起请求，后端需要对这个全局ID校验来保证幂等操作，流程如下图：</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/repeat/1.png"></p>
+<ul>
+<li>主要的流程步骤如下：<ul>
+<li>客户端先发送获取token的请求，服务端会生成一个全局唯一的ID保存在redis中，同时把这个ID返回给客户端。</li>
+<li>客户端调用业务请求的时候必须携带这个token，一般放在请求头上。</li>
+<li>服务端会校验这个Token，如果校验成功，则执行业务。</li>
+<li>如果校验失败，则表示重复操作，直接返回指定的结果给客户端。</li>
+</ul>
+</li>
+<li>通过以上的流程分析，唯一的重点就是这个全局唯一ID如何生成，在分布式服务中往往都会有一个生成全局ID的服务来保证ID的唯一性，但是工程量和实现难度比较大，UUID的数据量相对有些大，此处陈某选择的是雪花算法生成全局唯一ID，不了解雪花算法的读者下一篇文章会着重介绍。</li>
+</ul>
+<h4 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h4><ul>
+<li>陈某选择的环境是SpringBoot+Redis单机环境+注解+拦截器的方式实现，只是演示一下思想，具体的代码可以参照实现。</li>
+<li>redis如何实现，获取Token接口将全局唯一Id存入Redis（一定要设置失效时间，根据业务需求），业务请求的时候直接从redis中删除，根据delete的返回值判断，返回true表示第一次请求，返回false表示重复请求。代码如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Service</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TokenServiceImpl</span> <span class="keyword">implements</span> <span class="title">TokenService</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> StringRedisTemplate stringRedisTemplate;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getToken</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">//获取全局唯一id</span></span><br><span class="line">        <span class="keyword">long</span> nextId = SnowflakeUtil.nextId();</span><br><span class="line">        <span class="comment">//存入redis，设置10分钟失效</span></span><br><span class="line">        stringRedisTemplate.opsForValue().set(String.valueOf(nextId), UUID.randomUUID().toString(),<span class="number">10</span>, TimeUnit.MINUTES);</span><br><span class="line">        <span class="keyword">return</span> String.valueOf(nextId);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">    * 删除记录，true表示第一次提交，false重复提交</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Boolean <span class="title">checkToken</span><span class="params">(String token)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> stringRedisTemplate.delete(token);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>注解的实现如下，标注在controller类上表示当前类上全部接口都做幂等，标注单个方法上，表示单个接口做幂等操作。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Description</span> 幂等操作的注解</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Author</span> CJB</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Date</span> 2020/3/25 10:19</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Target(&#123;ElementType.TYPE, ElementType.METHOD&#125;)</span></span><br><span class="line"><span class="meta">@Retention(RetentionPolicy.RUNTIME)</span></span><br><span class="line"><span class="meta">@Documented</span></span><br><span class="line"><span class="keyword">public</span> <span class="meta">@interface</span> RepeatLimiter &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>请求头的拦截器，用于提取请求头和校验请求头，如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Description</span> 获取请求头的信息，具体校验逻辑读者自己实现</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Author</span> CJB</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@Date</span> 2020/3/25 11:09</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HeaderIntercept</span> <span class="keyword">implements</span> <span class="title">HandlerInterceptor</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">preHandle</span><span class="params">(HttpServletRequest request, HttpServletResponse response, Object handler)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="comment">//获取token</span></span><br><span class="line">        String token = request.getHeader(HeaderConstant.TOKEN);</span><br><span class="line">        <span class="comment">//校验逻辑</span></span><br><span class="line">        <span class="keyword">if</span> (!validToken(token))</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> TokenInvalidException(<span class="string">&quot;TOKEN失效&quot;</span>);</span><br><span class="line">        <span class="comment">//获取其他的参数.....</span></span><br><span class="line">        RequestHeader header = RequestHeader.builder()</span><br><span class="line">                .token(token)</span><br><span class="line">                .build();</span><br><span class="line">        <span class="comment">//放入request中</span></span><br><span class="line">        request.setAttribute(HeaderConstant.HEADER_INFO,header);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 校验token，逻辑自己实现</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> token</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">validToken</span><span class="params">(String token)</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> Boolean.TRUE;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>保证幂等性的拦截器，直接从redis中删除token，成功则第一次提交，不成功则重复提交。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RepeatIntercept</span> <span class="keyword">implements</span> <span class="title">HandlerInterceptor</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> TokenService tokenService;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">preHandle</span><span class="params">(HttpServletRequest request, HttpServletResponse response, Object handler)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (handler <span class="keyword">instanceof</span> HandlerMethod)&#123;</span><br><span class="line">            <span class="comment">//获取方法上的参数</span></span><br><span class="line">            RepeatLimiter repeatLimiter = AnnotationUtils.findAnnotation(((HandlerMethod) handler).getMethod(), RepeatLimiter.class);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (Objects.isNull(repeatLimiter))&#123;</span><br><span class="line">                <span class="comment">//获取controller类上注解</span></span><br><span class="line">                repeatLimiter=AnnotationUtils.findAnnotation(((HandlerMethod) handler).getBean().getClass(),RepeatLimiter.class);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">//使用注解，需要拦截验证</span></span><br><span class="line">            <span class="keyword">if</span> (Objects.nonNull(repeatLimiter))&#123;</span><br><span class="line">                <span class="comment">//获取全局token，表单提交的唯一id</span></span><br><span class="line">                RequestHeader info = RequestContextUtils.getHeaderInfo();</span><br><span class="line"></span><br><span class="line">                <span class="comment">//没有携带token，抛异常，这里的异常需要全局捕获</span></span><br><span class="line">                <span class="keyword">if</span> (StringUtils.isEmpty(info.getToken()))</span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> RepeatException();</span><br><span class="line"></span><br><span class="line">                <span class="comment">//校验token</span></span><br><span class="line">                Boolean flag = tokenService.checkToken(info.getToken());</span><br><span class="line"></span><br><span class="line">                <span class="comment">//删除失败，表示</span></span><br><span class="line">                <span class="keyword">if</span> (Boolean.FALSE.equals(flag))</span><br><span class="line">                    <span class="comment">//抛出重复提交的异常</span></span><br><span class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> RepeatException();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<ul>
+<li>接口幂等实现，代码如下：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RequestMapping(&quot;/order&quot;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderController</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Autowired</span></span><br><span class="line">    <span class="keyword">private</span> OrderService orderService;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 下单</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> order</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@PostMapping</span></span><br><span class="line">    <span class="meta">@RepeatLimiter</span>  <span class="comment">//幂等性保证</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> CommenResult <span class="title">add</span><span class="params">(<span class="meta">@RequestBody</span> Order order)</span></span>&#123;</span><br><span class="line">        orderService.save(order);</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> CommenResult(<span class="string">&quot;200&quot;</span>,<span class="string">&quot;下单成功&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h4 id="演示"><a href="#演示" class="headerlink" title="演示"></a>演示</h4><ul>
+<li>发送getToken的请求获取Token</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/repeat/2.png"></p>
+<ul>
+<li>携带Token下单第一次：</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/repeat/3.png"></p>
+<ul>
+<li>第二次下单：</li>
+</ul>
+<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/repeat/4.png"></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/01/Mysql%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%EF%BC%9A%E4%BB%80%E4%B9%88%E6%98%AF%E7%B4%A2%E5%BC%95%E4%B8%8B%E6%8E%A8%EF%BC%9F/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -580,605 +1578,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/03/23/IDEA%E8%B0%83%E8%AF%95%E6%8A%80%E5%B7%A7/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/23/IDEA%E8%B0%83%E8%AF%95%E6%8A%80%E5%B7%A7/" class="post-title-link" itemprop="url">IDEA调试技巧</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-03-23 16:15:12" itemprop="dateCreated datePublished" datetime="2020-03-23T16:15:12+08:00">2020-03-23</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-10-23 21:57:33" itemprop="dateModified" datetime="2020-10-23T21:57:33+08:00">2020-10-23</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%9D%82%E8%B0%88/" itemprop="url" rel="index"><span itemprop="name">杂谈</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2020/03/23/IDEA%E8%B0%83%E8%AF%95%E6%8A%80%E5%B7%A7/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2020/03/23/IDEA%E8%B0%83%E8%AF%95%E6%8A%80%E5%B7%A7/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="导读"><a href="#导读" class="headerlink" title="导读"></a>导读</h2><ul>
-<li>前天面试了一个985高校的实习生，问了他平时用什么开发工具，他想也没想的说IDEA，于是我抛砖引玉的问了一下IDEA的调试用过吧，你说说怎么设置断点条件？那孩子懵了，想了好一会对我说没用过，甚至都没听说过这个。</li>
-<li>作为一名资深的老司机，IDEA调试可以说是家常便饭，如果不会debug，我都不信你读过源码，就别和我说原理了，直接pass掉。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/03/23/IDEA%E8%B0%83%E8%AF%95%E6%8A%80%E5%B7%A7/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/03/23/Spring%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/23/Spring%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/" class="post-title-link" itemprop="url">Spring生命周期</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-03-23 10:13:32" itemprop="dateCreated datePublished" datetime="2020-03-23T10:13:32+08:00">2020-03-23</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-10-23 21:57:38" itemprop="dateModified" datetime="2020-10-23T21:57:38+08:00">2020-10-23</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%9D%82%E8%B0%88/" itemprop="url" rel="index"><span itemprop="name">杂谈</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2020/03/23/Spring%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2020/03/23/Spring%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="导读"><a href="#导读" class="headerlink" title="导读"></a>导读</h2><ul>
-<li>Spring中Bean的生命周期从容器的启动到停止，涉及到的源码主要是在<code>org.springframework.context.support.AbstractApplicationContext.refresh</code>方法中，下面也是围绕其中的逻辑进行讲解。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/03/23/Spring%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/03/23/%E6%8E%A5%E5%8F%A3%E9%99%90%E6%B5%81%E7%AE%97%E6%B3%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/23/%E6%8E%A5%E5%8F%A3%E9%99%90%E6%B5%81%E7%AE%97%E6%B3%95/" class="post-title-link" itemprop="url">接口限流算法</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-03-23 09:38:58" itemprop="dateCreated datePublished" datetime="2020-03-23T09:38:58+08:00">2020-03-23</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-10-23 21:57:42" itemprop="dateModified" datetime="2020-10-23T21:57:42+08:00">2020-10-23</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%9D%82%E8%B0%88/" itemprop="url" rel="index"><span itemprop="name">杂谈</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2020/03/23/%E6%8E%A5%E5%8F%A3%E9%99%90%E6%B5%81%E7%AE%97%E6%B3%95/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2020/03/23/%E6%8E%A5%E5%8F%A3%E9%99%90%E6%B5%81%E7%AE%97%E6%B3%95/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="导读"><a href="#导读" class="headerlink" title="导读"></a>导读</h2><ul>
-<li>前几天和一个朋友讨论了他们公司的系统问题，传统的单体应用，集群部署，他说近期服务的并发量可能会出现瞬时增加的风险，虽然部署了集群，但是通过压测后发现请求延迟仍然是很大，想问问我有什么改进的地方。我沉思了一会，现在去改架构显然是不可能的，于是我给出了一个建议，让他去做个接口限流，这样能够保证瞬时并发量飙高也不会出现请求延迟的问题，用户的体验度也会上去。</li>
-<li>至于什么是接口限流？怎么实现接口限流？如何实现单机应用的限流？如何实现分布式应用的限流？本篇文章将会详细阐述。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/03/23/%E6%8E%A5%E5%8F%A3%E9%99%90%E6%B5%81%E7%AE%97%E6%B3%95/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/03/18/SpringBoot%E6%95%B4%E5%90%88%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E7%9A%84%E5%B7%A8%E5%9D%91/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/03/18/SpringBoot%E6%95%B4%E5%90%88%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E7%9A%84%E5%B7%A8%E5%9D%91/" class="post-title-link" itemprop="url">SpringBoot整合多数据源的巨坑</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-03-18 16:51:57" itemprop="dateCreated datePublished" datetime="2020-03-18T16:51:57+08:00">2020-03-18</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-10-23 21:56:45" itemprop="dateModified" datetime="2020-10-23T21:56:45+08:00">2020-10-23</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%9D%82%E8%B0%88/" itemprop="url" rel="index"><span itemprop="name">杂谈</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2020/03/18/SpringBoot%E6%95%B4%E5%90%88%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E7%9A%84%E5%B7%A8%E5%9D%91/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2020/03/18/SpringBoot%E6%95%B4%E5%90%88%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E7%9A%84%E5%B7%A8%E5%9D%91/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="导读"><a href="#导读" class="headerlink" title="导读"></a>导读</h2><ul>
-<li>本篇文章接上篇<a href="https://chenjiabing666.github.io/2020/03/12/SpringBoot%E6%95%B4%E5%90%88%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%EF%BC%8C%E4%BD%A0%E4%BC%9A%E4%BA%86%E5%90%97%EF%BC%9F/">SpringBoot整合多数据源，你会了吗？</a>，前面文章最后留了几个问题供大家思考，今天一一揭晓。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/03/18/SpringBoot%E6%95%B4%E5%90%88%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E7%9A%84%E5%B7%A8%E5%9D%91/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2019/07/17/Spring%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2019/07/17/Spring%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96/" class="post-title-link" itemprop="url">Spring解决循环依赖</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2019-07-17 01:13:29" itemprop="dateCreated datePublished" datetime="2019-07-17T01:13:29+08:00">2019-07-17</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-10-23 21:57:47" itemprop="dateModified" datetime="2020-10-23T21:57:47+08:00">2020-10-23</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Spring/" itemprop="url" rel="index"><span itemprop="name">Spring</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2019/07/17/Spring%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2019/07/17/Spring%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="导读"><a href="#导读" class="headerlink" title="导读"></a>导读</h2><ul>
-<li>前几天发表的文章<a href="https://chenjiabing666.github.io/2020/03/12/SpringBoot%E6%95%B4%E5%90%88%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%EF%BC%8C%E4%BD%A0%E4%BC%9A%E4%BA%86%E5%90%97%EF%BC%9F/">SpringBoot多数据源动态切换</a>和<a href="https://chenjiabing666.github.io/2020/03/18/SpringBoot%E6%95%B4%E5%90%88%E5%A4%9A%E6%95%B0%E6%8D%AE%E6%BA%90%E7%9A%84%E5%B7%A8%E5%9D%91/">SpringBoot整合多数据源的巨坑</a>中，提到了一个坑就是动态数据源添加@Primary接口就会造成循环依赖异常，如下图：</li>
-</ul>
-<p><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/circleex.png" alt="微信所有码猿技术专栏"></p>
-<ul>
-<li>这个就是典型的构造器依赖，详情请看上面两篇文章，这里不再详细赘述了。本篇文章将会从源码深入解析Spring是如何解决循环依赖的？为什么不能解决构造器的循环依赖？</li>
-</ul>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2019/07/17/Spring%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2018/04/16/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/04/16/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/" class="post-title-link" itemprop="url">设计模式之适配器模式</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2018-04-16 13:56:28" itemprop="dateCreated datePublished" datetime="2018-04-16T13:56:28+08:00">2018-04-16</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-10-23 21:58:04" itemprop="dateModified" datetime="2020-10-23T21:58:04+08:00">2020-10-23</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2018/04/16/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2018/04/16/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h2><ul>
-<li>适配器模式用于将一个接口转化成客户想要的另一个接口，使接口不兼容的那些类可以一起工作，其别名为包装器(Wrapper)。适配器模式既可以作为类结构型模式，也可以作为对象结构型模式。</li>
-</ul>
-<p><img src="http://ono60m7tl.bkt.clouddn.com/adapeter1.png" alt="适配器模式"></p>
-<ul>
-<li><p>Target（目标抽象类）：目标抽象类定义客户所需接口，可以是一个抽象类或接口，也可以是具体类。</p>
-</li>
-<li><p>Adapter（适配器类）：适配器可以调用另一个接口，作为一个转换器，对Adaptee和Target进行适配，适配器类是适配器模式的核心，在对象适配器中，它通过继承Target并关联一个Adaptee对象使二者产生联系。</p>
-</li>
-<li><p>Adaptee（适配者类）：适配者即被适配的角色，它定义了一个已经存在的接口，这个接口需要适配，适配者类一般是一个具体类，包含了客户希望使用的业务方法，在某些情况下可能没有适配者类的源代码。</p>
-</li>
-<li><p>根据对象适配器模式结构图，在对象适配器中，客户端需要调用request()方法，而适配者类Adaptee没有该方法，但是它所提供的specificRequest()方法却是客户端所需要的。为了使客户端能够使用适配者类，需要提供一个包装类Adapter，即适配器类。这个包装类包装了一个适配者的实例，从而将客户端与适配者衔接起来，在适配器的request()方法中调用适配者的specificRequest()方法。因为适配器类与适配者类是关联关系（也可称之为委派关系），所以这种适配器模式称为对象适配器模式</p>
-</li>
-</ul>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/04/16/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E4%B9%8B%E9%80%82%E9%85%8D%E5%99%A8%E6%A8%A1%E5%BC%8F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/12/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><span class="page-number current">13</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/14/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/12/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><span class="page-number current">13</span><a class="page-number" href="/page/14/">14</a><a class="page-number" href="/page/15/">15</a><a class="extend next" rel="next" href="/page/14/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1258,20 +1661,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">136</span>
+          <span class="site-state-item-count">142</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">68</span>
+        <span class="site-state-item-count">72</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"chenjiabing666.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="1.spring 中都用到了哪些设计模式?  1.工厂设计模式: 比如通过 BeanFactory 和 ApplicationContext 来生产 Bean 对象 2.代理设计模式:  AOP 的实现方式就是通过代理来实现，Spring主要是使用 JDK 动态代理和 CGLIB 代理 3.单例设计模式: Spring 中的 Bean 默认都是单例的 4.模板方法模式: Spring 中 jdbc">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring全网最全面试题">
+<meta property="og:url" content="https://chenjiabing666.github.io/2023/04/27/Spring%E5%85%A8%E7%BD%91%E6%9C%80%E5%85%A8%E9%9D%A2%E8%AF%95%E9%A2%98/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="1.spring 中都用到了哪些设计模式?  1.工厂设计模式: 比如通过 BeanFactory 和 ApplicationContext 来生产 Bean 对象 2.代理设计模式:  AOP 的实现方式就是通过代理来实现，Spring主要是使用 JDK 动态代理和 CGLIB 代理 3.单例设计模式: Spring 中的 Bean 默认都是单例的 4.模板方法模式: Spring 中 jdbc">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.java-family.cn/20220823134458.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823134502.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823134505.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823134510.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823134513.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823134517.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823134521.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823134524.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823134528.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823134531.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823134544.png">
+<meta property="og:image" content="https://img.java-family.cn/202304270958131.png">
+<meta property="article:published_time" content="2023-04-27T01:20:43.000Z">
+<meta property="article:modified_time" content="2023-04-27T02:22:02.873Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="Spring">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.java-family.cn/20220823134458.png">
+
+<link rel="canonical" href="https://chenjiabing666.github.io/2023/04/27/Spring%E5%85%A8%E7%BD%91%E6%9C%80%E5%85%A8%E9%9D%A2%E8%AF%95%E9%A2%98/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Spring全网最全面试题 | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+		<div id="container">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2023/04/27/Spring%E5%85%A8%E7%BD%91%E6%9C%80%E5%85%A8%E9%9D%A2%E8%AF%95%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Spring全网最全面试题
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-04-27 09:20:43 / 修改时间：10:22:02" itemprop="dateCreated datePublished" datetime="2023-04-27T09:20:43+08:00">2023-04-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E9%9D%A2%E8%AF%95/" itemprop="url" rel="index"><span itemprop="name">面试</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2023/04/27/Spring%E5%85%A8%E7%BD%91%E6%9C%80%E5%85%A8%E9%9D%A2%E8%AF%95%E9%A2%98/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2023/04/27/Spring%E5%85%A8%E7%BD%91%E6%9C%80%E5%85%A8%E9%9D%A2%E8%AF%95%E9%A2%98/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="1-spring-中都用到了哪些设计模式"><a href="#1-spring-中都用到了哪些设计模式" class="headerlink" title="1.spring 中都用到了哪些设计模式?"></a>1.spring 中都用到了哪些设计模式?</h2><p><img src="https://img.java-family.cn/20220823134458.png"></p>
+<ul>
+<li><strong>1.工厂设计模式</strong>: 比如通过 BeanFactory 和 ApplicationContext 来生产 Bean 对象</li>
+<li><strong>2.代理设计模式</strong>:  AOP 的实现方式就是通过代理来实现，Spring主要是使用 JDK 动态代理和 CGLIB 代理</li>
+<li><strong>3.单例设计模式</strong>: Spring 中的 Bean 默认都是单例的</li>
+<li><strong>4.模板方法模式</strong>: Spring 中 jdbcTemplate 等以 Template 结尾的对数据库操作的类，都会使用到模板方法设计模式，一些通用的功能</li>
+<li><strong>5.包装器设计模式</strong>: 我们的项目需要连接多个数据库，而且不同的客户在每次访问中根据需要会去访问不同的数据库。这种模式让我们可以根据客户的需求能够动态切换不同的数据源</li>
+<li><strong>6.观察者模式</strong>: Spring 事件驱动模型观察者模式的</li>
+<li><strong>7.适配器模式</strong>:Spring AOP 的增强或通知(Advice)使用到了适配器模式</li>
+</ul>
+<span id="more"></span>
+
+<h2 id="2-spring-中有哪些核心模块"><a href="#2-spring-中有哪些核心模块" class="headerlink" title="2.spring 中有哪些核心模块?"></a>2.spring 中有哪些核心模块?</h2><p><img src="https://img.java-family.cn/20220823134502.png"></p>
+<ul>
+<li>1.<strong>Spring Core</strong>：Spring核心，它是框架最基础的部分，提供IOC和依赖注入DI特性</li>
+<li>2.<strong>Spring Context</strong>：Spring上下文容器，它是 BeanFactory 功能加强的一个子接口</li>
+<li>3.<strong>Spring Web</strong>：它提供Web应用开发的支持</li>
+<li>4.<strong>Spring MVC</strong>：它针对Web应用中MVC思想的实现</li>
+<li>5.<strong>Spring DAO</strong>：提供对JDBC抽象层，简化了JDBC编码，同时，编码更具有健壮性</li>
+<li>6.<strong>Spring ORM</strong>：它支持用于流行的ORM框架的整合，比如：Spring + Hibernate、Spring + iBatis、Spring + JDO的整合等</li>
+<li>7.<strong>Spring AOP</strong>：即面向切面编程，它提供了与AOP联盟兼容的编程实现</li>
+</ul>
+<h2 id="3-说一下你理解的-IOC-是什么"><a href="#3-说一下你理解的-IOC-是什么" class="headerlink" title="3.说一下你理解的 IOC 是什么?"></a>3.说一下你理解的 IOC 是什么?</h2><p><img src="https://img.java-family.cn/20220823134505.png"></p>
+<p>首先 IOC 是一个<strong>容器</strong>，是用来装载对象的，它的核心思想就是<strong>控制反转</strong></p>
+<p>那么究竟<strong>什么是控制反转</strong>?</p>
+<p>控制反转就是说，<strong>把对象的控制权交给了 spring，由 spring 容器进行管理</strong>，我们不进行任何操作</p>
+<p>那么为<strong>什么需要控制反转</strong>?</p>
+<p>我们想象一下，没有控制反转的时候，我们需要<strong>自己去创建对象，配置对象</strong>，还要<strong>人工去处理对象与对象之间的各种复杂的依赖关系</strong>，当一个工程的量起来之后，这种关系的维护是非常令人头痛的，所以就有了控制反转这个概念，将对象的创建、配置等一系列操作交给 spring 去管理，我们在使用的时候只要去取就好了</p>
+<h2 id="4-spring-中的-IOC-容器有哪些-有什么区别"><a href="#4-spring-中的-IOC-容器有哪些-有什么区别" class="headerlink" title="4.spring 中的 IOC 容器有哪些?有什么区别?"></a>4.spring 中的 IOC 容器有哪些?有什么区别?</h2><p>spring 主要提供了<strong>两种 IOC 容器</strong>，一种是 <strong>BeanFactory</strong>，还有一种是 <strong>ApplicationContext</strong></p>
+<p>它们的区别就在于，BeanFactory <strong>只提供了最基本的实例化对象和拿对象的功能</strong>，而 ApplicationContext 是继承了 BeanFactory 所派生出来的产物，是其子类，它的作用更加的强大，比如支持注解注入、国际化等功能</p>
+<h2 id="5-那-BeanFactory-和-FactoryBean-又有什么区别"><a href="#5-那-BeanFactory-和-FactoryBean-又有什么区别" class="headerlink" title="5.那 BeanFactory 和 FactoryBean 又有什么区别?"></a>5.那 BeanFactory 和 FactoryBean 又有什么区别?</h2><p>这两个是<strong>不同的产物</strong></p>
+<p><strong>BeanFactory 是 IOC 容器</strong>，是用来承载对象的</p>
+<p><strong>FactoryBean 是一个接口</strong>，为 Bean 提供了更加灵活的方式，通过代理一个Bean对象，对方法前后做一些操作。</p>
+<h2 id="6-Repository、-Service、-Compent、-Controller它们有什么区别"><a href="#6-Repository、-Service、-Compent、-Controller它们有什么区别" class="headerlink" title="6.@Repository、@Service、@Compent、@Controller它们有什么区别?"></a>6.@Repository、@Service、@Compent、@Controller它们有什么区别?</h2><p>这四个注解的<strong>本质都是一样的，都是将被该注解标识的对象放入 spring　容器当中，只是为了在使用上区分不同的应用分层</strong></p>
+<ul>
+<li>@Repository:dao层</li>
+<li>@Service:service层</li>
+<li>@Controller:controller层</li>
+<li>@Compent:其他不属于以上三层的统一使用该注解</li>
+</ul>
+<h2 id="7-那么-DI-又是什么"><a href="#7-那么-DI-又是什么" class="headerlink" title="7.那么 DI 又是什么?"></a>7.那么 DI 又是什么?</h2><p>DI 就是依赖注入，其实和 IOC 大致相同，只不过是<strong>同一个概念使用了不同的角度去阐述</strong></p>
+<p>DI 所描述的<strong>重点是在于依赖</strong>，我们说了 <strong>IOC 的核心功能就是在于在程序运行时动态的向某个对象提供其他的依赖对象</strong>，而这个功能就是依靠 DI 去完成的，比如我们需要注入一个对象 A，而这个对象 A 依赖一个对象 B，那么我们就需要把这个对象 B 注入到对象 A 中，这就是依赖注入</p>
+<p>spring 中有三种注入方式</p>
+<ul>
+<li>接口注入</li>
+<li>构造器注入</li>
+<li>set注入</li>
+</ul>
+<h2 id="8-说说-AOP-是什么"><a href="#8-说说-AOP-是什么" class="headerlink" title="8.说说 AOP 是什么?"></a>8.说说 AOP 是什么?</h2><p>AOP 意为：<strong>面向切面编程，通过预编译方式和运行期间动态代理实现程序功能的统一维护的一种技术</strong>。</p>
+<p>AOP 是 <strong>OOP(面向对象编程) 的延续</strong>，是 Spring 框架中的一个重要内容，是函数式编程的一种衍生范型。利用 AOP 可以对业务逻辑的各个部分进行隔离，从而使得业务逻辑各部分之间的耦合度降低，提高程序的可重用性，同时提高了开发的效率。</p>
+<p><strong>AOP 实现主要分为两类:</strong></p>
+<p><img src="https://img.java-family.cn/20220823134510.png"></p>
+<ul>
+<li><strong>静态 AOP 实现</strong>， AOP 框架<strong>在编译阶段</strong>对程序源代码进行修改，生成了静态的 AOP 代理类（生成的 *.class 文件已经被改掉了，需要使用特定的编译器），比如 AspectJ</li>
+<li><strong>动态 AOP 实现</strong>， AOP 框架<strong>在运行阶段</strong>对动态生成代理对象（在内存中以 JDK 动态代理，或 CGlib 动态地生成 AOP 代理类），如 SpringAOP</li>
+</ul>
+<p>spring 中 AOP 的实现是<strong>通过动态代理实现的</strong>，如果是实现了接口就会使用 JDK 动态代理，否则就使用 CGLIB 代理。</p>
+<p><img src="https://img.java-family.cn/20220823134513.png"></p>
+<p><strong>有 5 种通知类型:</strong></p>
+<ul>
+<li><strong>@Before</strong>:在目标方法调用前去通知</li>
+<li><strong>@AfterReturning</strong>:在目标方法返回或异常后调用</li>
+<li><strong>@AfterThrowing</strong>:在目标方法返回后调用</li>
+<li><strong>@After</strong>:在目标方法异常后调用</li>
+<li><strong>@Around</strong>:将目标方法封装起来，自己确定调用时机</li>
+</ul>
+<h2 id="9-动态代理和静态代理有什么区别"><a href="#9-动态代理和静态代理有什么区别" class="headerlink" title="9.动态代理和静态代理有什么区别?"></a>9.动态代理和静态代理有什么区别?</h2><p><strong>静态代理</strong></p>
+<ul>
+<li>由程序员创建或由特定工具自动生成源代码，再对其编译。在程序运行前，代理类的.class文件就已经存在了</li>
+<li>静态代理通常只代理一个类</li>
+<li>静态代理事先知道要代理的是什么</li>
+</ul>
+<p><strong>动态代理</strong></p>
+<ul>
+<li>在程序运行时，运用反射机制动态创建而成</li>
+<li>动态代理是代理一个接口下的多个实现类</li>
+<li>动态代理不知道要代理什么东西，只有在运行时才知道</li>
+</ul>
+<h2 id="10-JDK-动态代理和-CGLIB-代理有什么区别？"><a href="#10-JDK-动态代理和-CGLIB-代理有什么区别？" class="headerlink" title="10.JDK 动态代理和 CGLIB 代理有什么区别？"></a>10.JDK 动态代理和 CGLIB 代理有什么区别？</h2><p>JDK 动态代理时业务类<strong>必须要实现某个接口</strong>，它是<strong>基于反射的机制实现的</strong>，生成一个实现同样接口的一个代理类，然后通过重写方法的方式，实现对代码的增强。</p>
+<p>CGLIB 动态代理是使用字节码处理框架 ASM，其原理是通过字节码技术为一个类<strong>创建子类，然后重写父类的方法</strong>，实现对代码的增强。</p>
+<h2 id="11-Spring-AOP-和-AspectJ-AOP-有什么区别？"><a href="#11-Spring-AOP-和-AspectJ-AOP-有什么区别？" class="headerlink" title="11.Spring AOP 和 AspectJ AOP 有什么区别？"></a>11.Spring AOP 和 AspectJ AOP 有什么区别？</h2><p>Spring AOP 是运行时增强，是通过<strong>动态代理实现</strong>的</p>
+<p>AspectJ AOP 是编译时增强，需要特殊的编译器才可以完成，是通过<strong>修改代码来实现</strong>的，支持<strong>三种织入方式</strong></p>
+<ul>
+<li><strong>编译时织入</strong>:就是在编译字节码的时候织入相关代理类</li>
+<li><strong>编译后织入</strong>:编译完初始类后发现需要 AOP 增强，然后织入相关代码</li>
+<li><strong>类加载时织入</strong>:指在加载器加载类的时候织入</li>
+</ul>
+<p><img src="https://img.java-family.cn/20220823134517.png"></p>
+<table>
+<thead>
+<tr>
+<th align="left">主要区别</th>
+<th align="center">Spring AOP</th>
+<th align="right">AspecjtJ AOP</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">增强方式</td>
+<td align="center">运行时增强</td>
+<td align="right">编译时增强</td>
+</tr>
+<tr>
+<td align="left">实现方式</td>
+<td align="center">动态代理</td>
+<td align="right">修改代码</td>
+</tr>
+<tr>
+<td align="left">编译器</td>
+<td align="center">javac</td>
+<td align="right">特殊的编译器 ajc</td>
+</tr>
+<tr>
+<td align="left">效率</td>
+<td align="center">较低(运行时反射损耗性能)</td>
+<td align="right">较高</td>
+</tr>
+<tr>
+<td align="left">织入方式</td>
+<td align="center">运行时</td>
+<td align="right">编译时、编译后、类加载时</td>
+</tr>
+</tbody></table>
+<h2 id="12-spring-中-Bean-的生命周期是怎样的"><a href="#12-spring-中-Bean-的生命周期是怎样的" class="headerlink" title="12.spring 中 Bean 的生命周期是怎样的?"></a>12.spring 中 Bean 的生命周期是怎样的?</h2><p>SpringBean 生命周期大致分为4个阶段：</p>
+<p><img src="https://img.java-family.cn/20220823134521.png"></p>
+<ul>
+<li><p>1.<strong>实例化</strong>，实例化该 Bean 对象</p>
+</li>
+<li><p>2.<strong>填充属性</strong>，给该 Bean 赋值</p>
+</li>
+<li><p>3.<strong>初始化</strong></p>
+</li>
+<li><ul>
+<li>如果实现了 Aware 接口，会通过其接口获取容器资源</li>
+<li>如果实现了 BeanPostProcessor 接口，则会回调该接口的前置和后置处理增强</li>
+<li>如果配置了 init-method 方法，]会执行该方法</li>
+</ul>
+</li>
+<li><p>4.<strong>销毁</strong></p>
+</li>
+<li><ul>
+<li>如果实现了 DisposableBean 接口，则会回调该接口的 destroy 方法</li>
+<li>如果配置了 destroy-method 方法，则会执行 destroy-method 配置的方法</li>
+</ul>
+</li>
+</ul>
+<h2 id="13-spring-是怎么解决循环依赖的"><a href="#13-spring-是怎么解决循环依赖的" class="headerlink" title="13.spring 是怎么解决循环依赖的?"></a>13.spring 是怎么解决循环依赖的?</h2><p><img src="https://img.java-family.cn/20220823134524.png"></p>
+<p>循环依赖就是说两个对象相互依赖，形成了一个环形的调用链路</p>
+<p>spring 使用三级缓存去解决循环依赖的，其<strong>核心逻辑就是把实例化和初始化的步骤分开，然后放入缓存中</strong>，供另一个对象调用</p>
+<ul>
+<li><strong>第一级缓存</strong>：用来保存实例化、初始化都完成的对象</li>
+<li><strong>第二级缓存</strong>：用来保存实例化完成，但是未初始化完成的对象</li>
+<li><strong>第三级缓存</strong>：用来保存一个对象工厂，提供一个匿名内部类，用于创建二级缓存中的对象</li>
+</ul>
+<hr>
+<p>当 A、B 两个类发生循环引用时 大致流程</p>
+<ul>
+<li><p>1.A 完成实例化后，去<strong>创建一个对象工厂，并放入三级缓存</strong>当中</p>
+</li>
+<li><ul>
+<li>如果 A 被 AOP 代理，那么通过这个工厂获取到的就是 A 代理后的对象</li>
+<li>如果 A 没有被 AOP 代理，那么这个工厂获取到的就是 A 实例化的对象</li>
+</ul>
+</li>
+<li><p>2.A 进行属性注入时，去<strong>创建 B</strong></p>
+</li>
+<li><p>3.B 进行属性注入，需要 A ，则<strong>从三级缓存中去取 A 工厂代理对象</strong>并注入，然后删除三级缓存中的 A 工厂，将 A 对象放入二级缓存</p>
+</li>
+<li><p>4.B 完成后续属性注入，直到初始化结束，将 B 放入一级缓存</p>
+</li>
+<li><p>5.<strong>A 从一级缓存中取到 B 并且注入 B</strong>, 直到完成后续操作，将 A 从二级缓存删除并且放入一级缓存，循环依赖结束</p>
+</li>
+</ul>
+<hr>
+<p>spring 解决循环依赖有两个前提条件：</p>
+<ul>
+<li>1.<strong>不全是构造器方式</strong>的循环依赖(否则无法分离初始化和实例化的操作)</li>
+<li>2.<strong>必须是单例</strong>(否则无法保证是同一对象)</li>
+</ul>
+<h2 id="14-为什么要使用三级缓存，二级缓存不能解决吗"><a href="#14-为什么要使用三级缓存，二级缓存不能解决吗" class="headerlink" title="14.为什么要使用三级缓存，二级缓存不能解决吗?"></a>14.为什么要使用三级缓存，二级缓存不能解决吗?</h2><p>可以，三级缓存的功能是只有真正发生循环依赖的时候，才去提前生成代理对象，否则只会<strong>创建一个工厂并将其放入到三级缓存</strong>中，但是不会去通过这个工厂去真正创建对象。</p>
+<p>如果使用二级缓存解决循环依赖，意味着所有 Bean 在实例化后就要完成 AOP 代理，这样<strong>违背了 Spring 设计的原则</strong>，Spring 在设计之初就是在 Bean 生命周期的最后一步来完成 AOP 代理，而不是在实例化后就立马进行 AOP 代理。</p>
+<h2 id="15-Autowired-和-Resource-有什么区别"><a href="#15-Autowired-和-Resource-有什么区别" class="headerlink" title="15.@Autowired 和 @Resource 有什么区别?"></a>15.@Autowired 和 @Resource 有什么区别?</h2><ul>
+<li><strong>@Resource 是 Java 自己的注解</strong>，@Resource 有两个属性是比较重要的，分是 name 和 type；Spring 将 @Resource 注解的 name 属性解析为 bean 的名字，而 type 属性则解析为 bean 的类型。所以如果使用 name 属性，则使用 byName 的自动注入策略，而使用 type 属性时则使用 byType 自动注入策略。如果既不指定 name 也不指定 type 属性，这时将通过反射机制使用 byName 自动注入策略。</li>
+<li><strong>@Autowired 是spring 的注解</strong>，是 spring2.5 版本引入的，Autowired 只根据 type 进行注入，<strong>不会去匹配 name</strong>。如果涉及到 type 无法辨别注入对象时，那需要依赖 @Qualifier 或 @Primary 注解一起来修饰。</li>
+</ul>
+<h2 id="16-spring-事务隔离级别有哪些"><a href="#16-spring-事务隔离级别有哪些" class="headerlink" title="16.spring 事务隔离级别有哪些?"></a>16.spring 事务隔离级别有哪些?</h2><p><img src="https://img.java-family.cn/20220823134528.png"></p>
+<ul>
+<li>DEFAULT：采用 DB 默认的事务隔离级别</li>
+<li>READ_UNCOMMITTED：读未提交</li>
+<li>READ_COMMITTED：读已提交</li>
+<li>REPEATABLE_READ：可重复读</li>
+<li>SERIALIZABLE：串行化</li>
+</ul>
+<h2 id="17-spring-事务的传播机制有哪些"><a href="#17-spring-事务的传播机制有哪些" class="headerlink" title="17.spring 事务的传播机制有哪些?"></a>17.spring 事务的传播机制有哪些?</h2><p><img src="https://img.java-family.cn/20220823134531.png"></p>
+<ul>
+<li><p>1.<strong>propagation_required</strong></p>
+</li>
+<li><ul>
+<li>当前方法<strong>必须在一个具有事务的上下文中运行</strong>，如有客户端有事务在进行，那么被调用端将在该事务中运行，否则的话重新开启一个事务。（如果被调用端发生异常，那么调用端和被调用端事务都将回滚）</li>
+</ul>
+</li>
+<li><p>2.<strong>propagation_supports</strong></p>
+</li>
+<li><ul>
+<li>当前方法不必需要具有一个事务上下文，但是如果有一个事务的话，它也可以在这个事务中运行</li>
+</ul>
+</li>
+<li><p>3.<strong>propagation_mandatory</strong></p>
+</li>
+<li><ul>
+<li>表示当前方法<strong>必须在一个事务中运行</strong>，如果没有事务，将抛出异常</li>
+</ul>
+</li>
+<li><p>4.<strong>propagation_nested</strong></p>
+</li>
+<li><ul>
+<li>如果当前方法正有一个事务在运行中，则该方法应该<strong>运行在一个嵌套事务</strong>中，被嵌套的事务可以独立于被封装的事务中进行提交或者回滚。如果封装事务存在，并且外层事务抛出异常回滚，那么内层事务必须回滚，反之，内层事务并不影响外层事务。如果封装事务不存在，则同propagation_required的一样</li>
+</ul>
+</li>
+<li><p>5.<strong>propagation_never</strong></p>
+</li>
+<li><ul>
+<li>当方法务不应该在一个事务中运行，如果<strong>存在一个事务，则抛出异常</strong></li>
+</ul>
+</li>
+<li><p>6.<strong>propagation_requires_new</strong></p>
+</li>
+<li><ul>
+<li>当前方法<strong>必须运行在它自己的事务中</strong>。一个新的事务将启动，而且如果有一个现有的事务在运行的话，则这个方法将在运行期被挂起，直到新的事务提交或者回滚才恢复执行。</li>
+</ul>
+</li>
+<li><p>7.<strong>propagation_not_supported</strong></p>
+</li>
+<li><ul>
+<li>方法不应该在一个事务中运行。<strong>如果有一个事务正在运行，他将在运行期被挂起，直到这个事务提交或者回滚才恢复执行</strong></li>
+</ul>
+</li>
+</ul>
+<h2 id="18-springBoot-自动装配原理"><a href="#18-springBoot-自动装配原理" class="headerlink" title="18.springBoot 自动装配原理?"></a>18.springBoot 自动装配原理?</h2><p><img src="https://img.java-family.cn/20220823134544.png"></p>
+<ul>
+<li>1.容器在启动的时候会调用 EnableAutoConfigurationImportSelector.class 的 selectImports方法<strong>获取一个全面的常用 BeanConfiguration 列表</strong></li>
+<li>2.之后会读取 spring-boot-autoconfigure.jar 下面的spring.factories，<strong>获取到所有的 Spring 相关的 Bean 的全限定名 ClassName</strong></li>
+<li>3.之后继续<strong>调用 filter 来一一筛选</strong>，过滤掉一些我们不需要不符合条件的 Bean</li>
+<li>4.最后把符合条件的 BeanConfiguration 注入默认的 EnableConfigurationPropertie 类里面的属性值，并且<strong>注入到 IOC 环境当中</strong></li>
+</ul>
+<h2 id="最后说一句（别白嫖，求关注）"><a href="#最后说一句（别白嫖，求关注）" class="headerlink" title="最后说一句（别白嫖，求关注）"></a>最后说一句（别白嫖，求关注）</h2><p>陈某每一篇文章都是精心输出，如果这篇文章对你有所帮助，或者有所启发的话，帮忙<strong>点赞</strong>、<strong>在看</strong>、<strong>转发</strong>、<strong>收藏</strong>，你的支持就是我坚持下去的最大动力！</p>
+<p>另外陈某的<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247524437&idx=1&sn=32699e9afede86fe52136c38f844c620&chksm=fcf7bf98cb80368e5eff366916e6b251fa7ca7526b44202d59032863d89f353545f0c0ebfff2&token=339165402&lang=zh_CN#rd">知识星球</a>开通了，公众号回复关键词：<strong>知识星球</strong> 获取限量<strong>20元</strong>优惠券加入只需<strong>109</strong>元，星球回馈的价值巨大，目前更新了<strong>Spring全家桶实战系列</strong>、<strong>亿级数据分库分表实战</strong>、<strong>DDD微服务实战专栏</strong>、<strong>我要进大厂、Spring，Mybatis等框架源码、架构实战22讲、精尽RocketMQ</strong>等….每增加一个专栏价格将上涨20元</p>
+<p><img src="https://img.java-family.cn/202304270958131.png"></p>
+<p>关注公众号：【码猿技术专栏】，公众号内有超赞的粉丝福利，回复：加群，可以加入技术讨论群，和大家一起讨论技术，吹牛逼！</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    不才陈某  |  微信公众号【码猿技术专栏】
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://chenjiabing666.github.io/2023/04/27/Spring%E5%85%A8%E7%BD%91%E6%9C%80%E5%85%A8%E9%9D%A2%E8%AF%95%E9%A2%98/" title="Spring全网最全面试题">https://chenjiabing666.github.io/2023/04/27/Spring全网最全面试题/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+  <li class="post-copyright-license">
+    并保留本声明和上方二维码。感谢您的阅读和支持！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">微信公众号</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Spring/" rel="tag"># Spring</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/04/27/Kafka%E5%85%A8%E7%BD%91%E6%9C%80%E5%85%A8%E9%9D%A2%E8%AF%95%E9%A2%98/" rel="prev" title="Kafka全网最全面试题">
+      <i class="fa fa-chevron-left"></i> Kafka全网最全面试题
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/04/27/MySQL%E5%85%A8%E7%BD%91%E6%9C%80%E5%85%A8%E9%9D%A2%E8%AF%95%E9%A2%98/" rel="next" title="MySQL全网最全面试题">
+      MySQL全网最全面试题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+		  <script src="https://readmore.openwrite.cn/js/readmore.js" type="text/javascript"></script>
+<script>
+    const btw = new BTWPlugin();
+    btw.init({
+        id: 'container',
+        blogId: '27513-1629019452485-311',
+        name: '码猿技术专栏',
+        qrcode: 'https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg',
+        keyword: 'vip',
+    });
+</script>
+        </div>
+		</div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-spring-%E4%B8%AD%E9%83%BD%E7%94%A8%E5%88%B0%E4%BA%86%E5%93%AA%E4%BA%9B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F"><span class="nav-text">1.spring 中都用到了哪些设计模式?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-spring-%E4%B8%AD%E6%9C%89%E5%93%AA%E4%BA%9B%E6%A0%B8%E5%BF%83%E6%A8%A1%E5%9D%97"><span class="nav-text">2.spring 中有哪些核心模块?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-%E8%AF%B4%E4%B8%80%E4%B8%8B%E4%BD%A0%E7%90%86%E8%A7%A3%E7%9A%84-IOC-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-text">3.说一下你理解的 IOC 是什么?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-spring-%E4%B8%AD%E7%9A%84-IOC-%E5%AE%B9%E5%99%A8%E6%9C%89%E5%93%AA%E4%BA%9B-%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB"><span class="nav-text">4.spring 中的 IOC 容器有哪些?有什么区别?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-%E9%82%A3-BeanFactory-%E5%92%8C-FactoryBean-%E5%8F%88%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB"><span class="nav-text">5.那 BeanFactory 和 FactoryBean 又有什么区别?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-Repository%E3%80%81-Service%E3%80%81-Compent%E3%80%81-Controller%E5%AE%83%E4%BB%AC%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB"><span class="nav-text">6.@Repository、@Service、@Compent、@Controller它们有什么区别?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-%E9%82%A3%E4%B9%88-DI-%E5%8F%88%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-text">7.那么 DI 又是什么?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-%E8%AF%B4%E8%AF%B4-AOP-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-text">8.说说 AOP 是什么?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86%E5%92%8C%E9%9D%99%E6%80%81%E4%BB%A3%E7%90%86%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB"><span class="nav-text">9.动态代理和静态代理有什么区别?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-JDK-%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86%E5%92%8C-CGLIB-%E4%BB%A3%E7%90%86%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB%EF%BC%9F"><span class="nav-text">10.JDK 动态代理和 CGLIB 代理有什么区别？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-Spring-AOP-%E5%92%8C-AspectJ-AOP-%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB%EF%BC%9F"><span class="nav-text">11.Spring AOP 和 AspectJ AOP 有什么区别？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-spring-%E4%B8%AD-Bean-%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%98%AF%E6%80%8E%E6%A0%B7%E7%9A%84"><span class="nav-text">12.spring 中 Bean 的生命周期是怎样的?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#13-spring-%E6%98%AF%E6%80%8E%E4%B9%88%E8%A7%A3%E5%86%B3%E5%BE%AA%E7%8E%AF%E4%BE%9D%E8%B5%96%E7%9A%84"><span class="nav-text">13.spring 是怎么解决循环依赖的?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#14-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8%E4%B8%89%E7%BA%A7%E7%BC%93%E5%AD%98%EF%BC%8C%E4%BA%8C%E7%BA%A7%E7%BC%93%E5%AD%98%E4%B8%8D%E8%83%BD%E8%A7%A3%E5%86%B3%E5%90%97"><span class="nav-text">14.为什么要使用三级缓存，二级缓存不能解决吗?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#15-Autowired-%E5%92%8C-Resource-%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB"><span class="nav-text">15.@Autowired 和 @Resource 有什么区别?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#16-spring-%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB%E6%9C%89%E5%93%AA%E4%BA%9B"><span class="nav-text">16.spring 事务隔离级别有哪些?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#17-spring-%E4%BA%8B%E5%8A%A1%E7%9A%84%E4%BC%A0%E6%92%AD%E6%9C%BA%E5%88%B6%E6%9C%89%E5%93%AA%E4%BA%9B"><span class="nav-text">17.spring 事务的传播机制有哪些?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#18-springBoot-%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D%E5%8E%9F%E7%90%86"><span class="nav-text">18.springBoot 自动装配原理?</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%90%8E%E8%AF%B4%E4%B8%80%E5%8F%A5%EF%BC%88%E5%88%AB%E7%99%BD%E5%AB%96%EF%BC%8C%E6%B1%82%E5%85%B3%E6%B3%A8%EF%BC%89"><span class="nav-text">最后说一句（别白嫖，求关注）</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="不才陈某"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">142</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">72</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png" title="微信公众号 → https:&#x2F;&#x2F;gitee.com&#x2F;chenjiabing666&#x2F;BlogImage&#x2F;raw&#x2F;master&#x2F;myjszl_log.png" rel="noopener" target="_blank"><i class="fab fa-weixin fa-fw"></i>微信公众号</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.im/user/2506542244708072" title="掘金 → https:&#x2F;&#x2F;juejin.im&#x2F;user&#x2F;2506542244708072" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>掘金</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某|公众号：码猿技术专栏</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RtlQOgOT3M0hgyMeogykSQjT-gzGzoHsz',
+      appKey     : 'vSCxLU88wnXVf0Pa8mwJrCPm',
+      placeholder: "欢迎关注博主微信公众号【码猿技术专栏】",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

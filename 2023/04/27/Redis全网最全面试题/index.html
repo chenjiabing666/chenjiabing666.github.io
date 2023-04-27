@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"chenjiabing666.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="1.什么是 redis？它能做什么？ redis: redis 即 Remote Dictionary Server，用中文翻译过来可以理解为远程数据服务或远程字典服务。其是使用 C 语言的编写的key-value存储系统 应用场景:缓存，数据库，消息队列，分布式锁，点赞列表，排行榜等等">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis全网最全面试题">
+<meta property="og:url" content="https://chenjiabing666.github.io/2023/04/27/Redis%E5%85%A8%E7%BD%91%E6%9C%80%E5%85%A8%E9%9D%A2%E8%AF%95%E9%A2%98/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="1.什么是 redis？它能做什么？ redis: redis 即 Remote Dictionary Server，用中文翻译过来可以理解为远程数据服务或远程字典服务。其是使用 C 语言的编写的key-value存储系统 应用场景:缓存，数据库，消息队列，分布式锁，点赞列表，排行榜等等">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.java-family.cn/20220823152635.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823152639.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823152642.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823152646.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823152650.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823152654.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823152657.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823152700.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823152703.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823152708.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823152711.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823152714.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823152717.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823152720.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823152723.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823152726.png">
+<meta property="og:image" content="https://img.java-family.cn/20220823152729.png">
+<meta property="og:image" content="https://img.java-family.cn/202304270958131.png">
+<meta property="article:published_time" content="2023-04-27T01:20:43.000Z">
+<meta property="article:modified_time" content="2023-04-27T02:26:27.362Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="Redis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.java-family.cn/20220823152635.png">
+
+<link rel="canonical" href="https://chenjiabing666.github.io/2023/04/27/Redis%E5%85%A8%E7%BD%91%E6%9C%80%E5%85%A8%E9%9D%A2%E8%AF%95%E9%A2%98/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Redis全网最全面试题 | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+		<div id="container">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2023/04/27/Redis%E5%85%A8%E7%BD%91%E6%9C%80%E5%85%A8%E9%9D%A2%E8%AF%95%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Redis全网最全面试题
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-04-27 09:20:43 / 修改时间：10:26:27" itemprop="dateCreated datePublished" datetime="2023-04-27T09:20:43+08:00">2023-04-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E9%9D%A2%E8%AF%95/" itemprop="url" rel="index"><span itemprop="name">面试</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2023/04/27/Redis%E5%85%A8%E7%BD%91%E6%9C%80%E5%85%A8%E9%9D%A2%E8%AF%95%E9%A2%98/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2023/04/27/Redis%E5%85%A8%E7%BD%91%E6%9C%80%E5%85%A8%E9%9D%A2%E8%AF%95%E9%A2%98/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="1-什么是-redis？它能做什么？"><a href="#1-什么是-redis？它能做什么？" class="headerlink" title="1.什么是 redis？它能做什么？"></a>1.什么是 redis？它能做什么？</h2><p><img src="https://img.java-family.cn/20220823152635.png"></p>
+<p>redis: redis 即 Remote Dictionary Server，用中文翻译过来可以理解为<strong>远程数据服务</strong>或远程字典服务。其是使用 C 语言的编写的key-value<strong>存储系统</strong></p>
+<p>应用场景:缓存，数据库，消息队列，分布式锁，点赞列表，排行榜等等</p>
+<span id="more"></span>
+
+<h2 id="2-redis-有哪八种数据类型？有哪些应用场景？"><a href="#2-redis-有哪八种数据类型？有哪些应用场景？" class="headerlink" title="2.redis 有哪八种数据类型？有哪些应用场景？"></a>2.redis 有哪八种数据类型？有哪些应用场景？</h2><p>redis 总共有<strong>八种数据结构，五种基本数据类型和三种特殊数据类型</strong>。</p>
+<p><img src="https://img.java-family.cn/20220823152639.png"></p>
+<p>五种基本数据类型:</p>
+<ul>
+<li><p><strong>1.string</strong>:字符串类型，常被用来存储计数器，粉丝数等，简单的分布式锁也会用到该类型</p>
+</li>
+<li><p><strong>2.hashmap</strong>:key - value 形式的，value 是一个map</p>
+</li>
+<li><p><strong>3.list</strong>:基本的数据类型，列表。在 Redis 中可以把 list 用作栈、队列、阻塞队列。</p>
+</li>
+<li><p><strong>4.set</strong>:集合，不能有重复元素，可以做点赞，收藏等</p>
+</li>
+<li><p><strong>5.zset</strong>:有序集合，不能有重复元素，有序集合中的每个元素都需要指定一个分数，根据分数对元素进行升序排序。可以做排行榜</p>
+<p><img src="https://img.java-family.cn/20220823152642.png"></p>
+</li>
+<li><p><strong>1.geospatial</strong>: Redis 在 3.2 推出 Geo 类型，该功能<strong>可以推算出地理位置信息，两地之间的距离</strong>。</p>
+</li>
+<li><p><strong>2.hyperloglog</strong>:基数：数学上集合的元素个数，是不能重复的。这个数据结构<strong>常用于统计网站的 UV</strong>。</p>
+</li>
+<li><p><strong>3.bitmap</strong>: bitmap 就是通过最小的单位 bit 来进行0或者1的设置，表示某个元素对应的值或者状态。一个 bit 的值，或者是0，或者是1；也就是说一个 bit 能存储的最多信息是2。bitmap <strong>常用于统计用户信息比如活跃粉丝和不活跃粉丝、登录和未登录、是否打卡等</strong>。</p>
+</li>
+</ul>
+<h2 id="3-redis为什么这么快？"><a href="#3-redis为什么这么快？" class="headerlink" title="3.redis为什么这么快？"></a>3.redis为什么这么快？</h2><p><img src="https://img.java-family.cn/20220823152646.png"></p>
+<p>官方数据 redis 可以做到每秒近10w的并发，这么快的原因主要总结为以下几点：</p>
+<ul>
+<li>1:完全基于内存操作</li>
+<li>2:使用单线程模型来处理客户端的请求，避免了上下文的切换</li>
+<li>3:IO 多路复用机制</li>
+<li>4:自身使用 C 语言编写，有很多优化机制，比如动态字符串 sds</li>
+</ul>
+<h2 id="4-听说-redis-6-0之后又使用了多线程，不会有线程安全的问题吗？"><a href="#4-听说-redis-6-0之后又使用了多线程，不会有线程安全的问题吗？" class="headerlink" title="4.听说 redis 6.0之后又使用了多线程，不会有线程安全的问题吗？"></a>4.听说 redis 6.0之后又使用了多线程，不会有线程安全的问题吗？</h2><p><strong>不会</strong></p>
+<p>其实 redis <strong>还是使用单线程模型来处理客户端的请求</strong>，只是使用多线程来处理数据的读写和协议解析，执行命令还是使用单线程，所以是不会有线程安全的问题。</p>
+<p>之所以加入了多线程因为 redis 的性能瓶颈在于网络IO而非CPU，使用多线程能提升IO读写的效率，从而整体提高redis的性能。</p>
+<h2 id="5-redis-的持久化机制有哪些？优缺点说说"><a href="#5-redis-的持久化机制有哪些？优缺点说说" class="headerlink" title="5.redis 的持久化机制有哪些？优缺点说说"></a>5.redis 的持久化机制有哪些？优缺点说说</h2><p>redis 有<strong>两种</strong>持久化的方式，AOF 和 RDB.</p>
+<p><img src="https://img.java-family.cn/20220823152650.png"></p>
+<p><strong>AOF</strong>:</p>
+<ul>
+<li>redis 每次执行一个命令时,都会把这个命令原本的语句记录到一个.aod的文件当中,然后通过fsync策略,将命令执行后的数据持久化到磁盘中(不包括读命令)，</li>
+</ul>
+<p>AOF的优缺点</p>
+<p><img src="https://img.java-family.cn/20220823152654.png"></p>
+<ul>
+<li><p><strong>AOF 的优点</strong>:</p>
+</li>
+<li><ul>
+<li>1.AOF可以更好的保护数据不丢失，一般AOF会以每隔1秒，通过后台的一个线程去执行一次fsync操作，如果redis进程挂掉，<strong>最多丢失1秒的数据</strong></li>
+<li>2.AOF是将命令直接追加在文件末尾的,<strong>写入性能非常高</strong></li>
+<li>3.AOF日志文件的命令通过非常可读的方式进行记录，这个非常<strong>适合做灾难性的误删除紧急恢复</strong>，如果某人不小心用 flushall 命令清空了所有数据，只要这个时候还没有执行 rewrite，那么就可以将日志文件中的 flushall 删除，进行恢复</li>
+</ul>
+</li>
+</ul>
+<p><img src="https://img.java-family.cn/20220823152657.png"></p>
+<ul>
+<li><p><strong>AOF 的缺点</strong>:</p>
+</li>
+<li><ul>
+<li>1.对于同一份数据源来说,一般情况下<strong>AOF 文件比 RDB 数据快照要大</strong></li>
+<li>2.由于 .aof 的<strong>每次命令都会写入</strong>,那么相对于 RDB 来说需要消耗的性能也就更多，当然也会有 <strong>aof 重写</strong>将 aof 文件优化。</li>
+<li>3.<strong>数据恢复比较慢</strong>，不适合做冷备。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<p><strong>RDB</strong>:</p>
+<ul>
+<li>把<strong>某个时间点 redis 内存</strong>中的数据以二进制的形式存储的一个.rdb为后缀的文件当中,也就是<strong>周期性的备份redis中的整个数据</strong>,这是redis<strong>默认</strong>的持久化方式,也就是我们说的快照(snapshot)，是采用 fork 子进程的方式来写时同步的。</li>
+</ul>
+<p><strong>RDB的优缺点</strong></p>
+<p><img src="https://img.java-family.cn/20220823152700.png"></p>
+<ul>
+<li><p>RDB的优点:</p>
+</li>
+<li><ul>
+<li>1.它是将某一时间点redis内的所有数据保存下来,所以当我们做大型的数据恢复时,RDB的恢复速度会很快</li>
+<li>2.由于RDB的FROK子进程这种机制,队友给客户端提供读写服务的影响会非常小</li>
+</ul>
+</li>
+</ul>
+<p><img src="https://img.java-family.cn/20220823152703.png"></p>
+<ul>
+<li><p>RDB的缺点:</p>
+</li>
+<li><ul>
+<li>举个例子假设我们定时5分钟备份一次,在10:00的时候 redis 备份了数据,但是如果在10:04的时候服务挂了,那么我们就会丢失在10:00到10:04的整个数据</li>
+<li>1:有可能会产生长时间的数据丢失</li>
+<li>2:可能会有长时间停顿:我们前面讲了,fork 子进程这个过程是和 redis 的数据量有很大关系的,<strong>如果数据量很大,那么很有可能会使redis暂停几秒</strong></li>
+</ul>
+</li>
+</ul>
+<h2 id="6-Redis的过期键的删除策略有哪些？"><a href="#6-Redis的过期键的删除策略有哪些？" class="headerlink" title="6. Redis的过期键的删除策略有哪些？"></a>6. Redis的过期键的删除策略有哪些？</h2><p>过期策略通常有以下三种：</p>
+<p><img src="https://img.java-family.cn/20220823152708.png"></p>
+<ul>
+<li><strong>定时过期</strong>：<strong>每个设置过期时间的key都需要创建一个定时器，到过期时间就会立即清除</strong>。该策略可以立即清除过期的数据，对内存很友好；但是会占用大量的CPU资源去处理过期的数据，从而影响缓存的响应时间和吞吐量。</li>
+<li><strong>惰性过期</strong>：只有当<strong>访问一个key时，才会判断该key是否已过期</strong>，过期则清除。该策略可以最大化地节省CPU资源，却对内存非常不友好。极端情况可能出现大量的过期key没有再次被访问，从而不会被清除，占用大量内存。</li>
+<li><strong>定期过期</strong>：<strong>每隔一定的时间，会扫描一定数量的数据库的expires字典中一定数量的key，并清除其中已过期的key</strong>。该策略是前两者的一个折中方案。通过调整定时扫描的时间间隔和每次扫描的限定耗时，可以在不同情况下使得CPU和内存资源达到最优的平衡效果。</li>
+</ul>
+<h2 id="7-Redis的内存满了怎么办？"><a href="#7-Redis的内存满了怎么办？" class="headerlink" title="7. Redis的内存满了怎么办？"></a>7. Redis的内存满了怎么办？</h2><p>实际上Redis<strong>定义了8种内存淘汰策略用</strong>来处理redis内存满的情况：</p>
+<ul>
+<li>1.noeviction：直接返回错误，不淘汰任何已经存在的redis键</li>
+<li>2.allkeys-lru：所有的键使用lru算法进行淘汰</li>
+<li>3.volatile-lru：有过期时间的使用lru算法进行淘汰</li>
+<li>4.allkeys-random：随机删除redis键</li>
+<li>5.volatile-random：随机删除有过期时间的redis键</li>
+<li>6.volatile-ttl：删除快过期的redis键</li>
+<li>7.volatile-lfu：根据lfu算法从有过期时间的键删除</li>
+<li>8.allkeys-lfu：根据lfu算法从所有键删除</li>
+</ul>
+<h2 id="8-Redis-的热-key-问题怎么解决？"><a href="#8-Redis-的热-key-问题怎么解决？" class="headerlink" title="8.Redis 的热 key 问题怎么解决？"></a>8.Redis 的热 key 问题怎么解决？</h2><p>热 key  就是说，在某一时刻，有非常多的请求访问某个 key，流量过大，导致该 redi 服务器宕机</p>
+<p><img src="https://img.java-family.cn/20220823152711.png"></p>
+<p>解决方案:</p>
+<ul>
+<li>可以将结果缓存到本地内存中</li>
+<li>将热 key 分散到不同的服务器中</li>
+<li>设置永不过期</li>
+</ul>
+<h2 id="9-缓存击穿、缓存穿透、缓存雪崩是什么？怎么解决呢？"><a href="#9-缓存击穿、缓存穿透、缓存雪崩是什么？怎么解决呢？" class="headerlink" title="9.缓存击穿、缓存穿透、缓存雪崩是什么？怎么解决呢？"></a>9.缓存击穿、缓存穿透、缓存雪崩是什么？怎么解决呢？</h2><p>缓存穿透:</p>
+<ul>
+<li>缓存穿透是指用户请求的数据<strong>在缓存中不存在并且在数据库中也不存在</strong>，导致用户每次请求该数据都要去数据库中查询一遍，然后返回空。</li>
+</ul>
+<p><img src="https://img.java-family.cn/20220823152714.png"></p>
+<p>解决方案:</p>
+<ul>
+<li>布隆过滤器</li>
+<li>返回空对象</li>
+</ul>
+<p>缓存击穿：</p>
+<ul>
+<li>缓存击穿，是指一个 key 非常热点，在不停的扛着大并发，大并发集中对这一个点进行访问，当这个 key 在<strong>失效的瞬间，持续的大并发就穿破缓存</strong>，直接请求数据库，就像在一个屏障上凿开了一个洞。</li>
+</ul>
+<p><img src="https://img.java-family.cn/20220823152717.png"></p>
+<p>解决方案:</p>
+<ul>
+<li>互斥锁</li>
+<li>永不过期</li>
+</ul>
+<p>缓存雪崩：</p>
+<ul>
+<li>缓存雪崩是指缓存中<strong>不同的数据大批量到过期时间</strong>，而查询数据量巨大，请求直接落到数据库上导致宕机。</li>
+</ul>
+<p><img src="https://img.java-family.cn/20220823152720.png"></p>
+<p>解决方案:</p>
+<ul>
+<li>均匀过期</li>
+<li>加互斥锁</li>
+<li>缓存永不过期</li>
+<li>双层缓存策略</li>
+</ul>
+<h2 id="10-Redis-有哪些部署方式？"><a href="#10-Redis-有哪些部署方式？" class="headerlink" title="10.Redis 有哪些部署方式？"></a>10.Redis 有哪些部署方式？</h2><p><img src="https://img.java-family.cn/20220823152723.png"></p>
+<ul>
+<li>单机模式:这也是最基本的部署方式,只需要一台机器,负责读写,一般只用于开发人员自己测试</li>
+<li>哨兵模式:哨兵模式是一种特殊的模式，首先Redis提供了哨兵的命令，哨兵是一个独立的进程，作为进程，它会独立运行。其原理是哨兵通过发送命令，等待Redis服务器响应，从而监控运行的多个Redis实例。它具备<strong>自动故障转移、集群监控、消息通知</strong>等功能。</li>
+<li>cluster集群模式:在redis3.0版本中支持了cluster集群部署的方式，这种集群部署的方式能<strong>自动将数据进行分片</strong>，每个master上放一部分数据，提供了内置的高可用服务，即使某个master挂了，服务还可以正常地提供。</li>
+<li>主从复制:在主从复制这种集群部署模式中，我们会将数据库分为两类，第一种称为主数据库(master)，另一种称为从数据库(slave)。主数据库会负责我们整个系统中的读写操作，从数据库会负责我们整个数据库中的读操作。其中在职场开发中的真实情况是，我们会让主数据库只负责写操作，让从数据库只负责读操作，就是为了<strong>读写分离</strong>，减轻服务器的压力。</li>
+</ul>
+<h2 id="11-哨兵有哪些作用？"><a href="#11-哨兵有哪些作用？" class="headerlink" title="11.哨兵有哪些作用？"></a>11.哨兵有哪些作用？</h2><ul>
+<li>1.监控整个主数据库和从数据库，观察它们是否正常运行</li>
+<li>2.当主数据库发生异常时，自动的将从数据库升级为主数据库，继续保证整个服务的稳定</li>
+</ul>
+<h2 id="12-哨兵选举过程是怎么样的？"><a href="#12-哨兵选举过程是怎么样的？" class="headerlink" title="12.哨兵选举过程是怎么样的？"></a>12.哨兵选举过程是怎么样的？</h2><ul>
+<li>1.第一个发现该master挂了的哨兵，向每个哨兵发送命令，让对方选举自己成为领头哨兵</li>
+<li>2.其他哨兵如果没有选举过他人，就会将这一票投给第一个发现该master挂了的哨兵</li>
+<li>3.第一个发现该master挂了的哨兵如果发现由超过一半哨兵投给自己，并且其数量也超过了设定的quoram参数，那么该哨兵就成了领头哨兵</li>
+<li>4.如果多个哨兵同时参与这个选举，那么就会重复该过程，知道选出一个领头哨兵</li>
+</ul>
+<p>选出领头哨兵后，就开始了故障修复，会从选出一个从数据库作为新的master</p>
+<h2 id="13-cluster集群模式是怎么存放数据的？"><a href="#13-cluster集群模式是怎么存放数据的？" class="headerlink" title="13.cluster集群模式是怎么存放数据的？"></a>13.cluster集群模式是怎么存放数据的？</h2><p>一个cluster集群中总共有16384个节点，集群会<strong>将这16384个节点平均分配给每个节点</strong>，当然，我这里的节点指的是每个主节点，就如同下图：</p>
+<p><img src="https://img.java-family.cn/20220823152726.png"></p>
+<h2 id="14-cluster的故障恢复是怎么做的？"><a href="#14-cluster的故障恢复是怎么做的？" class="headerlink" title="14.cluster的故障恢复是怎么做的？"></a>14.cluster的故障恢复是怎么做的？</h2><p>判断故障的逻辑其实与哨兵模式有点类似，在集群中，每个节点都会<strong>定期的向其他节点发送ping命令</strong>，通过有没有收到回复来判断其他节点是否已经下线。</p>
+<p>如果<strong>长时间没有回复，那么发起ping命令的节点就会认为目标节点疑似下线</strong>，也可以和哨兵一样称作主观下线，当然也需要集群中一定数量的节点都认为该节点下线才可以，我们来说说具体过程：</p>
+<p><img src="https://img.java-family.cn/20220823152729.png"></p>
+<ul>
+<li>1.当A节点发现目标节点疑似下线，就会向集群中的其他节点散播消息，其他节点就会向目标节点发送命令，判断目标节点是否下线</li>
+<li>2.如果集群中半数以上的节点都认为目标节点下线，就会对目标节点标记为下线，从而告诉其他节点，让目标节点在整个集群中都下线</li>
+</ul>
+<h2 id="15-主从同步原理是怎样的？"><a href="#15-主从同步原理是怎样的？" class="headerlink" title="15.主从同步原理是怎样的？"></a>15.主从同步原理是怎样的？</h2><ul>
+<li>1.当一个从数据库启动时，它会向<strong>主数据库发送一个SYNC命令</strong>，master收到后，在后台保存快照，也就是我们说的RDB持久化，当然保存快照是需要消耗时间的，并且redis是单线程的，在保存快照期间redis受到的命令会缓存起来</li>
+<li>2.快照完成后会<strong>将缓存的命令以及快照一起打包发给slave节点</strong>，从而保证主从数据库的一致性。</li>
+<li>3.从数据库接受到快照以及缓存的命令后会将这部分数据<strong>写入到硬盘上的临时文件当中</strong>，写入完成后会用这份文件去替换掉RDB快照文件，当然，这个操作是不会阻塞的，可以继续接收命令执行，具体原因其实就是fork了一个子进程，用子进程去完成了这些功能。</li>
+</ul>
+<p>因为不会阻塞，所以，这部分初始化完成后，当主数据库执行了改变数据的命令后，会异步的给slave，这也就是我们说的复制同步阶段，这个阶段会贯穿在整个中从同步的过程中，直到主从同步结束后，复制同步才会终止。</p>
+<h2 id="16-无硬盘复制是什么？"><a href="#16-无硬盘复制是什么？" class="headerlink" title="16.无硬盘复制是什么？"></a>16.无硬盘复制是什么？</h2><p>我们刚刚说了主从之间是通过RDB快照来交互的，虽然看来逻辑很简单，但是还是会存在一些问题，但是会存在着一些问题。</p>
+<ul>
+<li>1.master禁用了RDB快照时，发生了主从同步(复制初始化)操作，也会生成RDB快照，但是之后如果master发成了重启，就会用RDB快照去恢复数据，这份数据可能已经很久了，中间就会丢失数据</li>
+<li>2.在这种一主多从的结构中，master每次和slave同步数据都要进行一次快照，从而在硬盘中生成RDB文件，会影响性能</li>
+</ul>
+<p>为了解决这种问题，redis在后续的更新中也加入了无硬盘复制功能，也就是说<strong>直接通过网络发送给slave</strong>，避免了和硬盘交互，但是也是有io消耗</p>
+<h2 id="最后说一句（别白嫖，求关注）"><a href="#最后说一句（别白嫖，求关注）" class="headerlink" title="最后说一句（别白嫖，求关注）"></a>最后说一句（别白嫖，求关注）</h2><p>陈某每一篇文章都是精心输出，如果这篇文章对你有所帮助，或者有所启发的话，帮忙<strong>点赞</strong>、<strong>在看</strong>、<strong>转发</strong>、<strong>收藏</strong>，你的支持就是我坚持下去的最大动力！</p>
+<p>另外陈某的<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247524437&idx=1&sn=32699e9afede86fe52136c38f844c620&chksm=fcf7bf98cb80368e5eff366916e6b251fa7ca7526b44202d59032863d89f353545f0c0ebfff2&token=339165402&lang=zh_CN#rd">知识星球</a>开通了，公众号回复关键词：<strong>知识星球</strong> 获取限量<strong>20元</strong>优惠券加入只需<strong>109</strong>元，星球回馈的价值巨大，目前更新了<strong>Spring全家桶实战系列</strong>、<strong>亿级数据分库分表实战</strong>、<strong>DDD微服务实战专栏</strong>、<strong>我要进大厂、Spring，Mybatis等框架源码、架构实战22讲、精尽RocketMQ</strong>等….每增加一个专栏价格将上涨20元</p>
+<p><img src="https://img.java-family.cn/202304270958131.png"></p>
+<p>关注公众号：【码猿技术专栏】，公众号内有超赞的粉丝福利，回复：加群，可以加入技术讨论群，和大家一起讨论技术，吹牛逼！</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    不才陈某  |  微信公众号【码猿技术专栏】
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://chenjiabing666.github.io/2023/04/27/Redis%E5%85%A8%E7%BD%91%E6%9C%80%E5%85%A8%E9%9D%A2%E8%AF%95%E9%A2%98/" title="Redis全网最全面试题">https://chenjiabing666.github.io/2023/04/27/Redis全网最全面试题/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+  <li class="post-copyright-license">
+    并保留本声明和上方二维码。感谢您的阅读和支持！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">微信公众号</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Redis/" rel="tag"># Redis</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/04/27/JVM%E5%85%A8%E7%BD%91%E6%9C%80%E5%85%A8%E9%9D%A2%E8%AF%95%E9%A2%98/" rel="prev" title="JVM全网最全面试题">
+      <i class="fa fa-chevron-left"></i> JVM全网最全面试题
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/04/27/Kafka%E5%85%A8%E7%BD%91%E6%9C%80%E5%85%A8%E9%9D%A2%E8%AF%95%E9%A2%98/" rel="next" title="Kafka全网最全面试题">
+      Kafka全网最全面试题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+		  <script src="https://readmore.openwrite.cn/js/readmore.js" type="text/javascript"></script>
+<script>
+    const btw = new BTWPlugin();
+    btw.init({
+        id: 'container',
+        blogId: '27513-1629019452485-311',
+        name: '码猿技术专栏',
+        qrcode: 'https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg',
+        keyword: 'vip',
+    });
+</script>
+        </div>
+		</div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-%E4%BB%80%E4%B9%88%E6%98%AF-redis%EF%BC%9F%E5%AE%83%E8%83%BD%E5%81%9A%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">1.什么是 redis？它能做什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-redis-%E6%9C%89%E5%93%AA%E5%85%AB%E7%A7%8D%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%EF%BC%9F%E6%9C%89%E5%93%AA%E4%BA%9B%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF%EF%BC%9F"><span class="nav-text">2.redis 有哪八种数据类型？有哪些应用场景？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-redis%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E4%B9%88%E5%BF%AB%EF%BC%9F"><span class="nav-text">3.redis为什么这么快？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-%E5%90%AC%E8%AF%B4-redis-6-0%E4%B9%8B%E5%90%8E%E5%8F%88%E4%BD%BF%E7%94%A8%E4%BA%86%E5%A4%9A%E7%BA%BF%E7%A8%8B%EF%BC%8C%E4%B8%8D%E4%BC%9A%E6%9C%89%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8%E7%9A%84%E9%97%AE%E9%A2%98%E5%90%97%EF%BC%9F"><span class="nav-text">4.听说 redis 6.0之后又使用了多线程，不会有线程安全的问题吗？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-redis-%E7%9A%84%E6%8C%81%E4%B9%85%E5%8C%96%E6%9C%BA%E5%88%B6%E6%9C%89%E5%93%AA%E4%BA%9B%EF%BC%9F%E4%BC%98%E7%BC%BA%E7%82%B9%E8%AF%B4%E8%AF%B4"><span class="nav-text">5.redis 的持久化机制有哪些？优缺点说说</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-Redis%E7%9A%84%E8%BF%87%E6%9C%9F%E9%94%AE%E7%9A%84%E5%88%A0%E9%99%A4%E7%AD%96%E7%95%A5%E6%9C%89%E5%93%AA%E4%BA%9B%EF%BC%9F"><span class="nav-text">6. Redis的过期键的删除策略有哪些？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7-Redis%E7%9A%84%E5%86%85%E5%AD%98%E6%BB%A1%E4%BA%86%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9F"><span class="nav-text">7. Redis的内存满了怎么办？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-Redis-%E7%9A%84%E7%83%AD-key-%E9%97%AE%E9%A2%98%E6%80%8E%E4%B9%88%E8%A7%A3%E5%86%B3%EF%BC%9F"><span class="nav-text">8.Redis 的热 key 问题怎么解决？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9-%E7%BC%93%E5%AD%98%E5%87%BB%E7%A9%BF%E3%80%81%E7%BC%93%E5%AD%98%E7%A9%BF%E9%80%8F%E3%80%81%E7%BC%93%E5%AD%98%E9%9B%AA%E5%B4%A9%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F%E6%80%8E%E4%B9%88%E8%A7%A3%E5%86%B3%E5%91%A2%EF%BC%9F"><span class="nav-text">9.缓存击穿、缓存穿透、缓存雪崩是什么？怎么解决呢？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-Redis-%E6%9C%89%E5%93%AA%E4%BA%9B%E9%83%A8%E7%BD%B2%E6%96%B9%E5%BC%8F%EF%BC%9F"><span class="nav-text">10.Redis 有哪些部署方式？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-%E5%93%A8%E5%85%B5%E6%9C%89%E5%93%AA%E4%BA%9B%E4%BD%9C%E7%94%A8%EF%BC%9F"><span class="nav-text">11.哨兵有哪些作用？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#12-%E5%93%A8%E5%85%B5%E9%80%89%E4%B8%BE%E8%BF%87%E7%A8%8B%E6%98%AF%E6%80%8E%E4%B9%88%E6%A0%B7%E7%9A%84%EF%BC%9F"><span class="nav-text">12.哨兵选举过程是怎么样的？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#13-cluster%E9%9B%86%E7%BE%A4%E6%A8%A1%E5%BC%8F%E6%98%AF%E6%80%8E%E4%B9%88%E5%AD%98%E6%94%BE%E6%95%B0%E6%8D%AE%E7%9A%84%EF%BC%9F"><span class="nav-text">13.cluster集群模式是怎么存放数据的？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#14-cluster%E7%9A%84%E6%95%85%E9%9A%9C%E6%81%A2%E5%A4%8D%E6%98%AF%E6%80%8E%E4%B9%88%E5%81%9A%E7%9A%84%EF%BC%9F"><span class="nav-text">14.cluster的故障恢复是怎么做的？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#15-%E4%B8%BB%E4%BB%8E%E5%90%8C%E6%AD%A5%E5%8E%9F%E7%90%86%E6%98%AF%E6%80%8E%E6%A0%B7%E7%9A%84%EF%BC%9F"><span class="nav-text">15.主从同步原理是怎样的？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#16-%E6%97%A0%E7%A1%AC%E7%9B%98%E5%A4%8D%E5%88%B6%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">16.无硬盘复制是什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%90%8E%E8%AF%B4%E4%B8%80%E5%8F%A5%EF%BC%88%E5%88%AB%E7%99%BD%E5%AB%96%EF%BC%8C%E6%B1%82%E5%85%B3%E6%B3%A8%EF%BC%89"><span class="nav-text">最后说一句（别白嫖，求关注）</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="不才陈某"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">142</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">72</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png" title="微信公众号 → https:&#x2F;&#x2F;gitee.com&#x2F;chenjiabing666&#x2F;BlogImage&#x2F;raw&#x2F;master&#x2F;myjszl_log.png" rel="noopener" target="_blank"><i class="fab fa-weixin fa-fw"></i>微信公众号</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.im/user/2506542244708072" title="掘金 → https:&#x2F;&#x2F;juejin.im&#x2F;user&#x2F;2506542244708072" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>掘金</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某|公众号：码猿技术专栏</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RtlQOgOT3M0hgyMeogykSQjT-gzGzoHsz',
+      appKey     : 'vSCxLU88wnXVf0Pa8mwJrCPm',
+      placeholder: "欢迎关注博主微信公众号【码猿技术专栏】",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

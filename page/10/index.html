@@ -188,6 +188,654 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/10/14/Spring%20Boot%20%E7%AC%AC%E4%BA%8C%E5%BC%B9%EF%BC%8C%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%80%8E%E4%B9%88%E9%80%A0%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/14/Spring%20Boot%20%E7%AC%AC%E4%BA%8C%E5%BC%B9%EF%BC%8C%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%80%8E%E4%B9%88%E9%80%A0%EF%BC%9F/" class="post-title-link" itemprop="url">Spring Boot 配置文件怎么造？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-14 10:01:42" itemprop="dateCreated datePublished" datetime="2020-10-14T10:01:42+08:00">2020-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 19:09:04" itemprop="dateModified" datetime="2020-10-23T19:09:04+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/10/14/Spring%20Boot%20%E7%AC%AC%E4%BA%8C%E5%BC%B9%EF%BC%8C%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%80%8E%E4%B9%88%E9%80%A0%EF%BC%9F/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/10/14/Spring%20Boot%20%E7%AC%AC%E4%BA%8C%E5%BC%B9%EF%BC%8C%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%80%8E%E4%B9%88%E9%80%A0%EF%BC%9F/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>自从用了Spring Boot，个人最喜欢的就是Spring Boot的配置文件了，和Spring比起，Spring Boot更加灵活，修改的某些配置也是更加得心应手。</p>
+<p>Spring Boot 官方提供了两种常用的配置文件格式，分别是<code>properties</code>、<code>YML</code>格式。相比于<code>properties</code>来说，<code>YML</code>更加年轻，层级也是更加分明。</p>
+<p>今天这篇文章就来介绍一下Spring Boot的配置文件的语法以及如何从配置文件中取值。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/10/14/Spring%20Boot%20%E7%AC%AC%E4%BA%8C%E5%BC%B9%EF%BC%8C%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E6%80%8E%E4%B9%88%E9%80%A0%EF%BC%9F/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/10/14/Spring%20Boot%20%E7%AC%AC%E4%B8%80%E5%BC%B9%EF%BC%8C%E9%97%AE%E5%80%99%E4%B8%80%E4%B8%8B%E4%B8%96%E7%95%8C%EF%BC%81%EF%BC%81%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/10/14/Spring%20Boot%20%E7%AC%AC%E4%B8%80%E5%BC%B9%EF%BC%8C%E9%97%AE%E5%80%99%E4%B8%80%E4%B8%8B%E4%B8%96%E7%95%8C%EF%BC%81%EF%BC%81%EF%BC%81/" class="post-title-link" itemprop="url">Spring Boot 第一弹，问候一下世界！！！</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-14 10:00:42" itemprop="dateCreated datePublished" datetime="2020-10-14T10:00:42+08:00">2020-10-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 19:08:23" itemprop="dateModified" datetime="2020-10-23T19:08:23+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Spring-Boot-%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Spring Boot 进阶</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/10/14/Spring%20Boot%20%E7%AC%AC%E4%B8%80%E5%BC%B9%EF%BC%8C%E9%97%AE%E5%80%99%E4%B8%80%E4%B8%8B%E4%B8%96%E7%95%8C%EF%BC%81%EF%BC%81%EF%BC%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/10/14/Spring%20Boot%20%E7%AC%AC%E4%B8%80%E5%BC%B9%EF%BC%8C%E9%97%AE%E5%80%99%E4%B8%80%E4%B8%8B%E4%B8%96%E7%95%8C%EF%BC%81%EF%BC%81%EF%BC%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>相信从事Java开发的朋友都听说过<code>SSM</code>框架，这还算年轻的，老点的甚至经历过<code>SSH</code>，说起来有点恐怖，哈哈。比如我就是经历过<code>SSH</code>那个时代末流，没办法，很无奈。</p>
+<p>当然无论是SSM还是SSH都不是今天的重点，今天要说的是<code>Spring Boot</code>，一个令人眼前一亮的框架，从大的说，Spring Boot取代了<code>SSM</code> 中的<code>SS</code>的角色。</p>
+<p>今天这篇文章就来谈谈Spring Boot，这个我第一次使用直呼<code>爽</code>的框架。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/10/14/Spring%20Boot%20%E7%AC%AC%E4%B8%80%E5%BC%B9%EF%BC%8C%E9%97%AE%E5%80%99%E4%B8%80%E4%B8%8B%E4%B8%96%E7%95%8C%EF%BC%81%EF%BC%81%EF%BC%81/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/08/27/Navicat%20Premium%2012%E5%85%8D%E8%B4%B9%E7%89%88%E6%9C%AC%E5%AE%89%E8%A3%85/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/08/27/Navicat%20Premium%2012%E5%85%8D%E8%B4%B9%E7%89%88%E6%9C%AC%E5%AE%89%E8%A3%85/" class="post-title-link" itemprop="url">Navicat Premium 12破解版安装</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-08-27 15:51:57" itemprop="dateCreated datePublished" datetime="2020-08-27T15:51:57+08:00">2020-08-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 21:56:33" itemprop="dateModified" datetime="2020-10-23T21:56:33+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">开发工具</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/08/27/Navicat%20Premium%2012%E5%85%8D%E8%B4%B9%E7%89%88%E6%9C%AC%E5%AE%89%E8%A3%85/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/08/27/Navicat%20Premium%2012%E5%85%8D%E8%B4%B9%E7%89%88%E6%9C%AC%E5%AE%89%E8%A3%85/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
+<li>这几年的工作过程中使用了很多的数据库工具，比如Sqlyog，DBeaver,sqlplus等工具，但是个人觉得很好用的还是Navicat。</li>
+<li>不如人意的就是目前Navicat都在收费，今天就来分享下如何安装免费的Navicat。</li>
+<li><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-Log-plugin/6.jpg">
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/08/27/Navicat%20Premium%2012%E5%85%8D%E8%B4%B9%E7%89%88%E6%9C%AC%E5%AE%89%E8%A3%85/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/08/26/plugin%E7%A0%B4%E8%A7%A3%EF%BC%8C%E4%BA%B2%E6%B5%8B%E5%8F%AF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/08/26/plugin%E7%A0%B4%E8%A7%A3%EF%BC%8C%E4%BA%B2%E6%B5%8B%E5%8F%AF%E7%94%A8/" class="post-title-link" itemprop="url">Mybatis Log plugin破解，亲测可用！！！</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-08-26 14:50:11" itemprop="dateCreated datePublished" datetime="2020-08-26T14:50:11+08:00">2020-08-26</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 21:55:33" itemprop="dateModified" datetime="2020-10-23T21:55:33+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">开发工具</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/08/26/plugin%E7%A0%B4%E8%A7%A3%EF%BC%8C%E4%BA%B2%E6%B5%8B%E5%8F%AF%E7%94%A8/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/08/26/plugin%E7%A0%B4%E8%A7%A3%EF%BC%8C%E4%BA%B2%E6%B5%8B%E5%8F%AF%E7%94%A8/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
+<li><p>今天重新装了IDEA2020，顺带重装了一些插件，毕竟这些插件都是习惯一直在用，其中一款就是Mybatis  Log plugin，按照往常的思路，在IDEA插件市场搜索安装，艹，眼睛一瞟，竟然收费了，对于我这种支持盗版的人来说太难了，于是自己开始捣鼓各种尝试破解，下文分享自己的破解方式。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/08/26/plugin%E7%A0%B4%E8%A7%A3%EF%BC%8C%E4%BA%B2%E6%B5%8B%E5%8F%AF%E7%94%A8/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/05/08/IDEA2020%E6%B0%B8%E4%B9%85%E7%A0%B4%E8%A7%A3%EF%BC%8C%E4%BA%B2%E6%B5%8B%E5%8F%AF%E7%94%A8%EF%BC%81%EF%BC%81%EF%BC%81/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/05/08/IDEA2020%E6%B0%B8%E4%B9%85%E7%A0%B4%E8%A7%A3%EF%BC%8C%E4%BA%B2%E6%B5%8B%E5%8F%AF%E7%94%A8%EF%BC%81%EF%BC%81%EF%BC%81/" class="post-title-link" itemprop="url">IDEA2020永久破解，亲测可用！！！</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-05-08 18:51:57" itemprop="dateCreated datePublished" datetime="2020-05-08T18:51:57+08:00">2020-05-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-23 21:55:04" itemprop="dateModified" datetime="2020-10-23T21:55:04+08:00">2020-10-23</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%BC%80%E5%8F%91%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">开发工具</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/05/08/IDEA2020%E6%B0%B8%E4%B9%85%E7%A0%B4%E8%A7%A3%EF%BC%8C%E4%BA%B2%E6%B5%8B%E5%8F%AF%E7%94%A8%EF%BC%81%EF%BC%81%EF%BC%81/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/05/08/IDEA2020%E6%B0%B8%E4%B9%85%E7%A0%B4%E8%A7%A3%EF%BC%8C%E4%BA%B2%E6%B5%8B%E5%8F%AF%E7%94%A8%EF%BC%81%EF%BC%81%EF%BC%81/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
+<li><p>随着 IDEA 的 2020 版本的发布，新增和优化了很多的功能，今天陈某不说新增的功能，来讲一讲如何永久破解。</p>
+</li>
+<li><p>不说别的，先上破解后的效果图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/IDEA%E7%A0%B4%E8%A7%A3/1.png" alt="永久破解效果图"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/05/08/IDEA2020%E6%B0%B8%E4%B9%85%E7%A0%B4%E8%A7%A3%EF%BC%8C%E4%BA%B2%E6%B5%8B%E5%8F%AF%E7%94%A8%EF%BC%81%EF%BC%81%EF%BC%81/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/05/08/select%E8%AF%AD%E5%8F%A5%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88%EF%BC%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/05/08/select%E8%AF%AD%E5%8F%A5%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88%EF%BC%9F/" class="post-title-link" itemprop="url">select语句做了什么？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-05-08 18:51:57" itemprop="dateCreated datePublished" datetime="2020-05-08T18:51:57+08:00">2020-05-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-10-21 21:35:09" itemprop="dateModified" datetime="2020-10-21T21:35:09+08:00">2020-10-21</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93%E5%B9%B2%E8%B4%A7%E7%AF%87/" itemprop="url" rel="index"><span itemprop="name">数据库干货篇</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/05/08/select%E8%AF%AD%E5%8F%A5%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88%EF%BC%9F/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/05/08/select%E8%AF%AD%E5%8F%A5%E5%81%9A%E4%BA%86%E4%BB%80%E4%B9%88%EF%BC%9F/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <section id="nice" data-tool="mdnice编辑器" data-website="https://www.mdnice.com" style="padding: 0 10px; word-spacing: 0px; word-wrap: break-word; text-align: left; font-family: Optima-Regular, Optima, PingFangSC-light, PingFangTC-light, 'PingFang SC', Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; line-height: 1.6; letter-spacing: .034em; color: rgb(63, 63, 63); font-size: 16px; word-break: all;"><h2 data-tool="mdnice编辑器" style="padding: 0px; font-weight: bold; color: black; font-size: 22px; display: block; text-align: center; background-image: url(https://my-wechat.mdnice.com/koala-2.png); background-position: center center; background-repeat: no-repeat; background-attachment: initial; background-origin: initial; background-clip: initial; background-size: 50px; margin-top: 1em; margin-bottom: 10px;"><span class="prefix" style="display: none;"></span><span class="content" style="text-align: center; display: inline-block; height: 38px; line-height: 42px; color: #48b378; background-position: left center; background-repeat: no-repeat; background-attachment: initial; background-origin: initial; background-clip: initial; background-size: 63px; margin-top: 38px; font-size: 18px; margin-bottom: 10px;">导读</span><span class="suffix"></span></h2>
+<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
+<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">Mysql在中小型企业中是个香饽饽，目前主流的数据库之一，几乎没有一个后端开发者不会使用的，但是作为一个老司机，仅仅会用真的不够。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">今天陈某透过一个简单的查询语句来讲述在Mysql内部的执行过程。</p>
+</section></li></ul>
+<pre class="custom" data-tool="mdnice编辑器" style="margin-top: 10px; margin-bottom: 10px; border-radius: 5px; box-shadow: rgba(0, 0, 0, 0.55) 0px 2px 10px;"><span style="display: block; background: url(https://my-wechat.mdnice.com/point.png); height: 30px; width: 100%; background-size: 40px; background-repeat: no-repeat; background-color: #f8f8f8; margin-bottom: -7px; border-radius: 5px; background-position: 10px 10px;"></span><code class="hljs" style="overflow-x: auto; padding: 16px; color: #333; display: -webkit-box; font-family: Operator Mono, Consolas, Monaco, Menlo, monospace; font-size: 12px; -webkit-overflow-scrolling: touch; padding-top: 15px; background: #f8f8f8; border-radius: 5px;">select * from table where id=10;
+</code></pre>
+<h2 data-tool="mdnice编辑器" style="padding: 0px; font-weight: bold; color: black; font-size: 22px; display: block; text-align: center; background-image: url(https://my-wechat.mdnice.com/koala-2.png); background-position: center center; background-repeat: no-repeat; background-attachment: initial; background-origin: initial; background-clip: initial; background-size: 50px; margin-top: 1em; margin-bottom: 10px;"><span class="prefix" style="display: none;"></span><span class="content" style="text-align: center; display: inline-block; height: 38px; line-height: 42px; color: #48b378; background-position: left center; background-repeat: no-repeat; background-attachment: initial; background-origin: initial; background-clip: initial; background-size: 63px; margin-top: 38px; font-size: 18px; margin-bottom: 10px;">撸它</span><span class="suffix"></span></h2>
+<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
+<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">首先通过一张图片来了解一下Mysql的基础架构，如下：</p>
+<figure style="margin: 0; margin-top: 10px; margin-bottom: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center;"><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/MYSQL%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/1.png" alt style="display: block; margin: 0 auto; max-width: 100%; border-radius: 4px; margin-bottom: 25px;"></figure>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">从上图可以看出，Mysql大致分为Server层和存储引擎层两部分。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">Server层包括连接器、查询缓存、分析器、优化器等，其中包含了Mysql的大多数核心功能以及所有的内置函数（如日期，时间函数等），所有跨存储引擎的功能都在这一层实现，比如存储过程、触发器、视图等。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">存储引擎层负责数据的存储和提取。它的架构是可插拔式的，支持InnoDB、MyISAM等多个存储引擎。Mysql中主流的存储引擎是InnoDB，由于它对事务的支持让它从Mysql5.5.5版本开始成为了默认的存储引擎。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">大致了解了整体架构，现在说说每一个基础的模块都承担着怎样的责任。</p>
+</section></li></ul>
+<h3 data-tool="mdnice编辑器" style="margin-bottom: 15px; padding: 0px; font-weight: bold; color: black; font-size: 20px; margin-top: 1.2em;"><span style="background-image: url(https://my-wechat.mdnice.com/koala-3.png); background-size: 100% 100%; background-repeat: no-repeat; display: inline-block; width: 16px; height: 15px; line-height: 15px; margin-bottom: -1px;"></span><span class="prefix" style="display: none;"></span><span class="content" style="font-size: 17px; font-weight: bold; display: inline-block; margin-left: 8px; color: #48b378;">1. 连接器</span><span class="suffix" style="display: none;"></span></h3>
+<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
+<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;">顾名思义，是客户端和Mysql之间连接的媒介，负责登录、获取权限、维持连接和管理连接。连接命令一般如下：</section></li></ul>
+<pre class="custom" data-tool="mdnice编辑器" style="margin-top: 10px; margin-bottom: 10px; border-radius: 5px; box-shadow: rgba(0, 0, 0, 0.55) 0px 2px 10px;"><span style="display: block; background: url(https://my-wechat.mdnice.com/point.png); height: 30px; width: 100%; background-size: 40px; background-repeat: no-repeat; background-color: #f8f8f8; margin-bottom: -7px; border-radius: 5px; background-position: 10px 10px;"></span><code class="hljs" style="overflow-x: auto; padding: 16px; color: #333; display: -webkit-box; font-family: Operator Mono, Consolas, Monaco, Menlo, monospace; font-size: 12px; -webkit-overflow-scrolling: touch; padding-top: 15px; background: #f8f8f8; border-radius: 5px;">mysql [-h] ip [- P] port -u [user] -p 
+</code></pre>
+<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
+<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">在完成经典的TCP握手后，连接器会开始认证身份，要求输入密码。</p>
+<ul style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: square;">
+<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;">密码认证通过，连接器会查询出拥有的权限，即使管理员修改了权限，也不会影响你这次的连接，只有重新连接才会生效。</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;">密码认证失败，会收到提示信息Access denied for user。</section></li></ul>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">连接完成后，没有后续动作的连接将会变成空闲连接，你可以输入<code style="font-size: 14px; word-wrap: break-word; padding: 2px 4px; border-radius: 4px; margin: 0 2px; background-color: rgba(27,31,35,.05); font-family: Operator Mono, Consolas, Monaco, Menlo, monospace; word-break: break-all; color: #28ca71;">show processlist</code>命令看到它。如下图，其中的Command这一列显示为sleep的这一行表示在系统里面有一个空闲连接。</p>
+<figure style="margin: 0; margin-top: 10px; margin-bottom: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center;"><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/MYSQL%E5%9F%BA%E7%A1%80%E6%9E%B6%E6%9E%84/2.png" alt style="display: block; margin: 0 auto; max-width: 100%; border-radius: 4px; margin-bottom: 25px;"></figure>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">客户端如果太长时间没有执行动作，连接器将会自动断开，这个时间由参数<code style="font-size: 14px; word-wrap: break-word; padding: 2px 4px; border-radius: 4px; margin: 0 2px; background-color: rgba(27,31,35,.05); font-family: Operator Mono, Consolas, Monaco, Menlo, monospace; word-break: break-all; color: #28ca71;">wait_timeout</code>控制，默认值是8小时。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">如果在连接被断开之后，客户端再次发送请求的话，就会收到一个错误提醒： Lost connection to MySQL server during query。这时候如果你要继续，就需要重连，然后再执行请求了。</p>
+</section></li></ul>
+<h3 data-tool="mdnice编辑器" style="margin-bottom: 15px; padding: 0px; font-weight: bold; color: black; font-size: 20px; margin-top: 1.2em;"><span style="background-image: url(https://my-wechat.mdnice.com/koala-3.png); background-size: 100% 100%; background-repeat: no-repeat; display: inline-block; width: 16px; height: 15px; line-height: 15px; margin-bottom: -1px;"></span><span class="prefix" style="display: none;"></span><span class="content" style="font-size: 17px; font-weight: bold; display: inline-block; margin-left: 8px; color: #48b378;">2. 查询缓存【废材，8.0 版本完全删除】</span><span class="suffix" style="display: none;"></span></h3>
+<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
+<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">连接建立完成后，你就可以select语句了，执行之前会查询缓存。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">查询缓存在Mysql中的是默认关闭的，因为缓存命中率非常低，只要有对表执行一个更新操作，这个表的所有查询缓存都将被清空。怎么样？一句废材足以形容了！！！</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">废材的东西不必多讲，主流的Redis的缓存你不用，别再搞这废材了。</p>
+</section></li></ul>
+<h3 data-tool="mdnice编辑器" style="margin-bottom: 15px; padding: 0px; font-weight: bold; color: black; font-size: 20px; margin-top: 1.2em;"><span style="background-image: url(https://my-wechat.mdnice.com/koala-3.png); background-size: 100% 100%; background-repeat: no-repeat; display: inline-block; width: 16px; height: 15px; line-height: 15px; margin-bottom: -1px;"></span><span class="prefix" style="display: none;"></span><span class="content" style="font-size: 17px; font-weight: bold; display: inline-block; margin-left: 8px; color: #48b378;">3. 分析器</span><span class="suffix" style="display: none;"></span></h3>
+<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
+<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">如果没有命中查询缓存，就要执行查询了，但是在执行查询之前，需要对SQL语句做解析，判断你这条语句有没有语法错误。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">分析器会做 '词法分析' ，你输入的无非可就是多个字符串和空格组成的SQL语句，MYSQL需要识别出里面的字符串是什么，代表什么，有没有关键词等。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">MYSQL会从你输入的select 这个关键字识别出来是一个查询语句，table是表名，id是列名。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">做完这些会做 '语法分析' ，根据MYSQL定义的规则来判断你的SQL语句有没有语法错误，如果你的语法不对，就会收到类似如下的提醒：</p>
+</section></li></ul>
+<pre class="custom" data-tool="mdnice编辑器" style="margin-top: 10px; margin-bottom: 10px; border-radius: 5px; box-shadow: rgba(0, 0, 0, 0.55) 0px 2px 10px;"><span style="display: block; background: url(https://my-wechat.mdnice.com/point.png); height: 30px; width: 100%; background-size: 40px; background-repeat: no-repeat; background-color: #f8f8f8; margin-bottom: -7px; border-radius: 5px; background-position: 10px 10px;"></span><code class="hljs" style="overflow-x: auto; padding: 16px; color: #333; display: -webkit-box; font-family: Operator Mono, Consolas, Monaco, Menlo, monospace; font-size: 12px; -webkit-overflow-scrolling: touch; padding-top: 15px; background: #f8f8f8; border-radius: 5px;">ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'elect * from t where ID=1' at line 1
+</code></pre>
+<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
+<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;">一般语法错误会提示第一个出现错误的位置，所以你要关注的是紧接“use near”的内容。</section></li></ul>
+<h3 data-tool="mdnice编辑器" style="margin-bottom: 15px; padding: 0px; font-weight: bold; color: black; font-size: 20px; margin-top: 1.2em;"><span style="background-image: url(https://my-wechat.mdnice.com/koala-3.png); background-size: 100% 100%; background-repeat: no-repeat; display: inline-block; width: 16px; height: 15px; line-height: 15px; margin-bottom: -1px;"></span><span class="prefix" style="display: none;"></span><span class="content" style="font-size: 17px; font-weight: bold; display: inline-block; margin-left: 8px; color: #48b378;">4. 优化器</span><span class="suffix" style="display: none;"></span></h3>
+<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
+<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">经过分析器词法和语法的分析，此时就能知道这条SQL语句是干什么的。但是在开始执行之前，MYSQL底层还要使用优化器对这条SQL语句进行优化处理。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">MYSQL内部会对这条SQL进行评估，比如涉及到多个索引会比较使用哪个索引代价更小、多表join的时候会考虑决定各个表的连接顺序。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">优化器的作用一句话总结：根据MYSQL内部的算法决定如何执行这条SQL语句来达到MYSQL认为代价最小目的。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">优化器阶段完成后，这个语句的执行方案就确定了，接下来就交给执行器执行了。</p>
+</section></li></ul>
+<h3 data-tool="mdnice编辑器" style="margin-bottom: 15px; padding: 0px; font-weight: bold; color: black; font-size: 20px; margin-top: 1.2em;"><span style="background-image: url(https://my-wechat.mdnice.com/koala-3.png); background-size: 100% 100%; background-repeat: no-repeat; display: inline-block; width: 16px; height: 15px; line-height: 15px; margin-bottom: -1px;"></span><span class="prefix" style="display: none;"></span><span class="content" style="font-size: 17px; font-weight: bold; display: inline-block; margin-left: 8px; color: #48b378;">5. 执行器</span><span class="suffix" style="display: none;"></span></h3>
+<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
+<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">MYSQL通过分析器知道了要做什么，通过优化器知道了如何做，于是就进入了执行器阶段。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">执行器开始执行之前，需要检查一下用户对表table有没有执行的权限，没有返回权限不足的错误，有的话就执行。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">执行也是分类的，如果Id不是索引则全表扫描，一行一行的查找，如果是索引则在索引组织表中查询，索引的查询很复杂，其中涉及到B+树等算法，这里不再详细介绍。</p>
+</section></li></ul>
+<h2 data-tool="mdnice编辑器" style="padding: 0px; font-weight: bold; color: black; font-size: 22px; display: block; text-align: center; background-image: url(https://my-wechat.mdnice.com/koala-2.png); background-position: center center; background-repeat: no-repeat; background-attachment: initial; background-origin: initial; background-clip: initial; background-size: 50px; margin-top: 1em; margin-bottom: 10px;"><span class="prefix" style="display: none;"></span><span class="content" style="text-align: center; display: inline-block; height: 38px; line-height: 42px; color: #48b378; background-position: left center; background-repeat: no-repeat; background-attachment: initial; background-origin: initial; background-clip: initial; background-size: 63px; margin-top: 38px; font-size: 18px; margin-bottom: 10px;">总结</span><span class="suffix"></span></h2>
+<ul data-tool="mdnice编辑器" style="margin-top: 8px; margin-bottom: 8px; padding-left: 25px; color: black; list-style-type: disc;">
+<li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">一条SQL语句在MYSQL内部执行的过程涉及到的内部模块有：连接器、查询缓存、分析器、优化器、执行器、存储引擎。</p>
+</section></li><li><section style="margin-top: 5px; margin-bottom: 5px; line-height: 26px; text-align: left; color: rgb(1,1,1); font-weight: 500;"><p style="font-size: 16px; padding-bottom: 8px; margin: 0; padding-top: 1em; color: rgb(74,74,74); line-height: 1.75em;">至此，MYSQL的基础架构已经讲完了。</p>
+</section></li></ul>
+
+
+
+
+
+
+
+
+
+
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/28/%E7%BA%BF%E4%B8%8ABug%E6%97%A0%E6%B3%95%E5%A4%8D%E7%8E%B0%E6%80%8E%E4%B9%88%E5%8A%9E%EF%BC%9F%E8%80%81%E5%8F%B8%E6%9C%BA%E6%95%99%E4%BD%A0%E4%B8%80%E6%8B%9B%EF%BC%8CSpringBoot%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95%E4%B8%8D%E7%94%A8%E6%84%81%EF%BC%81/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -801,655 +1449,10 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/20/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E8%AE%B2%E4%B8%80%E8%AE%B2Mybatis%E6%8F%92%E4%BB%B6%E7%9A%84%E5%8E%9F%E7%90%86%E5%8F%8A%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%EF%BC%9F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/04/20/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E8%AE%B2%E4%B8%80%E8%AE%B2Mybatis%E6%8F%92%E4%BB%B6%E7%9A%84%E5%8E%9F%E7%90%86%E5%8F%8A%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%EF%BC%9F/" class="post-title-link" itemprop="url">面试官：讲一讲Mybatis插件的原理及如何实现？</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-04-20 17:09:42" itemprop="dateCreated datePublished" datetime="2020-04-20T17:09:42+08:00">2020-04-20</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-10-23 21:55:46" itemprop="dateModified" datetime="2020-10-23T21:55:46+08:00">2020-10-23</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Mybatis%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Mybatis进阶</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2020/04/20/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E8%AE%B2%E4%B8%80%E8%AE%B2Mybatis%E6%8F%92%E4%BB%B6%E7%9A%84%E5%8E%9F%E7%90%86%E5%8F%8A%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%EF%BC%9F/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2020/04/20/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E8%AE%B2%E4%B8%80%E8%AE%B2Mybatis%E6%8F%92%E4%BB%B6%E7%9A%84%E5%8E%9F%E7%90%86%E5%8F%8A%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%EF%BC%9F/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
-<li>Mybatis的分页插件相信大家都使用过，那么可知道其中的实现原理？分页插件就是利用的Mybatis中的插件机制实现的，在<code>Executor</code>的<code>query</code>执行前后进行分页处理。</li>
-<li>此篇文章就来介绍以下Mybatis的插件机制以及在底层是如何实现的。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/04/20/%E9%9D%A2%E8%AF%95%E5%AE%98%EF%BC%9A%E8%AE%B2%E4%B8%80%E8%AE%B2Mybatis%E6%8F%92%E4%BB%B6%E7%9A%84%E5%8E%9F%E7%90%86%E5%8F%8A%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%EF%BC%9F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/20/%E9%9D%A2%E8%AF%95%E5%AE%98%E9%97%AE%EF%BC%9AMybatis%E4%B8%AD%E7%9A%84TypeHandler%E4%BD%A0%E7%94%A8%E8%BF%87%E5%90%97%EF%BC%9F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/04/20/%E9%9D%A2%E8%AF%95%E5%AE%98%E9%97%AE%EF%BC%9AMybatis%E4%B8%AD%E7%9A%84TypeHandler%E4%BD%A0%E7%94%A8%E8%BF%87%E5%90%97%EF%BC%9F/" class="post-title-link" itemprop="url">面试官问：Mybatis中的TypeHandler你用过吗？</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-04-20 17:08:42" itemprop="dateCreated datePublished" datetime="2020-04-20T17:08:42+08:00">2020-04-20</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-10-23 21:55:51" itemprop="dateModified" datetime="2020-10-23T21:55:51+08:00">2020-10-23</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Mybatis%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Mybatis进阶</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2020/04/20/%E9%9D%A2%E8%AF%95%E5%AE%98%E9%97%AE%EF%BC%9AMybatis%E4%B8%AD%E7%9A%84TypeHandler%E4%BD%A0%E7%94%A8%E8%BF%87%E5%90%97%EF%BC%9F/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2020/04/20/%E9%9D%A2%E8%AF%95%E5%AE%98%E9%97%AE%EF%BC%9AMybatis%E4%B8%AD%E7%9A%84TypeHandler%E4%BD%A0%E7%94%A8%E8%BF%87%E5%90%97%EF%BC%9F/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
-<li><p>相信大家用Mybatis这个框架至少一年以上了吧，有没有思考过这样一个问题：数据库有自己的数据类型，Java有自己的数据类型，那么Mybatis是如何把数据库中的类型和Java的数据类型对应的呢？</p>
-</li>
-<li><p>本篇文章就来讲讲Mybatis中的<code>黑匣子TypeHandler(类型处理器)</code>，说它是黑匣子一点都不为过，总是在默默的奉献着，但是不为人知。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/04/20/%E9%9D%A2%E8%AF%95%E5%AE%98%E9%97%AE%EF%BC%9AMybatis%E4%B8%AD%E7%9A%84TypeHandler%E4%BD%A0%E7%94%A8%E8%BF%87%E5%90%97%EF%BC%9F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/20/Mybatis%E7%9A%84Mapper%E4%B8%AD%E7%9A%84%E6%96%B9%E6%B3%95%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E8%83%BD%E9%87%8D%E8%BD%BD/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/04/20/Mybatis%E7%9A%84Mapper%E4%B8%AD%E7%9A%84%E6%96%B9%E6%B3%95%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E8%83%BD%E9%87%8D%E8%BD%BD/" class="post-title-link" itemprop="url">Mybatis的Mapper中的方法为什么不能重载？</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-04-20 17:07:42" itemprop="dateCreated datePublished" datetime="2020-04-20T17:07:42+08:00">2020-04-20</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-10-23 21:55:56" itemprop="dateModified" datetime="2020-10-23T21:55:56+08:00">2020-10-23</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Mybatis%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Mybatis进阶</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2020/04/20/Mybatis%E7%9A%84Mapper%E4%B8%AD%E7%9A%84%E6%96%B9%E6%B3%95%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E8%83%BD%E9%87%8D%E8%BD%BD/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2020/04/20/Mybatis%E7%9A%84Mapper%E4%B8%AD%E7%9A%84%E6%96%B9%E6%B3%95%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E8%83%BD%E9%87%8D%E8%BD%BD/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
-<li>在初入门<code>Mybatis</code>的时候可能都犯过一个错误，那就是在写<code>Mapper</code>接口的时候都重载过其中的方法，但是运行起来总是报错，那时候真的挺郁闷的，但是自己也查不出来原因，只能默默的改了方法名，哈哈，多么卑微的操作。</li>
-<li>今天就写一篇文章从源码角度为大家解惑为什么<code>Mybatis</code>中的方法不能重载？
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/04/20/Mybatis%E7%9A%84Mapper%E4%B8%AD%E7%9A%84%E6%96%B9%E6%B3%95%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E8%83%BD%E9%87%8D%E8%BD%BD/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/20/Mybatis%E5%A6%82%E4%BD%95%E6%89%A7%E8%A1%8CSelect%E8%AF%AD%E5%8F%A5%EF%BC%8C%E4%BD%A0%E7%9C%9F%E7%9A%84%E7%9F%A5%E9%81%93%E5%90%97%EF%BC%9F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/04/20/Mybatis%E5%A6%82%E4%BD%95%E6%89%A7%E8%A1%8CSelect%E8%AF%AD%E5%8F%A5%EF%BC%8C%E4%BD%A0%E7%9C%9F%E7%9A%84%E7%9F%A5%E9%81%93%E5%90%97%EF%BC%9F/" class="post-title-link" itemprop="url">Mybatis如何执行Select语句，你真的知道吗？</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-04-20 17:06:42" itemprop="dateCreated datePublished" datetime="2020-04-20T17:06:42+08:00">2020-04-20</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-10-23 21:56:01" itemprop="dateModified" datetime="2020-10-23T21:56:01+08:00">2020-10-23</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Mybatis%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Mybatis进阶</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2020/04/20/Mybatis%E5%A6%82%E4%BD%95%E6%89%A7%E8%A1%8CSelect%E8%AF%AD%E5%8F%A5%EF%BC%8C%E4%BD%A0%E7%9C%9F%E7%9A%84%E7%9F%A5%E9%81%93%E5%90%97%EF%BC%9F/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2020/04/20/Mybatis%E5%A6%82%E4%BD%95%E6%89%A7%E8%A1%8CSelect%E8%AF%AD%E5%8F%A5%EF%BC%8C%E4%BD%A0%E7%9C%9F%E7%9A%84%E7%9F%A5%E9%81%93%E5%90%97%EF%BC%9F/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
-<li>本篇文章是Myabtis源码分析的第三篇，前两篇分别介绍了Mybatis的重要组件和围绕着Mybatis中的重要组件教大家如何阅读源码的一些方法，有了前面两篇文章的基础，来看这篇文章的才不会觉得吃力，如果没有看过的朋友，陈某建议去看看，两篇文章分别是<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/lnJx0h_4Kk6fKuhptN1cdg">Mybatis源码解析之六剑客</a>和<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/B9e-4y_jokLHtDnS0o6-7g">Mybatis源码如何阅读，教你一招！！！</a>。</li>
-<li>今天接上一篇，围绕Mybatis中的<code>selectList()</code>来看一看Mybatis底层到底做了什么，有什么高级的地方。</li>
-</ul>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/04/20/Mybatis%E5%A6%82%E4%BD%95%E6%89%A7%E8%A1%8CSelect%E8%AF%AD%E5%8F%A5%EF%BC%8C%E4%BD%A0%E7%9C%9F%E7%9A%84%E7%9F%A5%E9%81%93%E5%90%97%EF%BC%9F/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/20/Mybatis%E5%A6%82%E4%BD%95%E9%98%85%E8%AF%BB%E6%BA%90%E7%A0%81%EF%BC%8C%E6%95%99%E4%BD%A0%E4%B8%80%E6%8B%9B/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/04/20/Mybatis%E5%A6%82%E4%BD%95%E9%98%85%E8%AF%BB%E6%BA%90%E7%A0%81%EF%BC%8C%E6%95%99%E4%BD%A0%E4%B8%80%E6%8B%9B/" class="post-title-link" itemprop="url">Mybatis如何阅读源码，教你一招？</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-04-20 17:05:42" itemprop="dateCreated datePublished" datetime="2020-04-20T17:05:42+08:00">2020-04-20</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-10-23 19:03:01" itemprop="dateModified" datetime="2020-10-23T19:03:01+08:00">2020-10-23</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Mybatis%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Mybatis进阶</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2020/04/20/Mybatis%E5%A6%82%E4%BD%95%E9%98%85%E8%AF%BB%E6%BA%90%E7%A0%81%EF%BC%8C%E6%95%99%E4%BD%A0%E4%B8%80%E6%8B%9B/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2020/04/20/Mybatis%E5%A6%82%E4%BD%95%E9%98%85%E8%AF%BB%E6%BA%90%E7%A0%81%EF%BC%8C%E6%95%99%E4%BD%A0%E4%B8%80%E6%8B%9B/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
-<li>前一篇文章简单的介绍了Mybatis的六个重要组件，这六剑客占据了Mybatis的半壁江山，和六剑客搞了基友，那么Mybatis就是囊中之物了。对六剑客感兴趣的朋友，可以看看这篇文章：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/lnJx0h_4Kk6fKuhptN1cdg">Mybatis源码解析篇之六剑客</a></li>
-<li>有些初入门的朋友可能很害怕阅读源码，不知道如何阅读源码，与其我一篇文章按照自己的思路写完Mybatis的源码，但是你们又能理解多少呢？不如教会你们思路，让你们能够自己知道如何阅读源码。</li>
-</ul>
-<h2 id="环境配置"><a href="#环境配置" class="headerlink" title="环境配置"></a>环境配置</h2><ul>
-<li>本篇文章讲的一切内容都是基于<code>Mybatis3.5</code>和<code>SpringBoot-2.3.3.RELEASE</code>。</li>
-</ul>
-<h2 id="从哪入手？"><a href="#从哪入手？" class="headerlink" title="从哪入手？"></a>从哪入手？</h2><ul>
-<li><p>还是要说一说六剑客的故事，既然是Mybatis的重要组件，当然要从六剑客下手了，沿用上篇文章的一张图，此图记录了六剑客先后执行的顺序，如下：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-%E5%85%AD%E5%89%91%E5%AE%A2/3.png" alt="六剑客执行流程图"></p>
-</li>
-<li><p>阅读源码最重要的一点不能忘了，就是开启<code>DEBUG</code>模式，重要方法打上断点，重要语句打上断点，先把握整体，再研究细节，基本就不难了。</p>
-</li>
-<li><p>下面就以Myabtis的查询语句<code>selectList()</code>来具体分析下如何阅读。</p>
-</li>
-</ul>
-<h2 id="总体把握六剑客"><a href="#总体把握六剑客" class="headerlink" title="总体把握六剑客"></a>总体把握六剑客</h2><ul>
-<li><p>从六剑客开整，既然是重要组件，源码执行流程肯定都是围绕着六剑客，下面来对六剑客一一分析，如何打断点。</p>
-</li>
-<li><p>下面只是简单的教你如何打断点，对于六剑客是什么不再介绍，请看上篇文章。</p>
-</li>
-</ul>
-<h3 id="SqlSession"><a href="#SqlSession" class="headerlink" title="SqlSession"></a>SqlSession</h3><ul>
-<li><p>既然是接口，肯定不能在接口方法上打断点，上文介绍有两个实现类，分别是<code>DefaultSqlSession</code>、<code>SqlSessionTemplate</code>。那么SpringBoot在初始化的时候到底注入的是哪一个呢？这个就要看Mybatis的启动器的自动配置类了，其中有一段这样的代码，如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//如果容器中没有SqlSessionTemplate这个Bean，则注入</span></span><br><span class="line"><span class="meta">@Bean</span></span><br><span class="line"><span class="meta">@ConditionalOnMissingBean</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> SqlSessionTemplate <span class="title">sqlSessionTemplate</span><span class="params">(SqlSessionFactory sqlSessionFactory)</span> </span>&#123;</span><br><span class="line">  ExecutorType executorType = <span class="keyword">this</span>.properties.getExecutorType();</span><br><span class="line">  <span class="keyword">if</span> (executorType != <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> SqlSessionTemplate(sqlSessionFactory, executorType);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> SqlSessionTemplate(sqlSessionFactory);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-<li><p>从上面的代码可以知道，SpringBoot启动时注入了<code>SqlSessionTemplate</code>，此时就肯定从<code>SqlSessionTemplate</code>入手了。它的一些方法如下图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E6%95%99%E5%AD%A6/1.png" alt="SqlSessionTemplate方法"></p>
-</li>
-<li><p>从上图的标记可以知道，首当其冲的就是<code>构造方法</code>了;既然是分析<code>selectList()</code>的查询流程，当然全部的<code>selectList()</code>方法要打上断点了;上篇文章也讲了Mapper的接口最终是走的动态代理生成的实例，因此此处的<code>getMapper()</code>也打上断点。</p>
-</li>
-<li><p>对于初入门的来说，上面三处打上断点已经足够了，但是如果你仔细看一眼<code>selectList()</code>方法，如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> &lt;E&gt; <span class="function">List&lt;E&gt; <span class="title">selectList</span><span class="params">(String statement)</span> </span>&#123;</span><br><span class="line">  <span class="comment">//此处的sqlSessionProxy是什么，也是SqlSession类型的，此处断点运行到这里可以知道，就是DefaultSqlSession实例</span></span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">this</span>.sqlSessionProxy.selectList(statement);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
-<li><p><code>sqlSessionProxy</code>是什么，没关系，这个不能靠猜，那么此时断点走一波，走到<code>selectList()</code>方法内部，如下图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E6%95%99%E5%AD%A6/2.png"></p>
-</li>
-<li><p>从上图可以很清楚的看到了，其实就是<code>DefaultSqlSession</code>。哦，明白了，原来SqlSessionTemplate把过甩给了<code>DefaultSqlSession</code>了，太狡诈了。</p>
-</li>
-<li><p><code>DefaultSqlSession</code>如何打断点就不用说了吧，自己搞搞吧。</p>
-</li>
-</ul>
-<h3 id="Executor"><a href="#Executor" class="headerlink" title="Executor"></a>Executor</h3><ul>
-<li><p>上面文章讲过执行器是什么作用，也讲过Mybatis内部是根据什么创建执行器的。此处不再赘述了。</p>
-</li>
-<li><p>SpringBoot整合各种框架有个特点，万变不离自动配置类，框架的一些初始化动作基本全是在自动配置类中完成，于是我们在配置类找一找在哪里注入了<code>Executor</code>的Bean，于是找到了如下的一段代码：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E6%95%99%E5%AD%A6/3.png"></p>
-</li>
-<li><p>从上面的代码可以知道默认创建了<code>CachingExecutor</code>，二级缓存的执行器，别管那么多，看看它重写了<code>Executor</code>的哪些接口，与<code>selectList()</code>相关的方法打上断点，如下图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E6%95%99%E5%AD%A6/4.png"></p>
-</li>
-<li><p>从上图也知道哪些方法和<code>selectList()</code>相关了，显然的<code>query</code>是查询的意思，别管那么多，先打上断点。</p>
-</li>
-<li><p>此时再仔细瞅一眼<code>query()</code>的方法怎么执行的，哦？发现了什么，如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">  <span class="keyword">public</span> &lt;E&gt; <span class="function">List&lt;E&gt; <span class="title">query</span><span class="params">(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql)</span></span></span><br><span class="line"><span class="function">      <span class="keyword">throws</span> SQLException </span>&#123;</span><br><span class="line">      <span class="comment">//先尝试从缓存中获取</span></span><br><span class="line">    Cache cache = ms.getCache();</span><br><span class="line">    <span class="keyword">if</span> (cache != <span class="keyword">null</span>) &#123;</span><br><span class="line">      flushCacheIfRequired(ms);</span><br><span class="line">      <span class="keyword">if</span> (ms.isUseCache() &amp;&amp; resultHandler == <span class="keyword">null</span>) &#123;</span><br><span class="line">        ensureNoOutParams(ms, boundSql);</span><br><span class="line">        <span class="meta">@SuppressWarnings(&quot;unchecked&quot;)</span></span><br><span class="line">        List&lt;E&gt; list = (List&lt;E&gt;) tcm.getObject(cache, key);</span><br><span class="line">        <span class="keyword">if</span> (list == <span class="keyword">null</span>) &#123;</span><br><span class="line">          list = delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);</span><br><span class="line">          tcm.putObject(cache, key, list); <span class="comment">// issue #578 and #116</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> list;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//没有缓存，直接调用delegate的query方法</span></span><br><span class="line">    <span class="keyword">return</span> delegate.query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure></li>
-<li><p>从上面的代码知道，有缓存了，直接返回了，没有缓存，调用了<code>delegate</code>中的<code>query</code>方法，那么这个<code>delegate</code>是哪个类的对象呢？参照sqlSession的分析的方法，调试走起，可以知道是<code>SimpleExecutor</code>的实例，如下图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E6%95%99%E5%AD%A6/5.png"></p>
-</li>
-<li><p>后面的<code>SimpleExecutor</code>如何打断点就不再说了，自己尝试找找。</p>
-</li>
-</ul>
-<h3 id="StatementHandler"><a href="#StatementHandler" class="headerlink" title="StatementHandler"></a>StatementHandler</h3><ul>
-<li>很熟悉的一个接口，在学JDBC的时候就接触过类似的，执行语句和设置参数的作用。</li>
-<li>这个接口很简单，大佬写的代码，看到方法名就知道这个方法是干什么的，如下图：<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E6%95%99%E5%AD%A6/6.png"></li>
-<li>最重要的实现类是什么？当然是<code>PreparedStatementHandler</code>，因此在对应的方法上打上断点即可。</li>
-</ul>
-<h3 id="ParameterHandler"><a href="#ParameterHandler" class="headerlink" title="ParameterHandler"></a>ParameterHandler</h3><ul>
-<li>这个接口很简单，也别选择了，总共两个方法，一个设置，一个获取，在实现类<code>DefaultParameterHandler</code>中对应的方法上打上断点即可。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/Mybatis-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E6%95%99%E5%AD%A6/7.png"></li>
-</ul>
-<h3 id="TypeHandler"><a href="#TypeHandler" class="headerlink" title="TypeHandler"></a>TypeHandler</h3><ul>
-<li>类型处理器，也是一个简单的接口，总共’两个’方法，一个设置参数的转换，一个对结果的转换，啥也别说了，自己找到对应参数类型的处理器，在其中的方法打上断点。</li>
-</ul>
-<h3 id="ResultSetHandler"><a href="#ResultSetHandler" class="headerlink" title="ResultSetHandler"></a>ResultSetHandler</h3><ul>
-<li>结果处理器，负责对结果的处理，总共三个方法，一个实现类<code>DefaultResultSetHandler</code>，全部安排断点。</li>
-</ul>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
-<li>授人以鱼不授人以渔，与其都分析了给你看，不如教会你阅读源码的方式，先自己去研究，不仅仅是阅读Mybatis的源码是这样，阅读任何框架的源码都是如此，比如Spring的源码，只要找到其中重要的组件，比如前置处理器，后置处理器，事件触发器等等，一切都迎刃而解。</li>
-<li>如果你觉得作者写的不错，有所收获，不妨关注分享一波，后续更多精彩内容更新。<br><img src="https://gitee.com/chenjiabing666/Blog-file/raw/master/%E4%B8%83%E7%A7%92%E7%BC%96%E7%A8%8B.jpg"></li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2020/04/20/Mybatis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E4%B9%8B%E5%85%AD%E5%89%91%E5%AE%A2/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/header.jpg">
-      <meta itemprop="name" content="不才陈某">
-      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2020/04/20/Mybatis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E4%B9%8B%E5%85%AD%E5%89%91%E5%AE%A2/" class="post-title-link" itemprop="url">Mybatis源码阅读之六剑客</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-04-20 17:04:42" itemprop="dateCreated datePublished" datetime="2020-04-20T17:04:42+08:00">2020-04-20</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-10-23 21:56:05" itemprop="dateModified" datetime="2020-10-23T21:56:05+08:00">2020-10-23</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Mybatis%E8%BF%9B%E9%98%B6/" itemprop="url" rel="index"><span itemprop="name">Mybatis进阶</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    
-      <span class="post-meta-item-icon">
-        <i class="far fa-comment"></i>
-      </span>
-      <span class="post-meta-item-text">Valine：</span>
-    
-    <a title="valine" href="/2020/04/20/Mybatis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E4%B9%8B%E5%85%AD%E5%89%91%E5%AE%A2/#valine-comments" itemprop="discussionUrl">
-      <span class="post-comments-count valine-comment-count" data-xid="/2020/04/20/Mybatis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E4%B9%8B%E5%85%AD%E5%89%91%E5%AE%A2/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
-<li>Mybatis的专题文章写到这里已经是第四篇了，前三篇讲了Mybatis的基本使用，相信只要认真看了的朋友，在实际开发中正常使用应该不是问题。没有看过的朋友，作者建议去看一看，三篇文章分别是<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/KdrEvlShnVoYA8nr0qLSNw">Mybatis入门之基本操作</a>、<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/czICR6jv1yz6adi6G3xFgQ">Mybatis结果映射，你射准了吗？</a>、<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/yuYAEXY_OGRsr0Eb3xZkog">Mybatis动态SQL，你真的会了吗？</a>。</li>
-<li>当然，任何一个技术都不能浅藏辄止，今天作者就带大家深入底层源码看一看Mybatis的基础架构。此篇文章只是源码的入门篇，讲一些Mybatis中重要的组件，作者称之为<code>六剑客</code>。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2020/04/20/Mybatis%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E4%B9%8B%E5%85%AD%E5%89%91%E5%AE%A2/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/9/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/11/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/9/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="extend next" rel="next" href="/page/11/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 
@@ -1529,20 +1532,20 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">136</span>
+          <span class="site-state-item-count">142</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-count">16</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">68</span>
+        <span class="site-state-item-count">72</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>

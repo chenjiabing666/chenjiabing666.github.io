@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"chenjiabing666.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="大家好，我是不才陈某~ 在每个公司的系统中，总有一些拥有复杂业务逻辑的系统，这些系统承载着核心业务逻辑，几乎每个需求都和这些核心业务有关，这些核心业务业务逻辑冗长，涉及内部逻辑运算，缓存操作，持久化操作，外部资源调取，内部其他系统RPC调用等等。时间一长，项目几经易手，维护的成本就会越来越高。各种硬代码判断，分支条件越来越多。代码的抽象，复用率也越来越低，各个模块之间的耦合度很高。一小段逻辑的变动">
+<meta property="og:type" content="article">
+<meta property="og:title" content="万字+28张图带你探秘小而美的规则引擎框架LiteFlow">
+<meta property="og:url" content="https://chenjiabing666.github.io/2023/04/27/%E4%B8%87%E5%AD%97+28%E5%BC%A0%E5%9B%BE%E5%B8%A6%E4%BD%A0%E6%8E%A2%E7%A7%98%E5%B0%8F%E8%80%8C%E7%BE%8E%E7%9A%84%E8%A7%84%E5%88%99%E5%BC%95%E6%93%8E%E6%A1%86%E6%9E%B6LiteFlow/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="大家好，我是不才陈某~ 在每个公司的系统中，总有一些拥有复杂业务逻辑的系统，这些系统承载着核心业务逻辑，几乎每个需求都和这些核心业务有关，这些核心业务业务逻辑冗长，涉及内部逻辑运算，缓存操作，持久化操作，外部资源调取，内部其他系统RPC调用等等。时间一长，项目几经易手，维护的成本就会越来越高。各种硬代码判断，分支条件越来越多。代码的抽象，复用率也越来越低，各个模块之间的耦合度很高。一小段逻辑的变动">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.java-family.cn/20230427103445201.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103449202.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103451203.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103453204.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103454205.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103456206.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103459207.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103501208.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103503209.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103505210.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103507211.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103509212.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103510213.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103512214.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103514215.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103516216.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103518217.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103519218.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103521219.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103522220.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103536221.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103538222.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103539223.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103541224.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103544225.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103545226.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103546227.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103550228.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103552229.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103553230.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103555231.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103557232.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103558233.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103600234.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103601235.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103603236.png">
+<meta property="og:image" content="https://img.java-family.cn/20230427103604237.png">
+<meta property="og:image" content="https://img.java-family.cn/2023042710371222.png">
+<meta property="og:image" content="https://img.java-family.cn/2023042710371523.png">
+<meta property="og:image" content="https://img.java-family.cn/2023042710371924.png">
+<meta property="og:image" content="https://img.java-family.cn/2023042710372225.png">
+<meta property="og:image" content="https://img.java-family.cn/2023042710372426.png">
+<meta property="og:image" content="https://img.java-family.cn/202304270958131.png">
+<meta property="article:published_time" content="2023-04-27T01:31:43.000Z">
+<meta property="article:modified_time" content="2023-04-27T02:39:04.733Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="LiteFlow">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.java-family.cn/20230427103445201.png">
+
+<link rel="canonical" href="https://chenjiabing666.github.io/2023/04/27/%E4%B8%87%E5%AD%97+28%E5%BC%A0%E5%9B%BE%E5%B8%A6%E4%BD%A0%E6%8E%A2%E7%A7%98%E5%B0%8F%E8%80%8C%E7%BE%8E%E7%9A%84%E8%A7%84%E5%88%99%E5%BC%95%E6%93%8E%E6%A1%86%E6%9E%B6LiteFlow/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>万字+28张图带你探秘小而美的规则引擎框架LiteFlow | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+		<div id="container">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2023/04/27/%E4%B8%87%E5%AD%97+28%E5%BC%A0%E5%9B%BE%E5%B8%A6%E4%BD%A0%E6%8E%A2%E7%A7%98%E5%B0%8F%E8%80%8C%E7%BE%8E%E7%9A%84%E8%A7%84%E5%88%99%E5%BC%95%E6%93%8E%E6%A1%86%E6%9E%B6LiteFlow/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          万字+28张图带你探秘小而美的规则引擎框架LiteFlow
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-04-27 09:31:43 / 修改时间：10:39:04" itemprop="dateCreated datePublished" datetime="2023-04-27T09:31:43+08:00">2023-04-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%A7%84%E5%88%99%E5%BC%95%E6%93%8E/" itemprop="url" rel="index"><span itemprop="name">规则引擎</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2023/04/27/%E4%B8%87%E5%AD%97+28%E5%BC%A0%E5%9B%BE%E5%B8%A6%E4%BD%A0%E6%8E%A2%E7%A7%98%E5%B0%8F%E8%80%8C%E7%BE%8E%E7%9A%84%E8%A7%84%E5%88%99%E5%BC%95%E6%93%8E%E6%A1%86%E6%9E%B6LiteFlow/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2023/04/27/%E4%B8%87%E5%AD%97+28%E5%BC%A0%E5%9B%BE%E5%B8%A6%E4%BD%A0%E6%8E%A2%E7%A7%98%E5%B0%8F%E8%80%8C%E7%BE%8E%E7%9A%84%E8%A7%84%E5%88%99%E5%BC%95%E6%93%8E%E6%A1%86%E6%9E%B6LiteFlow/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><strong>大家好，我是不才陈某~</strong></p>
+<p>在每个公司的系统中，总有一些拥有复杂业务逻辑的系统，这些系统承载着核心业务逻辑，几乎每个需求都和这些核心业务有关，这些核心业务业务逻辑冗长，涉及内部逻辑运算，缓存操作，持久化操作，外部资源调取，内部其他系统RPC调用等等。时间一长，项目几经易手，维护的成本就会越来越高。各种硬代码判断，分支条件越来越多。代码的抽象，复用率也越来越低，各个模块之间的耦合度很高。一小段逻辑的变动，会影响到其他模块，需要进行完整回归测试来验证。如要灵活改变业务流程的顺序，则要进行代码大改动进行抽象，重新写方法。实时热变更业务流程，几乎很难实现。</p>
+<p>LiteFlow官方网站和代码仓库地址</p>
+<p>官方网站：<a target="_blank" rel="noopener" href="https://yomahub.com/liteflow">https://yomahub.com/liteflow</a></p>
+<p>Gitee托管仓库：<a target="_blank" rel="noopener" href="https://gitee.com/dromara/liteFlow">https://gitee.com/dromara/liteFlow</a></p>
+<p>Github托管仓库：<a target="_blank" rel="noopener" href="https://github.com/dromara/liteflow">https://github.com/dromara/liteflow</a></p>
+<p><img src="https://img.java-family.cn/20230427103445201.png"></p>
+<span id="more"></span>
+
+<h2 id="LiteFlow框架的作用"><a href="#LiteFlow框架的作用" class="headerlink" title="LiteFlow框架的作用"></a><strong>LiteFlow框架的作用</strong></h2><p>LiteFlow就是为解耦复杂逻辑而生，如果你要对复杂业务逻辑进行新写或者重构，用LiteFlow最合适不过。它是一个轻量，快速的组件式流程引擎框架，组件编排，帮助解耦业务代码，让每一个业务片段都是一个组件，并支持热加载规则配置，实现即时修改。</p>
+<p>使用LiteFlow，你需要去把复杂的业务逻辑按代码片段拆分成一个个小组件，并定义一个规则流程配置。这样，所有的组件，就能按照你的规则配置去进行复杂的流转。</p>
+<h2 id="LiteFlow的设计原则"><a href="#LiteFlow的设计原则" class="headerlink" title="LiteFlow的设计原则"></a><strong>LiteFlow的设计原则</strong></h2><p>LiteFlow是基于工作台模式进行设计的，何谓工作台模式？</p>
+<p>n个工人按照一定顺序围着一张工作台，按顺序各自生产零件，生产的零件最终能组装成一个机器，每个工人只需要完成自己手中零件的生产，而无需知道其他工人生产的内容。每一个工人生产所需要的资源都从工作台上拿取，如果工作台上有生产所必须的资源，则就进行生产，若是没有，就等到有这个资源。每个工人所做好的零件，也都放在工作台上。</p>
+<p>这个模式有几个好处：</p>
+<ul>
+<li>每个工人无需和其他工人进行沟通。工人只需要关心自己的工作内容和工作台上的资源。这样就做到了每个工人之间的解耦和无差异性。</li>
+<li>即便是工人之间调换位置，工人的工作内容和关心的资源没有任何变化。这样就保证了每个工人的稳定性。</li>
+<li>如果是指派某个工人去其他的工作台，工人的工作内容和需要的资源依旧没有任何变化，这样就做到了工人的可复用性。</li>
+<li>因为每个工人不需要和其他工人沟通，所以可以在生产任务进行时进行实时工位更改：替换，插入，撤掉一些工人，这样生产任务也能实时地被更改。这样就保证了整个生产任务的灵活性。</li>
+</ul>
+<p>这个模式映射到LiteFlow框架里，工人就是组件，工人坐的顺序就是流程配置，工作台就是上下文，资源就是参数，最终组装的这个机器就是这个业务。正因为有这些特性，所以LiteFlow能做到统一解耦的组件和灵活的装配。</p>
+<h2 id="LiteFlow的使用"><a href="#LiteFlow的使用" class="headerlink" title="LiteFlow的使用"></a><strong>LiteFlow的使用</strong></h2><p><strong>1）非Spring环境下</strong></p>
+<p>引入pom依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.yomahub<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>liteflow-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.6.13<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>第一步构建自己的业务Node，也就是继承NodeComponent，重写process方法，业务执行的过程中，会调用process来执行节点的业务。</p>
+<p><img src="https://img.java-family.cn/20230427103449202.png"></p>
+<p>我这里写了三个</p>
+<p><img src="https://img.java-family.cn/20230427103451203.png"></p>
+<p>然后编写xml文件，直接放在resources底下</p>
+<p><img src="https://img.java-family.cn/20230427103453204.png"></p>
+<p><img src="https://img.java-family.cn/20230427103454205.png"></p>
+<p><nodes/>配置了每个业务的节点，这里配置了我们写的那几个，<chain/>标签代表了每一个业务的执行流程，配置了<when/>和<then/>标签，然后value标签设置了上面配置的<node/>的id，至于为什么这么配置，后面会解析。</p>
+<p>然后执行这个demo</p>
+<p><img src="https://img.java-family.cn/20230427103456206.png"></p>
+<p>构建了一个LiteflowConfig，传入xml的路径，然后构建FlowExecutor，最后调用FlowExecutor的execute2Resp，传入需要执行的业务流程名字 chain1 ，就是xml中配置的，执行业务流程。</p>
+<p>结果</p>
+<p><img src="https://img.java-family.cn/20230427103459207.png"></p>
+<p>如果业务变动，现在不需要执行B流程了，那么直接修改规则文件就行了，如图。</p>
+<p><img src="https://img.java-family.cn/20230427103501208.png"></p>
+<p>运行结果</p>
+<p><img src="https://img.java-family.cn/20230427103503209.png"></p>
+<p>这里发现B就没执行了。</p>
+<p><strong>2）SpringBoot环境下</strong></p>
+<p>引入pom依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.yomahub<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>liteflow-spring-boot-starter<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">   <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.6.13<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+
+
+<p>构建自己的业务Node，只不过在Spring的环境底下，可以不需要在xml配置<node/>标签，直接使用@LiteflowComponent注解即可</p>
+<p><img src="https://img.java-family.cn/20230427103505210.png"></p>
+<p>xml中没有声明<node/>标签</p>
+<p><img src="https://img.java-family.cn/20230427103507211.png"></p>
+<p>application.properties中配置xml文件的路径</p>
+<p><img src="https://img.java-family.cn/20230427103509212.png"></p>
+<p>测试代码</p>
+<p><img src="https://img.java-family.cn/20230427103510213.png"></p>
+<p>执行结果</p>
+<p><img src="https://img.java-family.cn/20230427103512214.png"></p>
+<p>跟非spring的环境结果一致。</p>
+<blockquote>
+<p>如果有想要获取demo的小伙伴关注微信公众号：码猿技术专栏，回复 关键词：<strong>LiteFlow</strong>  即可获取。</p>
+</blockquote>
+<p>通过上面的例子我们可以看出，其实每个业务节点之间是没有耦合的，用户只需要按照一定的业务规则配置节点的执行顺序，LiteFlow就能实现业务的执行。</p>
+<h2 id="LiteFlow核心组件讲解"><a href="#LiteFlow核心组件讲解" class="headerlink" title="LiteFlow核心组件讲解"></a><strong>LiteFlow核心组件讲解</strong></h2><p>讲解核心组件的时候如果有什么不是太明白的，可以继续往下看，后面会有源码解析。</p>
+<p>下图为LiteFlow整体架构图</p>
+<p><img src="https://img.java-family.cn/20230427103514215.png"></p>
+<p><strong>1）Parser</strong></p>
+<p>这个组件的作用就是用来解析流程配置的规则，也就是将你配置的规则文件解析成Java代码来运行。支持的文件格式有xml、json、yaml，其实不论是什么格式，只是形式的不同，用户可根据自身配置的习惯来选择规则文件的格式。</p>
+<p>同时，规则文件的存储目前官方支持基于zk或者本地文件的形式，同时也支持自定义的形式。</p>
+<p>对于xml来说，Parser会将<node/>标签解析成Node对象，将<chain/>解析成Chain对象，将<chain/>内部的比如<when/>、<then/>等标签都会解析成Condition对象。</p>
+<p>如下图所示。</p>
+<p><img src="https://img.java-family.cn/20230427103516216.png"></p>
+<ul>
+<li>Node其实就是代表了你具体业务执行的节点，就是真正的业务是在Node中执行的</li>
+<li>Condition可以理解为一种条件，比如前置条件，后置条件，里面一个Condition可以包含许多需要执行的Node</li>
+<li>Chain可以理解成整个业务执行的流程，按照一定的顺序来执行Condition中的Node也就是业务节点</li>
+</ul>
+<p><strong>Condition和Node的关系</strong></p>
+<p><img src="https://img.java-family.cn/20230427103518217.png"></p>
+<p>Condition分为以下几种</p>
+<ul>
+<li>PreCondition：在整个业务执行前执行，就是前置的作用</li>
+<li>ThenCondition：内部的Node是串行执行的</li>
+<li>WhenCondition：内部的Node是并行执行的</li>
+<li>FinallyCondition：当前面的Condition中的Node都执行完成之后，就会执行这个Condition中的Node节点</li>
+</ul>
+<p><strong>Chain和Condition的关系</strong></p>
+<p><img src="https://img.java-family.cn/20230427103519218.png"></p>
+<p>Chain内部其实就是封装了一堆Condition，Chain的执行就是指从不同的Condition中拿出里面的Node来执行，首先会拿出来PreCondition中的Node节点来执行，执行完之后会执行ThenCondition和WhenCondition中的Node节点，最后执行完之后才会执行FinallyCondition中的Node节点。</p>
+<p><strong>2）FlowBus</strong></p>
+<p>这个组件主要是用来存储上一步骤解析出来的Node和Chain的</p>
+<p><img src="https://img.java-family.cn/20230427103521219.png"></p>
+<p><strong>3）FlowExecutor</strong></p>
+<p>这个其实是用来执行上面解析出来的业务流程，从FlowBus找到需要执行的业务流程Chain，然后执行Chain，也就是按照Condition的顺序来分别执行每个Condition的Node，也就是业务节点。</p>
+<p><img src="https://img.java-family.cn/20230427103522220.png"></p>
+<p><strong>4）Slot</strong></p>
+<p>Slot可以理解为业务的上下文，在一个业务流程中，这个Slot是共享的。</p>
+<p>Slot有个默认的实现DefaultSlot，DefaultSlot虽然可以用，但是在实际业务中，用这个会存在大量的弱类型，存取数据的时候都要进行强转，颇为不方便。所以官方建议自己去实现自己的Slot，可以继承AbsSlot。</p>
+<p><img src="https://img.java-family.cn/20230427103536221.png"></p>
+<p><strong>5）DataBus</strong></p>
+<p>用来管理Slot的，从这里面可以获取当前业务流程执行的Slot。</p>
+<h2 id="LiteFlow源码探究"><a href="#LiteFlow源码探究" class="headerlink" title="LiteFlow源码探究"></a><strong>LiteFlow源码探究</strong></h2><p>说完核心的组件，接下来就来剖析一下源码，来看一看LiteFlow到底是如何实现规则编排的。</p>
+<p><strong>1）FlowExecutor的构造流程</strong></p>
+<p>我们这里就以非Spring环境的例子来说，因为在SpringBoot环境底下，FlowExecutor是由Spring创建的，但是创建的过程跟非Spring的例子是一样的。</p>
+<p><img src="https://img.java-family.cn/20230427103538222.png"></p>
+<p>这里在构建FlowExecutor，传入了一个规则的路径flow.xml，也就是ruleSource属性值。</p>
+<p>进入loadInstance这个方法，其实就是直接new了一个FlowExecutor。</p>
+<p><img src="https://img.java-family.cn/20230427103539223.png"></p>
+<p>进入FlowExecutor构造方法，前面就是简单的赋值操作。然后调用liteflowConfig.isParseOnStart()，这个方法默认是返回true的，接下来会调用init方法，也就是在启动时，就去解析规则文件，保证运行时的效率。</p>
+<p>接下来进入init方法。</p>
+<p><img src="https://img.java-family.cn/20230427103541224.png"></p>
+<p>init方法非常长，来一步一步解析</p>
+<p>前面就是校验，不用care</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; sourceRulePathList = Lists.newArrayList(liteflowConfig.getRuleSource().split(<span class="string">&quot;,|;&quot;</span>));</span><br></pre></td></tr></table></figure>
+
+<p>这行代码的意思就是将我们传入的规则文件路径进行分割成多个路径，从这可以看出支持配置多个规则的文件。对我们这个demo来说其实就是只有一个，那就是flow.xml。</p>
+<p>分割完之后，就会遍历每个路径，然后判断文件的格式，比如xml、json、yaml，然后根据文件格式找到对应的FlowParser。</p>
+<p>随后根据liteflowConfig.isSupportMultipleType()判断是不是支持多类型的，什么叫多类型，就是指规则文件配置了多个并且文件的格式不同，如果支持的话，需要每个规则文件单独去解析，如果不支持，那就说明文件的格式一定是相同的，相同可以在最后统一解析，解析是通过调用FlowParser的parseMain来解析的。</p>
+<p>剖析完之后整个init方法就会结束，然后继续调用DataBus的init方法，其实就是初始化DataBus。</p>
+<p>到这其实构建FlowExecutor就完成了，从上面我们得出一个结论，那就是在构造FlowExecutor的时候会通过FlowParser的parseMain来处理对应规则文件的路径，所以接下来我们分析一下这个FlowParser是如何解析xml的，并且解析了之后干了什么。</p>
+<p><strong>2）FlowParser规则解析流程</strong></p>
+<p>接下来我们进入FlowParser来看看一个是如何解析规则的。</p>
+<p>以本文的例子为例，因为是配置本地的xml文件，找到的FlowParser的实现是LocalXmlFlowParser。</p>
+<p><img src="https://img.java-family.cn/20230427103544225.png"></p>
+<p>接下会调用parseMain方法，parseMain的方法的实现很简单，首先根据PathContentParserHolder拿到一个PathContentParser来解析路径，对上面案例来说，就是flow.xml路径，拿到路径对应文件的内容，其实就是拿到了flow.xml内容。然后调用父类的parse方法来解析xml的内容，所以parse方法才是解析xml的核心方法。</p>
+<p>这里有个细节说一下，PathContentParserHolder其实内部使用了Java的SPI机制来加载PathContentParser的实现，然后解析路径，拿到内容，在Spring环境中默认基于Spring的实现的优先级高点，但是不论是怎么实现，作用都是一样的，那就是拿到路径对应的xml文件的内容，这里就不继续研究PathContentParser是如何加载文件的源码了。</p>
+<p>其实不光是PathContentParser，LiteFlow内部使用了很多SPI机制，但是基本上整合Spring的实现的优先级都高于框架本身的实现。</p>
+<p>接下来我们就来看一下LocalXmlFlowParser父类中的parse方法的实现。</p>
+<p><img src="https://img.java-family.cn/20230427103545226.png"></p>
+<p>首先遍历每个文件中的内容，然后转成Document，Document其实是dom4j的包，其实就是将xml转成Java对象，这样可以通过Java中的方法来获取xml中每个标签的数据。</p>
+<p>将文件都转换成Document之后，调用parseDocument方法。</p>
+<p><img src="https://img.java-family.cn/20230427103546227.png"></p>
+<p>首先调用了ContextCmpInitHolder.loadContextCmpInit().initCmp() ，这行代码也是通过SPI机制来加载ContextCmpInit，调用initCmp方法。框架本身对于initCmp的实现是空实现，但是在Spring环境中，主要是用来整合Spring中的Node节点的，将Node节点添加到FlowBus中，这也是为什么在Spring环境中的那个案例中不需要在xml文件中配置<nodes/>的原因，因为LiteFlow会自动识别这些Node节点的Spring Bean。至于怎么整合Spring的，有兴趣的同学可以看一下ComponentScanner类的实现，主要在Bean初始化之后进行判断的，这里画一张图来总结一下initCmp方法的作用。</p>
+<p><img src="https://img.java-family.cn/20230427103550228.png"></p>
+<p>至于为什么需要先将Spring中的Node节点添加到FlowBus，其实很简单，主要是因为构建Chain是需要Node，需要保证构建Chain之前，Spring中的Node节点都已经添加到了FlowBus中。</p>
+<p>接下来就会继续遍历每个Document，也就是每个xml，然后拿到解析<nodes></nodes>中的每个<node></node>标签，拿出每个node标签中的属性，通过LiteFlowNodeBuilder构建Node，然后放入到FlowBus中，至于如何放入到FlowBus中，可以看一下LiteFlowNodeBuilder的build方法的实现。</p>
+<p><img src="https://img.java-family.cn/20230427103552229.png"></p>
+<p>解析完Node之后，接下来就是解析<chain/>标签，拿到每一个<chain/>标签对应的Element之后，调用parseOneChain来解析<chain/>标签的内容。</p>
+<p><img src="https://img.java-family.cn/20230427103553230.png"></p>
+<p>parseOneChain方法，先拿到<chain/>底下所有的标签，然后判断标签类型，标签的类型主要有四种类型：then、when、pre、finally，然后拿到每个标签的值，构建对应的Condition，就是上文提到的ThenCondition、WhenCondition、PreCondition、FinallyCondition，然后加入到Chain中，至于如何将Node设置到Condition中，主要是通过LiteFlowConditionBuilder的setValue方法来实现的，setValue这个方式设置的值是条件标签的value属性值，然后解析value属性值，然后从FlowBus中clone一个新的Node，加入到Condition中，至于为什么需要clone一下新的Node，因为同一个业务节点，可能在不同的执行链中，为了保证不同业务中的同一个业务节点不相互干扰，所以得重新clone一个新的Node对象。</p>
+<p>构建好Condition之后，都设置到了对应的Chain中，最后将Chain添加到FlowBus中。</p>
+<p><img src="https://img.java-family.cn/20230427103555231.png"></p>
+<p>到这里，其实整个xml就解析完了，FlowParser的最主要的作用就是解析xml，根据配置构建Node、Condition和Chain对象，有了这些基础的组件之后，后面才能运行业务流程。其实从这里也可以看出是如何流程编排的，其实就是根据配置，将一个个Node添加到Condition中，Condition再添加到Chain中，这样相同的业务节点，可能分布在不同的Chain中，这样就实现了业务代码的复用和流程的编排。</p>
+<p><strong>3）Chain的执行流程</strong></p>
+<p>剖析完FlowParser的作用，也就是Node和Chain的构造流程之后，接下来看一下Chain是如何执行的。</p>
+<p>流程执行是通过FlowExecutor来执行的，FlowExecutor执行的方法很多，我们以上面demo调用的execute2Resp为例，最终会走到如下图的重载方法。</p>
+<p><img src="https://img.java-family.cn/20230427103557232.png"></p>
+<p>execute2Resp方法就会调用doExecute方法的实现，然后拿到Slot，封装成一个LiteflowResponse返回回去，所以从这里可以看出，doExecute是核心方法。</p>
+<p>接下来看看doExecute方法的实现。</p>
+<p><img src="https://img.java-family.cn/20230427103558233.png"></p>
+<p><img src="https://img.java-family.cn/20230427103600234.png"></p>
+<p>doExecute方法比较长，我截了两张图</p>
+<p>首先从DataBus中获取一个Slot，也就是当前业务执行的上下文。之后从FlowBus中获取需要执行的Chain，最后分别调用了Chain的executePre、execute、executeFinally方法，其实不用看也知道这些方法干了什么，其实就是调用不同的Condition中Node方法。</p>
+<p>executePre和executeFinally方法</p>
+<p><img src="https://img.java-family.cn/20230427103601235.png"></p>
+<p>这两个方法最后调用的是同一个方法，就是分别找到PreCondition和FinallyCondition，取出里面的Node节点，执行excute方法。</p>
+<p>这里有重点说明一下，其实在Condition中存的不是直接的Node，而是Executable，Executable的有两个实现，一个就是我们所说的Node，还有一个就是我们一直说的Chain，为了方便大家理解，我一直说的是Node，其实这里的Executable是有可能为Chain的，取决于规则的配置。当是一个Chain的时候，其实就是一个嵌套的子流程，也就是在一个流程中嵌套另一个流程的意思，大家注意一下就行了，其实不论怎么嵌套，流程执行到最后一定是Node，因为如果是Chain，那么还会继续执行，不会停止，只有最后一个流程的Executable都是Node的时候流程才能执行完。</p>
+<p>executePre和executeFinally方法说完之后，看一看execute方法的实现。</p>
+<p><img src="https://img.java-family.cn/20230427103603236.png"></p>
+<p>execute方法主要是判断Condition的类型，然后判断是ThenCondition还是WhenCondition，ThenCondition的话其实也就是拿出Node直接执行，如果是WhenCondition的话，其实就是并行执行每个Node节点。这也是ThenCondition和WhenCondition的主要区别。</p>
+<p>画图总结一下Chain的执行流程</p>
+<p><img src="https://img.java-family.cn/20230427103604237.png"></p>
+<p><strong>4）Node的执行流程</strong></p>
+<p>从上面我们可以看出，Chain的执行其实最终都是交给Node来执行的，只不过是不同阶段调用不同的Node而已，其实最终也就是会调用Node的execute方法，所以我们就来着重看一下Node的execute方法。</p>
+<p><img src="https://img.java-family.cn/2023042710371222.png"></p>
+<p>instance就是NodeComponent对象，也就是我们自定义实现的节点对象，好家伙，终于要执行到业务了。有人可能好奇NodeComponent是如何设置到Node对象中的，其实就是在往FlowBus添加Node的时候设置的，不清楚的小伙伴可以翻一下那块相关的源码，在解析xml那块我有说过。</p>
+<p>先调用NodeComponent的isAccess方法来判断业务要不要执行，默认是true，你可以重写这个方法，自己根据其它节点执行的情况来判断当前业务的节点要不要执行，因为Slot是公共的，每个业务节点的执行结果可以放在Slot中。</p>
+<p>随后通过这个方法获取了NodeExecutor，NodeExecutor可以通过execute方法来执行NodeComponent的，也就是来执行业务的，NodeExecutor默认是使用DefaultNodeExecutor子类的，当然你也可以自定义NodeExecutor来执行NodeComponent</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">NodeExecutor nodeExecutor = NodeExecutorHelper.loadInstance().buildNodeExecutor(instance.getNodeExecutorClass());</span><br></pre></td></tr></table></figure>
+
+<p>DefaultNodeExecutor的execute方法也是直接调用父类NodeExecutor的execute方法，接下来我们来看一下NodeExecutor的execute方法。</p>
+<p><img src="https://img.java-family.cn/2023042710371523.png"></p>
+<p>从这个方法的实现我们可以看出，LiteFlow对于业务的执行是支持重试功能的，但是不论怎么重试，最终一定调用的是NodeComponent的execute方法。</p>
+<p>进入NodeComponent的execute方法</p>
+<p><img src="https://img.java-family.cn/2023042710371924.png"></p>
+<p>红框圈出来的，就是核心代码，self是一个变量，指的是当前这个NodeComponent对象，所以就直接调用当前这个NodeComponent的process方法，也就是用来执行业务的方法。</p>
+<p>在执行NodeComponent的process方法前后其实有回调的，也就是可以实现拦截的效果，在Spring环境中会生效。</p>
+<p>至于这里为什么要使用self变量而不是直接使用this，其实源码也有注释，简单点说就是如果process方法被动态代理了，那么直接使用this的话，动态代理会不生效，所以为了防止动态代理不生效，就单独使用了self变量来引用自己。至于为什么不生效，这是属于Spring的范畴了，这里就不过多赘述了。</p>
+<p>其实到这里，一个Node就执行完成了，Node的执行其实就是在执行NodeComponent，而NodeComponent其实最终是交给NodeExecutor来执行的。</p>
+<p><img src="https://img.java-family.cn/2023042710372225.png"></p>
+<p>每个Condition中的Node执行完之后，就将Slot返回，这样就能在调用方就能通过Slot拿到整个流程的执行结果了。</p>
+<p>到这里，其实核心流程源码剖析就完成了，总的来说就是将规则配置文件翻译成代码，生成Node和Chain，然后通过调用Chain来执行业务流程，最终其实就是执行我们实现的NodeComponent的process方法。</p>
+<p>最终画一张图来总结整个核心源码。</p>
+<p><img src="https://img.java-family.cn/2023042710372426.png"></p>
+<p>图中我省略了Condition的示意图，因为Condition其实最终也是执行Node的。</p>
+<h2 id="最后说一句（别白嫖，求关注）"><a href="#最后说一句（别白嫖，求关注）" class="headerlink" title="最后说一句（别白嫖，求关注）"></a>最后说一句（别白嫖，求关注）</h2><p>陈某每一篇文章都是精心输出，如果这篇文章对你有所帮助，或者有所启发的话，帮忙<strong>点赞</strong>、<strong>在看</strong>、<strong>转发</strong>、<strong>收藏</strong>，你的支持就是我坚持下去的最大动力！</p>
+<p>另外陈某的<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247523057&idx=1&sn=32b42c6b0ac41b48785b7c0d24ce344a&chksm=fcf7453ccb80cc2a4a6cf38d5b9ab0354f09f270418bf4ff5eeb832b020aedabd561979b712d&token=1260267649&lang=zh_CN#rd">知识星球</a>开通了，公众号回复关键词：<strong>知识星球</strong> 获取限量<strong>30元</strong>优惠券加入只需<strong>99</strong>元，一顿饭钱，但是星球回馈的价值却是巨大，目前更新了<strong>Spring全家桶实战系列</strong>、<strong>亿级数据分库分表实战</strong>、<strong>DDD微服务实战专栏</strong>、<strong>我要进大厂、Spring，Mybatis等框架源码、架构实战22讲</strong>等….每增加一个专栏价格将上涨20元</p>
+<p><img src="https://img.java-family.cn/202304270958131.png"></p>
+<p>关注公众号：【码猿技术专栏】，公众号内有超赞的粉丝福利，回复：加群，可以加入技术讨论群，和大家一起讨论技术，吹牛逼！</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    不才陈某  |  微信公众号【码猿技术专栏】
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://chenjiabing666.github.io/2023/04/27/%E4%B8%87%E5%AD%97+28%E5%BC%A0%E5%9B%BE%E5%B8%A6%E4%BD%A0%E6%8E%A2%E7%A7%98%E5%B0%8F%E8%80%8C%E7%BE%8E%E7%9A%84%E8%A7%84%E5%88%99%E5%BC%95%E6%93%8E%E6%A1%86%E6%9E%B6LiteFlow/" title="万字+28张图带你探秘小而美的规则引擎框架LiteFlow">https://chenjiabing666.github.io/2023/04/27/万字+28张图带你探秘小而美的规则引擎框架LiteFlow/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+  <li class="post-copyright-license">
+    并保留本声明和上方二维码。感谢您的阅读和支持！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">微信公众号</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/LiteFlow/" rel="tag"># LiteFlow</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/04/27/%E5%AE%9E%E6%88%98%EF%BC%81%E9%A1%B9%E7%9B%AE%E7%BB%88%E4%BA%8E%E7%94%A8%E4%B8%8A%E4%BA%86xxl-job/" rel="prev" title="实战！项目终于用上了xxl-job">
+      <i class="fa fa-chevron-left"></i> 实战！项目终于用上了xxl-job
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+		  <script src="https://readmore.openwrite.cn/js/readmore.js" type="text/javascript"></script>
+<script>
+    const btw = new BTWPlugin();
+    btw.init({
+        id: 'container',
+        blogId: '27513-1629019452485-311',
+        name: '码猿技术专栏',
+        qrcode: 'https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg',
+        keyword: 'vip',
+    });
+</script>
+        </div>
+		</div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#LiteFlow%E6%A1%86%E6%9E%B6%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-text">LiteFlow框架的作用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LiteFlow%E7%9A%84%E8%AE%BE%E8%AE%A1%E5%8E%9F%E5%88%99"><span class="nav-text">LiteFlow的设计原则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LiteFlow%E7%9A%84%E4%BD%BF%E7%94%A8"><span class="nav-text">LiteFlow的使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LiteFlow%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6%E8%AE%B2%E8%A7%A3"><span class="nav-text">LiteFlow核心组件讲解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LiteFlow%E6%BA%90%E7%A0%81%E6%8E%A2%E7%A9%B6"><span class="nav-text">LiteFlow源码探究</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%90%8E%E8%AF%B4%E4%B8%80%E5%8F%A5%EF%BC%88%E5%88%AB%E7%99%BD%E5%AB%96%EF%BC%8C%E6%B1%82%E5%85%B3%E6%B3%A8%EF%BC%89"><span class="nav-text">最后说一句（别白嫖，求关注）</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="不才陈某"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">142</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">72</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png" title="微信公众号 → https:&#x2F;&#x2F;gitee.com&#x2F;chenjiabing666&#x2F;BlogImage&#x2F;raw&#x2F;master&#x2F;myjszl_log.png" rel="noopener" target="_blank"><i class="fab fa-weixin fa-fw"></i>微信公众号</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.im/user/2506542244708072" title="掘金 → https:&#x2F;&#x2F;juejin.im&#x2F;user&#x2F;2506542244708072" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>掘金</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某|公众号：码猿技术专栏</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RtlQOgOT3M0hgyMeogykSQjT-gzGzoHsz',
+      appKey     : 'vSCxLU88wnXVf0Pa8mwJrCPm',
+      placeholder: "欢迎关注博主微信公众号【码猿技术专栏】",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

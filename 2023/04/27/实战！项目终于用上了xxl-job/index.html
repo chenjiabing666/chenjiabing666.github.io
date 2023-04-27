@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"chenjiabing666.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="大家好，我是不才陈某~ 今天分享一篇知识星球的球友分享的一篇xxl-job实战的文章，内容非常肝，慢慢看吧！ 本篇文章主要记录项目中遇到的 xxl-job 的实战，希望能通过这篇文章告诉读者们什么是 xxl-job 以及怎么使用 xxl-job 并分享一个实战案例。 那么下面先说明什么是 xxl-job 以及为什么要使用它。 xxl-job 是什么？XXL-JOB 是一个分布式任务调度平台，其核心">
+<meta property="og:type" content="article">
+<meta property="og:title" content="实战！项目终于用上了xxl-job">
+<meta property="og:url" content="https://chenjiabing666.github.io/2023/04/27/%E5%AE%9E%E6%88%98%EF%BC%81%E9%A1%B9%E7%9B%AE%E7%BB%88%E4%BA%8E%E7%94%A8%E4%B8%8A%E4%BA%86xxl-job/index.html">
+<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:description" content="大家好，我是不才陈某~ 今天分享一篇知识星球的球友分享的一篇xxl-job实战的文章，内容非常肝，慢慢看吧！ 本篇文章主要记录项目中遇到的 xxl-job 的实战，希望能通过这篇文章告诉读者们什么是 xxl-job 以及怎么使用 xxl-job 并分享一个实战案例。 那么下面先说明什么是 xxl-job 以及为什么要使用它。 xxl-job 是什么？XXL-JOB 是一个分布式任务调度平台，其核心">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://img.java-family.cn/202304262109341.png">
+<meta property="og:image" content="https://img.java-family.cn/202304262109392.png">
+<meta property="og:image" content="https://img.java-family.cn/202304262109433.png">
+<meta property="og:image" content="https://img.java-family.cn/202304262109464.png">
+<meta property="og:image" content="https://img.java-family.cn/202304262109485.png">
+<meta property="og:image" content="https://img.java-family.cn/202304262109516.png">
+<meta property="og:image" content="https://img.java-family.cn/202304262109567.png">
+<meta property="og:image" content="https://img.java-family.cn/202304262110058.png">
+<meta property="og:image" content="https://img.java-family.cn/202304262110099.png">
+<meta property="og:image" content="https://img.java-family.cn/2023042621101210.png">
+<meta property="og:image" content="https://img.java-family.cn/2023042621101511.png">
+<meta property="og:image" content="https://img.java-family.cn/2023042621102012.png">
+<meta property="og:image" content="https://img.java-family.cn/2023042621102613.png">
+<meta property="og:image" content="https://img.java-family.cn/2023042621102914.png">
+<meta property="og:image" content="https://img.java-family.cn/2023042621103315.png">
+<meta property="og:image" content="https://img.java-family.cn/2023042621103816.png">
+<meta property="og:image" content="https://img.java-family.cn/2023042621104817.png">
+<meta property="og:image" content="https://img.java-family.cn/2023042621105418.png">
+<meta property="og:image" content="https://img.java-family.cn/2023042621105919.png">
+<meta property="og:image" content="https://img.java-family.cn/2023042621110620.png">
+<meta property="og:image" content="https://img.java-family.cn/2023042621111121.png">
+<meta property="og:image" content="https://img.java-family.cn/202304270958131.png">
+<meta property="article:published_time" content="2023-04-27T01:20:43.000Z">
+<meta property="article:modified_time" content="2023-04-27T01:59:41.635Z">
+<meta property="article:author" content="不才陈某">
+<meta property="article:tag" content="xxl-job">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://img.java-family.cn/202304262109341.png">
+
+<link rel="canonical" href="https://chenjiabing666.github.io/2023/04/27/%E5%AE%9E%E6%88%98%EF%BC%81%E9%A1%B9%E7%9B%AE%E7%BB%88%E4%BA%8E%E7%94%A8%E4%B8%8A%E4%BA%86xxl-job/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>实战！项目终于用上了xxl-job | 不才陈某技术博客</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">不才陈某技术博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+		<div id="container">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chenjiabing666.github.io/2023/04/27/%E5%AE%9E%E6%88%98%EF%BC%81%E9%A1%B9%E7%9B%AE%E7%BB%88%E4%BA%8E%E7%94%A8%E4%B8%8A%E4%BA%86xxl-job/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/header.jpg">
+      <meta itemprop="name" content="不才陈某">
+      <meta itemprop="description" content="本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="不才陈某技术博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          实战！项目终于用上了xxl-job
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2023-04-27 09:20:43 / 修改时间：09:59:41" itemprop="dateCreated datePublished" datetime="2023-04-27T09:20:43+08:00">2023-04-27</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%88%86%E5%B8%83%E5%BC%8F%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6/" itemprop="url" rel="index"><span itemprop="name">分布式任务调度</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2023/04/27/%E5%AE%9E%E6%88%98%EF%BC%81%E9%A1%B9%E7%9B%AE%E7%BB%88%E4%BA%8E%E7%94%A8%E4%B8%8A%E4%BA%86xxl-job/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2023/04/27/%E5%AE%9E%E6%88%98%EF%BC%81%E9%A1%B9%E7%9B%AE%E7%BB%88%E4%BA%8E%E7%94%A8%E4%B8%8A%E4%BA%86xxl-job/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><strong>大家好，我是不才陈某~</strong></p>
+<p>今天分享一篇<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247524437&idx=1&sn=32699e9afede86fe52136c38f844c620&chksm=fcf7bf98cb80368e5eff366916e6b251fa7ca7526b44202d59032863d89f353545f0c0ebfff2&token=259186422&lang=zh_CN#rd">知识星球</a>的球友分享的一篇xxl-job实战的文章，内容非常肝，慢慢看吧！</p>
+<p>本篇文章主要记录项目中遇到的 xxl-job 的实战，希望能通过这篇文章告诉读者们什么是 xxl-job 以及怎么使用 xxl-job 并分享一个实战案例。</p>
+<p>那么下面先说明什么是 xxl-job 以及为什么要使用它。</p>
+<h2 id="xxl-job-是什么？"><a href="#xxl-job-是什么？" class="headerlink" title="xxl-job 是什么？"></a><strong>xxl-job 是什么？</strong></h2><p>XXL-JOB 是一个<strong>分布式任务调度平台</strong>，其核心设计目标是开发迅速、学习简单、轻量级、易扩展。</p>
+<p><strong>设计思想</strong> 是将调度行为抽象形成 <strong>调度中心</strong> 平台，平台本身不承担业务逻辑，而是负责发起 <strong>调度请求</strong> 后，由 <strong>执行器</strong> 接收调度请求并执行 <strong>任务</strong>，这里的 <strong>任务</strong> 抽象为 <strong>分散的 JobHandler</strong>。通过这种方式即可实现 <strong>调度</strong> 与 <strong>任务</strong> 相互解耦，从而提高系统整体的稳定性和拓展性。</p>
+<p>为了更好理解，这里放一张官网的架构图：</p>
+<p><img src="https://img.java-family.cn/202304262109341.png"></p>
+<span id="more"></span>
+
+<h2 id="任务调度是什么？"><a href="#任务调度是什么？" class="headerlink" title="任务调度是什么？"></a><strong>任务调度是什么？</strong></h2><p>在开发项目时大家是否也遇到过类似的场景问题：</p>
+<ul>
+<li>系统需要定时在每天0点进行数据备份。</li>
+<li>系统需要在活动开始前几小时预热执行一些前置业务。</li>
+<li>系统需要定时对 MQ 消息表的发送装填，对发送失败的 MQ 消息进行补偿重新发送。</li>
+</ul>
+<p>这些场景问题都可以通过 <strong>任务调度</strong> 来解决，任务调度指的是系统在约定的指定时间自动去执行指定的任务的过程。</p>
+<p><strong>单体系统</strong> 中有许多实现 <strong>任务调度</strong> 的方式，如多线程方式、Timer 类、Spring Tasks 等等。这里比较常用的是 Spring Tasks（通过 <code>@EnableScheduling</code> + <code>@Scheduled</code> 的注解可以自定义定时任务，有兴趣的可以去了解一下）</p>
+<h2 id="为什么需要分布式任务调度平台？"><a href="#为什么需要分布式任务调度平台？" class="headerlink" title="为什么需要分布式任务调度平台？"></a><strong>为什么需要分布式任务调度平台？</strong></h2><p>分布式下，每个服务都可以搭建为集群，这样的好处是可以将任务切片分给每一个服务从而实现并行执行，提高任务调度的处理效率。那么为什么 <strong>分布式系统</strong> 不能使用 <strong>单体系统</strong> 的任务调度实现方式呢。</p>
+<p>在集群服务下，如果还是使用每台机器按照单体系统的任务调度实现方式实现的话，会出现下面这四个问题：</p>
+<ol>
+<li>怎么做到对任务的控制（如何避免任务重复执行）。</li>
+<li>如果某台机器宕机了，会不会存在任务丢失。</li>
+<li>如果要增加服务实例，怎么做到弹性扩容。</li>
+<li>如何做到对任务调度的执行情况统一监测。</li>
+</ol>
+<p>通过上面的问题可以了解到分布式系统下需要一个满足高可用、容错管理、负载均衡等功能的任务调度平台来实现任务调度。分布式系统下，也有许多可以实现任务调度的第三方的分布式任务调度系统，如 xxl-job、Quartz、elastic-job 等等常用的分布式任务调度系统。</p>
+<h2 id="如何使用-xxl-job"><a href="#如何使用-xxl-job" class="headerlink" title="如何使用 xxl-job"></a>如何使用 xxl-job</h2><p>作为开源软件的 xxl-job，可以在 github 或 gitee上查看和下载 xxl-job 的源码。</p>
+<p>下面将介绍我使用 xxl-job 的流程（如果有操作不当的，可以查看官方的中文文档：<a target="_blank" rel="noopener" href="https://www.xuxueli.com/xxl-job%EF%BC%89">https://www.xuxueli.com/xxl-job）</a></p>
+<blockquote>
+<p><strong>dokcer 下安装 xxl-job</strong></p>
+</blockquote>
+<p>1、docker 下拉取 xxl-job 的镜像（这里使用 2.3.1 版本）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull xuxueli/xxl-job-admin:2.3.1</span><br></pre></td></tr></table></figure>
+
+<p>2、创建映射容器的文件目录</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p -m 777 /mydata/xxl-job/data/applogs</span><br></pre></td></tr></table></figure>
+
+<p>3、在 <code>/mydata/xxl-job</code> 的目录下创建 <code>application.properties</code> 文件</p>
+<p>由于 <code>application.properties</code> 的代码过长，这里就不展示了，需要的可以去 gitee 上获取，具体路径如图：</p>
+<p><img src="https://img.java-family.cn/202304262109392.png"></p>
+<p>这里需要注意数据库位置的填写：</p>
+<p><img src="https://img.java-family.cn/202304262109433.png"></p>
+<p>如果还需要更改端口的可以更改这里：</p>
+<p><img src="https://img.java-family.cn/202304262109464.png"></p>
+<p>这里还需要注意告警邮箱和访问口令（后续Spring Boot配置用到）：</p>
+<p><img src="https://img.java-family.cn/202304262109485.png"></p>
+<p>4、将 <code>tables_xxl-job.sql</code> 文件导入上面步骤3指定的数据库（自己填写的那个数据库）</p>
+<p>同样由于文件代码过长，这里展示 gitee 上获取的路径图：</p>
+<p><img src="https://img.java-family.cn/202304262109516.png"></p>
+<p>5、执行 docker 命令</p>
+<p>注意这里的 <code>-p 8088:8088</code> 是因为我更改了前面 <code>application.porperties</code> 文件的端口号为 8088，所以这里我执行的 docker 命令为 <code>-p 8088:8088</code>，如果没有更改的这里一定要改为 <code>-p 8080:8080</code>。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">docker run  -p 8088:8088 \</span><br><span class="line">-d --name=xxl-job-admin --restart=always \</span><br><span class="line">-v /mydata/xxl-job/application.properties:/application.properties \</span><br><span class="line">-v /mydata/xxl-job/data/applogs:/data/applogs \</span><br><span class="line">-e PARAMS=&#x27;--spring.config.location=/application.properties&#x27; xuxueli/xxl-job-admin:2.3.1</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>执行后通过 <code>docker ps</code> 查看是否成功运行，如果失败可以通过 <code>docker logs xxl-job-admin</code> 查看具体错误日志。</p>
+<p>6、通过 <code>http://192.168.101.25:8088/xxl-job-admin/</code> 访问（这里ip和端口是自己的）</p>
+<p><img src="https://img.java-family.cn/202304262109567.png"></p>
+<p>账号：admin 密码：123456</p>
+<p>到这里就算是完成了 xxl-job 在 docker 的搭建。</p>
+<h2 id="Spring-Boot-项目集成-xxl-job"><a href="#Spring-Boot-项目集成-xxl-job" class="headerlink" title="Spring Boot 项目集成 xxl-job"></a><strong>Spring Boot 项目集成 xxl-job</strong></h2><p>xxl-job 由 <strong>调度中心</strong> 和 <strong>执行器</strong> 组成，上面已经完成了在 docker 上部署调度中心了，接下来介绍怎么<strong>配置部署执行器项目</strong>。</p>
+<p>1、在 Spring Boot 项目中导入 maven 依赖</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.xuxueli<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>xxl-job-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.3.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>这里需要注意版本号与 xxl-job 版本需要一致，这里我配置的都是 2.3.1 版本。</p>
+<p>2、在 Spring Boot 项目中配置 <code>application.yml</code> 文件</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">xxl:</span></span><br><span class="line">  <span class="attr">job:</span></span><br><span class="line">    <span class="attr">admin:</span></span><br><span class="line">      <span class="attr">addresses:</span> <span class="string">http://192.168.101.25:8088/xxl-job-admin</span></span><br><span class="line">    <span class="attr">executor:</span></span><br><span class="line">      <span class="attr">appname:</span> <span class="string">media-process-service</span></span><br><span class="line">      <span class="attr">address:</span></span><br><span class="line">      <span class="attr">ip:</span></span><br><span class="line">      <span class="attr">port:</span> <span class="number">9999</span></span><br><span class="line">      <span class="attr">logpath:</span> <span class="string">/data/applogs/xxl-job/jobhandler</span></span><br><span class="line">      <span class="attr">logretentiondays:</span> <span class="number">30</span></span><br><span class="line">    <span class="attr">accessToken:</span> <span class="string">default_token</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>这里的 <code>xxl.job.admin.addresses</code> 用于指定调度中心的地址。</li>
+<li>这里的 <code>xxl.job.accessToken</code> 用于指定访问口令（也就是前面搭建 xxl-job 中步骤3指定的）。</li>
+<li>这里的 <code>xxl.job.executor.appname</code> 用于指定执行器的名称（需要与后续配置执行器的名称一致）。</li>
+<li>这里的 <code>xxl.job.executor.port</code> 用于指定执行器的端口（执行器实际上是一个内嵌的 Server，默认端口为9999，配置多个同一服务实例时需要指定不同的执行器端口，否则会端口冲突）。</li>
+<li>其他属性只需要照着配置即可（想要了解属性的具体含义可以查看中文文档中的2.4配置部署执行器项目章节）。</li>
+</ul>
+<p>3、编写配置类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * XXL-JOB配置类</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> 公众号：码猿技术专栏</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="meta">@Configuration</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">XxlJobConfig</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;xxl.job.admin.addresses&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String adminAddresses;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;xxl.job.accessToken&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String accessToken;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;xxl.job.executor.appname&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String appname;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;xxl.job.executor.address&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String address;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;xxl.job.executor.ip&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String ip;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;xxl.job.executor.port&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> port;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;xxl.job.executor.logpath&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String logPath;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;xxl.job.executor.logretentiondays&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> logRetentionDays;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Bean</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> XxlJobSpringExecutor <span class="title">xxlJobExecutor</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        log.info(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; xxl-job config init.&quot;</span>);</span><br><span class="line">        XxlJobSpringExecutor xxlJobSpringExecutor = <span class="keyword">new</span> XxlJobSpringExecutor();</span><br><span class="line">        xxlJobSpringExecutor.setAdminAddresses(adminAddresses);</span><br><span class="line">        xxlJobSpringExecutor.setAppname(appname);</span><br><span class="line">        xxlJobSpringExecutor.setAddress(address);</span><br><span class="line">        xxlJobSpringExecutor.setIp(ip);</span><br><span class="line">        xxlJobSpringExecutor.setPort(port);</span><br><span class="line">        xxlJobSpringExecutor.setAccessToken(accessToken);</span><br><span class="line">        xxlJobSpringExecutor.setLogPath(logPath);</span><br><span class="line">        xxlJobSpringExecutor.setLogRetentionDays(logRetentionDays);</span><br><span class="line">        <span class="keyword">return</span> xxlJobSpringExecutor;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>4、调度中心中新增执行器</p>
+<p><img src="https://img.java-family.cn/202304262110058.png"></p>
+<p>执行器的配置属性：</p>
+<ul>
+<li>AppName: 每个执行器集群的唯一标示 AppName，执行器会周期性以 AppName 为对象进行自动注册。可通过该配置自动发现注册成功的执行器，供任务调度时使用。</li>
+<li>名称: 执行器的名称（可以使用中文更好地体现该执行器是用来干嘛的）。</li>
+<li>注册方式：调度中心获取执行器地址的方式（一般为了方便可以选用自动注册即可）。<ul>
+<li>自动注册：执行器自动进行执行器注册，调度中心通过底层注册表可以动态发现执行器机器地址。</li>
+<li>手动录入：人工手动录入执行器的地址信息，多地址逗号分隔，供调度中心使用。</li>
+</ul>
+</li>
+<li>机器地址：”注册方式”为”手动录入”时有效，支持人工维护执行器的地址信息。</li>
+</ul>
+<p>5、配置自定义任务</p>
+<p>配置自定义任务有许多种模式，如 Bean模式（基于方法）、Bean模式（基于类）、GLUE模式等等。这里介绍通过 Bean模式（基于方法） 是如何自定义任务的（对于其余的模式可以参考官方文档）。</p>
+<p>Bean模式（基于方法）也就是每个任务对应一个方法，通过添加 <code>@XxLJob(value=&quot;自定义JobHandler名称&quot;, init = &quot;JobHandler初始化方法&quot;, destroy = &quot;JobHandler销毁方法&quot;)</code> 注解即可完成定义。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 任务处理类</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> 公众号：码猿技术专栏</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">TestJob</span> </span>&#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 测试任务</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@XxlJob(&quot;testHandler&quot;)</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">testHandler</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        XxlJobHelper.handleSuccess(<span class="string">&quot;本次测试任务调度成功&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>通过注解也可以指定 <strong>初始化方法和销毁方法</strong>，如果不填写可以直接写一个 <strong>自定义的JobHandler名称</strong> 用于后面在调度中心中配置任务时对应任务的 JobHandler 属性值。</li>
+<li>可以通过 <code>XxlJobHelper.log</code> 来打印日志，通过调度中心可以查看执行日志的情况。</li>
+<li>可以通过 <code>XxlJobHelper.handleFail</code> 或 <code>XxlJobHelper.handleSuccess</code> 手动设置任务调度的结果（不设置时默认结果为成功状态，除非任务执行时出现异常）。</li>
+</ul>
+<p>6、调度中心中新增任务</p>
+<p><img src="https://img.java-family.cn/202304262110099.png"></p>
+<p>这里主要注意 <strong>Cron</strong> 表达式的时间配置以及 <strong>JobHandler</strong> 的值需要与自定义任务方法的注解上的 <code>value</code> 属性值一致即可。</p>
+<p>关于高级配置这里放一张中文文档的详细说明（也可以直接去看文档）：</p>
+<p><img src="https://img.java-family.cn/2023042621101210.png"></p>
+<p>需要搭建集群或过期策略等高级玩法时可以进行配置。</p>
+<p>到这里就完成了 SpringBoot 集成 xxl-job 实现分布式任务调度的全过程了，接下来会通过一个实战案例来具体看看 xxl-job 的用处。</p>
+<h2 id="xxl-job-实战"><a href="#xxl-job-实战" class="headerlink" title="xxl-job 实战"></a>xxl-job 实战</h2><p>下面通过一个最近自己在跟着做的学习项目中使用到 xxl-job 的场景案例来具体了解一下如何利用 xxl-job 来实现任务调度。</p>
+<h3 id="实战背景"><a href="#实战背景" class="headerlink" title="实战背景"></a><strong>实战背景</strong></h3><p>当前项目需要对上传到分布式文件系统 minio 中的视频文件进行统一格式的视频转码操作，由于本身视频转码操作会带了很大的时间消耗以及 CPU 的开销，所以考虑集群服务下使用 xxl-job 的方式以任务调度的方式定时处理视频转码操作。</p>
+<p>这样可以带来两个好处：① 以任务调度的方式，可以使得视频转码操作不会阻塞主线程，避免影响主要业务的吞吐量； ② 以集群服务分片接收任务的方式，可以将任务均分给每个机器使得任务调度可以并行执行，提高总任务处理时间以及降低单台机器 CPU 的开销；</p>
+<h3 id="xxl-job-执行流程图"><a href="#xxl-job-执行流程图" class="headerlink" title="xxl-job 执行流程图"></a><strong>xxl-job 执行流程图</strong></h3><p><img src="https://img.java-family.cn/2023042621101511.png" alt="xxl-job实战.png"></p>
+<h3 id="怎么将任务均分给每台服务器？"><a href="#怎么将任务均分给每台服务器？" class="headerlink" title="怎么将任务均分给每台服务器？"></a><strong>怎么将任务均分给每台服务器？</strong></h3><p>由于任务执行时间过长，需要搭建集群服务来做到并行任务调度，从而减小 CPU 的开销，那么怎么均分任务呢？</p>
+<p>利用 xxl-job 在集群部署时，配置路由策略中选择 <strong>分片广播</strong> 的方式，可以使一次任务调度会广播触发集群中所有的执行器执行一次任务，并且可以向系统传递分片参数。</p>
+<p><img src="https://img.java-family.cn/2023042621102012.png"></p>
+<p>利用这一特性可以根据 <strong>当前执行器的分片序号和分片总数</strong> 来获取对应的任务记录。</p>
+<p>先来看看 Bean 模式下怎么获取分片序号和分片总数：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 分片序号（当前执行器序号）</span></span><br><span class="line"><span class="keyword">int</span> shardIndex = XxlJobHelper.getShardIndex();</span><br><span class="line"><span class="comment">// 分片总数（执行器总数）</span></span><br><span class="line"><span class="keyword">int</span> shardTotal = XxlJobHelper.getShardTotal();</span><br></pre></td></tr></table></figure>
+
+<p>有了这两个属性，当执行器扫描数据库获取记录时，可以根据 取模 的方式获取属于当前执行器的任务，可以这样编写 sql 获取任务记录：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> media_process m</span><br><span class="line"><span class="keyword">where</span> m.id <span class="operator">%</span> #&#123;shareTotal&#125; <span class="operator">=</span> #&#123;shareIndex&#125;  </span><br><span class="line">  <span class="keyword">and</span> (m.status <span class="operator">=</span> <span class="string">&#x27;1&#x27;</span> <span class="keyword">or</span> m.status <span class="operator">=</span> <span class="string">&#x27;3&#x27;</span>)</span><br><span class="line">  <span class="keyword">and</span> m.fail_count <span class="operator">&amp;</span>lt; <span class="number">3</span></span><br><span class="line">limit #&#123;count&#125;</span><br></pre></td></tr></table></figure>
+
+<p>扫描任务表，根据任务 id 对分片总数 <strong>取模</strong> 来实现对所有分片的均分任务，通过判断是否是当前分片序号，并且当前任务状态为 <code>1</code>（未处理）或 <code>3</code>（处理失败）并且当前任务失败次数小于3次时可以取得当前任务。每次扫描只取出 <code>count</code> 个任务数（批量处理）。</p>
+<p><img src="https://img.java-family.cn/2023042621102613.png"></p>
+<p>因此通过 xxl-job 的分片广播 ＋ 取模 的方式即可实现对集群服务均分任务的操作。</p>
+<h3 id="怎么确保任务不会被重复消费？"><a href="#怎么确保任务不会被重复消费？" class="headerlink" title="怎么确保任务不会被重复消费？"></a><strong>怎么确保任务不会被重复消费？</strong></h3><p>由于视频转码本身处理时间就会比较长，所以更不允许服务重复执行，虽然上面通过分片广播＋取模的方式提高了任务不会被重复执行的机率，但是依旧存在如下情况：</p>
+<p>如下图，有三台集群机器和六个任务，刚开始分配好了每台机器两个任务，<strong>执行器0正准备执行任务3</strong>时，刚好执行器2宕机了，此时执行器1刚好执行一次任务，因为分片总数减小，导致<strong>执行器1重新分配到需要执行的任务正好也是任务3</strong>，那么此时就会出现<strong>执行器0和执行器1都在执行任务3</strong>的情况。</p>
+<p><img src="https://img.java-family.cn/2023042621102914.png"></p>
+<p>那么这种情况就需要实现幂等性了，幂等性有很多种实现方法，有兴趣了解的可以参考：<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247489722&idx=1&sn=e71ae0c2b36011b5a553c8bb882217a0&chksm=fcf4c777cb834e61a62d30bef2f67bb0b8543f80877efbe9fe9f09439cd1346d03d367fc2197&token=259186422&lang=zh_CN#rd">接口幂等性的实现方案</a></p>
+<p>这里使用乐观锁的方式实现幂等性，具体 sql 如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">update media_process m</span><br><span class="line"><span class="keyword">set</span> m.status <span class="operator">=</span> <span class="string">&#x27;2&#x27;</span></span><br><span class="line"><span class="keyword">where</span> (m.status <span class="operator">=</span> <span class="string">&#x27;1&#x27;</span> <span class="keyword">or</span> m.status <span class="operator">=</span> <span class="string">&#x27;3&#x27;</span>)</span><br><span class="line">  <span class="keyword">and</span> m.fail_count <span class="operator">&amp;</span>lt; <span class="number">3</span></span><br><span class="line">  <span class="keyword">and</span> m.id <span class="operator">=</span> #&#123;id&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里只需要依靠任务的状态即可实现（未处理<code>1</code>；处理中<code>2</code>；处理失败<code>3</code>；处理成功<code>4</code>），可以看到这里类似于 CAS 的方式<strong>通过比较和设置的方式只有在状态为未处理或处理失败时才能设置为处理中</strong>。这样在并发场景下，即使多个执行器同时处理该任务，也只有一个任务可以设置成功进入处理任务阶段。</p>
+<p>为了真正达到幂等性，还需要设置一下 xxl-job 的调度过期策略和阻塞处理策略来保证真正的幂等性。分别设置为 <strong>忽略</strong>（调度过期后，忽略过期的任务，从当前时间开始重新计算下次触发时间） 和 <strong>丢弃后续调度</strong>（调度请求进入单机执行器后，发现执行器存在运行的调度任务，本次请求将会被丢弃并标记为失败）。</p>
+<p><img src="https://img.java-family.cn/2023042621103315.png"></p>
+<hr>
+<h3 id="编写完成该功能所需的所有任务"><a href="#编写完成该功能所需的所有任务" class="headerlink" title="编写完成该功能所需的所有任务"></a><strong>编写完成该功能所需的所有任务</strong></h3><p>1、<strong>分片视频转码处理</strong></p>
+<p>代码（这里的代码只展示部分核心步骤代码）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 视频转码处理任务</span></span><br><span class="line"><span class="comment"> * 公众号：码猿技术专栏</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@XxlJob(&quot;videoTranscodingHandler&quot;)</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">videoTranscodingHandler</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="comment">// 1. 分片获取当前执行器需要执行的所有任务</span></span><br><span class="line">    List&lt;MediaProcess&gt; mediaProcessList = mediaProcessService.getMediaProcessList(shardIndex, shardTotal, count);</span><br><span class="line">    <span class="comment">// 通过JUC工具类阻塞直到所有任务执行完</span></span><br><span class="line">    CountDownLatch countDownLatch = <span class="keyword">new</span> CountDownLatch(mediaProcessList.size());</span><br><span class="line">    <span class="comment">// 遍历所有任务</span></span><br><span class="line">    mediaProcessList.forEach(mediaProcess -&gt; &#123;</span><br><span class="line">        <span class="comment">// 以多线程的方式执行所有任务</span></span><br><span class="line">        executor.execute(() -&gt; &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="comment">// 2. 尝试抢占任务（通过乐观锁实现）</span></span><br><span class="line">                <span class="keyword">boolean</span> res = mediaProcessService.startTask(id);</span><br><span class="line">                <span class="keyword">if</span> (!res) &#123;</span><br><span class="line">                    XxlJobHelper.log(<span class="string">&quot;任务抢占失败，任务id&#123;&#125;&quot;</span>, id);</span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                </span><br><span class="line">                <span class="comment">// 3. 从minio中下载视频到本地</span></span><br><span class="line">                File file = mediaFileService.downloadFileFromMinIO(bucket, objectName);</span><br><span class="line">                <span class="comment">// 下载失败</span></span><br><span class="line">                <span class="keyword">if</span> (file == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    XxlJobHelper.log(<span class="string">&quot;下载视频出错,任务id:&#123;&#125;,bucket:&#123;&#125;,objectName:&#123;&#125;&quot;</span>, id, bucket, objectName);</span><br><span class="line">                    <span class="comment">// 出现异常重置任务状态为处理失败等待下一次处理</span></span><br><span class="line">                    mediaProcessService.saveProcessFinishStatus(id, Constants.MediaProcessCode.FAIL.getValue(), fileId, <span class="keyword">null</span>, <span class="string">&quot;下载视频到本地失败&quot;</span>);</span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                </span><br><span class="line">                <span class="comment">// 4. 视频转码</span></span><br><span class="line">                String result = videoUtil.generateMp4();</span><br><span class="line">                <span class="keyword">if</span> (!result.equals(<span class="string">&quot;success&quot;</span>)) &#123;</span><br><span class="line">                    XxlJobHelper.log(<span class="string">&quot;视频转码失败,原因:&#123;&#125;,bucket:&#123;&#125;,objectName:&#123;&#125;,&quot;</span>, result, bucket, objectName);</span><br><span class="line">                    <span class="comment">// 出现异常重置任务状态为处理失败等待下一次处理</span></span><br><span class="line">                    mediaProcessService.saveProcessFinishStatus(id, Constants.MediaProcessCode.FAIL.getValue(), fileId, <span class="keyword">null</span>, <span class="string">&quot;视频转码失败&quot;</span>);</span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                </span><br><span class="line">                <span class="comment">// 5. 上传转码后的文件</span></span><br><span class="line">                <span class="keyword">boolean</span> b1 = mediaFileService.addMediaFilesToMinIO(new_File.getAbsolutePath(), <span class="string">&quot;video/mp4&quot;</span>, bucket, objectNameMp4);</span><br><span class="line">                <span class="keyword">if</span> (!b1) &#123;</span><br><span class="line">                    XxlJobHelper.log(<span class="string">&quot;上传 mp4 到 minio 失败,任务id:&#123;&#125;&quot;</span>, id);</span><br><span class="line">                    <span class="comment">// 出现异常重置任务状态为处理失败等待下一次处理</span></span><br><span class="line">                    mediaProcessService.saveProcessFinishStatus(id, Constants.MediaProcessCode.FAIL.getValue(), fileId, <span class="keyword">null</span>, <span class="string">&quot;上传 mp4 文件到 minio 失败&quot;</span>);</span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 6. 更新任务状态为成功</span></span><br><span class="line">                mediaProcessService.saveProcessFinishStatus(id, Constants.MediaProcessCode.SUCCESS.getValue(), fileId, url, <span class="string">&quot;创建临时文件异常&quot;</span>);</span><br><span class="line">                </span><br><span class="line">            &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">                countDownLatch.countDown();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="comment">// 阻塞直到所有方法执行完成（30min后不再等待）</span></span><br><span class="line">    countDownLatch.await(<span class="number">30</span>, TimeUnit.MINUTES);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>核心任务 - 分片获取任务后执行视频转码任务，步骤如下：</p>
+<ul>
+<li>通过 <strong>分片广播拿到的参数以取模的方式</strong> 获取当前执行器所属的任务记录集合</li>
+<li>遍历集合，以 <strong>多线程的方式</strong> 并发地执行任务</li>
+<li>每次执行任务前需要先通过 <strong>数据库乐观锁的方式</strong> 抢占当前任务，抢占到才能执行</li>
+<li>执行任务过程分为 分布式文件系统下载需要转码的视频文件 -&gt; 视频转码 -&gt; 上传转码后的视频 -&gt; 更新任务状态（处理成功）</li>
+<li>使用JUC工具类 <code>CountDownLatch</code> 实现所有任务执行完后才退出方法</li>
+<li>中间使用 xxl-job 的日志记录错误信息和执行结果</li>
+</ul>
+<p>2、<strong>清理任务表中转码成功的任务的记录并将其插入任务历史表</strong></p>
+<p>由于任务表处理完任务后只是更新任务状态，这样随着任务增多会导致检索起来时间消耗过大，所以使用任务调度的方式定期扫描任务表，将任务状态为处理成功的任务删除并重新插入任务历史表中留存（由于代码过于简单，这里就不做展示了）。</p>
+<p>主要实现两个功能：① 清理任务表中已成功处理的任务； ② 将处理成功的任务记录插入历史表中；</p>
+<p>3、<strong>视频补偿机制</strong></p>
+<p>由于使用乐观锁会将任务状态更新为处理中，如果此时执行任务的执行器（服务）宕机了，会导致该任务记录一直存在，因为乐观锁的原因别的执行器也无法获取，这个时候同样需要使用任务调度的方式，定期扫描任务表，<strong>判断任务是否处于处理中状态并且任务创建时间远大于30分钟，则说明任务超时了</strong>，则是使用任务调度的方式重新更新任务的状态为未处理，等待下一次视频转码任务的调度处理。此外视频补偿机制任务调度还需要<strong>检查是否存在任务最大次数已经大于3次的</strong>，如果存在则交付给人工处理（由于代码过于简单，这里就不做展示了）。</p>
+<p>主要实现两个功能：① 处理任务超时情况下的任务，做出补偿； ② 处理失败次数大于3次的任务，做出补偿；</p>
+<h3 id="测试并查看日志"><a href="#测试并查看日志" class="headerlink" title="测试并查看日志"></a><strong>测试并查看日志</strong></h3><p>准备好的任务表记录：</p>
+<p><img src="https://img.java-family.cn/2023042621103816.png"></p>
+<p>启动三台媒资服务器，并开启任务：</p>
+<p><img src="https://img.java-family.cn/2023042621104817.png"></p>
+<p>可以单独查看每个任务的日志：</p>
+<p><img src="https://img.java-family.cn/2023042621105418.png"></p>
+<p>通过日志中的执行日志查看具体日志信息：</p>
+<p><img src="https://img.java-family.cn/2023042621105919.png"></p>
+<p>可以看到直接为了测试改错的路径导致下载视频出错：</p>
+<p><img src="https://img.java-family.cn/2023042621110620.png"></p>
+<p>查看数据库表的变化：</p>
+<p><img src="https://img.java-family.cn/2023042621111121.png"></p>
+<p>到这里可以看到核心的视频转码任务执行成功，并且逻辑正确，能够起到分布式任务调度的作用。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这就是本次 xxl-job 实战的全部内容了，写这篇文章主要是为了记录一下项目中是如何使用 xxl-job 的，并且提供一种分片广播均分任务的思路以及幂等性问题如何处理，具体使用 xxl-job 还需根据自己项目的需求，遇到问题可以参考官网</p>
+<h2 id="最后说一句（别白嫖，求关注）"><a href="#最后说一句（别白嫖，求关注）" class="headerlink" title="最后说一句（别白嫖，求关注）"></a>最后说一句（别白嫖，求关注）</h2><p>陈某每一篇文章都是精心输出，如果这篇文章对你有所帮助，或者有所启发的话，帮忙<strong>点赞</strong>、<strong>在看</strong>、<strong>转发</strong>、<strong>收藏</strong>，你的支持就是我坚持下去的最大动力！</p>
+<p>另外陈某的<a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s?__biz=MzU3MDAzNDg1MA==&mid=2247524437&idx=1&sn=32699e9afede86fe52136c38f844c620&chksm=fcf7bf98cb80368e5eff366916e6b251fa7ca7526b44202d59032863d89f353545f0c0ebfff2&token=339165402&lang=zh_CN#rd">知识星球</a>开通了，公众号回复关键词：<strong>知识星球</strong> 获取限量<strong>20元</strong>优惠券加入只需<strong>109</strong>元，星球回馈的价值巨大，目前更新了<strong>Spring全家桶实战系列</strong>、<strong>亿级数据分库分表实战</strong>、<strong>DDD微服务实战专栏</strong>、<strong>我要进大厂、Spring，Mybatis等框架源码、架构实战22讲、精尽RocketMQ</strong>等….每增加一个专栏价格将上涨20元</p>
+<p><img src="https://img.java-family.cn/202304270958131.png"></p>
+<p>关注公众号：【码猿技术专栏】，公众号内有超赞的粉丝福利，回复：加群，可以加入技术讨论群，和大家一起讨论技术，吹牛逼！</p>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    不才陈某  |  微信公众号【码猿技术专栏】
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://chenjiabing666.github.io/2023/04/27/%E5%AE%9E%E6%88%98%EF%BC%81%E9%A1%B9%E7%9B%AE%E7%BB%88%E4%BA%8E%E7%94%A8%E4%B8%8A%E4%BA%86xxl-job/" title="实战！项目终于用上了xxl-job">https://chenjiabing666.github.io/2023/04/27/实战！项目终于用上了xxl-job/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+  <li class="post-copyright-license">
+    并保留本声明和上方二维码。感谢您的阅读和支持！
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <p>欢迎关注我的其它发布渠道</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">微信公众号</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/xxl-job/" rel="tag"># xxl-job</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/04/27/MySQL%E5%85%A8%E7%BD%91%E6%9C%80%E5%85%A8%E9%9D%A2%E8%AF%95%E9%A2%98/" rel="prev" title="MySQL全网最全面试题">
+      <i class="fa fa-chevron-left"></i> MySQL全网最全面试题
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/04/27/%E4%B8%87%E5%AD%97+28%E5%BC%A0%E5%9B%BE%E5%B8%A6%E4%BD%A0%E6%8E%A2%E7%A7%98%E5%B0%8F%E8%80%8C%E7%BE%8E%E7%9A%84%E8%A7%84%E5%88%99%E5%BC%95%E6%93%8E%E6%A1%86%E6%9E%B6LiteFlow/" rel="next" title="万字+28张图带你探秘小而美的规则引擎框架LiteFlow">
+      万字+28张图带你探秘小而美的规则引擎框架LiteFlow <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+		  <script src="https://readmore.openwrite.cn/js/readmore.js" type="text/javascript"></script>
+<script>
+    const btw = new BTWPlugin();
+    btw.init({
+        id: 'container',
+        blogId: '27513-1629019452485-311',
+        name: '码猿技术专栏',
+        qrcode: 'https://gitee.com/chenjiabing666/BlogImage/raw/master/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg',
+        keyword: 'vip',
+    });
+</script>
+        </div>
+		</div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#xxl-job-%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">xxl-job 是什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="nav-text">任务调度是什么？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%88%86%E5%B8%83%E5%BC%8F%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6%E5%B9%B3%E5%8F%B0%EF%BC%9F"><span class="nav-text">为什么需要分布式任务调度平台？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8-xxl-job"><span class="nav-text">如何使用 xxl-job</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-Boot-%E9%A1%B9%E7%9B%AE%E9%9B%86%E6%88%90-xxl-job"><span class="nav-text">Spring Boot 项目集成 xxl-job</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#xxl-job-%E5%AE%9E%E6%88%98"><span class="nav-text">xxl-job 实战</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E6%88%98%E8%83%8C%E6%99%AF"><span class="nav-text">实战背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#xxl-job-%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B%E5%9B%BE"><span class="nav-text">xxl-job 执行流程图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%8E%E4%B9%88%E5%B0%86%E4%BB%BB%E5%8A%A1%E5%9D%87%E5%88%86%E7%BB%99%E6%AF%8F%E5%8F%B0%E6%9C%8D%E5%8A%A1%E5%99%A8%EF%BC%9F"><span class="nav-text">怎么将任务均分给每台服务器？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%8E%E4%B9%88%E7%A1%AE%E4%BF%9D%E4%BB%BB%E5%8A%A1%E4%B8%8D%E4%BC%9A%E8%A2%AB%E9%87%8D%E5%A4%8D%E6%B6%88%E8%B4%B9%EF%BC%9F"><span class="nav-text">怎么确保任务不会被重复消费？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E5%86%99%E5%AE%8C%E6%88%90%E8%AF%A5%E5%8A%9F%E8%83%BD%E6%89%80%E9%9C%80%E7%9A%84%E6%89%80%E6%9C%89%E4%BB%BB%E5%8A%A1"><span class="nav-text">编写完成该功能所需的所有任务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E5%B9%B6%E6%9F%A5%E7%9C%8B%E6%97%A5%E5%BF%97"><span class="nav-text">测试并查看日志</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E5%90%8E%E8%AF%B4%E4%B8%80%E5%8F%A5%EF%BC%88%E5%88%AB%E7%99%BD%E5%AB%96%EF%BC%8C%E6%B1%82%E5%85%B3%E6%B3%A8%EF%BC%89"><span class="nav-text">最后说一句（别白嫖，求关注）</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="不才陈某"
+      src="/images/header.jpg">
+  <p class="site-author-name" itemprop="name">不才陈某</p>
+  <div class="site-description" itemprop="description">本站是不才陈某的技术分享博客。内容涵盖Java后端技术、Spring Boot、微服务架构、系统安全、前端、系统监控等相关的研究与知识分享。</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">142</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">72</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png" title="微信公众号 → https:&#x2F;&#x2F;gitee.com&#x2F;chenjiabing666&#x2F;BlogImage&#x2F;raw&#x2F;master&#x2F;myjszl_log.png" rel="noopener" target="_blank"><i class="fab fa-weixin fa-fw"></i>微信公众号</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.im/user/2506542244708072" title="掘金 → https:&#x2F;&#x2F;juejin.im&#x2F;user&#x2F;2506542244708072" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>掘金</a>
+      </span>
+  </div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">不才陈某|公众号：码猿技术专栏</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : false,
+      appId      : 'RtlQOgOT3M0hgyMeogykSQjT-gzGzoHsz',
+      appKey     : 'vSCxLU88wnXVf0Pa8mwJrCPm',
+      placeholder: "欢迎关注博主微信公众号【码猿技术专栏】",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : false,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : false,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
