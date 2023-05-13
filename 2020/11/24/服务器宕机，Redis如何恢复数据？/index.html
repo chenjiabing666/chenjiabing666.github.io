@@ -24,7 +24,7 @@
 <meta property="og:type" content="article">
 <meta property="og:title" content="服务器宕机，Redis如何恢复数据？">
 <meta property="og:url" content="https://chenjiabing666.github.io/2020/11/24/%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%AE%95%E6%9C%BA%EF%BC%8CRedis%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%E6%95%B0%E6%8D%AE%EF%BC%9F/index.html">
-<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:site_name" content="码猿技术专栏">
 <meta property="og:description" content="前言Redis作为内存型的数据库，虽然很快，依然有着很大的隐患，一旦服务器宕机重启，内存中数据还会存在吗？ 很容易想到的一个方案是从后台数据恢复这些数据，如果数据量很小，这倒是一个可行的方案。但是如果数据量过大，频繁的从后台数据库访问数据，压力很大；另外一方面恢复数据的时间极慢。 对于Redis来说，实现数据的持久化和快速恢复是至关重要。 今天这篇文章就来介绍一下Redis持久化的两种机制AOF日">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="http://img.java-family.cn/Redis%E5%AE%95%E6%9C%BA%E5%90%8E%E7%9A%84%E5%A6%82%E4%BD%95%E6%81%A2%E5%A4%8D%EF%BC%9F/1.png">
@@ -51,7 +51,7 @@
   };
 </script>
 
-  <title>服务器宕机，Redis如何恢复数据？ | 不才陈某技术博客</title>
+  <title>服务器宕机，Redis如何恢复数据？ | 码猿技术专栏</title>
   
 
 
@@ -102,7 +102,7 @@
 
     <a href="/" class="brand" rel="start">
       <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">不才陈某技术博客</h1>
+      <h1 class="site-title">码猿技术专栏</h1>
       <span class="logo-line-after"><i></i></span>
     </a>
       <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
@@ -206,7 +206,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
+      <meta itemprop="name" content="码猿技术专栏">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
@@ -585,7 +585,7 @@
 </div>
   <div class="links-of-author motion-element">
       <span class="links-of-author-item">
-        <a href="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png" title="微信公众号 → https:&#x2F;&#x2F;gitee.com&#x2F;chenjiabing666&#x2F;BlogImage&#x2F;raw&#x2F;master&#x2F;myjszl_log.png" rel="noopener" target="_blank"><i class="fab fa-weixin fa-fw"></i>微信公众号</a>
+        <a href="https://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg" title="微信公众号 → https:&#x2F;&#x2F;img.java-family.cn&#x2F;@Async为什么不建议使用&#x2F;16.jpg" rel="noopener" target="_blank"><i class="fab fa-weixin fa-fw"></i>微信公众号</a>
       </span>
       <span class="links-of-author-item">
         <a href="https://juejin.im/user/2506542244708072" title="掘金 → https:&#x2F;&#x2F;juejin.im&#x2F;user&#x2F;2506542244708072" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>掘金</a>

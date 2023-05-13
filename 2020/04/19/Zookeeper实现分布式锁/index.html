@@ -24,7 +24,7 @@
 <meta property="og:type" content="article">
 <meta property="og:title" content="Zookeeper实现分布式锁">
 <meta property="og:url" content="https://chenjiabing666.github.io/2020/04/19/Zookeeper%E5%AE%9E%E7%8E%B0%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/index.html">
-<meta property="og:site_name" content="不才陈某技术博客">
+<meta property="og:site_name" content="码猿技术专栏">
 <meta property="og:description" content="导读 真是有人(锁)的地方就有江湖(事务)，今天不谈江湖，来撩撩人。 分布式锁的概念、为什么使用分布式锁，想必大家已经很清楚了。前段时间作者写过Redis是如何实现分布式锁，今天这篇文章来谈谈Zookeeper是如何实现分布式锁的。 陈某今天分别从如下几个方面来详细讲讲ZK如何实现分布式锁： ZK的四种节点 排它锁的实现 读写锁的实现 Curator实现分步式锁    ZK的四种节点 持久性节点：">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://gitee.com/chenjiabing666/Blog-file/raw/master/ZK%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/zk%E6%8E%92%E4%BB%96%E9%94%81.png">
@@ -52,7 +52,7 @@
   };
 </script>
 
-  <title>Zookeeper实现分布式锁 | 不才陈某技术博客</title>
+  <title>Zookeeper实现分布式锁 | 码猿技术专栏</title>
   
 
 
@@ -103,7 +103,7 @@
 
     <a href="/" class="brand" rel="start">
       <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">不才陈某技术博客</h1>
+      <h1 class="site-title">码猿技术专栏</h1>
       <span class="logo-line-after"><i></i></span>
     </a>
       <p class="site-subtitle" itemprop="description">微信公众号：码猿技术专栏</p>
@@ -207,7 +207,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="不才陈某技术博客">
+      <meta itemprop="name" content="码猿技术专栏">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
@@ -568,7 +568,7 @@
 </div>
   <div class="links-of-author motion-element">
       <span class="links-of-author-item">
-        <a href="https://gitee.com/chenjiabing666/BlogImage/raw/master/myjszl_log.png" title="微信公众号 → https:&#x2F;&#x2F;gitee.com&#x2F;chenjiabing666&#x2F;BlogImage&#x2F;raw&#x2F;master&#x2F;myjszl_log.png" rel="noopener" target="_blank"><i class="fab fa-weixin fa-fw"></i>微信公众号</a>
+        <a href="https://img.java-family.cn/@Async%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E5%BB%BA%E8%AE%AE%E4%BD%BF%E7%94%A8/16.jpg" title="微信公众号 → https:&#x2F;&#x2F;img.java-family.cn&#x2F;@Async为什么不建议使用&#x2F;16.jpg" rel="noopener" target="_blank"><i class="fab fa-weixin fa-fw"></i>微信公众号</a>
       </span>
       <span class="links-of-author-item">
         <a href="https://juejin.im/user/2506542244708072" title="掘金 → https:&#x2F;&#x2F;juejin.im&#x2F;user&#x2F;2506542244708072" rel="noopener" target="_blank"><i class="fab fa-google fa-fw"></i>掘金</a>
